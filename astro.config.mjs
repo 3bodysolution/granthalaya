@@ -5,7 +5,7 @@ import vercel from '@astrojs/vercel';
 // used by the Add screen run on Vercel as functions.
 // When you connect a custom domain, change `site` to it.
 export default defineConfig({
-  site: 'https://granthalaya.vercel.app',
+  site: 'https://granthalaya-sarthak.vercel.app',
   output: 'static',
   adapter: vercel(),
   trailingSlash: 'ignore',

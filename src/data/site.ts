@@ -3,7 +3,7 @@ export const site = {
   name: 'Granthalaya',
   owner: 'Sarthak',
   city: 'Pune',
-  url: 'https://granthalaya.vercel.app',
+  url: 'https://granthalaya-sarthak.vercel.app',
   description: 'Everything I read, watch, and keep coming back to — a personal library, painted in Pune.',
   // Small line above the big headline on the home page.
   season: 'Monsoon 2026 · Pune',
