@@ -1,0 +1,93 @@
+---
+import Base from '../layouts/Base.astro';
+import Cover from '../components/Cover.astro';
+import { site } from '../data/site';
+import { getEntries, href, kind, typeColor } from '../lib/data';
+
+const all = await getEntries();
+const notes = all.flatMap((e) => e.data.highlights.map((h) => ({ e, h })));
+const q = site.lineOfTheWeek;
+const mineCount = notes.filter((n) => n.h.mine).length;
+---
+<Base title="Notes" active="notes" description="Lines I underlined, and what I thought about them.">
+  <section class="pad head">
+    <div class="rise stack" style="gap: 10px">
+      <p class="eyebrow" style="color: var(--lat)">Notes</p>
+      <h1 class="title">Lines I underlined, <em>and what I thought.</em></h1>
+    </div>
+    <div class="seg rise d1" role="tablist" aria-label="Filter notes" id="nf">
+      <button role="tab" aria-selected="true" data-f="all">All</button>
+      <button role="tab" aria-selected="false" data-f="quote">Highlights</button>
+      {mineCount > 0 && <button role="tab" aria-selected="false" data-f="mine">My lines</button>}
+    </div>
+  </section>
+
+  <section class="pad rise d2" style="padding-top: 36px">
+    <figure class="wash lotw settle">
+      <img src="/img/pune-night.webp" alt="" width="2172" height="388" aria-hidden="true" />
+      <span class="lk">Line of the week</span>
+      <blockquote class="serif">“{q.text}”</blockquote>
+      <figcaption>{q.by} · <em>{q.source}</em>{q.year ? ` (${q.year})` : ''}</figcaption>
+    </figure>
+  </section>
+
+  <section class="pad" style="padding-top: 36px">
+    <div class="grid" id="notes">
+      {notes.map(({ e, h }, i) => (
+        <article class="card lift rise nc" data-kind={h.mine ? 'mine' : 'quote'} style={`animation-delay: ${(0.3 + Math.min(i, 8) * 0.06).toFixed(2)}s`}>
+          <div class="ntop">
+            <span class="eyebrow" style={`font-size: 11px; color: ${h.mine ? 'var(--moss)' : typeColor(e.data.type)}`}>{h.mine ? `My line · ${kind(e)}` : 'Highlight'}</span>
+            <button class="mini" data-copy={`“${h.text}” — ${h.mine ? site.owner : e.data.creator}, ${e.data.title}`} aria-label="Copy this line">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            </button>
+          </div>
+          <p class="serif nt" style={h.mine ? 'font-style: normal; font-size: 22px' : ''}>{h.mine ? h.text : `“${h.text}”`}</p>
+          {h.note && <p class="soft-note"><span class="eyebrow">My note</span>{h.note}</p>}
+          <a href={href(e)} class="src">
+            <Cover entry={e} variant="swatch" w={28} h={40} />
+            <span class="stack grow" style="gap: 2px"><span class="serif" style="font-size: 15px">{e.data.title}</span><span class="muted" style="font-size: 12px">{e.data.creator}</span></span>
+            {h.where && <span class="type muted wh">{h.where}</span>}
+          </a>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: 52px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+  .lotw { position: relative; margin: 0; min-height: 300px; border-radius: 18px; background: #22313F; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 48px clamp(24px, 9vw, 120px) 72px; box-shadow: 0 24px 40px -24px var(--shadow); }
+  .lotw > * { position: relative; z-index: 1; }
+  .lotw img { position: absolute; z-index: 0; left: 0; bottom: -40px; width: 100%; height: auto; opacity: .5; }
+  .lk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #E7B24C; }
+  blockquote { margin: 0; font-size: clamp(24px, 3vw, 34px); line-height: 1.3; font-style: italic; color: #F4ECDD; }
+  figcaption { font-size: 14px; color: #C9C2B4; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .nc { padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 16px; min-height: 290px; }
+  .ntop { display: flex; justify-content: space-between; align-items: flex-start; }
+  .mini { width: 36px; height: 36px; border-radius: 18px; border: 1px solid var(--line); background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity .3s ease, border-color .3s ease, color .3s ease; }
+  .nc:hover .mini, .mini:focus-visible { opacity: 1; }
+  .mini:hover, .mini:global(.copied) { border-color: var(--lat); color: var(--lat); opacity: 1; }
+  @media (hover: none) { .mini { opacity: 1; } }
+  .nt { margin: 0; font-size: 20px; line-height: 1.45; font-style: italic; }
+  .src { margin-top: auto; display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .grow { flex-grow: 1; min-width: 0; }
+  .wh { font-size: 12px; text-align: right; max-width: 45%; }
+  .nc.is-hidden { display: none; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 780px) {
+    .head { flex-direction: column; align-items: flex-start; padding-top: 36px; }
+    .grid { grid-template-columns: 1fr; }
+    .nc { min-height: 0; }
+  }
+</style>
+
+<script>
+  document.addEventListener('click', (ev) => {
+    const b = (ev.target as Element).closest<HTMLElement>('#nf [data-f]');
+    if (!b) return;
+    const f = b.dataset.f!;
+    document.querySelectorAll<HTMLElement>('#nf [data-f]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll<HTMLElement>('#notes .nc').forEach((n) => n.classList.toggle('is-hidden', f !== 'all' && n.dataset.kind !== f));
+  });
+</script>

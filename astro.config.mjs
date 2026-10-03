@@ -1,0 +1,13 @@
+import { defineConfig } from 'astro/config';
+import vercel from '@astrojs/vercel';
+
+// Pages are built ahead of time (fast and free). Only the small /api routes
+// used by the Add screen run on Vercel as functions.
+// When you connect a custom domain, change `site` to it.
+export default defineConfig({
+  site: 'https://granthalaya.vercel.app',
+  output: 'static',
+  adapter: vercel(),
+  trailingSlash: 'ignore',
+  prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
+});

@@ -1,0 +1,117 @@
+---
+// A painted cover, made from the title. No images needed.
+// variant: tile (library grid) · poster (Start here) · mini (Sits well next to) · swatch (small thumbnails)
+import { palette, radius, kind, excerpt, short, type Entry } from '../lib/data';
+
+interface Props {
+  entry: Entry;
+  variant?: 'tile' | 'poster' | 'mini' | 'swatch';
+  n?: string;
+  w?: number;
+  h?: number;
+  vt?: boolean; // give it a view-transition name so it flies into the entry page
+}
+const { entry, variant = 'tile', n, w = 34, h = 48, vt = false } = Astro.props;
+const p = palette(entry);
+const d = entry.data;
+const vars = `--c-bg:${p.bg};--c-accent:${p.accent};--c-hill:${p.hill};--c-r:${radius(entry)}`;
+const tname = vt ? `cover-${entry.id.replace(/[^a-z0-9-]/gi, '')}` : undefined;
+const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpperCase() : ''}`;
+---
+{variant === 'tile' && d.type === 'book' && (
+  <div class="wash c book" style={vars} transition:name={tname}>
+    <i class="spine" /><i class="sun" /><i class="hill" />
+    <span class="k">Book</span>
+    <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}</span></span>
+  </div>
+)}
+{variant === 'tile' && d.type === 'film' && (
+  <div class="film" style={vars} transition:name={tname}>
+    <div class="wash c filmtop">
+      <i class="sun" /><i class="hill" />
+      <span class="k">Film</span>
+      <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}{d.year ? ` · ${d.year}` : ''}</span></span>
+    </div>
+    <div class="type stub ticket"><b>ADMIT ONE</b><span>{stub}</span></div>
+  </div>
+)}
+{variant === 'tile' && d.type === 'essay' && (
+  <div class="essay" transition:name={tname}>
+    <span class="type src">{(d.source ?? d.creator).toUpperCase()}</span>
+    <span class="serif et">{d.title}</span>
+    <span class="serif ex">{excerpt(entry, 96)}</span>
+    <span class="go">Note + link ↗</span>
+  </div>
+)}
+{variant === 'poster' && (
+  <div class="wash c poster" style={vars}>
+    <i class="sun" /><i class="hill" />
+    <span class="serif num pn">{n}</span>
+    <span class="tt"><span class="serif">{d.title}</span><span class="pk">{kind(entry)}</span></span>
+  </div>
+)}
+{variant === 'mini' && (
+  <div class="wash c mini" style={vars}>
+    <i class="sun" /><i class="hill" />
+    <span class="serif mt">{d.title}</span>
+  </div>
+)}
+{variant === 'swatch' && (
+  <span class="wash c sw" style={`${vars};width:${w}px;height:${h}px`} aria-hidden="true">
+    {w >= 60 && (<><i class="sun" /><i class="hill" /></>)}
+  </span>
+)}
+
+<style>
+  .c { background: var(--c-bg); border-radius: var(--c-r); box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6EEDF; }
+  .c > * { position: relative; }
+  .sun, .hill, .spine { position: absolute !important; display: block; }
+  .sun { border-radius: 50%; background: var(--c-accent); opacity: .78; }
+  .hill { left: -20%; width: 140%; border-radius: 50% 50% 0 0; background: var(--c-hill); }
+  .spine { left: 0; top: 0; bottom: 0; width: 12px; background: linear-gradient(90deg, rgba(0,0,0,.3), rgba(255,255,255,.08) 70%, rgba(0,0,0,0)); }
+  .k { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
+  .tt { display: flex; flex-direction: column; gap: 4px; }
+  .tt .serif { font-size: 20px; line-height: 1.1; overflow-wrap: anywhere; }
+  .by { font-size: 11px; opacity: .85; }
+
+  .book { height: 250px; padding: 14px 14px 14px 22px; box-shadow: 3px 3px 0 -1px var(--card), 4px 4px 0 -1px var(--line), 6px 6px 0 -2px var(--card), 7px 7px 0 -2px var(--line), 8px 14px 20px -6px var(--shadow); }
+  .book .sun { width: 120px; height: 120px; right: -28px; top: 64px; }
+  .book .hill { bottom: -10px; height: 86px; }
+
+  .film { height: 250px; display: flex; flex-direction: column; filter: drop-shadow(0 12px 12px var(--shadow)); }
+  .filmtop { height: 192px; flex-shrink: 0; border-radius: 6px 6px 0 0; padding: 14px; }
+  .filmtop .sun { width: 110px; height: 110px; right: -24px; top: 40px; }
+  .filmtop .hill { bottom: -10px; height: 66px; }
+  .ticket { flex-grow: 1; background: var(--card); border-top: 2px dashed var(--line); border-radius: 0 0 6px 6px; padding: 8px 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
+  .ticket b { font-size: 12px; font-weight: 700; letter-spacing: .2em; color: var(--lat); }
+  .ticket span { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .essay { height: 250px; background: var(--card); padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); border-top: 4px solid var(--sky); border-radius: 6px; box-shadow: 0 14px 22px -10px var(--shadow); overflow: hidden; }
+  .src { font-size: 11px; letter-spacing: .08em; color: var(--sky); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .et { font-size: 20px; line-height: 1.15; }
+  .ex { font-size: 13px; line-height: 1.5; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+  .go { margin-top: auto; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--lat); }
+
+  .poster { height: 300px; padding: 16px; box-shadow: 0 18px 28px -14px var(--shadow); }
+  .poster .sun { width: 150px; height: 150px; right: -34px; top: 80px; }
+  .poster .hill { bottom: -12px; height: 104px; }
+  .pn { font-size: 44px; line-height: 1; opacity: .9; }
+  .poster .tt .serif { font-size: 22px; }
+  .pk { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
+
+  .mini { height: 200px; padding: 12px; justify-content: flex-end; box-shadow: 0 12px 20px -8px var(--shadow); }
+  .mini .sun { width: 90px; height: 90px; right: -20px; top: 44px; }
+  .mini .hill { bottom: -10px; height: 70px; }
+  .mt { font-size: 17px; line-height: 1.1; }
+
+  .sw { display: block; flex-shrink: 0; box-shadow: 0 8px 14px -8px var(--shadow); }
+  .sw .sun { width: 70%; aspect-ratio: 1; right: -16%; top: 26%; }
+  .sw .hill { bottom: -8%; height: 38%; }
+
+  @media (max-width: 780px) {
+    .book, .film, .essay { height: 230px; }
+    .filmtop { height: 172px; }
+    .poster { height: 240px; }
+    .mini { height: 170px; }
+  }
+</style>

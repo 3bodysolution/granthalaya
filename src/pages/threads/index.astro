@@ -1,0 +1,25 @@
+---
+import Base from '../../layouts/Base.astro';
+import ThreadCard from '../../components/ThreadCard.astro';
+import { getEntries, getThreads } from '../../lib/data';
+const entries = await getEntries();
+const threads = await getThreads();
+---
+<Base title="Threads" active="threads" description="Hand-picked paths through the library.">
+  <section class="pad head rise">
+    <p class="eyebrow" style="color: var(--lat)">Threads</p>
+    <h1 class="title">Paths through the library, <em>in a good order.</em></h1>
+    <p class="lede">Small collections that belong together — best taken one after another.</p>
+  </section>
+  <section class="pad grid">
+    {threads.map((t, i) => <div class="rise" style={`animation-delay: ${(0.15 + i * 0.08).toFixed(2)}s`}><ThreadCard thread={t} entries={entries} /></div>)}
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: 52px; display: flex; flex-direction: column; gap: 12px; }
+  .grid { padding-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .grid > div > :global(a) { height: 100%; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 780px) { .head { padding-top: 36px; } .grid { grid-template-columns: 1fr; } }
+</style>

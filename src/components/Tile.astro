@@ -1,0 +1,15 @@
+---
+import Cover from './Cover.astro';
+import { href, stars, starsLabel, short, type Entry } from '../lib/data';
+interface Props { entry: Entry; vt?: boolean; delay?: string; cls?: string }
+const { entry, vt = false, delay, cls = '' } = Astro.props;
+const s = stars(entry);
+---
+<a href={href(entry)} class:list={['tile lift', cls]} style={delay ? `animation-delay:${delay}` : undefined}
+   data-type={entry.data.type}>
+  <Cover entry={entry} vt={vt} />
+  <div class="tile-foot">
+    {s ? <span class="stars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="date">{entry.data.status !== 'done' ? 'In progress' : ''}</span>}
+    <span class="date num">{short(entry.data.date)}</span>
+  </div>
+</a>

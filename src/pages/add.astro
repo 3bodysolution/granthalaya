@@ -1,0 +1,392 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import { getThreads, palette } from '../lib/data';
+
+// Everything the Add screen needs to know, baked in at build time.
+const all = await getCollection('library');
+const now = all.filter((e) => e.data.status !== 'done').map((e) => ({
+  slug: e.id, title: e.data.title, type: e.data.type, progress: e.data.progress ?? 0, bg: palette(e).bg,
+}));
+const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.title }));
+---
+<Base title="Add" description="Add something to the library.">
+  <div id="add" class="wrap" data-inprogress={JSON.stringify(now)} data-threadlist={JSON.stringify(threads)} data-step="loading">
+
+    <!-- checking -->
+    <section class="step" data-s="loading" aria-live="polite"><div class="sk" style="height: 180px"></div></section>
+
+    <!-- sign in -->
+    <section class="step" data-s="signin">
+      <p class="eyebrow" style="color: var(--lat)">Only for Sarthak</p>
+      <h1 class="serif h">Sign in to <em>add things.</em></h1>
+      <form class="stack" style="gap: 12px" id="signin">
+        <label class="sr" for="pw">Password</label>
+        <input id="pw" class="field" type="password" autocomplete="current-password" placeholder="Password" required />
+        <p class="err" hidden></p>
+        <button class="btn primary big" type="submit">Sign in</button>
+      </form>
+      <p class="muted small" id="setup" hidden></p>
+    </section>
+
+    <!-- find it -->
+    <section class="step" data-s="find">
+      <div class="between"><h1 class="serif h">What did you just <em>finish?</em></h1></div>
+      <div class="seg" role="tablist" aria-label="Kind" id="kind">
+        <button type="button" role="tab" data-k="book" aria-selected="true">Book</button>
+        <button type="button" role="tab" data-k="film" aria-selected="false">Film</button>
+        <button type="button" role="tab" data-k="essay" aria-selected="false">Essay or article</button>
+      </div>
+      <form id="find" class="findbox">
+        <label class="sr" for="q">Search a title or paste a link</label>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="q" class="field" type="text" autocomplete="off" placeholder="Search a title, or paste a link" />
+      </form>
+      <ul class="hits" id="hits" aria-live="polite"></ul>
+      <p class="err" id="finderr" hidden></p>
+      <button type="button" class="linkbtn" data-go="manual">Fill it in by hand →</button>
+
+      <div class="stack nowlist" id="nowlist" style="gap: 10px"></div>
+      <p class="muted small center">Works with Goodreads, Letterboxd, Substack and most article links.</p>
+    </section>
+
+    <!-- the details -->
+    <section class="step" data-s="form">
+      <form id="entry" class="stack" style="gap: 22px">
+        <div class="card preview">
+          <span class="wash pc" id="pc"></span>
+          <div class="stack grow" style="gap: 8px">
+            <span class="eyebrow" id="pk" style="font-size: 10px"></span>
+            <input name="title" class="bare serif pt" placeholder="Title" required aria-label="Title" />
+            <input name="creator" class="bare" placeholder="Author" required aria-label="Author or director" />
+            <div class="row3">
+              <label>Year<input name="year" class="field sm" inputmode="numeric" /></label>
+              <label class="only-book">Pages<input name="pages" class="field sm" inputmode="numeric" /></label>
+              <label class="only-film">Minutes<input name="runtime" class="field sm" inputmode="numeric" /></label>
+              <label class="only-essay">Words<input name="words" class="field sm" inputmode="numeric" /></label>
+            </div>
+            <span class="found small" id="from" hidden></span>
+          </div>
+        </div>
+
+        <div class="seg wide" role="radiogroup" aria-label="Status" id="status">
+          <button type="button" data-st="done" aria-pressed="true">Finished</button>
+          <button type="button" data-st="progress" aria-pressed="false" class="not-essay"><span class="only-book">Still reading</span><span class="only-film">Still watching</span></button>
+        </div>
+
+        <label class="stack progress-only" style="gap: 8px">
+          <span class="eyebrow">How far along · <span id="pv">0</span>%</span>
+          <input type="range" name="progress" min="0" max="100" step="1" value="0" />
+        </label>
+
+        <div class="stack center done-only rating-wrap" style="gap: 6px">
+          <div class="stars-in not-essay" role="radiogroup" aria-label="Your rating" id="stars">
+            {[1, 2, 3, 4, 5].map((n) => <button type="button" data-n={n} aria-label={`${n} star${n > 1 ? 's' : ''}`}>★</button>)}
+          </div>
+          <button type="button" class="heart only-essay" id="loved" aria-pressed="false">♥ Loved it</button>
+          <span class="muted small not-essay" id="rl">Tap a star. Tap again for a half.</span>
+        </div>
+
+        <label class="stack" style="gap: 8px">
+          <span class="eyebrow">A few lines to remember</span>
+          <textarea name="note" class="field serif" rows="3" placeholder="Optional. What stayed with you?"></textarea>
+        </label>
+
+        <details class="more-box">
+          <summary>Add a quote, a link, where you watched it…</summary>
+          <div class="stack" style="gap: 14px; padding-top: 14px">
+            <label class="stack" style="gap: 6px"><span class="eyebrow">A line you underlined</span><textarea name="quote" class="field serif" rows="2"></textarea></label>
+            <label class="check"><input type="checkbox" name="quoteMine" /> This line is mine, not a quote</label>
+            <label class="stack" style="gap: 6px"><span class="eyebrow">Link</span><input name="link" class="field" type="url" placeholder="https://" /></label>
+            <label class="stack only-essay" style="gap: 6px"><span class="eyebrow">Published in</span><input name="source" class="field" placeholder="Substack, a magazine, a blog…" /></label>
+            <label class="stack only-film" style="gap: 6px"><span class="eyebrow">Where</span><input name="where" class="field" placeholder="at home, at the cinema, film club…" /></label>
+            <label class="stack" style="gap: 6px"><span class="eyebrow">Times read or watched</span><input name="times" class="field sm" inputmode="numeric" placeholder="1" /></label>
+          </div>
+        </details>
+
+        <div class="stack" style="gap: 10px">
+          <span class="eyebrow">Threads</span>
+          <div class="chips" id="tchips"></div>
+          <input name="newThread" class="field" placeholder="+ Start a new thread (optional)" />
+        </div>
+
+        <div class="chips">
+          <label class="chip"><input type="date" name="date" class="date" aria-label="Date" /></label>
+          <button type="button" class="chip" id="priv" aria-pressed="false">Everyone can see this</button>
+        </div>
+
+        <p class="err" id="saveerr" hidden></p>
+        <div class="stack" style="gap: 10px">
+          <button class="btn primary big" type="submit" id="savebtn">Save to library</button>
+          <button type="button" class="linkbtn" data-go="find">← Start over</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- saved -->
+    <section class="step center" data-s="saved" role="status">
+      <div class="done-mark"><span class="ring"></span><span class="pop"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FFFBF3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span></div>
+      <h2 class="serif h">On your shelf.</h2>
+      <p class="muted" id="savedmsg"></p>
+      <div class="stack" style="gap: 10px; width: 100%">
+        <button class="btn primary big" type="button" data-go="find">Add another</button>
+        <a class="btn big" id="viewlink" href="/">View the entry</a>
+      </div>
+    </section>
+
+    <button type="button" class="linkbtn signout" id="signout" hidden>Sign out</button>
+  </div>
+</Base>
+
+<style is:global>
+  #add.wrap { max-width: 600px; margin: 0 auto; padding: 48px 20px 0; }
+  #add .step { display: none; flex-direction: column; gap: 22px; }
+  #add[data-step="loading"] [data-s="loading"], #add[data-step="signin"] [data-s="signin"], #add[data-step="find"] [data-s="find"],
+  #add[data-step="form"] [data-s="form"], #add[data-step="saved"] [data-s="saved"] { display: flex; animation: rise .6s var(--spring) backwards; }
+  #add .h { margin: 0; font-weight: 400; font-size: clamp(30px, 5vw, 40px); line-height: 1.1; }
+  #add .h em { color: var(--lat); }
+  #add .small { font-size: 13px; }
+  #add .center { text-align: center; align-items: center; }
+  #add .between { display: flex; justify-content: space-between; align-items: center; }
+  #add .grow { flex: 1; min-width: 0; }
+  #add .field { width: 100%; height: 52px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-family: inherit; font-size: 16px; outline: none; transition: border-color .3s ease, box-shadow .3s ease; }
+  #add textarea.field { height: auto; padding: 14px 16px; line-height: 1.45; resize: vertical; }
+  #add .field:focus { border-color: var(--lat); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lat) 18%, transparent); }
+  #add .field.sm { height: 40px; padding: 0 10px; font-size: 15px; border-radius: 10px; }
+  #add .findbox { position: relative; }
+  #add .findbox svg { position: absolute; left: 16px; top: 17px; color: var(--muted); }
+  #add .findbox .field { padding-left: 46px; height: 56px; }
+  #add .seg { align-self: flex-start; }
+  #add .seg.wide { align-self: stretch; display: flex; }
+  #add .seg.wide button { flex: 1; }
+  #add .hits:empty { display: none; }
+  #add .hits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  #add .hits button { width: 100%; text-align: left; display: flex; gap: 14px; align-items: center; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font-family: inherit; transition: transform .4s var(--spring), border-color .3s ease; }
+  #add .hits button:hover { border-color: var(--lat); transform: translateX(4px); }
+  #add .hits .sw { width: 36px; height: 52px; border-radius: 3px; flex-shrink: 0; }
+  #add .sk { border-radius: 14px; background: linear-gradient(90deg, var(--soft), var(--card), var(--soft)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+  #add .linkbtn { align-self: flex-start; height: 40px; padding: 0; border: 0; background: transparent; color: var(--lat); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #add .err { margin: 0; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--lat); color: var(--ink); font-size: 14px; }
+  #add .nowrow { width: 100%; text-align: left; padding: 12px 14px; display: flex; align-items: center; gap: 14px; cursor: pointer; color: var(--ink); font-family: inherit; }
+  #add .nowrow .sw { width: 36px; height: 52px; border-radius: 2px 4px 4px 2px; flex-shrink: 0; }
+
+  #add .preview { padding: 16px; display: flex; gap: 16px; align-items: flex-start; }
+  #add .pc { width: 84px; height: 124px; border-radius: 4px; flex-shrink: 0; transition: background-color .5s ease; }
+  #add .bare { width: 100%; border: 0; border-bottom: 1px dashed var(--line); background: transparent; color: var(--ink); font-family: inherit; font-size: 15px; padding: 4px 0; outline: none; }
+  #add .bare:focus { border-bottom-color: var(--lat); }
+  #add .pt { font-family: Fraunces, Georgia, serif; font-size: 24px; }
+  #add .row3 { display: flex; gap: 10px; }
+  #add .row3 label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: 1; }
+  #add .found { color: var(--moss); }
+  #add .stars-in { display: flex; gap: 4px; }
+  #add .stars-in button { width: 52px; height: 52px; border: 0; background: transparent; font-size: 38px; line-height: 1; color: var(--line); cursor: pointer; padding: 0; transition: transform .3s var(--spring), color .2s ease; }
+  #add .stars-in button.on { color: var(--haldi); }
+  #add .stars-in button.half { background: linear-gradient(90deg, var(--haldi) 50%, var(--line) 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  #add .stars-in button:active { transform: scale(.85); }
+  #add .heart { height: 48px; padding: 0 22px; border-radius: 24px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  #add .heart[aria-pressed="true"] { background: var(--lat); border-color: var(--lat); color: var(--bg); }
+  #add .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  #add .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  #add .date { border: 0; background: transparent; color: inherit; font: inherit; }
+  #add .more-box summary { cursor: pointer; color: var(--lat); font-size: 14px; font-weight: 600; list-style: none; }
+  #add .more-box summary::-webkit-details-marker { display: none; }
+  #add .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+
+  /* show the right fields for each kind */
+  #add[data-kind="book"] .only-film, #add[data-kind="book"] .only-essay,
+  #add[data-kind="film"] .only-book, #add[data-kind="film"] .only-essay,
+  #add[data-kind="essay"] .only-book, #add[data-kind="essay"] .only-film, #add[data-kind="essay"] .not-essay { display: none !important; }
+  #add[data-st="done"] .progress-only, #add[data-st="progress"] .done-only { display: none !important; }
+
+  #add .done-mark { position: relative; width: 104px; height: 104px; margin-top: 40px; }
+  #add .done-mark span { position: absolute; inset: 0; border-radius: 52px; }
+  #add .ring { border: 2px solid var(--moss); animation: ring 1.2s var(--spring) .3s backwards; opacity: 0; }
+  #add .pop { background: var(--moss); display: flex; align-items: center; justify-content: center; animation: pop .7s var(--spring) backwards; }
+  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
+  @keyframes ring { from { transform: scale(1); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+  #add .signout { margin-top: 40px; color: var(--muted); }
+</style>
+
+<script>
+  type Now = { slug: string; title: string; type: string; progress: number; bg: string };
+  const COLORS = ['#2F4A5C', '#6B3A2E', '#4E5B3A', '#3C4E6B', '#7A4E5A', '#4E6A3F', '#8A5A2B', '#355E6B', '#2E5049', '#5C4A6E', '#8C3F3A', '#46525E'];
+  const hash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
+  const colorFor = (t: string) => COLORS[hash(t || 'x') % COLORS.length];
+  const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+
+  function init() {
+    const root = document.getElementById('add');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = '1';
+    const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const form = $<HTMLFormElement>('#entry');
+    const F = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+    const now: Now[] = JSON.parse(root.dataset.inprogress!);
+    const threads: { slug: string; title: string }[] = JSON.parse(root.dataset.threadlist!);
+    let kind = 'book', rating = 0, loved = false, priv = false, picked = new Set<string>(), updating: Now | null = null;
+
+    const go = (s: string) => { root.dataset.step = s; window.scrollTo({ top: 0, behavior: 'smooth' }); if (s === 'find') setTimeout(() => $<HTMLInputElement>('#q').focus(), 50); };
+    const setKind = (k: string) => {
+      kind = k; root.dataset.kind = k;
+      root.querySelectorAll('#kind [data-k]').forEach((b) => b.setAttribute('aria-selected', String((b as HTMLElement).dataset.k === k)));
+      $('#pk').textContent = { book: 'Book', film: 'Film', essay: 'Essay' }[k]!;
+      $('#pk').style.color = { book: 'var(--lat)', film: 'var(--sky)', essay: 'var(--moss)' }[k]!;
+      F('creator').placeholder = { book: 'Author', film: 'Director', essay: 'Writer' }[k]!;
+      $('#q').setAttribute('placeholder', k === 'essay' ? 'Paste the link to the essay' : 'Search a title, or paste a link');
+      if (k === 'essay') setStatus('done');
+    };
+    const setStatus = (s: string) => { root.dataset.st = s; root.querySelectorAll('#status [data-st]').forEach((b) => b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.st === s))); };
+    const paintStars = () => {
+      root.querySelectorAll<HTMLElement>('#stars button').forEach((b) => {
+        const n = +b.dataset.n!;
+        b.classList.toggle('on', n <= rating); b.classList.toggle('half', n - 0.5 === rating);
+        b.setAttribute('aria-checked', String(Math.ceil(rating) === n));
+      });
+      const L = ['Tap a star. Tap again for a half.', 'Not for me', 'It was okay', 'Liked it', 'Really liked it', 'Loved it'];
+      $('#rl').textContent = rating ? `${rating} · ${L[Math.ceil(rating)]}` : L[0];
+    };
+    const paintCover = () => { $('#pc').style.background = colorFor(F('title').value); };
+    const paintThreads = () => {
+      $('#tchips').innerHTML = threads.map((t) => `<button type="button" class="chip" data-t="${esc(t.slug)}" aria-pressed="${picked.has(t.slug)}">${picked.has(t.slug) ? '✓ ' : ''}${esc(t.title)}</button>`).join('');
+    };
+    const paintNow = () => {
+      $('#nowlist').innerHTML = now.length ? `<span class="eyebrow">Finish something from Now</span>` + now.map((n) =>
+        `<button type="button" class="card nowrow" data-now="${esc(n.slug)}"><span class="wash sw" style="background:${n.bg}"></span><span class="stack grow" style="gap:3px"><span class="serif" style="font-size:16px">${esc(n.title)}</span><span class="muted small">${n.type === 'book' ? 'Reading' : 'Watching'}${n.type === 'book' ? ' · ' + n.progress + '%' : ''}</span></span><span class="chip" style="height:32px">Update</span></button>`).join('') : '';
+    };
+
+    const reset = (k = kind) => {
+      form.reset(); rating = 0; loved = false; priv = false; picked = new Set(); updating = null;
+      F('date').value = today(); $('#from').hidden = true; $('#saveerr').hidden = true;
+      $('#loved').setAttribute('aria-pressed', 'false');
+      $('#priv').setAttribute('aria-pressed', 'false'); $('#priv').textContent = 'Everyone can see this';
+      root.querySelectorAll<HTMLElement>('#entry input, #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((el) => (el.style.display = ''));
+      $('#savebtn').textContent = 'Save to library';
+      F('title').required = true; F('creator').required = true;
+      setKind(k); setStatus('done'); paintStars(); paintThreads(); paintCover(); $('#pv').textContent = '0';
+    };
+    const fill = (h: any) => {
+      reset(h.type);
+      for (const k of ['title', 'creator', 'year', 'pages', 'runtime', 'words', 'link', 'source']) if (h[k] != null && F(k)) F(k).value = String(h[k]);
+      if (h.from) { $('#from').hidden = false; $('#from').textContent = `✓ Filled in from ${h.from}. Change anything.`; }
+      paintCover(); go('form');
+    };
+
+    // ——— who is this? ———
+    fetch('/api/me', { cache: 'no-store' }).then((r) => r.json()).then((me) => {
+      if (!me.ready) { const s = $('#setup'); s.hidden = false; s.textContent = `Adding isn’t switched on yet. In Vercel, add: ${me.missing.join(', ')}.`; }
+      $('#signout').hidden = !me.owner;
+      reset('book'); paintNow();
+      go(me.owner ? 'find' : 'signin');
+    }).catch(() => {
+      reset('book'); go('signin');
+      const s = $('#setup'); s.hidden = false; s.textContent = 'Adding only works on the live site, not in preview.';
+    });
+
+    $<HTMLFormElement>('#signin').addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const err = $<HTMLElement>('[data-s="signin"] .err');
+      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $<HTMLInputElement>('#pw').value }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) { err.hidden = false; err.textContent = j.error ?? 'That didn’t work.'; return; }
+      document.dispatchEvent(new Event('owner-changed'));
+      $('#signout').hidden = false; go('find');
+    });
+    $('#signout').addEventListener('click', async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      document.dispatchEvent(new Event('owner-changed'));
+      $('#signout').hidden = true; go('signin');
+    });
+
+    // ——— searching ———
+    let timer: any, seq = 0;
+    const search = async () => {
+      const q = $<HTMLInputElement>('#q').value.trim();
+      const hits = $('#hits'), err = $('#finderr');
+      err.hidden = true;
+      if (q.length < 2) { hits.innerHTML = ''; return; }
+      if (kind === 'essay' && !/^https?:\/\//.test(q)) { hits.innerHTML = ''; return; }
+      const my = ++seq;
+      hits.innerHTML = '<li class="sk" style="height:76px"></li><li class="sk" style="height:76px"></li>';
+      const r = await fetch(`/api/lookup?type=${kind}&q=${encodeURIComponent(q)}`).catch(() => null);
+      if (my !== seq) return;
+      const j = r ? await r.json().catch(() => ({})) : {};
+      if (r?.status === 401) { go('signin'); return; }
+      if (!r || !r.ok) { hits.innerHTML = ''; err.hidden = false; err.textContent = j.error ?? 'We couldn’t reach the catalogue. Fill it in by hand instead.'; return; }
+      (root as any)._hits = j.hits;
+      hits.innerHTML = j.hits.length ? j.hits.map((h: any, i: number) =>
+        `<li><button type="button" data-hit="${i}"><span class="wash sw" style="background:${colorFor(h.title)}"></span><span class="stack grow" style="gap:3px"><span class="serif" style="font-size:18px">${esc(h.title)}</span><span class="muted small">${esc([h.creator, h.year, h.pages && h.pages + ' pages', h.runtime && h.runtime + ' min', h.words && Math.round(h.words / 230) + '-minute read'].filter(Boolean).join(' · '))}</span></span><span class="eyebrow" style="font-size:10px">${esc(h.type)}</span></button></li>`).join('')
+        : `<li class="muted small">Nothing found. Try fewer words, or fill it in by hand.</li>`;
+    };
+    $('#q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, /^https?:/.test($<HTMLInputElement>('#q').value) ? 50 : 400); });
+    $('#find').addEventListener('submit', (ev) => { ev.preventDefault(); clearTimeout(timer); search(); });
+
+    // ——— clicks ———
+    root.addEventListener('click', (ev) => {
+      const el = ev.target as HTMLElement;
+      const k = el.closest<HTMLElement>('#kind [data-k]');
+      if (k) { setKind(k.dataset.k!); $<HTMLInputElement>('#q').value = ''; $('#hits').innerHTML = ''; $('#q').focus(); return; }
+      const hit = el.closest<HTMLElement>('[data-hit]');
+      if (hit) { fill((root as any)._hits[+hit.dataset.hit!]); return; }
+      const g = el.closest<HTMLElement>('[data-go]');
+      if (g) { if (g.dataset.go === 'manual') { reset(kind); go('form'); F('title').focus(); } else { $<HTMLInputElement>('#q').value = ''; $('#hits').innerHTML = ''; go(g.dataset.go!); } return; }
+      const st = el.closest<HTMLElement>('#status [data-st]');
+      if (st) { setStatus(st.dataset.st!); return; }
+      const s = el.closest<HTMLElement>('#stars [data-n]');
+      if (s) { const n = +s.dataset.n!; rating = rating === n ? n - 0.5 : rating === n - 0.5 ? n : n; paintStars(); return; }
+      if (el.closest('#loved')) { loved = !loved; $('#loved').setAttribute('aria-pressed', String(loved)); return; }
+      if (el.closest('#priv')) { priv = !priv; $('#priv').setAttribute('aria-pressed', String(priv)); $('#priv').textContent = priv ? 'Only me' : 'Everyone can see this'; return; }
+      const t = el.closest<HTMLElement>('[data-t]');
+      if (t) { picked.has(t.dataset.t!) ? picked.delete(t.dataset.t!) : picked.add(t.dataset.t!); paintThreads(); return; }
+      const nw = el.closest<HTMLElement>('[data-now]');
+      if (nw) {
+        const n = now.find((x) => x.slug === nw.dataset.now)!;
+        reset(n.type); updating = n;
+        F('title').value = n.title; paintCover();
+        F('title').required = false; F('creator').required = false;
+        // only status, progress, rating, note and date matter when updating
+        root.querySelectorAll<HTMLElement>('#entry [name=title], #entry [name=creator], #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((x) => (x.style.display = 'none'));
+        (F('title').parentElement!.querySelector('.eyebrow') as HTMLElement).textContent = n.title;
+        F('progress').value = String(n.progress); $('#pv').textContent = String(n.progress);
+        $('#savebtn').textContent = 'Save';
+        go('form');
+      }
+    });
+    F('title').addEventListener('input', paintCover);
+    F('progress').addEventListener('input', () => ($('#pv').textContent = F('progress').value));
+
+    // ——— saving ———
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const btn = $<HTMLButtonElement>('#savebtn'), err = $('#saveerr');
+      err.hidden = true; btn.disabled = true; btn.textContent = 'Saving…';
+      const done = root.dataset.st === 'done';
+      const v = (n: string) => (F(n)?.value ?? '').trim();
+      const body = updating
+        ? { action: 'update', slug: updating.slug, status: done ? 'done' : 'progress', progress: +v('progress'), rating: done ? rating : undefined, note: v('note'), date: v('date') }
+        : {
+            type: kind, title: v('title'), creator: v('creator'), year: v('year'), pages: v('pages'), runtime: v('runtime'), words: v('words'),
+            link: v('link'), source: v('source'), where: v('where'), times: v('times'), date: v('date'),
+            status: done ? 'done' : kind === 'book' ? 'reading' : 'watching', progress: +v('progress'),
+            rating: done && kind !== 'essay' ? rating || undefined : undefined, loved: kind === 'essay' && loved,
+            note: v('note'), quote: v('quote'), quoteMine: (F('quoteMine') as HTMLInputElement).checked,
+            threads: [...picked], newThread: v('newThread'), private: priv,
+          };
+      const r = await fetch('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null);
+      const j = r ? await r.json().catch(() => ({})) : {};
+      btn.disabled = false; btn.textContent = updating ? 'Save' : 'Save to library';
+      if (r?.status === 401) { go('signin'); return; }
+      if (!r || !r.ok) { err.hidden = false; err.textContent = j.error ?? 'Saving failed. Check your connection and try again.'; return; }
+      const title = updating ? updating.title : v('title');
+      const tnames = (j.threads ?? []).map((s: string) => threads.find((t) => t.slug === s)?.title ?? v('newThread')).filter(Boolean);
+      $('#savedmsg').innerHTML = `<em class="serif">${esc(title)}</em> ${updating ? 'was updated' : 'was added'}${tnames.length ? ` to <strong>${esc(tnames.join(', '))}</strong>` : ''}. ` +
+        (j.private ? 'It’s private, so only this file knows about it.' : 'It’ll appear on the site in about a minute, once Vercel rebuilds.');
+      ($('#viewlink') as HTMLAnchorElement).href = j.private ? '/library/' : j.href;
+      ($('#viewlink') as HTMLAnchorElement).dataset.astroReload = '';
+      if (updating) now.splice(now.indexOf(updating), 1), paintNow();
+      go('saved');
+    });
+  }
+  document.addEventListener('astro:page-load', init);
+</script>

@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Not found">
+  <section class="pad nf">
+    <div class="paint settle" aria-hidden="true">
+      <img class="sky skyL" src="/img/pune-day.webp" alt="" width="2172" height="388" />
+      <img class="sky skyD" src="/img/pune-night.webp" alt="" width="2172" height="388" />
+    </div>
+    <p class="eyebrow rise d1" style="color: var(--lat)">404</p>
+    <h1 class="title rise d2">This shelf is <em>empty.</em></h1>
+    <p class="lede rise d3">Maybe it was lent to a friend. Try the library, or search for it.</p>
+    <div class="rise d4 row">
+      <a href="/library/" class="btn primary">Go to the library</a>
+      <button class="btn" data-search-open>Search</button>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { padding-top: 40px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+  .paint { width: 100%; max-width: 900px; margin-bottom: 16px; opacity: .9; }
+  .row { display: flex; gap: 10px; margin-top: 8px; }
+</style>

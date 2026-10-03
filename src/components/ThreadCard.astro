@@ -1,0 +1,30 @@
+---
+import { palette, type Entry, type Thread } from '../lib/data';
+interface Props { thread: Thread; entries: Entry[] }
+const { thread, entries } = Astro.props;
+const bySlug = new Map(entries.map((e) => [e.id, e]));
+const list = thread.data.items.map((i) => bySlug.get(i.slug)).filter(Boolean) as Entry[];
+const c = [0, 1, 2].map((i) => (list[i] ? palette(list[i]).bg : '#46525E'));
+const n = (t: string) => list.filter((e) => e.data.type === t).length;
+const meta = [`${list.length} things`, n('film') && `${n('film')} film${n('film') > 1 ? 's' : ''}`, n('book') && `${n('book')} book${n('book') > 1 ? 's' : ''}`, n('essay') && `${n('essay')} essay${n('essay') > 1 ? 's' : ''}`].filter(Boolean).join(' · ');
+---
+<a href={`/threads/${thread.id}/`} class="card threadcard">
+  <div class="fanwrap" aria-hidden="true">
+    <span class="wash st l" style={`background: ${c[0]}`}></span>
+    <span class="wash st r" style={`background: ${c[2]}`}></span>
+    <span class="wash st m" style={`background: ${c[1]}`}></span>
+  </div>
+  <span class="stack" style="gap: 6px"><span class="serif" style="font-size: 24px">{thread.data.title}</span><span class="num muted" style="font-size: 13px">{meta}</span></span>
+</a>
+
+<style>
+  .threadcard { padding: 28px 24px 24px; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; transition: transform .55s var(--spring), box-shadow .55s ease, background-color .5s ease, border-color .4s ease; }
+  .threadcard:hover { transform: translateY(-5px); color: inherit; box-shadow: 0 26px 40px -22px var(--shadow); }
+  .fanwrap { position: relative; width: 190px; height: 110px; }
+  .st { position: absolute; width: 64px; height: 92px; border-radius: 4px; top: 12px; transition: transform .6s var(--spring); }
+  .st.l { left: 22px; transform: rotate(-8deg); }
+  .st.r { right: 22px; transform: rotate(8deg); }
+  .st.m { left: 61px; top: 0; width: 68px; height: 100px; box-shadow: 0 10px 16px -8px var(--shadow); }
+  .threadcard:hover .st.l { transform: translateX(-14px) rotate(-10deg); }
+  .threadcard:hover .st.r { transform: translateX(14px) rotate(10deg); }
+</style>

@@ -1,0 +1,151 @@
+---
+// The footer meadow: one wildflower for everything finished this year,
+// planted left to right from January to December.
+// Books → balsam (laterite red) · Films → karvi (monsoon purple) · Essays → smithia (haldi yellow)
+import { getEntries, href, short, kind } from '../lib/data';
+
+const all = (await getEntries()).filter((e) => e.data.status === 'done');
+const thisYear = new Date().getUTCFullYear();
+const year = all.some((e) => e.data.date.getUTCFullYear() === thisYear) ? thisYear : (all[0]?.data.date.getUTCFullYear() ?? thisYear);
+const items = all.filter((e) => e.data.date.getUTCFullYear() === year).sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+
+// small deterministic randomness, so the meadow looks the same on every build
+let seed = 7;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const hashOf = (s: string) => [...s].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 5381);
+
+// place flowers along the year, nudging apart ones that would touch
+const MIN = items.length > 40 ? 1.2 : 2.4; // % of width
+const placed: number[] = [];
+const flowers = items.map((e) => {
+  const doy = (e.data.date.getTime() - Date.UTC(year, 0, 1)) / 86400000;
+  let x = 3 + (doy / 365) * 94;
+  for (const p of placed) if (Math.abs(p - x) < MIN) x = p + MIN;
+  x = Math.min(x, 98);
+  placed.push(x);
+  const h = hashOf(e.id);
+  return {
+    e, x,
+    stem: 34 + (h % 46),                      // 34–79px tall
+    lean: ((h >> 3) % 9) - 4,                 // −4…4°
+    dur: (5 + ((h >> 5) % 40) / 10).toFixed(1),
+    delay: (-((h >> 7) % 50) / 10).toFixed(1),
+    flip: (h >> 9) % 2 === 0,
+  };
+});
+
+// grass blades across the whole width
+const blades: string[] = [];
+for (let i = 0; i < 260; i++) {
+  const x = i * (1200 / 260) + rnd() * 4;
+  const hgt = 8 + rnd() * 20;
+  const bend = (rnd() - 0.5) * 10;
+  blades.push(`M${x.toFixed(1)} 40 Q${(x + bend / 2).toFixed(1)} ${(40 - hgt / 2).toFixed(1)} ${(x + bend).toFixed(1)} ${(40 - hgt).toFixed(1)} Q${(x + bend / 2 + 1.6).toFixed(1)} ${(40 - hgt / 2).toFixed(1)} ${(x + 2.6).toFixed(1)} 40Z`);
+}
+// fireflies (dark mode only)
+const flies = Array.from({ length: 14 }, () => ({
+  x: (rnd() * 96 + 2).toFixed(1), y: (rnd() * 70 + 10).toFixed(1),
+  dur: (6 + rnd() * 8).toFixed(1), delay: (-rnd() * 10).toFixed(1), blink: (2 + rnd() * 3).toFixed(1),
+}));
+const label = (e: (typeof items)[number]) => `${e.data.title} · ${kind(e)} · ${short(e.data.date)}`;
+const n = (t: string) => items.filter((e) => e.data.type === t).length;
+---
+<div class="meadow" role="group" aria-label={`The ${year} meadow: ${items.length} flowers, one for each thing finished this year.`}>
+  <div class="field">
+    {flies.map((f) => <span class="fly" aria-hidden="true" style={`left:${f.x}%;bottom:${f.y}px;--d:${f.dur}s;--dl:${f.delay}s;--b:${f.blink}s`}></span>)}
+
+    {flowers.map((f) => (
+      <a href={href(f.e)} class={`fl ${f.e.data.type}`} style={`left:${f.x.toFixed(2)}%;--h:${f.stem}px;--lean:${f.lean}deg;--d:${f.dur}s;--dl:${f.delay}s`} aria-label={label(f.e)}>
+        <span class="tip">{f.e.data.title}<small>{kind(f.e)} · {short(f.e.data.date)}</small></span>
+        <svg class="plant" width="26" height={f.stem + 18} viewBox={`0 0 26 ${f.stem + 18}`} aria-hidden="true"><g transform={f.flip ? 'translate(26 0) scale(-1 1)' : undefined}>
+          <path class="stem" d={`M13 ${f.stem + 18} C 13 ${f.stem * 0.6 + 18}, 15 ${f.stem * 0.4 + 12}, 13 12`} />
+          <path class="leaf" d={`M13 ${f.stem * 0.62 + 18} q -9 -3 -10 -10 q 7 1 10 8`} />
+          {f.stem > 50 && <path class="leaf" d={`M13.6 ${f.stem * 0.38 + 16} q 8 -3 9 -9 q -7 1 -9 7`} />}
+          {f.e.data.type === 'book' && (
+            <g class="head" transform="translate(13 11)">
+              {[0, 72, 144, 216, 288].map((a) => <ellipse class="petal" cx="0" cy="-5" rx="3.6" ry="5.4" transform={`rotate(${a})`} />)}
+              <circle class="eye" r="2.4" />
+            </g>
+          )}
+          {f.e.data.type === 'film' && (
+            <g class="head" transform="translate(13 12)">
+              <path class="stem" d="M0 0 L-5 -6 M0 0 L5 -5 M0 0 L0 -9" />
+              <ellipse class="bell" cx="-5.5" cy="-7.5" rx="3.2" ry="4.2" transform="rotate(-24 -5.5 -7.5)" />
+              <ellipse class="bell" cx="5.5" cy="-6.5" rx="3.2" ry="4.2" transform="rotate(24 5.5 -6.5)" />
+              <ellipse class="bell" cx="0" cy="-11" rx="3.4" ry="4.6" />
+              <circle class="bud" cx="-1.6" cy="-2.6" r="1.8" />
+            </g>
+          )}
+          {f.e.data.type === 'essay' && (
+            <g class="head" transform="translate(13 11)">
+              {[0, 90, 180, 270].map((a) => <ellipse class="petal" cx="0" cy="-3.6" rx="2.6" ry="3.6" transform={`rotate(${a + 45})`} />)}
+              <circle class="eye" r="1.6" />
+            </g>
+          )}
+        </g></svg>
+      </a>
+    ))}
+
+    <svg class="grass" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true">
+      <path class="hill" d="M0 40 L0 26 C 140 14 260 22 380 18 C 520 13 640 24 780 19 C 920 14 1060 21 1200 16 L1200 40Z" />
+      <path class="blades" d={blades.join('')} />
+    </svg>
+  </div>
+  <p class="caption">
+    <span class="serif">The {year} meadow.</span> A flower for everything finished —
+    <span class="k"><i class="kb"></i>{n('book')} books</span>
+    <span class="k"><i class="kf"></i>{n('film')} films</span>
+    <span class="k"><i class="ke"></i>{n('essay')} essays</span>
+  </p>
+</div>
+
+<style>
+  .meadow { overflow-x: clip; --karvi: #6F5FA8; --bloom: #C2502B; --sun: #D9A21E; --grass: #6F8F4E; --grass2: #8DAA66; }
+  :global(html[data-theme="dark"]) .meadow { overflow-x: clip; --karvi: #A898DC; --bloom: #E3875A; --sun: #E7B24C; --grass: #3E5232; --grass2: #556B44; }
+
+  .field { position: relative; height: 150px; max-width: var(--max); margin: 0 auto; overflow: visible; }
+  .grass { position: absolute; left: calc(50% - 50vw); bottom: 0; width: 100vw; height: 40px; display: block; }
+  .hill { fill: var(--grass2); opacity: .55; }
+  .blades { fill: var(--grass); }
+
+  .fl { position: absolute; bottom: 14px; width: 26px; margin-left: -13px; display: block; z-index: 1; outline-offset: 2px; }
+  .plant { display: block; transform-origin: 50% 100%; overflow: visible; }
+  .fl > svg { animation: sway var(--d) ease-in-out var(--dl) infinite alternate; }
+  .stem { fill: none; stroke: var(--grass); stroke-width: 1.6; stroke-linecap: round; }
+  .leaf { fill: var(--grass2); }
+  .head { transition: transform .5s var(--spring); transform-box: fill-box; transform-origin: center; }
+  .book .petal { fill: var(--bloom); opacity: .92; }
+  .book .eye { fill: var(--sun); }
+  .film .bell { fill: var(--karvi); opacity: .9; }
+  .film .bud { fill: var(--karvi); opacity: .55; }
+  .essay .petal { fill: var(--sun); }
+  .essay .eye { fill: #8A5A2B; }
+  @keyframes sway { from { transform: rotate(calc(var(--lean) - 2.2deg)); } to { transform: rotate(calc(var(--lean) + 2.2deg)); } }
+
+  .fl:hover .head, .fl:focus-visible .head { transform: scale(1.35); }
+  .tip { position: absolute; left: 50%; bottom: calc(100% + 6px); transform: translate(-50%, 6px); opacity: 0; pointer-events: none; white-space: nowrap; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 7px 11px; font-family: Fraunces, Georgia, serif; font-size: 14px; color: var(--ink); box-shadow: 0 12px 24px -12px var(--shadow); transition: opacity .3s ease, transform .4s var(--spring); z-index: 3; }
+  .tip small { display: block; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .fl:hover .tip, .fl:focus-visible .tip { opacity: 1; transform: translate(-50%, 0); }
+
+  .fly { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #F3E39A; box-shadow: 0 0 8px 3px rgba(243, 227, 154, .55); opacity: 0; display: none; pointer-events: none;
+         animation: drift var(--d) ease-in-out var(--dl) infinite alternate, blink var(--b) ease-in-out var(--dl) infinite; }
+  :global(html[data-theme="dark"]) .fly { display: block; }
+  @keyframes drift { from { transform: translate(0, 0); } 50% { transform: translate(18px, -14px); } to { transform: translate(-12px, 8px); } }
+  @keyframes blink { 0%, 100% { opacity: 0; } 45%, 60% { opacity: .9; } }
+
+  .caption { max-width: var(--max); margin: 0 auto; padding: 14px var(--gut) 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font-size: 13px; color: var(--muted); }
+  .caption .serif { font-size: 15px; color: var(--ink); font-style: italic; }
+  .k { display: inline-flex; align-items: center; gap: 6px; }
+  .k i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .kb { background: var(--bloom); } .kf { background: var(--karvi); } .ke { background: var(--sun); }
+
+  @media (max-width: 780px) {
+    .field { height: 120px; }
+    .fl { transform: scale(.78); transform-origin: 50% 100%; }
+    .tip { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fl > svg, .fly { animation: none !important; }
+    .fly { opacity: .6; }
+  }
+</style>

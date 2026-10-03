@@ -1,0 +1,112 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import ThreadCard from '../../components/ThreadCard.astro';
+import { getEntries, getThreads, href, palette, radius, kind, typeColor, minutes, duration, aboutHours, type Entry, type Thread } from '../../lib/data';
+
+export async function getStaticPaths() {
+  const threads = await getThreads();
+  return threads.map((thread) => ({ params: { slug: thread.id }, props: { thread } }));
+}
+const { thread } = Astro.props as { thread: Thread };
+const { Content } = await render(thread);
+const entries = await getEntries();
+const threads = await getThreads();
+const bySlug = new Map(entries.map((e) => [e.id, e]));
+const path = thread.data.items.map((i) => ({ ...i, e: bySlug.get(i.slug) })).filter((x) => x.e) as { slug: string; why: string; e: Entry }[];
+const n = (t: string) => path.filter((x) => x.e.data.type === t).length;
+const plural = (k: number, w: string) => `${k} ${w}${k > 1 ? 's' : ''}`;
+const total = path.reduce((s, x) => s + minutes(x.e), 0);
+const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' · ');
+const [first, ...rest] = thread.data.title.split(' ');
+const fan = path.slice(0, 3).map((x) => palette(x.e));
+const others = threads.filter((t) => t.id !== thread.id).slice(0, 3);
+---
+<Base title={thread.data.title} active="threads" description={`A thread: ${thread.data.title}. ${meta}.`}>
+  <section class="pad head">
+    <div class="fan" aria-hidden="true">
+      {fan[1] && <div class="wash f l" style={`background: ${fan[1].bg}`}></div>}
+      {fan[2] && <div class="wash f r" style={`background: ${fan[2].bg}`}></div>}
+      {fan[0] && <div class="wash f m" style={`background: ${fan[0].bg}`}><i style={`background: ${fan[0].accent}`}></i><b style={`background: ${fan[0].hill}`}></b></div>}
+    </div>
+    <p class="eyebrow rise d2" style="color: var(--lat)">A thread</p>
+    <h1 class="serif rise d3 tt">{first}{rest.length > 0 && <> <em>{rest.join(' ')}</em></>}</h1>
+    <div class="serif rise d4 intro"><Content /></div>
+    <div class="rise d4 row">
+      <span class="num muted" style="font-size: 14px">{meta}</span>
+      <button class="btn" data-copy={Astro.url.href}>Copy link</button>
+    </div>
+  </section>
+
+  <div class="path">
+    <div class="line" aria-hidden="true"></div>
+    <ol aria-label="Suggested order">
+      {path.map((x, i) => (
+        <li>
+          <a href={href(x.e)} class="step rise" style={`animation-delay: ${(0.5 + i * 0.1).toFixed(2)}s`}>
+            <span class="serif num dot" style={`border-color: ${typeColor(x.e.data.type)}; color: ${typeColor(x.e.data.type)}`}>{i + 1}</span>
+            <Cover entry={x.e} variant="swatch" w={72} h={104} />
+            <span class="stack body">
+              <span class="k" style={`color: ${typeColor(x.e.data.type)}`}>{kind(x.e)}</span>
+              <span class="serif st">{x.e.data.title}</span>
+              <span class="muted why">{x.why}</span>
+            </span>
+            <span class="num muted m">{x.e.data.type === 'film' ? duration(minutes(x.e)) : x.e.data.type === 'essay' ? `${minutes(x.e)} min` : `≈ ${duration(minutes(x.e))}`}</span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </div>
+
+  {others.length > 0 && (
+    <section class="pad more-t">
+      <div class="rule"><h2 class="eyebrow">More threads</h2><a href="/threads/" class="more">All {threads.length} threads →</a></div>
+      <div class="grid">{others.map((t) => <ThreadCard thread={t} entries={entries} />)}</div>
+    </section>
+  )}
+</Base>
+
+<style>
+  @keyframes fan { from { opacity: 0; transform: translateY(24px) rotate(0); } }
+  @keyframes draw { from { transform: scaleY(0); } }
+  .head { padding-top: 64px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 18px; }
+  .fan { position: relative; width: 300px; height: 150px; }
+  .f { position: absolute; top: 20px; width: 84px; height: 120px; border-radius: 5px; box-shadow: 0 14px 20px -10px var(--shadow); animation: fan 1s var(--spring) backwards; }
+  .f.l { left: 40px; transform: rotate(-10deg); animation-delay: .1s; }
+  .f.r { right: 40px; transform: rotate(10deg); animation-delay: .2s; }
+  .f.m { left: 105px; top: 0; width: 90px; height: 130px; box-shadow: 0 18px 24px -10px var(--shadow); animation-delay: .3s; }
+  .f.m i, .f.m b { position: absolute; display: block; }
+  .f.m i { width: 60px; height: 60px; border-radius: 50%; right: -14px; top: 30px; opacity: .8; }
+  .f.m b { left: -20%; width: 140%; bottom: -8px; height: 44px; border-radius: 50% 50% 0 0; }
+  .tt { margin: 0; font-weight: 400; font-size: clamp(44px, 6vw, 64px); line-height: 1; letter-spacing: -.02em; }
+  .tt em { color: var(--lat); }
+  .intro { max-width: 640px; }
+  .intro :global(p) { margin: 0; font-size: 20px; line-height: 1.55; color: var(--muted); }
+  .row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; margin-top: 6px; }
+
+  .path { position: relative; width: min(880px, calc(100% - 2 * var(--gut))); margin: 56px auto 0; }
+  .line { position: absolute; left: 35px; top: 30px; bottom: 30px; width: 2px; background: var(--line); transform-origin: top center; animation: draw 1.8s var(--spring) .4s backwards; }
+  ol { position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .step { position: relative; display: flex; align-items: center; gap: 26px; padding: 14px 20px 14px 16px; border-radius: 14px; transition: transform .5s var(--spring), background-color .4s ease; }
+  .step:hover { transform: translateX(6px); background: var(--card); color: inherit; }
+  .dot { flex-shrink: 0; width: 40px; height: 40px; border-radius: 20px; background: var(--bg); border: 2px solid; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+  .body { gap: 6px; flex-grow: 1; min-width: 0; }
+  .k { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+  .st { font-size: 24px; line-height: 1.15; }
+  .why { font-size: 14px; line-height: 1.5; }
+  .m { font-size: 13px; white-space: nowrap; }
+
+  .more-t { padding-top: 72px; display: flex; flex-direction: column; gap: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 780px) {
+    .head { padding-top: 36px; }
+    .step { gap: 14px; padding: 12px 8px; }
+    .step :global(.sw) { width: 52px !important; height: 76px !important; }
+    .line { left: 27px; }
+    .m { display: none; }
+    .st { font-size: 20px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
