@@ -188,8 +188,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
   </section>
 
   <section class="pad bottom">
-    <div class="wash recap">
-      <img src="/img/pune-night.webp" alt="" width="2172" height="388" aria-hidden="true" />
+    <div class="art recap" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)">
       <div class="between"><span class="rk">Season recap</span><span style="font-size: 13px; color: #C9C2B4">Jun 1 – Sep 30</span></div>
       <h3 class="serif">Monsoon <em>{year}</em></h3>
       <div class="num three">
@@ -270,13 +269,16 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
   .sv { font-size: 30px; }
 
   .bottom { padding-top: 52px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
-  .recap { position: relative; border-radius: 18px; background: #22313F; color: #F4ECDD; padding: 30px 30px 150px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 24px 40px -24px var(--shadow); }
-  .recap > * { position: relative; z-index: 1; }
-  .recap img { position: absolute; z-index: 0; left: -10%; bottom: -6px; width: 120%; height: auto; opacity: .8; }
+  /* the recap sits in the storm clouds, top right, so the fields and the cart stay clear */
+  .recap { grid-column: 1 / -1; border-radius: 18px; background-color: #22313F; color: #F4ECDD; min-height: clamp(420px, 36vw, 500px); padding: 30px 34px; display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 16px; box-shadow: 0 24px 40px -24px var(--shadow); text-shadow: 0 1px 12px rgba(10, 16, 30, .65); }
+  .recap > * { width: min(360px, 100%); }
+  .recap .between { gap: 16px; }
+  .recap .three .stack { align-items: flex-end; }
   .rk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #E7B24C; }
   .recap h3 { margin: 0; font-weight: 400; font-size: 46px; line-height: 1; }
   .recap h3 em { color: #E7B24C; }
   .recap a:hover { color: #E7B24C; }
+  .bottom > .stack:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
   .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .three .stack { gap: 2px; }
   .how { padding: 28px; display: flex; flex-direction: column; gap: 16px; }
@@ -291,6 +293,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
     .heat { flex-direction: column; }
     .streaks { flex-direction: row; width: auto; gap: 40px; padding-top: 0; }
     .bottom { grid-template-columns: 1fr; }
+    .bottom > .stack:last-child { grid-template-columns: 1fr; }
   }
   @media (max-width: 780px) {
     .head { padding-top: 36px; }
@@ -301,5 +304,6 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
     .streaks { gap: 24px; flex-wrap: wrap; }
     .sv { font-size: 24px; }
     .recap h3 { font-size: 38px; }
+    .recap { background-position: 72% center; min-height: 460px; }
   }
 </style>

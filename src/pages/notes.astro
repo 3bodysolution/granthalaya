@@ -23,8 +23,7 @@ const mineCount = notes.filter((n) => n.h.mine).length;
   </section>
 
   <section class="pad rise d2" style="padding-top: 36px">
-    <figure class="wash lotw settle">
-      <img src="/img/pune-night.webp" alt="" width="2172" height="388" aria-hidden="true" />
+    <figure class="art lotw settle" style="--day: url(/art/lotw-day.webp); --night: url(/art/lotw-night.webp)">
       <span class="lk">Line of the week</span>
       <blockquote class="serif">“{q.text}”</blockquote>
       <figcaption>{q.by} · <em>{q.source}</em>{q.year ? ` (${q.year})` : ''}</figcaption>
@@ -56,12 +55,16 @@ const mineCount = notes.filter((n) => n.h.mine).length;
 
 <style>
   .head { padding-top: 52px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
-  .lotw { position: relative; margin: 0; min-height: 300px; border-radius: 18px; background: #22313F; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 48px clamp(24px, 9vw, 120px) 72px; box-shadow: 0 24px 40px -24px var(--shadow); }
+  .lotw { position: relative; margin: 0; min-height: clamp(320px, 30vw, 400px); border-radius: 18px; background-color: #22313F; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; text-align: center; padding: 48px clamp(24px, 9vw, 120px) 72px; box-shadow: 0 24px 40px -24px var(--shadow); }
   .lotw > * { position: relative; z-index: 1; }
-  .lotw img { position: absolute; z-index: 0; left: 0; bottom: -40px; width: 100%; height: auto; opacity: .5; }
-  .lk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #E7B24C; }
-  blockquote { margin: 0; font-size: clamp(24px, 3vw, 34px); line-height: 1.3; font-style: italic; color: #F4ECDD; }
-  figcaption { font-size: 14px; color: #C9C2B4; }
+  /* the quote sits on the quiet wall between the window and the shelf */
+  .lotw > * { max-width: 540px; }
+  .lk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #8E3B1F; }
+  blockquote { margin: 0; font-size: clamp(24px, 3vw, 34px); line-height: 1.3; font-style: italic; color: #2A211B; text-shadow: 0 1px 14px rgba(255, 240, 220, .7); }
+  figcaption { font-size: 14px; color: #4A3C30; }
+  :global(html[data-theme="dark"]) .lk { color: #F2C46B; }
+  :global(html[data-theme="dark"]) blockquote { color: #F6EEDF; text-shadow: 0 2px 14px rgba(8, 14, 32, .7); }
+  :global(html[data-theme="dark"]) figcaption { color: #DCD3C2; }
   .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
   .nc { padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 16px; min-height: 290px; }
   .ntop { display: flex; justify-content: space-between; align-items: flex-start; }

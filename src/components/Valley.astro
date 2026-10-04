@@ -2,7 +2,7 @@
 // The footer: a painted Sahyadri valley, by day and by night.
 // The painting is shown exactly as painted. It's cut into four solid layers (sky, mesas, valley, near hill)
 // that slide a few pixels with the cursor, and a few small things move: the flag, a banyan leaf,
-// the waterfalls and the river. When it's raining in Pune, it rains here too.
+// and the river. When it's raining in Pune, it rains here too.
 import { site } from '../data/site';
 import overlay from '../data/valley.json';
 const line = site.lineOfTheWeek;
@@ -11,10 +11,10 @@ const layers = [0, 1, 2, 3];
 <div class="valley" data-overlay={JSON.stringify(overlay)}>
   <div class="frame">
     <div class="set skyL" data-set="day">
-      {layers.map((k) => <img class="layer" data-k={k} src={`/img/valley-day-${k}.webp`} alt="" width="2172" height="629" loading="lazy" decoding="async" />)}
+      {layers.map((k) => <img class="layer" data-k={k} src={`/img/valley-day-${k}.webp`} alt="" width="2172" height="629" loading="lazy" decoding="async" draggable="false" />)}
     </div>
     <div class="set skyD" data-set="night">
-      {layers.map((k) => <img class="layer" data-k={k} src={`/img/valley-night-${k}.webp`} alt="" width="2172" height="629" loading="lazy" decoding="async" />)}
+      {layers.map((k) => <img class="layer" data-k={k} src={`/img/valley-night-${k}.webp`} alt="" width="2172" height="629" loading="lazy" decoding="async" draggable="false" />)}
     </div>
     <canvas class="fx" aria-hidden="true"></canvas>
     <button class="shepherd" type="button" aria-label="The shepherd has something to say"
@@ -26,19 +26,16 @@ const layers = [0, 1, 2, 3];
 <style>
   .valley { position: relative; overflow: hidden; }
   .frame {
-    position: relative; width: max(100%, 760px); max-width: 2172px; margin: 0 auto; aspect-ratio: 2172 / 629;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 6%);
-    mask-image: linear-gradient(to bottom, transparent 0, #000 6%);
-  }
-  /* very wide screens: let the sides melt away too */
-  @media (min-width: 2172px) {
-    .frame { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 6%), linear-gradient(to right, transparent, #000 4%, #000 96%, transparent); -webkit-mask-composite: source-in;
-             mask-image: linear-gradient(to bottom, transparent 0, #000 6%), linear-gradient(to right, transparent, #000 4%, #000 96%, transparent); mask-composite: intersect; }
+    position: relative; width: max(100%, 760px); margin: 0 auto; aspect-ratio: 2172 / 629;
+    /* a long, soft melt from the page into the painting */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.08) 6%, rgba(0,0,0,.45) 14%, rgba(0,0,0,.85) 22%, #000 28%);
+    mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.08) 6%, rgba(0,0,0,.45) 14%, rgba(0,0,0,.85) 22%, #000 28%);
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
   /* on small screens, show the part with the banyan and the shepherd */
-  @media (max-width: 760px) { .frame { margin-left: calc((100vw - 760px) * 0.32); } }
+  @media (max-width: 780px) { .frame { width: 1100px; margin-left: calc((100vw - 1100px) * 0.3); } }
   .set { position: absolute; inset: 0; }
-  .layer { position: absolute; inset: 0; width: 100%; height: 100%; display: block; will-change: transform; image-rendering: auto; }
+  .layer { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; will-change: transform; image-rendering: auto; }
   .fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   .shepherd { position: absolute; left: 28.8%; top: 71%; width: 2.6%; height: 9%; border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 8px; }
   .shepherd:focus-visible { outline: 2px solid var(--lat); }
@@ -49,7 +46,7 @@ const layers = [0, 1, 2, 3];
 </style>
 
 <script>
-  type Overlay = { falls: number[][][]; glintsDay: number[][]; glintsNight: number[][] };
+  type Overlay = { glintsDay: number[][]; glintsNight: number[][] };
   const IW = 2172, IH = 629;
   const SHIFT = [0, 2, 4, 7];              // how far each layer slides, in painting pixels, at full cursor travel
   const FLAG = { day: { x: 1440, y: 257, src: '/img/valley-day-flag.png' }, night: { x: 1440, y: 258, src: '/img/valley-night-flag.png' } };
@@ -108,7 +105,6 @@ const layers = [0, 1, 2, 3];
     const offset = (k: number) => -mx * SHIFT[k];    // painting px
 
     let leaf: { x: number; y: number; vx: number; vy: number; rot: number; life: number } | null = null, nextLeaf = 5000;
-    const flowPhase = Math.random() * 100;
 
     function draw(t: number, dt: number) {
       const night = isNight();
@@ -127,19 +123,6 @@ const layers = [0, 1, 2, 3];
       }
       if (reduce) return;
 
-      // waterfalls: a faint, slow flow
-      ctx.lineCap = 'round'; ctx.lineWidth = 1.3;
-      ctx.strokeStyle = night ? 'rgba(225,235,255,0.22)' : 'rgba(255,255,255,0.28)';
-      for (const fall of ov.falls) {
-        if (fall.length < 2) continue;
-        const len = fall.length;
-        for (let d = 0; d < 3; d++) {
-          const p = ((t / 2600 + d / 3 + flowPhase) % 1) * (len - 1), i = Math.floor(p);
-          const a = fall[i], b = fall[Math.min(i + 1, len - 1)], q = p - i;
-          const x = a[0] + (b[0] - a[0]) * q + o1, y = a[1] + (b[1] - a[1]) * q;
-          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - (b[0] - a[0]) * 0.6, y + 5); ctx.stroke();
-        }
-      }
       // the river: soft glints that come and go
       const gl = night ? ov.glintsNight : ov.glintsDay;
       for (let i = 0; i < gl.length; i++) {

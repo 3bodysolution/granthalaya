@@ -8,10 +8,6 @@ const all = await getEntries();
 const years = [...new Set(all.map((e) => e.data.date.getUTCFullYear()))].sort((a, b) => b - a);
 const byYear = years.map((y) => ({ y, items: all.filter((e) => e.data.date.getUTCFullYear() === y) }));
 const count = (list: typeof all, t?: string) => (t ? list.filter((e) => e.data.type === t).length : list.length);
-const summary = (list: typeof all) => {
-  const b = count(list, 'book'), f = count(list, 'film'), s = count(list, 'essay');
-  return [`${list.length} things`, b && `${b} book${b > 1 ? 's' : ''}`, f && `${f} film${f > 1 ? 's' : ''}`, s && `${s} essay${s > 1 ? 's' : ''}`].filter(Boolean).join(' · ');
-};
 const tabs = [
   { key: 'all', label: 'All', n: all.length },
   { key: 'book', label: 'Books', n: count(all, 'book') },
@@ -20,10 +16,7 @@ const tabs = [
 ];
 ---
 <Base title="Library" active="library" description="Every book, film and essay, by year.">
-  <div class="strip" aria-hidden="true">
-    <img class="sky skyL settle" src="/img/pune-day.webp" alt="" width="2172" height="388" />
-    <img class="sky skyD settle" src="/img/pune-night.webp" alt="" width="2172" height="388" />
-  </div>
+  <div class="art melt settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
 
   <div id="lib" data-view="grid" data-type="all">
     <section class="pad head rise">
@@ -46,8 +39,8 @@ const tabs = [
       <section class:list={['pad year rise', i === 0 ? 'd2' : 'd3']}>
         <details open={i === 0} class="yr">
           <summary>
-            <span class="yrhead"><span class="serif yn">{y}</span><span class="num muted yc">{summary(items)}</span></span>
-            <span class="more toggle" style="color: var(--lat)" aria-hidden="true"><span class="o">Show {y} ↓</span><span class="c">Hide ↑</span></span>
+            <span class="serif yn">{y}</span>
+            <span class="more toggle" style="color: var(--lat)" aria-hidden="true"><span class="o">Show ↓</span><span class="c">Hide ↑</span></span>
           </summary>
           <div class="shelf grid">
             {items.map((e) => <Tile entry={e} vt />)}
@@ -73,9 +66,8 @@ const tabs = [
 </Base>
 
 <style>
-  .strip { height: 150px; overflow: hidden; display: flex; align-items: flex-end; }
-  .strip img { flex-shrink: 0; }
-  .head { padding-top: 36px; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .banner { height: clamp(220px, 27vw, 400px); background-position: center 62%; }
+  .head { margin-top: -28px; position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
   .tabs { margin-top: 24px; display: flex; gap: 32px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
   .tabs button { height: 50px; padding: 0; background: transparent; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color .3s ease, border-color .3s ease; }
   .tabs button span { color: var(--muted); font-weight: 500; margin-left: 4px; }
@@ -85,9 +77,7 @@ const tabs = [
   .year { padding-top: 32px; }
   .yr summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 22px; }
   .yr summary::-webkit-details-marker { display: none; }
-  .yrhead { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
   .yn { font-size: 32px; }
-  .yc { font-size: 14px; }
   .yr[open] .o, .yr:not([open]) .c { display: none; }
   .yr:not([open]) summary { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 24px; box-shadow: 0 12px 24px -16px var(--shadow); margin-bottom: 0; }
   .yr[open] > .grid, .yr[open] > .list { animation: rise .7s var(--spring) backwards; }
@@ -103,11 +93,12 @@ const tabs = [
   .lrow :global(.sw) { margin: 10px 0; }
 
   .none { display: none; margin: 0; font-size: 15px; }
-  .is-hidden { display: none !important; }
+  :global(.is-hidden) { display: none !important; }
   .yr.empty .none { display: block; }
 
   @media (max-width: 780px) {
-    .strip { height: 90px; }
+    .banner { height: 190px; }
+    .head { margin-top: -12px; }
     .lrow { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; }
     .lrow > :nth-child(3), .lrow > :nth-child(4), .lrow > :nth-child(6) { display: none; }
     .tabs { gap: 22px; }

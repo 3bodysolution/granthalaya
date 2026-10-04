@@ -77,8 +77,10 @@ const nav = [
   <div class="foot-wrap">
     <Valley />
     <footer class="foot">
-      <span>{site.name} · made slowly, in {site.city}.</span>
-      <nav aria-label="Footer"><a href="/about/">About</a><a href="/rss.xml">RSS</a><a href="/library/">Everything</a><a href="/add/" class="visitor-only">Sign in</a><a href="/add/" class="owner-only" hidden>Add something</a></nav>
+      <div class="foot-in">
+        <span>{site.name} · made slowly, in {site.city}. Paintings © {site.owner}.</span>
+        <nav aria-label="Footer"><a href="/about/">About</a><a href="/rss.xml">RSS</a><a href="/library/">Everything</a><a href="/add/" class="visitor-only">Sign in</a><a href="/add/" class="owner-only" hidden>Add something</a></nav>
+      </div>
     </footer>
   </div>
 
@@ -119,6 +121,11 @@ const nav = [
     }
     document.addEventListener('astro:page-load', paintOwner);
     document.addEventListener('owner-changed', paintOwner);
+
+    // ——— the paintings stay on the page: no right-click saving, no dragging ———
+    const guarded = (t: EventTarget | null) => !!(t as Element)?.closest?.('.art, .valley, .cover, img');
+    document.addEventListener('contextmenu', (ev) => { if (guarded(ev.target)) ev.preventDefault(); });
+    document.addEventListener('dragstart', (ev) => { if (guarded(ev.target)) ev.preventDefault(); });
 
     // ——— copy buttons ———
     document.addEventListener('click', async (ev) => {

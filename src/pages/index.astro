@@ -16,17 +16,15 @@ const hrefs = all.map(href);
 const quote = site.lineOfTheWeek;
 ---
 <Base>
-  <section class="hero pad">
-    <p class="eyebrow rise" style="color: var(--lat)">{site.season}</p>
-    <h1 class="title rise d1">Everything I read, watch, and keep <em>coming back to.</em></h1>
+  <section class="hero bleed">
+    <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
+    <div class="pad words">
+      <p class="eyebrow rise">{site.season}</p>
+      <h1 class="title rise d1">Everything I read, watch, and keep <em>coming back to.</em></h1>
+    </div>
   </section>
 
-  <div class="paint settle d2" aria-hidden="true">
-    <img class="sky skyL" src="/img/pune-day.webp" alt="" width="2172" height="388" />
-    <img class="sky skyD" src="/img/pune-night.webp" alt="" width="2172" height="388" />
-  </div>
-
-  <section class="pad block rise d4" style="padding-top: 40px">
+  <section class="pad block rise d4" style="padding-top: 16px">
     <div class="rule">
       <div class="inline"><h2 class="eyebrow">Now</h2><span class="small muted">Updated {short(latest.data.date)}</span></div>
       <a class="small muted otd" data-otd={JSON.stringify(otd)} hidden></a>
@@ -99,9 +97,16 @@ const quote = site.lineOfTheWeek;
 </Base>
 
 <style>
-  .hero { padding-top: 60px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
-  .hero .title { max-width: 820px; }
-  .paint { margin-top: 8px; }
+  /* the painting fills the width; the words sit in its sky */
+  .hero { position: relative; aspect-ratio: 2172 / 724; min-height: 460px; max-height: 760px; }
+  .hero .bg { position: absolute; inset: 0; background-position: center bottom; }
+  .words { position: relative; padding-top: clamp(40px, 5.5vw, 84px); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
+  .words .title { max-width: 820px; color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .55); }
+  .words .title em { color: #8E3B1F; }
+  .words .eyebrow { color: #7A3A1E; }
+  :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
+  :global(html[data-theme="dark"]) .words .title em { color: #F2C46B; }
+  :global(html[data-theme="dark"]) .words .eyebrow { color: #F2C46B; }
   .block { padding-top: 60px; display: flex; flex-direction: column; gap: 24px; }
   .inline { display: flex; align-items: baseline; gap: 14px; }
   .small { font-size: 13px; }
@@ -121,7 +126,8 @@ const quote = site.lineOfTheWeek;
     .starts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
   }
   @media (max-width: 780px) {
-    .hero { padding-top: 36px; }
+    .hero { aspect-ratio: auto; min-height: 520px; }
+    .hero .bg { background-position: 6% bottom; }
     .block { padding-top: 44px; }
     .now { grid-template-columns: 1fr; }
     .starts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }

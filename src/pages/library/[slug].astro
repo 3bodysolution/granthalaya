@@ -52,9 +52,7 @@ const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
 <Base title={d.title} active="library" description={desc}>
   {d.type !== 'essay' ? (
     <>
-      <div class="wash banner settle" style={`background: ${d.type === 'film' ? '#2F4A5C' : '#6F8A5C'}`} aria-hidden="true">
-        <img src={d.type === 'film' ? '/img/pune-night.webp' : '/img/pune-day.webp'} alt="" width="2172" height="388" />
-      </div>
+      <div class="art melt banner settle bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
 
       <section class="pad top">
         <div class="side">
@@ -176,8 +174,7 @@ const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
 
 <style>
   @keyframes hero { from { opacity: .4; transform: translateY(40px) scale(.9); } to { opacity: 1; transform: none; } }
-  .banner { height: 280px; -webkit-mask-image: linear-gradient(180deg, #000 50%, transparent); mask-image: linear-gradient(180deg, #000 50%, transparent); }
-  .banner img { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; }
+  .banner { height: 280px; background-position: center 62%; }
   .top { position: relative; margin-top: -170px; display: flex; gap: 56px; align-items: flex-start; }
   .side { flex-shrink: 0; width: 260px; display: flex; flex-direction: column; gap: 12px; }
   .hero-film, .hero-book { animation: hero .95s var(--spring) backwards; }
