@@ -12,6 +12,11 @@ highlights:
   - text: "One cannot think well, love well, sleep well, if one has not dined well."
     where: "Chapter 1"
     note: "Agreed. Especially after a Sunday misal."
+trivia:
+  - "Woolf deliberately invoked lesbianism in the essay, asking if the magistrate from a famous obscenity trial was present."
+  - "The narrator's names, like Mary Beton and Mary Seton, come from a 16th-century Scottish ballad."
+  - "The popular fanfiction archive 'Archive of Our Own' was named after this essay."
+triviaSource: "https://en.wikipedia.org/wiki/A_Room_of_One's_Own"
 ---
 
 Funny, sharp and much less of a lecture than I expected. It reads like someone thinking out loud on a long walk.

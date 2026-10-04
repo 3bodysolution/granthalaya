@@ -96,13 +96,21 @@ async function askGemini(key, model, text, tries = 1) {
   throw last;
 }
 
-async function askGroq(key, model, text) {
-  const j = await getJSON('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
-    body: JSON.stringify({ model: model || 'llama-3.3-70b-versatile', temperature: 0.4, response_format: { type: 'json_object' }, messages: [{ role: 'user', content: text }] }),
-  }, 20000);
-  return j.choices?.[0]?.message?.content ?? '';
+// Groq's free plan allows about one article a minute, so with tries > 1 it waits for the minute to pass
+async function askGroq(key, model, text, tries = 1) {
+  for (let i = 0; ; i++) {
+    try {
+      const j = await getJSON('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({ model: model || 'openai/gpt-oss-120b', temperature: 0.4, response_format: { type: 'json_object' }, messages: [{ role: 'user', content: text }] }),
+      }, 30000);
+      return j.choices?.[0]?.message?.content ?? '';
+    } catch (e) {
+      if (i + 1 >= tries || !String(e.message).startsWith('429')) throw e;
+      await new Promise((r) => setTimeout(r, 25000));
+    }
+  }
 }
 
 const clean = (s) => String(s).replace(/\s*[—–]\s*/g, ', ').replace(/\s+/g, ' ').trim();
@@ -125,7 +133,7 @@ export async function getTrivia(item, keys) {
       raw = await askGemini(keys.gemini, keys.geminiModel, text, keys.tries);
     } catch (e) {
       if (!keys.groq) throw e;
-      raw = await askGroq(keys.groq, keys.groqModel, text);
+      raw = await askGroq(keys.groq, keys.groqModel, text, keys.tries);
     }
     const facts = (JSON.parse(raw.replace(/^```(?:json)?|```$/g, '').trim()).facts ?? [])
       .filter((f) => typeof f === 'string' && f.trim().length > 15)

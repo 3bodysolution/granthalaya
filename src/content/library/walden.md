@@ -19,6 +19,11 @@ highlights:
     note: "Nine words. I think about this one on slow Sundays."
   - text: "A lake is the landscape's most beautiful and expressive feature. It is earth's eye; looking into which the beholder measures the depth of his own nature."
     where: "The Ponds"
+trivia:
+  - "Thoreau listed his cabin’s exact cost, $28.12 (about $971.65 in 2025), and broke down each material expense, a rarity for 19th‑century builders."
+  - "Emerson praised the book within three weeks, declaring that “All American kind are delighted with Walden as far as they have dared to say.”"
+  - "Though the book champions self‑reliance, Thoreau’s mother regularly washed his dirty laundry and delivered fresh baked goods during his two‑year experiment."
+triviaSource: "https://en.wikipedia.org/wiki/Walden"
 ---
 
 Read it at nineteen and thought it was about living in the woods. Read it again at twenty-four and realised it's about paying attention wherever you already are.
