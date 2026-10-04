@@ -1,25 +1,25 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getCollection } from 'astro:content';
-import { getThreads, palette } from '../lib/data';
+import { getThreads, getAllEntries, palette, percent } from '../lib/data';
+import { site } from '../data/site';
 
 // Everything the Add screen needs to know, baked in at build time.
-const all = await getCollection('library');
+const all = await getAllEntries();
 const now = all.filter((e) => e.data.status !== 'done').map((e) => ({
-  slug: e.id, title: e.data.title, type: e.data.type, progress: e.data.progress ?? 0, bg: palette(e).bg,
+  slug: e.id, title: e.data.title, type: e.data.type, page: e.data.page ?? 0, pages: e.data.pages ?? 0, pct: percent(e), bg: palette(e).bg,
 }));
 const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.title }));
 ---
 <Base title="Add" description="Add something to the library.">
-  <div id="add" class="wrap" data-inprogress={JSON.stringify(now)} data-threadlist={JSON.stringify(threads)} data-step="loading">
+  <div id="add" class="wrap" data-inprogress={JSON.stringify(now)} data-threadlist={JSON.stringify(threads)} data-mpp={site.owner.minutesPerPage} data-step="loading">
 
     <!-- checking -->
     <section class="step" data-s="loading" aria-live="polite"><div class="sk" style="height: 180px"></div></section>
 
     <!-- sign in -->
     <section class="step" data-s="signin">
-      <p class="eyebrow" style="color: var(--lat)">Only for Sarthak</p>
-      <h1 class="serif h">Sign in to <em>add things.</em></h1>
+      <p class="eyebrow" style="color: var(--lat)">Only for {site.owner.name}</p>
+      <h1 class="serif h">Sign in to add things</h1>
       <form class="stack" style="gap: 12px" id="signin">
         <label class="sr" for="pw">Password</label>
         <input id="pw" class="field" type="password" autocomplete="current-password" placeholder="Password" required />
@@ -31,7 +31,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
 
     <!-- find it -->
     <section class="step" data-s="find">
-      <div class="between"><h1 class="serif h">What did you just <em>finish?</em></h1></div>
+      <div class="between"><h1 class="serif h">What are you adding?</h1></div>
       <div class="seg" role="tablist" aria-label="Kind" id="kind">
         <button type="button" role="tab" data-k="book" aria-selected="true">Book</button>
         <button type="button" role="tab" data-k="film" aria-selected="false">Film</button>
@@ -74,10 +74,20 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
           <button type="button" data-st="progress" aria-pressed="false" class="not-essay"><span class="only-book">Still reading</span><span class="only-film">Still watching</span></button>
         </div>
 
-        <label class="stack progress-only" style="gap: 8px">
-          <span class="eyebrow">How far along · <span id="pv">0</span>%</span>
-          <input type="range" name="progress" min="0" max="100" step="1" value="0" />
-        </label>
+        <div class="stack progress-only only-book pagebox" style="gap: 12px">
+          <span class="eyebrow">Where you are</span>
+          <div class="pagerow">
+            <label>On page<input name="page" class="field sm" inputmode="numeric" placeholder="0" /></label>
+            <span class="of">of</span>
+            <label>Pages in all<input name="ptotal" class="field sm" inputmode="numeric" placeholder="320" /></label>
+          </div>
+          <div class="chips">
+            <button type="button" class="chip" data-addp="10">+10 pages</button>
+            <button type="button" class="chip" data-addp="25">+25</button>
+            <button type="button" class="chip" data-addp="50">+50</button>
+          </div>
+          <span class="muted small" id="pv"></span>
+        </div>
 
         <div class="stack center done-only rating-wrap" style="gap: 6px">
           <div class="stars-in not-essay" role="radiogroup" aria-label="Your rating" id="stars">
@@ -112,6 +122,8 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
         </div>
 
         <div class="chips">
+          <button type="button" class="chip" data-day="0">Today</button>
+          <button type="button" class="chip" data-day="1">Yesterday</button>
           <label class="chip"><input type="date" name="date" class="date" aria-label="Date" /></label>
           <button type="button" class="chip" id="priv" aria-pressed="false">Everyone can see this</button>
         </div>
@@ -127,7 +139,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
     <!-- saved -->
     <section class="step center" data-s="saved" role="status">
       <div class="done-mark"><span class="ring"></span><span class="pop"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FFFBF3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span></div>
-      <h2 class="serif h">On your shelf.</h2>
+      <h2 class="serif h">Saved</h2>
       <p class="muted" id="savedmsg"></p>
       <div class="stack" style="gap: 10px; width: 100%">
         <button class="btn primary big" type="button" data-go="find">Add another</button>
@@ -178,6 +190,9 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
   #add .bare:focus { border-bottom-color: var(--lat); }
   #add .pt { font-family: Fraunces, Georgia, serif; font-size: 24px; }
   #add .row3 { display: flex; gap: 10px; }
+  #add .pagerow { display: flex; align-items: flex-end; gap: 12px; }
+  #add .pagerow label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: 1; }
+  #add .pagerow .of { padding-bottom: 10px; color: var(--muted); }
   #add .row3 label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: 1; }
   #add .found { color: var(--moss); }
   #add .stars-in { display: flex; gap: 4px; }
@@ -210,12 +225,12 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
 </style>
 
 <script>
-  type Now = { slug: string; title: string; type: string; progress: number; bg: string };
+  type Now = { slug: string; title: string; type: string; page: number; pages: number; pct: number; bg: string };
   const COLORS = ['#2F4A5C', '#6B3A2E', '#4E5B3A', '#3C4E6B', '#7A4E5A', '#4E6A3F', '#8A5A2B', '#355E6B', '#2E5049', '#5C4A6E', '#8C3F3A', '#46525E'];
   const hash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
   const colorFor = (t: string) => COLORS[hash(t || 'x') % COLORS.length];
   const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-  const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  const today = (back = 0) => { const d = new Date(Date.now() - back * 86400000); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 
   function init() {
     const root = document.getElementById('add');
@@ -225,6 +240,9 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
     const form = $<HTMLFormElement>('#entry');
     const F = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
     const now: Now[] = JSON.parse(root.dataset.inprogress!);
+    const MPP = +(root.dataset.mpp || 1.1);
+    let lastKind = 'book';
+    try { lastKind = localStorage.getItem('addKind') || 'book'; } catch (e) {}
     const threads: { slug: string; title: string }[] = JSON.parse(root.dataset.threadlist!);
     let kind = 'book', rating = 0, loved = false, priv = false, picked = new Set<string>(), updating: Now | null = null;
 
@@ -237,6 +255,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
       F('creator').placeholder = { book: 'Author', film: 'Director', essay: 'Writer' }[k]!;
       $('#q').setAttribute('placeholder', k === 'essay' ? 'Paste the link to the essay' : 'Search a title, or paste a link');
       if (k === 'essay') setStatus('done');
+      try { localStorage.setItem('addKind', k); } catch (e) {}
     };
     const setStatus = (s: string) => { root.dataset.st = s; root.querySelectorAll('#status [data-st]').forEach((b) => b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.st === s))); };
     const paintStars = () => {
@@ -253,19 +272,28 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
       $('#tchips').innerHTML = threads.map((t) => `<button type="button" class="chip" data-t="${esc(t.slug)}" aria-pressed="${picked.has(t.slug)}">${picked.has(t.slug) ? '✓ ' : ''}${esc(t.title)}</button>`).join('');
     };
     const paintNow = () => {
-      $('#nowlist').innerHTML = now.length ? `<span class="eyebrow">Finish something from Now</span>` + now.map((n) =>
-        `<button type="button" class="card nowrow" data-now="${esc(n.slug)}"><span class="wash sw" style="background:${n.bg}"></span><span class="stack grow" style="gap:3px"><span class="serif" style="font-size:16px">${esc(n.title)}</span><span class="muted small">${n.type === 'book' ? 'Reading' : 'Watching'}${n.type === 'book' ? ' · ' + n.progress + '%' : ''}</span></span><span class="chip" style="height:32px">Update</span></button>`).join('') : '';
+      $('#nowlist').innerHTML = now.length ? `<span class="eyebrow">Update something you’re on</span>` + now.map((n) =>
+        `<button type="button" class="card nowrow" data-now="${esc(n.slug)}"><span class="wash sw" style="background:${n.bg}"></span><span class="stack grow" style="gap:3px"><span class="serif" style="font-size:16px">${esc(n.title)}</span><span class="muted small">${n.type === 'book' ? 'Reading · ' + (n.page ? 'page ' + n.page + (n.pages ? ' of ' + n.pages : '') : n.pct + '%') : 'Watching'}</span></span><span class="chip" style="height:32px">Update</span></button>`).join('') : '';
     };
 
+    // pages: "38% · about 3 hours left at your pace"
+    const paintPages = () => {
+      const p = +F('page').value || 0, t = +F('ptotal').value || 0;
+      if (!p) { $('#pv').textContent = t ? 'Type the page you are on.' : 'Type the page you are on, and the total if you know it.'; return; }
+      if (!t) { $('#pv').textContent = `Page ${p}.`; return; }
+      const left = Math.max(0, Math.round((t - Math.min(p, t)) * MPP)), h = Math.floor(left / 60), m = left % 60;
+      $('#pv').textContent = p >= t ? 'That is the last page. Mark it finished?' : `${Math.round((p / t) * 100)}% · about ${h ? h + 'h ' : ''}${m}m left at your pace`;
+    };
     const reset = (k = kind) => {
       form.reset(); rating = 0; loved = false; priv = false; picked = new Set(); updating = null;
       F('date').value = today(); F('cover').value = ''; $('#from').hidden = true; $('#saveerr').hidden = true;
       $('#loved').setAttribute('aria-pressed', 'false');
       $('#priv').setAttribute('aria-pressed', 'false'); $('#priv').textContent = 'Everyone can see this';
       root.querySelectorAll<HTMLElement>('#entry input, #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((el) => (el.style.display = ''));
+      $('#tchips').parentElement!.style.display = '';
       $('#savebtn').textContent = 'Save to library';
       F('title').required = true; F('creator').required = true;
-      setKind(k); setStatus('done'); paintStars(); paintThreads(); paintCover(); $('#pv').textContent = '0';
+      setKind(k); setStatus('done'); paintStars(); paintThreads(); paintCover(); paintPages();
     };
     const fill = (h: any) => {
       reset(h.type);
@@ -278,10 +306,10 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
     fetch('/api/me', { cache: 'no-store' }).then((r) => r.json()).then((me) => {
       if (!me.ready) { const s = $('#setup'); s.hidden = false; s.textContent = `Adding isn’t switched on yet. In Vercel, add: ${me.missing.join(', ')}.`; }
       $('#signout').hidden = !me.owner;
-      reset('book'); paintNow();
+      reset(lastKind); paintNow();
       go(me.owner ? 'find' : 'signin');
     }).catch(() => {
-      reset('book'); go('signin');
+      reset(lastKind); go('signin');
       const s = $('#setup'); s.hidden = false; s.textContent = 'Adding only works on the live site, not in preview.';
     });
 
@@ -332,6 +360,10 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
       if (hit) { fill((root as any)._hits[+hit.dataset.hit!]); return; }
       const g = el.closest<HTMLElement>('[data-go]');
       if (g) { if (g.dataset.go === 'manual') { reset(kind); go('form'); F('title').focus(); } else { $<HTMLInputElement>('#q').value = ''; $('#hits').innerHTML = ''; go(g.dataset.go!); } return; }
+      const ap = el.closest<HTMLElement>('[data-addp]');
+      if (ap) { const t = +F('ptotal').value || Infinity; F('page').value = String(Math.min(t, (+F('page').value || 0) + +ap.dataset.addp!)); paintPages(); return; }
+      const dy = el.closest<HTMLElement>('[data-day]');
+      if (dy) { F('date').value = today(+dy.dataset.day!); return; }
       const st = el.closest<HTMLElement>('#status [data-st]');
       if (st) { setStatus(st.dataset.st!); return; }
       const s = el.closest<HTMLElement>('#stars [data-n]');
@@ -346,16 +378,19 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
         reset(n.type); updating = n;
         F('title').value = n.title; paintCover();
         F('title').required = false; F('creator').required = false;
-        // only status, progress, rating, note and date matter when updating
+        // only status, page, rating, note and date matter when updating
         root.querySelectorAll<HTMLElement>('#entry [name=title], #entry [name=creator], #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((x) => (x.style.display = 'none'));
+        $('#tchips').parentElement!.style.display = 'none';
         (F('title').parentElement!.querySelector('.eyebrow') as HTMLElement).textContent = n.title;
-        F('progress').value = String(n.progress); $('#pv').textContent = String(n.progress);
+        F('page').value = n.page ? String(n.page) : ''; F('ptotal').value = n.pages ? String(n.pages) : ''; setStatus(n.type === 'book' ? 'progress' : 'done'); paintPages();
         $('#savebtn').textContent = 'Save';
         go('form');
       }
     });
     F('title').addEventListener('input', paintCover);
-    F('progress').addEventListener('input', () => ($('#pv').textContent = F('progress').value));
+    F('page').addEventListener('input', paintPages);
+    F('ptotal').addEventListener('input', () => { F('pages').value = F('ptotal').value; paintPages(); });
+    F('pages').addEventListener('input', () => { F('ptotal').value = F('pages').value; paintPages(); });
 
     // ——— saving ———
     form.addEventListener('submit', async (ev) => {
@@ -365,11 +400,11 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
       const done = root.dataset.st === 'done';
       const v = (n: string) => (F(n)?.value ?? '').trim();
       const body = updating
-        ? { action: 'update', slug: updating.slug, status: done ? 'done' : 'progress', progress: +v('progress'), rating: done ? rating : undefined, note: v('note'), date: v('date') }
+        ? { action: 'update', slug: updating.slug, status: done ? 'done' : 'progress', page: v('page'), pages: v('ptotal'), rating: done ? rating : undefined, note: v('note'), date: v('date') }
         : {
-            type: kind, title: v('title'), creator: v('creator'), year: v('year'), pages: v('pages'), runtime: v('runtime'), words: v('words'),
+            type: kind, title: v('title'), creator: v('creator'), year: v('year'), pages: v('pages') || v('ptotal'), runtime: v('runtime'), words: v('words'),
             link: v('link'), source: v('source'), cover: v('cover'), where: v('where'), times: v('times'), date: v('date'),
-            status: done ? 'done' : kind === 'book' ? 'reading' : 'watching', progress: +v('progress'),
+            status: done ? 'done' : kind === 'book' ? 'reading' : 'watching', page: v('page'),
             rating: done && kind !== 'essay' ? rating || undefined : undefined, loved: kind === 'essay' && loved,
             note: v('note'), quote: v('quote'), quoteMine: (F('quoteMine') as HTMLInputElement).checked,
             threads: [...picked], newThread: v('newThread'), private: priv,

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { isOwner, config, json, readFile, writeFile, listDir, slugify, setFrontmatter } from '../../lib/server';
+import { getTrivia } from '../../lib/trivia.mjs';
 export const prerender = false;
 
 const LIB = 'src/content/library';
@@ -36,8 +37,13 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       const f = await readFile(path);
       if (!f) return json({ error: 'Couldn’t find that entry.' }, 404);
       const values: Record<string, unknown> = {};
-      if (b.status === 'done') Object.assign(values, { status: 'done', progress: null, date: str(b.date) ?? new Date().toISOString().slice(0, 10) });
-      if (num(b.progress) !== undefined && b.status !== 'done') values.progress = Math.max(0, Math.min(100, Math.round(num(b.progress)!)));
+      if (b.status === 'done') Object.assign(values, { status: 'done', progress: null, page: null, date: str(b.date) ?? new Date().toISOString().slice(0, 10) });
+      if (num(b.pages) && b.status !== 'done') values.pages = Math.round(num(b.pages)!);
+      if (num(b.page) !== undefined && b.status !== 'done') {
+        const total = num(b.pages) ?? num((f.text.match(/^pages:\s*(\d+)/m) ?? [])[1]);
+        values.page = Math.max(0, Math.round(total ? Math.min(num(b.page)!, total) : num(b.page)!));
+        values.progress = null;
+      }
       if (num(b.rating)) values.rating = num(b.rating);
       let text = setFrontmatter(f.text, values);
       const note = str(b.note, 4000);
@@ -55,7 +61,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     const fm: Record<string, unknown> = {
       title, type, creator, year: num(b.year), date, status: status === 'done' ? undefined : status,
-      progress: status === 'reading' ? num(b.progress) ?? 0 : undefined,
+      page: status === 'reading' ? num(b.page) ?? 0 : undefined,
       rating: type === 'essay' ? undefined : status === 'done' ? num(b.rating) : undefined,
       loved: type === 'essay' && b.loved ? true : undefined,
       runtime: type === 'film' ? num(b.runtime) : undefined,
@@ -69,6 +75,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       private: b.private ? true : undefined,
     };
     const lines = Object.entries(fm).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}: ${JSON.stringify(v)}`);
+    // "Behind the film / book": a few facts from Wikipedia, picked by a free AI model. Skipped quietly if it fails.
+    if (type !== 'essay') {
+      const c = config();
+      const t = await getTrivia({ title, year: num(b.year), type, creator }, { gemini: c.gemini, geminiModel: c.geminiModel, groq: c.groq, groqModel: c.groqModel });
+      if (t) lines.push('trivia:', ...t.trivia.map((f) => `  - ${JSON.stringify(f)}`), `triviaSource: ${JSON.stringify(t.source)}`);
+    }
     const quote = str(b.quote, 1000);
     if (quote) lines.push('highlights:', `  - text: ${JSON.stringify(quote)}`, ...(b.quoteMine ? ['    mine: true'] : []));
     const note = str(b.note, 8000) ?? '';

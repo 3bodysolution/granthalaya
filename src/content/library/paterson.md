@@ -13,6 +13,11 @@ highlights:
   - text: "Some films are less a story and more a place to go back to."
     where: "fourth rewatch"
     mine: true
+trivia:
+  - "The film won the Palm Dog Award at the 2016 Cannes Film Festival."
+  - "Adam Driver obtained his commercial bus driver's license for the film."
+  - "Real-life poet Ron Padgett provided the poems written by the character Paterson. Director Jim Jarmusch wrote another poem for a young girl in the film."
+triviaSource: "https://en.wikipedia.org/wiki/Paterson_(film)"
 ---
 
 Fourth rewatch. Some films are less a story and more a place to go back to.

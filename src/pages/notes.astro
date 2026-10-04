@@ -6,14 +6,14 @@ import { getEntries, href, kind, typeColor } from '../lib/data';
 
 const all = await getEntries();
 const notes = all.flatMap((e) => e.data.highlights.map((h) => ({ e, h })));
-const q = site.lineOfTheWeek;
+const q = site.owner.lineOfTheWeek;
 const mineCount = notes.filter((n) => n.h.mine).length;
 ---
-<Base title="Notes" active="notes" description="Lines I underlined, and what I thought about them.">
+<Base title="Notes" active="notes" description="Lines I underlined in books and films, with my notes.">
   <section class="pad head">
     <div class="rise stack" style="gap: 10px">
       <p class="eyebrow" style="color: var(--lat)">Notes</p>
-      <h1 class="title">Lines I underlined, <em>and what I thought.</em></h1>
+      <h1 class="title">Lines I underlined</h1>
     </div>
     <div class="seg rise d1" role="tablist" aria-label="Filter notes" id="nf">
       <button role="tab" aria-selected="true" data-f="all">All</button>
@@ -33,10 +33,10 @@ const mineCount = notes.filter((n) => n.h.mine).length;
   <section class="pad" style="padding-top: 36px">
     <div class="grid" id="notes">
       {notes.map(({ e, h }, i) => (
-        <article class="card lift rise nc" data-kind={h.mine ? 'mine' : 'quote'} style={`animation-delay: ${(0.3 + Math.min(i, 8) * 0.06).toFixed(2)}s`}>
+        <article class="card rise nc" data-kind={h.mine ? 'mine' : 'quote'} style={`animation-delay: ${(0.3 + Math.min(i, 8) * 0.06).toFixed(2)}s`}>
           <div class="ntop">
             <span class="eyebrow" style={`font-size: 11px; color: ${h.mine ? 'var(--moss)' : typeColor(e.data.type)}`}>{h.mine ? `My line · ${kind(e)}` : 'Highlight'}</span>
-            <button class="mini" data-copy={`“${h.text}” — ${h.mine ? site.owner : e.data.creator}, ${e.data.title}`} aria-label="Copy this line">
+            <button class="mini" data-copy={`“${h.text}” (${h.mine ? site.owner.name : e.data.creator}, ${e.data.title})`} aria-label="Copy this line">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
             </button>
           </div>
@@ -59,10 +59,10 @@ const mineCount = notes.filter((n) => n.h.mine).length;
   .lotw > * { position: relative; z-index: 1; }
   /* the quote sits on the quiet wall between the window and the shelf */
   .lotw > * { max-width: 540px; }
-  .lk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #8E3B1F; }
+  .lk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #0B5552; }
   blockquote { margin: 0; font-size: clamp(24px, 3vw, 34px); line-height: 1.3; font-style: italic; color: #2A211B; text-shadow: 0 1px 14px rgba(255, 240, 220, .7); }
   figcaption { font-size: 14px; color: #4A3C30; }
-  :global(html[data-theme="dark"]) .lk { color: #F2C46B; }
+  :global(html[data-theme="dark"]) .lk { color: #8FDCD2; }
   :global(html[data-theme="dark"]) blockquote { color: #F6EEDF; text-shadow: 0 2px 14px rgba(8, 14, 32, .7); }
   :global(html[data-theme="dark"]) figcaption { color: #DCD3C2; }
   .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
@@ -70,7 +70,10 @@ const mineCount = notes.filter((n) => n.h.mine).length;
   .ntop { display: flex; justify-content: space-between; align-items: flex-start; }
   .mini { width: 36px; height: 36px; border-radius: 18px; border: 1px solid var(--line); background: transparent; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; transition: opacity .3s ease, border-color .3s ease, color .3s ease; }
   .nc:hover .mini, .mini:focus-visible { opacity: 1; }
-  .mini:hover, .mini:global(.copied) { border-color: var(--lat); color: var(--lat); opacity: 1; }
+  .mini:hover { border-color: var(--lat); color: var(--lat); opacity: 1; }
+  .mini:global(.copied) { border-color: var(--moss); color: var(--moss); opacity: 1; }
+  .nc { transition: box-shadow .4s ease; }
+  .nc:hover { box-shadow: 0 18px 30px -18px var(--shadow); }
   @media (hover: none) { .mini { opacity: 1; } }
   .nt { margin: 0; font-size: 20px; line-height: 1.45; font-style: italic; }
   .src { margin-top: auto; display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }

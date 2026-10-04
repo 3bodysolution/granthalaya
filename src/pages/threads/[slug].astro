@@ -31,7 +31,7 @@ const others = threads.filter((t) => t.id !== thread.id).slice(0, 3);
       {fan[0] && <div class="wash f m" style={`background: ${fan[0].bg}`}><i style={`background: ${fan[0].accent}`}></i><b style={`background: ${fan[0].hill}`}></b></div>}
     </div>
     <p class="eyebrow rise d2" style="color: var(--lat)">A thread</p>
-    <h1 class="serif rise d3 tt">{first}{rest.length > 0 && <> <em>{rest.join(' ')}</em></>}</h1>
+    <h1 class="serif rise d3 tt">{thread.data.title}</h1>
     <div class="serif rise d4 intro"><Content /></div>
     <div class="rise d4 row">
       <span class="num muted" style="font-size: 14px">{meta}</span>

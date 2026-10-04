@@ -1,6 +1,7 @@
 // Server-only helpers for the Add screen. Nothing here is sent to the browser.
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { AstroCookies } from 'astro';
+import { site } from '../data/site';
 
 const env = (k: string) => (process.env[k] ?? (import.meta.env as any)[k] ?? '') as string;
 
@@ -11,6 +12,10 @@ export const config = () => ({
   branch: env('GITHUB_BRANCH') || 'main',
   secret: env('SESSION_SECRET') || env('ADMIN_PASSWORD'),
   tmdb: env('TMDB_API_KEY'),
+  gemini: env('GEMINI_API_KEY'),
+  geminiModel: env('GEMINI_MODEL'),
+  groq: env('GROQ_API_KEY'),
+  groqModel: env('GROQ_MODEL'),
 });
 
 export const json = (data: unknown, status = 200) =>
@@ -27,22 +32,35 @@ export function checkPassword(p: string) {
   const want = config().password;
   return !!want && same(sign('pw:' + p), sign('pw:' + want));
 }
-export function startSession(cookies: AstroCookies) {
+// The session remembers WHO signed in ("sarthak"), not just "the owner".
+// Today there's one person and one password; when friends join, sign-in finds their id
+// and everything else (saving, editing) already works per person.
+export function startSession(cookies: AstroCookies, user = site.owner.id) {
   const exp = String(Date.now() + 1000 * 60 * 60 * 24 * 90); // 90 days
   const opts = { path: '/', sameSite: 'lax' as const, secure: true, maxAge: 60 * 60 * 24 * 90 };
-  cookies.set(COOKIE, `${exp}.${sign(exp)}`, { ...opts, httpOnly: true });
+  const body = `${user}.${exp}`;
+  cookies.set(COOKIE, `${body}.${sign(body)}`, { ...opts, httpOnly: true });
   cookies.set('g_owner', '1', opts); // only a hint for showing the Add button
 }
 export function endSession(cookies: AstroCookies) {
   cookies.delete(COOKIE, { path: '/' });
   cookies.delete('g_owner', { path: '/' });
 }
-export function isOwner(cookies: AstroCookies) {
+/** who is signed in, or null */
+export function currentUser(cookies: AstroCookies): string | null {
   const v = cookies.get(COOKIE)?.value;
-  if (!v || !config().secret) return false;
-  const [exp, sig] = v.split('.');
-  return !!exp && !!sig && same(sig, sign(exp)) && +exp > Date.now();
+  if (!v || !config().secret) return null;
+  const parts = v.split('.');
+  if (parts.length === 2) { // sessions from before people had ids: they belong to the owner
+    const [exp, sig] = parts;
+    return same(sig, sign(exp)) && +exp > Date.now() ? site.owner.id : null;
+  }
+  const [user, exp, sig] = parts;
+  return user && exp && sig && same(sig, sign(`${user}.${exp}`)) && +exp > Date.now() ? user : null;
 }
+/** can this person change this shelf? (today: only the owner, on the owner's shelf) */
+export const canEdit = (cookies: AstroCookies, shelf = site.owner.id) => currentUser(cookies) === shelf;
+export const isOwner = (cookies: AstroCookies) => canEdit(cookies);
 
 /* ——— GitHub ——— */
 async function gh(path: string, init: RequestInit = {}) {

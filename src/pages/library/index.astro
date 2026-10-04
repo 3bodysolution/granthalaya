@@ -53,7 +53,7 @@ const tabs = [
                 <span class="serif lt">{e.data.title}</span>
                 <span class="muted ell">{e.data.creator}</span>
                 <span class="lk" style={`color: ${typeColor(e.data.type)}`}>{kind(e)}</span>
-                <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || '—'}</span>
+                <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || '·'}</span>
                 <span class="num muted" style="text-align: right">{short(e.data.date)}</span>
               </a>
             ))}

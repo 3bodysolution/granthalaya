@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Cover from '../../components/Cover.astro';
 import {
   getEntries, getThreads, href, palette, coverSrc, radius, stars, starsLabel, long, ticketDate, timesWord,
-  minutes, duration, kind, threadsFor, excerpt, type Entry,
+  minutes, duration, kind, threadsFor, excerpt, whereAt, type Entry,
 } from '../../lib/data';
 
 export async function getStaticPaths() {
@@ -40,7 +40,7 @@ const q = encodeURIComponent(d.title + (d.type === 'book' ? ' ' + d.creator : ''
 const findOn = d.type === 'film'
   ? [{ label: 'Letterboxd', url: `https://letterboxd.com/search/films/${encodeURIComponent(d.title)}/` }, { label: 'IMDb', url: `https://www.imdb.com/find/?q=${encodeURIComponent(d.title + ' ' + (d.year ?? ''))}` }]
   : [{ label: 'Goodreads', url: `https://www.goodreads.com/search?q=${q}` }, { label: 'Open Library', url: `https://openlibrary.org/search?q=${q}` }];
-if (d.link && d.type !== 'essay') findOn.unshift({ label: new URL(d.link).hostname.replace('www.', ''), url: d.link });
+if (d.link && d.type !== 'essay' && !/themoviedb\.org|openlibrary\.org/.test(d.link)) findOn.unshift({ label: new URL(d.link).hostname.replace('www.', ''), url: d.link });
 
 const s = stars(entry);
 const mins = minutes(entry);
@@ -95,14 +95,19 @@ const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
           <div class="stats rise d4 num">
             <div class="stat"><span class="eyebrow">{inProgress ? 'Status' : 'My rating'}</span>
               {inProgress
-                ? <b>{d.type === 'book' ? `Reading · ${d.progress ?? 0}%` : 'Watching'}</b>
-                : <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s || '—'}</span>}
+                ? <b>{d.type === 'book' ? `Reading · ${whereAt(entry)}` : 'Watching'}</b>
+                : <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s || 'Not rated'}</span>}
             </div>
             <div class="stat"><span class="eyebrow">{d.type === 'film' ? 'Watched' : inProgress ? 'Started' : 'Finished'}</span><b>{long(d.date)}</b></div>
             <div class="stat"><span class="eyebrow">{d.type === 'film' ? 'Runtime' : 'Reading time'}</span><b>{d.type === 'film' ? duration(mins) : `≈ ${duration(d.type === 'book' && inProgress ? Math.round((d.pages ?? 250) * 1.1) : mins)}`}</b></div>
             <div class="stat"><span class="eyebrow">{d.type === 'film' ? 'Times seen' : 'Times read'}</span><b>{timesWord(d.times, d.type === 'film' ? 'watch' : 'read')}</b></div>
           </div>
-          <div class="note rise d5"><Content /></div>
+          {entry.body?.trim() && (
+            <div class="mynotes rise d5">
+              <p class="eyebrow">My notes</p>
+              <div class="note"><Content /></div>
+            </div>
+          )}
           {inThreads.length > 0 && (
             <div class="chips rise d6">
               <span class="eyebrow" style="margin-right: 4px">In threads</span>
@@ -115,7 +120,7 @@ const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
 
       {d.highlights.length > 0 && (
         <section class="pad block rise d6">
-          <div class="rule"><h2 class="eyebrow">{d.highlights.every((h) => h.mine) ? 'Lines I wrote after' : 'My highlights'}</h2><a href="/notes/" class="more">All in Notes →</a></div>
+          <div class="rule"><h2 class="eyebrow">{d.highlights.every((h) => h.mine) ? 'Lines I wrote' : 'Lines I underlined'}</h2><a href="/notes/" class="more">All in Notes →</a></div>
           <div class="hl">
             {d.highlights.map((h) => (
               <article class="card lift hlc">
@@ -125,6 +130,20 @@ const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
               </article>
             ))}
           </div>
+        </section>
+      )}
+
+      {d.trivia.length > 0 && (
+        <section class="pad block rise d6">
+          <div class="rule">
+            <h2 class="eyebrow">{d.type === 'film' ? 'Behind the film' : 'Behind the book'}</h2>
+            {d.triviaSource && <a href={d.triviaSource} class="more" target="_blank" rel="noopener">From Wikipedia ↗</a>}
+          </div>
+          <ol class="trivia">
+            {d.trivia.map((t, i) => (
+              <li class="card"><span class="serif tn num">{String(i + 1).padStart(2, '0')}</span><p>{t}</p></li>
+            ))}
+          </ol>
         </section>
       )}
     </>
@@ -254,5 +273,13 @@ const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
     .note :global(p:first-child) { font-size: 20px; }
     .essay-page { padding-top: 36px; }
   }
+  .mynotes { display: flex; flex-direction: column; gap: 10px; }
+  .mynotes .eyebrow { color: var(--lat); margin: 0; }
+  .trivia { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .trivia li { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 10px; }
+  .trivia .tn { font-size: 28px; line-height: 1; color: var(--haldi); }
+  .trivia p { margin: 0; font-size: 15.5px; line-height: 1.6; }
+  @media (max-width: 1100px) { .trivia { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 780px) { .trivia { grid-template-columns: 1fr; } }
 </style>
 

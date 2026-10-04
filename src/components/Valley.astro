@@ -2,13 +2,13 @@
 // The footer: a painted Sahyadri valley, by day and by night.
 // The painting is shown exactly as painted. It's cut into four solid layers (sky, mesas, valley, near hill)
 // that slide a few pixels with the cursor, and a few small things move: the flag, a banyan leaf,
-// and the river. When it's raining in Pune, it rains here too.
+// and the river. When it's raining where the owner lives, it rains here too.
 import { site } from '../data/site';
 import overlay from '../data/valley.json';
-const line = site.lineOfTheWeek;
+const line = site.owner.lineOfTheWeek;
 const layers = [0, 1, 2, 3];
 ---
-<div class="valley" data-overlay={JSON.stringify(overlay)}>
+<div class="valley" data-overlay={JSON.stringify(overlay)} data-weather={JSON.stringify(site.owner.weather)}>
   <div class="frame">
     <div class="set skyL" data-set="day">
       {layers.map((k) => <img class="layer" data-k={k} src={`/img/valley-day-${k}.webp`} alt="" width="2172" height="629" loading="lazy" decoding="async" draggable="false" />)}
@@ -18,7 +18,7 @@ const layers = [0, 1, 2, 3];
     </div>
     <canvas class="fx" aria-hidden="true"></canvas>
     <button class="shepherd" type="button" aria-label="The shepherd has something to say"
-            data-line={`“${line.text}” — ${line.by}, ${line.source}`}></button>
+            data-line={`“${line.text}” (${line.by}, ${line.source})`}></button>
   </div>
   <div class="tip" aria-live="polite"></div>
 </div>
@@ -80,18 +80,19 @@ const layers = [0, 1, 2, 3];
     });
     document.addEventListener('pointerdown', (ev) => { if (!(ev.target as Element).closest?.('.shepherd')) tip.classList.remove('on'); });
 
-    /* ——— is it raining in Pune right now? ——— */
+    /* ——— is it raining at home right now? ——— */
     let rain: { x: number; y: number; l: number; s: number }[] = [];
     (async () => {
       let wet = new URLSearchParams(location.search).has('rain');
       try {
-        const cached = JSON.parse(sessionStorage.getItem('puneRain') || 'null');
+        const cached = JSON.parse(sessionStorage.getItem('rainNow') || 'null');
         if (cached && Date.now() - cached.t < 30 * 60 * 1000) wet ||= cached.wet;
         else {
-          const j = await fetch('https://api.open-meteo.com/v1/forecast?latitude=18.52&longitude=73.86&current=precipitation,weather_code').then((r) => r.json());
+          const wx = JSON.parse(root.dataset.weather || '{"lat":18.52,"lon":73.86}');
+          const j = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${wx.lat}&longitude=${wx.lon}&current=precipitation,weather_code`).then((r) => r.json());
           const code = j.current?.weather_code ?? 0, mm = j.current?.precipitation ?? 0;
           const now = mm > 0.05 || (code >= 51 && code <= 67) || (code >= 80 && code <= 99);
-          sessionStorage.setItem('puneRain', JSON.stringify({ t: Date.now(), wet: now })); wet ||= now;
+          sessionStorage.setItem('rainNow', JSON.stringify({ t: Date.now(), wet: now })); wet ||= now;
         }
       } catch {}
       if (wet && !reduce) { rain = Array.from({ length: 150 }, () => ({ x: Math.random() * IW, y: Math.random() * IH, l: 12 + Math.random() * 14, s: 0.9 + Math.random() * 0.6 })); kick(); }
@@ -145,7 +146,7 @@ const layers = [0, 1, 2, 3];
         ctx.restore();
         if (leaf.y > 560) leaf = null;
       }
-      // monsoon rain, when it's raining in Pune
+      // monsoon rain, when it's raining at home
       if (rain.length) {
         ctx.strokeStyle = night ? 'rgba(205,216,236,.26)' : 'rgba(80,100,124,.3)'; ctx.lineWidth = 1.2; ctx.beginPath();
         for (const d of rain) { d.y += d.s * dt; d.x -= d.s * dt * 0.16; if (d.y > IH) { d.y = -20; d.x = Math.random() * (IW + 100); } ctx.moveTo(d.x, d.y); ctx.lineTo(d.x + d.l * 0.16, d.y - d.l); }

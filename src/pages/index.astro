@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import Cover from '../components/Cover.astro';
 import Tile from '../components/Tile.astro';
 import { site } from '../data/site';
-import { getEntries, href, short, kind, remaining, duration, excerpt } from '../lib/data';
+import { getEntries, href, short, kind, remaining, duration, excerpt, percent, whereAt } from '../lib/data';
 
 const all = await getEntries();
 const latest = all[0];
@@ -13,14 +13,14 @@ const recent = all.filter((e) => e.data.status === 'done').slice(0, 6);
 const start = all.filter((e) => e.data.startHere).sort((a, b) => a.data.startHere! - b.data.startHere!).slice(0, 5);
 const otd = all.filter((e) => e.data.status === 'done').map((e) => ({ t: e.data.title, d: e.data.date.toISOString().slice(0, 10), h: href(e), v: e.data.type === 'film' ? 'watched' : 'finished' }));
 const hrefs = all.map(href);
-const quote = site.lineOfTheWeek;
+const quote = site.owner.lineOfTheWeek;
 ---
 <Base>
   <section class="hero bleed">
     <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
     <div class="pad words">
-      <p class="eyebrow rise">{site.season}</p>
-      <h1 class="title rise d1">Everything I read, watch, and keep <em>coming back to.</em></h1>
+      <p class="eyebrow rise">{site.owner.season}</p>
+      <h1 class="title rise d1">Books, films and everything I’ve spent time with.</h1>
     </div>
   </section>
 
@@ -37,10 +37,10 @@ const quote = site.lineOfTheWeek;
             <p class="eyebrow" style="color: var(--lat)">Reading</p>
             <span class="serif nt">{reading.data.title}</span>
             <span class="small muted">{reading.data.creator}</span>
-            <div role="progressbar" aria-label="Reading progress" aria-valuenow={reading.data.progress ?? 0} aria-valuemin="0" aria-valuemax="100" class="bar">
-              <div class="growX" style={`animation-delay: 1s; width: ${reading.data.progress ?? 0}%`}></div>
+            <div role="progressbar" aria-label="Reading progress" aria-valuenow={percent(reading)} aria-valuemin="0" aria-valuemax="100" class="bar">
+              <div class="growX" style={`animation-delay: 1s; width: ${percent(reading)}%`}></div>
             </div>
-            <span class="num tiny muted">{reading.data.progress ?? 0}% · about {duration(remaining(reading), 'words')} left</span>
+            <span class="num tiny muted">{whereAt(reading)} · about {duration(remaining(reading), 'words')} left</span>
           </div>
         </a>
       )}
@@ -75,7 +75,7 @@ const quote = site.lineOfTheWeek;
       <div class="rule start-rule">
         <div class="stack" style="gap: 8px">
           <h2 class="eyebrow" style="color: var(--lat)">Start here</h2>
-          <p class="serif" style="margin: 0; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2">If you’re new, these {start.length === 5 ? 'five' : start.length} explain my taste better than I can.</p>
+          <p class="serif" style="margin: 0; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2">New here? Start with these {start.length === 5 ? 'five' : start.length}.</p>
         </div>
         <div class="inline" style="gap: 10px">
           <button class="btn" data-surprise={JSON.stringify(hrefs)}>
@@ -102,11 +102,11 @@ const quote = site.lineOfTheWeek;
   .hero .bg { position: absolute; inset: 0; background-position: center bottom; }
   .words { position: relative; padding-top: clamp(40px, 5.5vw, 84px); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
   .words .title { max-width: 820px; color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .55); }
-  .words .title em { color: #8E3B1F; }
-  .words .eyebrow { color: #7A3A1E; }
+  .words .title em { color: #0B5552; }
+  .words .eyebrow { color: #0B5552; }
   :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
-  :global(html[data-theme="dark"]) .words .title em { color: #F2C46B; }
-  :global(html[data-theme="dark"]) .words .eyebrow { color: #F2C46B; }
+  :global(html[data-theme="dark"]) .words .title em { color: #8FDCD2; }
+  :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
   .block { padding-top: 60px; display: flex; flex-direction: column; gap: 24px; }
   .inline { display: flex; align-items: baseline; gap: 14px; }
   .small { font-size: 13px; }

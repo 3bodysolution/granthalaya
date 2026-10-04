@@ -84,7 +84,7 @@ const busiest = [...threads].sort((a, b) => b.data.items.filter((i) => ids.has(i
 
 const booksDone = done.filter((e) => e.data.type === 'book').length;
 const kpis = [
-  { label: 'Books', value: booksDone, note: `of ${site.goal.target} this year`, color: 'var(--lat)' },
+  { label: 'Books', value: booksDone, note: `of ${site.owner.goal.target} this year`, color: 'var(--book)' },
   { label: 'Films', value: done.filter((e) => e.data.type === 'film').length + inYear.filter((e) => e.data.type === 'film' && e.data.status !== 'done').length, note: `${hours(T.film)} hours of cinema`, color: 'var(--sky)' },
   { label: 'Essays', value: done.filter((e) => e.data.type === 'essay').length, note: `${hours(T.essay) || '<1'} hour${hours(T.essay) === 1 ? '' : 's'} of reading`, color: 'var(--moss)' },
   { label: 'Days with a story', value: activeDays, note: `of ${daysSoFar} so far`, color: 'var(--haldi)' },
@@ -97,8 +97,8 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
   <section class="pad head">
     <div class="rise stack" style="gap: 10px">
       <p class="eyebrow" style="color: var(--lat)">Stats · {year}</p>
-      <h1 class="title"><span class="num">{hours(total)}</span> hours of stories, <em>{year === thisYear ? 'so far this year.' : `in ${year}.`}</em></h1>
-      <p class="lede">About {duration(perDay, 'words').replace(/ min$/, ' minutes')} a day. Counted automatically, nothing to log.</p>
+      <h1 class="title"><span class="num">{hours(total)}</span> hours {year === thisYear ? 'so far this year' : `in ${year}`}</h1>
+      <p class="lede">About {duration(perDay, 'words').replace(/ min$/, ' minutes')} a day. Worked out from runtimes, pages and word counts.</p>
     </div>
   </section>
 
@@ -114,14 +114,14 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
   </section>
 
   <section class="pad split">
-    <div class="between"><h2 class="eyebrow">Where the hours went</h2><span class="muted" style="font-size: 13px">Jan 1 – {label(endOfPeriod)}</span></div>
+    <div class="between"><h2 class="eyebrow">Where the hours went</h2><span class="muted" style="font-size: 13px">Jan 1 to {label(endOfPeriod)}</span></div>
     <div class="bar" role="img" aria-label={`Books ${hours(T.book)} hours, ${pct(T.book)} percent. Films ${hours(T.film)} hours, ${pct(T.film)} percent. Essays ${hours(T.essay)} hours, ${pct(T.essay)} percent.`}>
-      <div class="wash growX" style={`animation-delay: .6s; width: ${pct(T.book)}%; background: var(--lat)`}></div>
+      <div class="wash growX" style={`animation-delay: .6s; width: ${pct(T.book)}%; background: var(--book)`}></div>
       <div class="wash growX" style={`animation-delay: .8s; width: ${pct(T.film)}%; background: var(--sky)`}></div>
       <div class="wash growX" style={`animation-delay: 1s; width: ${Math.max(pct(T.essay), 1)}%; background: var(--moss)`}></div>
     </div>
     <div class="num keys">
-      <span class="key"><i style="background: var(--lat)"></i>Books · {hours(T.book)}h · {pct(T.book)}%</span>
+      <span class="key"><i style="background: var(--book)"></i>Books · {hours(T.book)}h · {pct(T.book)}%</span>
       <span class="key"><i style="background: var(--sky)"></i>Films · {hours(T.film)}h · {pct(T.film)}%</span>
       <span class="key"><i style="background: var(--moss)"></i>Essays · {hours(T.essay)}h · {pct(T.essay)}%</span>
     </div>
@@ -131,7 +131,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
     <div class="card shelfcard">
       <div class="between">
         <h2 class="eyebrow">{year} as a bookshelf</h2>
-        <div class="keys hide-sm"><span class="key" style="font-size: 13px"><i style="background: var(--lat)"></i>Books</span><span class="key" style="font-size: 13px"><i style="background: var(--sky)"></i>Films</span><span class="key" style="font-size: 13px"><i style="background: var(--moss)"></i>Essays</span></div>
+        <div class="keys hide-sm"><span class="key" style="font-size: 13px"><i style="background: var(--book)"></i>Books</span><span class="key" style="font-size: 13px"><i style="background: var(--sky)"></i>Films</span><span class="key" style="font-size: 13px"><i style="background: var(--moss)"></i>Essays</span></div>
       </div>
       <div class="scroller">
         <div class="bars" role="img" aria-label={`Hours per month in ${year}: ` + months.filter((m) => !m.future).map((m) => `${m.name} ${hours(m.sum)}`).join(', ')}>
@@ -142,7 +142,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
                 <div class="growY stackbar" style={`animation-delay: ${(0.3 + i * 0.06).toFixed(2)}s`}>
                   {m.essay > 0 && <div class="wash" style={`height: ${Math.max(3, (m.essay / maxMonth) * BAR)}px; background: var(--moss)`}></div>}
                   {m.film > 0 && <div class="wash" style={`height: ${(m.film / maxMonth) * BAR}px; background: var(--sky)`}></div>}
-                  {m.book > 0 && <div class="wash" style={`height: ${(m.book / maxMonth) * BAR}px; background: var(--lat)`}></div>}
+                  {m.book > 0 && <div class="wash" style={`height: ${(m.book / maxMonth) * BAR}px; background: var(--book)`}></div>}
                 </div>
               )}
             </div>
@@ -189,8 +189,8 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
 
   <section class="pad bottom">
     <div class="art recap" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)">
-      <div class="between"><span class="rk">Season recap</span><span style="font-size: 13px; color: #C9C2B4">Jun 1 – Sep 30</span></div>
-      <h3 class="serif">Monsoon <em>{year}</em></h3>
+      <div class="between"><span class="rk">Season recap</span><span style="font-size: 13px; color: #C9C2B4">Jun 1 to Sep 30</span></div>
+      <h3 class="serif">Monsoon {year}</h3>
       <div class="num three">
         <div class="stack"><span class="serif" style="font-size: 34px">{sc('book')}</span><span style="font-size: 12px; color: #C9C2B4">books</span></div>
         <div class="stack"><span class="serif" style="font-size: 34px">{sc('film')}</span><span style="font-size: 12px; color: #C9C2B4">films</span></div>
@@ -206,8 +206,8 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
       <div class="card how">
         <div class="between"><h2 class="eyebrow">Nothing to log</h2><span class="muted" style="font-size: 13px">Time is worked out for you</span></div>
         <div class="hr"><span class="key"><i style="background: var(--sky)"></i></span><span class="serif grow">Films</span><span class="muted">the runtime</span></div>
-        <div class="hr"><span class="key"><i style="background: var(--lat)"></i></span><span class="serif grow">Books</span><span class="muted">pages × {site.minutesPerPage} min</span></div>
-        <div class="hr last"><span class="key"><i style="background: var(--moss)"></i></span><span class="serif grow">Essays</span><span class="muted">words ÷ {site.wordsPerMinute} a minute</span></div>
+        <div class="hr"><span class="key"><i style="background: var(--book)"></i></span><span class="serif grow">Books</span><span class="muted">pages × {site.owner.minutesPerPage} min</span></div>
+        <div class="hr last"><span class="key"><i style="background: var(--moss)"></i></span><span class="serif grow">Essays</span><span class="muted">words ÷ {site.owner.wordsPerMinute} a minute</span></div>
       </div>
       <div class="stack">
         <h2 class="eyebrow" style="margin-bottom: 8px">Counted lately</h2>

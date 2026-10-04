@@ -14,4 +14,4 @@ items:
     why: "A love story told through a tiffin."
 ---
 
-Indian films — mostly Marathi — that don’t shout. If you only know Bollywood, start here.
+Indian films, mostly Marathi, that don’t shout. If you only know Bollywood, start here.

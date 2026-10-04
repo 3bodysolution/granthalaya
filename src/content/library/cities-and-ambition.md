@@ -10,4 +10,4 @@ words: 3700
 link: "https://paulgraham.com/cities.html"
 ---
 
-Every city is quietly telling you what to want. Made me wonder what Pune says — something about taking your time, I think.
+Every city is quietly telling you what to want. Made me wonder what Pune says. Something about taking your time, I think.

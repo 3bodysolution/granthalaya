@@ -7,7 +7,7 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://granthalaya-sarthak.vercel.app',
   output: 'static',
-  adapter: vercel(),
+  adapter: vercel({ maxDuration: 30 }), // saving can take a few seconds while it fetches film facts
   trailingSlash: 'ignore',
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
 });

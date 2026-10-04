@@ -1,16 +1,17 @@
 /* ——— Granthalaya · shared styles ——— */
 
+/* accent: --lat is the site's accent colour (peacock teal); --book marks books, --sky films, --moss essays */
 :root { --spring: cubic-bezier(.2,.8,.2,1); --gut: 56px; --max: 1280px; }
 
 html[data-theme="light"] {
   --bg:#F8ECD6; --card:#FFFBF3; --ink:#1F1C18; --muted:#4F4942; --line:#E3D3BA; --soft:#EFE1CA;
-  --lat:#AE4520; --moss:#46702F; --sky:#285F8A; --haldi:#B8780A;
+  --lat:#0F6A66; --book:#6B4527; --moss:#46702F; --sky:#285F8A; --haldi:#B8780A;
   --shadow:rgba(120,70,30,.22); --scrim:rgba(31,28,24,.38);
   color-scheme: light;
 }
 html[data-theme="dark"] {
   --bg:#15171B; --card:#1F2227; --ink:#ECE5D6; --muted:#A39D92; --line:#2D3036; --soft:#24272D;
-  --lat:#E3875A; --moss:#9AB685; --sky:#8FB1CC; --haldi:#E7B24C;
+  --lat:#6CC9BF; --book:#D8AE84; --moss:#9AB685; --sky:#8FB1CC; --haldi:#E7B24C;
   --shadow:rgba(0,0,0,.5); --scrim:rgba(0,0,0,.55);
   color-scheme: dark;
 }
@@ -92,7 +93,7 @@ html[data-theme="dark"] .theme-moon { display: none; }
 .foot-in { width: 100%; max-width: var(--max); display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 13px; color: #EFE8DA; text-shadow: 0 1px 6px rgba(0,0,0,.45); pointer-events: auto; }
 .foot nav { display: flex; gap: 24px; }
 .foot a { color: #F6F0E4; }
-.foot a:hover { color: #F2C46B; }
+.foot a:hover { color: #8FDCD2; }
 
 /* day and night versions of the footer painting */
 html[data-theme="dark"] .skyL, html[data-theme="light"] .skyD { display: none !important; }

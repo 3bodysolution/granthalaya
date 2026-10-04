@@ -1,6 +1,6 @@
 # Granthalaya
 
-A personal library of books, films and essays, painted in Pune. It's built with [Astro](https://astro.build) and hosted free on Vercel.
+A personal library of books, films and essays, in hand-painted scenes. It's built with [Astro](https://astro.build) and hosted free on Vercel.
 
 ## Adding from the site (the easy way)
 
@@ -101,6 +101,18 @@ Books and films show their real cover or poster when there is one, and a painted
 - **To fetch covers for everything else,** ask Claude Code to run `npm run covers`. It saves them in `public/covers/`. Film posters need a free TMDB key in a `.env` file (`TMDB_API_KEY=...`); without one, films keep their painted covers.
 - **Wrong cover?** Put your own image at `public/covers/<file name>.jpg`, or add `cover: painted` to that entry to keep the painted one.
 - **Painted covers everywhere:** set `covers: 'painted'` in `src/data/site.ts`.
+
+## Reading progress
+
+When you're partway through a book, the site keeps the page you're on (`page: 142`) next to the total (`pages: 320`) and works out the percent and time left. On the Add screen, tap **Update** next to the book and use the +10, +25 or +50 buttons.
+
+## Behind the film
+
+Films and books get a "Behind the film" (or "Behind the book") box with 3 short facts from their Wikipedia page, picked by a free AI model.
+
+- **New things you add from the site** get facts automatically about a minute after saving, once `GEMINI_API_KEY` is set in Vercel (free key from aistudio.google.com).
+- **Older entries:** put the same key in `.env` (`GEMINI_API_KEY=...`) and ask Claude Code to run `npm run trivia`. Add `-- --dry` to only preview.
+- **Edit them by hand** any time: they're the `trivia:` list in the entry, with `triviaSource:` for the link. Delete the list to hide the box.
 
 ## Threads
 

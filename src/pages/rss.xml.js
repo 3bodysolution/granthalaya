@@ -1,10 +1,9 @@
 import rss from '@astrojs/rss';
-import { getCollection } from 'astro:content';
+import { getEntries } from '../lib/data';
 import { site } from '../data/site';
 
 export async function GET(context) {
-  const all = (await getCollection('library', (e) => !e.data.private))
-    .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  const all = await getEntries();
   const verb = { book: 'Read', film: 'Watched', essay: 'Saved' };
   return rss({
     title: site.name,

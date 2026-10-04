@@ -12,7 +12,8 @@ const library = defineCollection({
     year: z.number().optional(),               // year it came out
     date: z.coerce.date(),                     // when you finished / watched / read it
     status: z.enum(['done', 'reading', 'watching']).default('done'),
-    progress: z.number().min(0).max(100).optional(), // for things in progress
+    page: z.number().optional(),               // books in progress: the page you're on
+    progress: z.number().min(0).max(100).optional(), // older entries: percent read (page is used instead now)
     rating: z.number().min(0).max(5).optional(),     // 0–5, halves allowed (4.5)
     loved: z.boolean().default(false),         // for essays: a heart instead of stars
     runtime: z.number().optional(),            // films: minutes
@@ -28,6 +29,8 @@ const library = defineCollection({
     startHere: z.number().optional(),          // 1–5: shows in "Start here" on the home page
     startWhy: z.string().optional(),           // one line for "Start here"
     tags: z.array(z.string()).default([]),
+    trivia: z.array(z.string()).default([]),   // films and books: a few short facts for "Behind the film"
+    triviaSource: z.string().url().optional(), // where the facts came from (usually Wikipedia)
     highlights: z.array(z.object({
       text: z.string(),
       where: z.string().optional(),            // chapter, page, timestamp

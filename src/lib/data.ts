@@ -6,10 +6,18 @@ import { site } from '../data/site';
 export type Entry = CollectionEntry<'library'>;
 export type Thread = CollectionEntry<'threads'>;
 
-/* ——— loading ——— */
+/* ——— loading ———
+   Every page reads the library through these functions and nothing else.
+   Today they read markdown files; when friends join, only this section changes to read a database
+   (and takes whose shelf to load). Keep it that way: never call getCollection from a page. */
+const newestFirst = (a: Entry, b: Entry) => b.data.date.getTime() - a.data.date.getTime();
+/** everything that's public, newest first */
 export async function getEntries(): Promise<Entry[]> {
-  const all = await getCollection('library', (e) => !e.data.private);
-  return all.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  return (await getCollection('library', (e) => !e.data.private)).sort(newestFirst);
+}
+/** everything, including private entries (only for the owner's own screens, like Add) */
+export async function getAllEntries(): Promise<Entry[]> {
+  return (await getCollection('library')).sort(newestFirst);
 }
 export async function getThreads(): Promise<Thread[]> {
   const all = await getCollection('threads');
@@ -62,7 +70,7 @@ export const radius = (e: Entry) => (e.data.type === 'book' ? '2px 6px 6px 2px' 
 
 /* ——— words ——— */
 export const kind = (e: Entry) => ({ book: 'Book', film: 'Film', essay: 'Essay' })[e.data.type];
-export const typeColor = (t: Entry['data']['type']) => ({ book: 'var(--lat)', film: 'var(--sky)', essay: 'var(--moss)' })[t];
+export const typeColor = (t: Entry['data']['type']) => ({ book: 'var(--book)', film: 'var(--sky)', essay: 'var(--moss)' })[t];
 
 export function stars(e: Entry) {
   if (e.data.type === 'essay' && e.data.loved) return '♥ Loved';
@@ -88,14 +96,26 @@ export const timesWord = (n: number, verb: 'read' | 'watch') =>
 export function minutes(e: Entry) {
   const d = e.data;
   if (d.type === 'film') return d.runtime ?? 110;
-  if (d.type === 'essay') return Math.max(3, Math.round((d.words ?? 2500) / site.wordsPerMinute));
+  if (d.type === 'essay') return Math.max(3, Math.round((d.words ?? 2500) / site.owner.wordsPerMinute));
   const pages = d.pages ?? 250;
-  const share = d.status === 'reading' ? (d.progress ?? 0) / 100 : 1;
-  return Math.round(pages * site.minutesPerPage * share);
+  const share = d.status === 'reading' ? percent(e) / 100 : 1;
+  return Math.round(pages * site.owner.minutesPerPage * share);
+}
+/** how far through a book you are, 0 to 100: from the page you're on, or the old percent field */
+export function percent(e: Entry) {
+  const d = e.data;
+  if (d.page && d.pages) return Math.max(0, Math.min(100, Math.round((d.page / d.pages) * 100)));
+  return d.progress ?? 0;
+}
+/** "Page 142 of 320", or "62% read" for older entries without pages */
+export function whereAt(e: Entry) {
+  const d = e.data;
+  if (d.page) return d.pages ? `Page ${d.page} of ${d.pages}` : `Page ${d.page}`;
+  return `${d.progress ?? 0}% read`;
 }
 export function remaining(e: Entry) {
   if (e.data.type !== 'book' || e.data.status !== 'reading') return 0;
-  return Math.round((e.data.pages ?? 250) * site.minutesPerPage) - minutes(e);
+  return Math.round((e.data.pages ?? 250) * site.owner.minutesPerPage) - minutes(e);
 }
 export function duration(min: number, style: 'clock' | 'words' = 'clock') {
   const h = Math.floor(min / 60), m = Math.round(min % 60);

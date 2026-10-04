@@ -8,9 +8,8 @@ const threads = await getThreads();
 <Base title="Threads" active="threads" description="Hand-picked paths through the library.">
   <div class="art melt settle banner bleed" style="--day: url(/art/threads-day.webp); --night: url(/art/threads-night.webp)" aria-hidden="true"></div>
   <section class="pad head rise">
-    <p class="eyebrow" style="color: var(--lat)">Threads</p>
-    <h1 class="title">Paths through the library, <em>in a good order.</em></h1>
-    <p class="lede">Small collections that belong together — best taken one after another.</p>
+    <h1 class="title">Threads</h1>
+    <p class="lede">Books and films that go well together, in the order I’d take them.</p>
   </section>
   <section class="pad grid">
     {threads.map((t, i) => <div class="rise" style={`animation-delay: ${(0.15 + i * 0.08).toFixed(2)}s`}><ThreadCard thread={t} entries={entries} /></div>)}

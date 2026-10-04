@@ -1,6 +1,5 @@
 ---
 import Base from '../layouts/Base.astro';
-import Logo from '../components/Logo.astro';
 import { site } from '../data/site';
 import { getEntries } from '../lib/data';
 const all = await getEntries();
@@ -15,13 +14,16 @@ const swatches = [
 <Base title="About" active="about" description={`What ${site.name} is, and how it works.`}>
   <section class="pad cols">
   <div class="wrap">
-    <div class="rise mark"><Logo size={64} /></div>
+    <div class="rise mark" aria-hidden="true">
+      <img class="skyL" src="/img/mark-3d-day.webp" alt="" width="42" height="120" draggable="false" />
+      <img class="skyD" src="/img/mark-3d-night.webp" alt="" width="42" height="120" draggable="false" />
+    </div>
     <p class="eyebrow rise d1" style="color: var(--lat)">About</p>
-    <h1 class="title rise d2">A small library, <em>kept by hand.</em></h1>
+    <h1 class="title rise d2">About Granthalaya</h1>
     <div class="rise d3 prose">
-      <p class="serif first"><em>Granthalaya</em> (ग्रंथालय) is Marathi for library. This one holds everything I read, watch and keep coming back to — books, films and essays — with a few lines about each.</p>
-      <p>It’s painted in {site.city}: the laterite of old fort walls, the haldi of a monsoon evening, the green of the hills after rain. Covers are painted from each title, so nothing here is borrowed artwork.</p>
-      <p>Essays aren’t copied here. Each one links to the original, and this page only keeps why I saved it. Time spent is worked out on its own — runtime for films, pages for books, word count for essays — so there’s nothing to log.</p>
+      <p class="serif first"><em>Granthalaya</em> (ग्रंथालय) is Marathi for library. This one is mine: the books, films and essays I’ve spent time with, and a few lines about each.</p>
+      <p>The paintings use the colours of old fort walls, monsoon evenings and hills after rain. Book covers come from Open Library and film posters from TMDB. When there isn’t one, the site paints a cover from the title.</p>
+      <p>Essays aren’t copied here. Each one links to the original, and this page only keeps why I saved it. Time spent is worked out from runtimes, pages and word counts, so there’s nothing to log.</p>
       <p class="num muted">So far: {n('book')} books · {n('film')} films · {n('essay')} essays.</p>
     </div>
 
@@ -50,7 +52,8 @@ const swatches = [
   .wrap { display: flex; flex-direction: column; gap: 18px; }
   /* the writing desk, a tall painting beside the words */
   .desk { position: sticky; top: 96px; aspect-ratio: 2 / 3; border-radius: 18px; overflow: hidden; box-shadow: 0 24px 40px -24px var(--shadow); }
-  .mark { margin-bottom: 8px; }
+  .mark { margin-bottom: 8px; height: 120px; }
+  .mark img { height: 120px; width: auto; filter: drop-shadow(0 14px 16px var(--shadow)); }
   .prose { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
   .prose p { margin: 0; font-size: 17px; line-height: 1.7; }
   .prose .first { font-size: 23px; line-height: 1.55; }

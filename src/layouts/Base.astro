@@ -7,7 +7,7 @@ import '../styles/global.css';
 
 interface Props { title?: string; description?: string; active?: 'library' | 'notes' | 'threads' | 'stats' | 'about'; image?: string }
 const { title, description = site.description, active, image = '/img/og.jpg' } = Astro.props;
-const fullTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.owner}'s library`;
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · ${site.owner.name}’s library`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const nav = [
   { key: 'library', label: 'Library', href: '/library/' },
@@ -25,6 +25,7 @@ const nav = [
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="alternate" type="application/rss+xml" title={site.name} href="/rss.xml" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content={fullTitle} />
@@ -78,7 +79,7 @@ const nav = [
     <Valley />
     <footer class="foot">
       <div class="foot-in">
-        <span>{site.name} · made slowly, in {site.city}. Paintings © {site.owner}.</span>
+        <span>Made with ❤️ by {site.owner.name}</span>
         <nav aria-label="Footer"><a href="/about/">About</a><a href="/rss.xml">RSS</a><a href="/library/">Everything</a><a href="/add/" class="visitor-only">Sign in</a><a href="/add/" class="owner-only" hidden>Add something</a></nav>
       </div>
     </footer>
@@ -133,9 +134,14 @@ const nav = [
       if (!b) return;
       try { await navigator.clipboard.writeText(b.dataset.copy!); } catch (e) {}
       const label = b.getAttribute('aria-label');
+      if (b.classList.contains('copied')) return;
       b.classList.add('copied');
-      if (!b.querySelector('svg')) { const old = b.textContent; b.textContent = 'Copied'; setTimeout(() => (b.textContent = old), 1600); }
-      else { b.setAttribute('aria-label', 'Copied'); setTimeout(() => { b.classList.remove('copied'); if (label) b.setAttribute('aria-label', label); }, 1600); }
+      const old = b.innerHTML;
+      // a tick for a moment, like copying in a chat
+      if (b.querySelector('svg')) b.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+      else b.textContent = 'Copied';
+      b.setAttribute('aria-label', 'Copied');
+      setTimeout(() => { b.innerHTML = old; b.classList.remove('copied'); if (label) b.setAttribute('aria-label', label); }, 1500);
     });
 
     // ——— search (⌘K) ———

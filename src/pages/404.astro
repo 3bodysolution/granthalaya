@@ -6,8 +6,8 @@ import Base from '../layouts/Base.astro';
     <div class="art melt settle bg" style="--day: url(/art/lost-day.webp); --night: url(/art/lost-night.webp)" aria-hidden="true"></div>
     <div class="pad words">
       <p class="eyebrow rise d1">404</p>
-      <h1 class="title rise d2">This shelf is <em>empty.</em></h1>
-      <p class="lede rise d3">Maybe it was lent to a friend. Try the library, or search for it.</p>
+      <h1 class="title rise d2">Nothing on this shelf</h1>
+      <p class="lede rise d3">This page doesn’t exist, or it has moved. Try the library or search.</p>
     </div>
   </section>
   <div class="pad rise d4 row">
@@ -21,11 +21,11 @@ import Base from '../layouts/Base.astro';
   .bg { position: absolute; inset: 0; background-position: center bottom; }
   .words { position: relative; padding-top: clamp(36px, 5vw, 80px); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
   .words .title { color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .55); }
-  .words .title em { color: #8E3B1F; }
-  .words .eyebrow { color: #7A3A1E; }
+  .words .title em { color: #0B5552; }
+  .words .eyebrow { color: #0B5552; }
   .words .lede { color: #3A2E25; text-shadow: 0 1px 12px rgba(255, 240, 220, .6); }
   :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
-  :global(html[data-theme="dark"]) .words .title em, :global(html[data-theme="dark"]) .words .eyebrow { color: #F2C46B; }
+  :global(html[data-theme="dark"]) .words .title em, :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
   :global(html[data-theme="dark"]) .words .lede { color: #E4DCCB; text-shadow: 0 2px 12px rgba(8, 14, 32, .7); }
   .row { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
   @media (max-width: 780px) { .nf { aspect-ratio: auto; min-height: 480px; } .bg { background-position: 20% bottom; } }
