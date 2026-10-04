@@ -1,4 +1,6 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
 import { site } from '../data/site';
 
 export type Entry = CollectionEntry<'library'>;
@@ -14,6 +16,17 @@ export async function getThreads(): Promise<Thread[]> {
   return all.sort((a, b) => a.data.order - b.data.order);
 }
 export const href = (e: Entry) => `/library/${e.id}/`;
+
+/* ——— real covers: public/covers/<file name>.jpg, or a link in the entry's `cover` field ——— */
+export function coverSrc(e: Entry): string | undefined {
+  if (site.covers === 'painted' || e.data.type === 'essay') return;
+  const c = e.data.cover;
+  if (c === 'painted') return;
+  if (c) return c;
+  for (const ext of ['jpg', 'webp', 'png']) {
+    if (fs.existsSync(path.join(process.cwd(), 'public', 'covers', `${e.id}.${ext}`))) return `/covers/${e.id}.${ext}`;
+  }
+}
 
 /* ——— painted cover colours ——— */
 const PALETTES = [

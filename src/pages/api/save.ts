@@ -64,6 +64,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       link: str(b.link, 500) && /^https?:\/\//.test(b.link) ? str(b.link, 500) : undefined,
       source: type === 'essay' ? str(b.source, 80) : undefined,
       where: type === 'film' ? str(b.where, 60) : undefined,
+      cover: type !== 'essay' && /^https:\/\/\S+$/.test(str(b.cover, 500) ?? '') ? str(b.cover, 500) : undefined,
       times: num(b.times) && num(b.times)! > 1 ? num(b.times) : undefined,
       private: b.private ? true : undefined,
     };

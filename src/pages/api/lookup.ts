@@ -4,7 +4,7 @@ export const prerender = false;
 
 type Hit = {
   type: 'book' | 'film' | 'essay'; title: string; creator?: string; year?: number;
-  pages?: number; runtime?: number; words?: number; link?: string; source?: string; from: string;
+  pages?: number; runtime?: number; words?: number; link?: string; source?: string; cover?: string; from: string;
 };
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; Granthalaya/1.0; personal library)' };
@@ -20,12 +20,12 @@ const decode = (s: string) => s
 
 /* ——— books: Open Library (free, no key) ——— */
 async function books(q: string): Promise<Hit[]> {
-  const r = await get(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=key,title,author_name,first_publish_year,number_of_pages_median`);
+  const r = await get(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=6&fields=key,title,author_name,first_publish_year,number_of_pages_median,cover_i`);
   if (!r.ok) return [];
   const j = await r.json();
   return (j.docs ?? []).map((d: any) => ({
     type: 'book', title: d.title, creator: d.author_name?.[0], year: d.first_publish_year,
-    pages: d.number_of_pages_median, link: d.key ? `https://openlibrary.org${d.key}` : undefined, from: 'Open Library',
+    pages: d.number_of_pages_median, cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` : undefined, link: d.key ? `https://openlibrary.org${d.key}` : undefined, from: 'Open Library',
   }));
 }
 
@@ -43,7 +43,7 @@ async function films(q: string): Promise<Hit[]> {
           runtime = d.runtime || undefined;
           creator = d.credits?.crew?.find((c: any) => c.job === 'Director')?.name;
         } catch {}
-        return { type: 'film', title: m.title, year: m.release_date ? +m.release_date.slice(0, 4) : undefined, runtime, creator, link: `https://www.themoviedb.org/movie/${m.id}`, from: 'TMDB' } as Hit;
+        return { type: 'film', title: m.title, year: m.release_date ? +m.release_date.slice(0, 4) : undefined, runtime, creator, cover: m.poster_path ? `https://image.tmdb.org/t/p/w500${m.poster_path}` : undefined, link: `https://www.themoviedb.org/movie/${m.id}`, from: 'TMDB' } as Hit;
       }));
     }
   }
@@ -82,7 +82,7 @@ async function link(url: string): Promise<Hit[]> {
     const m = title.match(/^(.*?)\s*\((\d{4})\)/);
     const director = meta(html, 'twitter:data1') || html.match(/Directed by[^<]*<[^>]*>\s*(?:<[^>]*>)*([^<]+)/i)?.[1];
     const runtime = +(html.match(/(\d{2,3})\s*(?:&nbsp;|\s)*min/i)?.[1] ?? 0) || undefined;
-    return [{ type: 'film', title: decode(m?.[1] ?? title.split(/[|–-]/)[0]), year: m ? +m[2] : undefined, creator: director ? decode(director) : undefined, runtime, link: url, from: site }];
+    return [{ type: 'film', title: decode(m?.[1] ?? title.split(/[|–-]/)[0]), year: m ? +m[2] : undefined, creator: director ? decode(director) : undefined, runtime, cover: meta(html, 'og:image') || undefined, link: url, from: site }];
   }
   if (/goodreads\.com|openlibrary\.org|amazon\./.test(host)) {
     const clean = title.replace(/\s*[|:–-]\s*(Goodreads|Open Library).*$/i, '');
@@ -90,7 +90,7 @@ async function link(url: string): Promise<Hit[]> {
     const pages = +(meta(html, 'books:page_count') || html.match(/(\d{2,4})\s+pages/i)?.[1] || 0) || undefined;
     const fromOL = await books(clean).catch(() => []);
     const best = fromOL[0];
-    return [{ type: 'book', title: decode(t), creator: by ? decode(by) : best?.creator, year: best?.year, pages: pages ?? best?.pages, link: url, from: site }];
+    return [{ type: 'book', title: decode(t), creator: by ? decode(by) : best?.creator, year: best?.year, pages: pages ?? best?.pages, cover: best?.cover || meta(html, 'og:image') || undefined, link: url, from: site }];
   }
   // anything else: an essay or article
   const body = (html.match(/<article[\s\S]*?<\/article>/i)?.[0] ?? html.match(/<body[\s\S]*<\/body>/i)?.[0] ?? html)

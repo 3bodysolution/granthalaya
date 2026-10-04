@@ -10,6 +10,7 @@ Sarthak's personal library of books, films and essays, painted in Pune. Built wi
 - `src/pages/` holds the pages: home, library, entry pages, notes, threads, stats, about, add, rss, search.
 - `src/components/Valley.astro` is the footer painting. It is four solid layers (`public/img/valley-{day,night}-{0..3}.webp`) that slide a few pixels with the cursor, plus a canvas for the flag, river glints, a falling banyan leaf and Pune rain. The footer links sit on the painting's lower edge.
 - `public/art/` holds the page paintings, each in a day and a night version: home, library (also entry pages), lotw (Line of the Week), threads, stats, about and lost (404). They are shown as CSS backgrounds with the `.art` class and `--day`/`--night` variables, so they can't be dragged or saved with a right-click. `.melt` fades a painting into the page on every side, and `.bleed` makes it run the full width of the screen.
+- Covers: `src/components/Cover.astro` shows a real cover when `coverSrc()` in `src/lib/data.ts` finds one (the entry's `cover` link, or `public/covers/<file name>.jpg`), and the painted one otherwise. `npm run covers` (`scripts/covers.mjs`) fetches missing covers: books from Open Library, films only from TMDB (key in `.env` as `TMDB_API_KEY`, never committed). Never use Wikipedia for film posters; it returns photos of people instead. `cover: painted` on an entry, or `covers: 'painted'` in `site.ts`, keeps painted covers.
 - `src/styles/global.css` holds the design tokens for light and dark (`html[data-theme]`).
 
 ## Rules Sarthak cares about

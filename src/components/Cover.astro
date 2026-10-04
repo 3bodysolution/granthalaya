@@ -1,7 +1,7 @@
 ---
-// A painted cover, made from the title. No images needed.
+// A cover: the real book cover or film poster when there is one (see coverSrc), otherwise one painted from the title.
 // variant: tile (library grid) · poster (Start here) · mini (Sits well next to) · swatch (small thumbnails)
-import { palette, radius, kind, excerpt, short, type Entry } from '../lib/data';
+import { palette, radius, kind, excerpt, short, coverSrc, type Entry } from '../lib/data';
 
 interface Props {
   entry: Entry;
@@ -16,10 +16,12 @@ const p = palette(entry);
 const d = entry.data;
 const vars = `--c-bg:${p.bg};--c-accent:${p.accent};--c-hill:${p.hill};--c-r:${radius(entry)}`;
 const tname = vt ? `cover-${entry.id.replace(/[^a-z0-9-]/gi, '')}` : undefined;
+const src = coverSrc(entry);
 const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpperCase() : ''}`;
 ---
 {variant === 'tile' && d.type === 'book' && (
-  <div class="wash c book" style={vars} transition:name={tname}>
+  <div class:list={['c book', src ? 'real' : 'wash']} style={vars} transition:name={tname}>
+    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
     <i class="spine" /><i class="sun" /><i class="hill" />
     <span class="k">Book</span>
     <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}</span></span>
@@ -27,7 +29,8 @@ const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpper
 )}
 {variant === 'tile' && d.type === 'film' && (
   <div class="film" style={vars} transition:name={tname}>
-    <div class="wash c filmtop">
+    <div class:list={['c filmtop', src ? 'real' : 'wash']}>
+      {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
       <i class="sun" /><i class="hill" />
       <span class="k">Film</span>
       <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}{d.year ? ` · ${d.year}` : ''}</span></span>
@@ -44,21 +47,23 @@ const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpper
   </div>
 )}
 {variant === 'poster' && (
-  <div class="wash c poster" style={vars}>
+  <div class:list={['c poster', src ? 'real' : 'wash']} style={vars}>
+    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
     <i class="sun" /><i class="hill" />
     <span class="serif num pn">{n}</span>
     <span class="tt"><span class="serif">{d.title}</span><span class="pk">{kind(entry)}</span></span>
   </div>
 )}
 {variant === 'mini' && (
-  <div class="wash c mini" style={vars}>
+  <div class:list={['c mini', src ? 'real' : 'wash']} style={vars}>
+    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
     <i class="sun" /><i class="hill" />
     <span class="serif mt">{d.title}</span>
   </div>
 )}
 {variant === 'swatch' && (
-  <span class="wash c sw" style={`${vars};width:${w}px;height:${h}px`} aria-hidden="true">
-    {w >= 60 && (<><i class="sun" /><i class="hill" /></>)}
+  <span class:list={['c sw', src ? 'real' : 'wash']} style={`${vars};width:${w}px;height:${h}px`} aria-hidden="true">
+    {src ? <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" /> : w >= 60 && (<><i class="sun" /><i class="hill" /></>)}
   </span>
 )}
 
@@ -107,6 +112,14 @@ const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpper
   .sw { display: block; flex-shrink: 0; box-shadow: 0 8px 14px -8px var(--shadow); }
   .sw .sun { width: 70%; aspect-ratio: 1; right: -16%; top: 26%; }
   .sw .hill { bottom: -8%; height: 38%; }
+
+  /* real covers: the picture fills the shape; the painted sun, hill and title step aside */
+  .real { position: relative; overflow: hidden; }
+  .pic { position: absolute !important; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-select: none; user-select: none; }
+  .real > :not(.pic):not(.spine) { visibility: hidden; }
+  .real .spine { z-index: 1; visibility: visible; }
+  .real.filmtop .k { visibility: visible; z-index: 1; align-self: flex-start; padding: 3px 7px; border-radius: 4px; background: rgba(12, 14, 18, .55); }
+  .real.poster .pn { visibility: visible; z-index: 1; text-shadow: 0 2px 10px rgba(0, 0, 0, .6); }
 
   @media (max-width: 780px) {
     .book, .film, .essay { height: 230px; }

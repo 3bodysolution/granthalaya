@@ -93,6 +93,15 @@ Why you saved it.
 | `private: true` | Keeps the entry off the site |
 | `highlights` with `mine: true` | A line you wrote, rather than a quote |
 
+## Covers
+
+Books and films show their real cover or poster when there is one, and a painted cover otherwise. Essays always use their own card.
+
+- **Things you add from the site** pick up a cover automatically when you choose a search result.
+- **To fetch covers for everything else,** ask Claude Code to run `npm run covers`. It saves them in `public/covers/`. Film posters need a free TMDB key in a `.env` file (`TMDB_API_KEY=...`); without one, films keep their painted covers.
+- **Wrong cover?** Put your own image at `public/covers/<file name>.jpg`, or add `cover: painted` to that entry to keep the painted one.
+- **Painted covers everywhere:** set `covers: 'painted'` in `src/data/site.ts`.
+
 ## Threads
 
 A thread is a hand-picked path through the library. Each one is a file in `src/content/threads/`. The `slug` of each item is the file name of the entry, without `.md`.

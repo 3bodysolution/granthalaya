@@ -23,6 +23,7 @@ const library = defineCollection({
     where: z.string().optional(),              // "at home", "film club"…
     times: z.number().default(1),              // how many times you've read / watched it
     color: z.string().optional(),              // override the painted cover colour
+    cover: z.string().optional(),              // a cover image link, or "painted" to keep the painted cover
     private: z.boolean().default(false),       // true = never shown on the site
     startHere: z.number().optional(),          // 1–5: shows in "Start here" on the home page
     startWhy: z.string().optional(),           // one line for "Start here"

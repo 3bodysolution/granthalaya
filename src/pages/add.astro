@@ -98,6 +98,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
             <label class="stack" style="gap: 6px"><span class="eyebrow">A line you underlined</span><textarea name="quote" class="field serif" rows="2"></textarea></label>
             <label class="check"><input type="checkbox" name="quoteMine" /> This line is mine, not a quote</label>
             <label class="stack" style="gap: 6px"><span class="eyebrow">Link</span><input name="link" class="field" type="url" placeholder="https://" /></label>
+            <input type="hidden" name="cover" />
             <label class="stack only-essay" style="gap: 6px"><span class="eyebrow">Published in</span><input name="source" class="field" placeholder="Substack, a magazine, a blog…" /></label>
             <label class="stack only-film" style="gap: 6px"><span class="eyebrow">Where</span><input name="where" class="field" placeholder="at home, at the cinema, film club…" /></label>
             <label class="stack" style="gap: 6px"><span class="eyebrow">Times read or watched</span><input name="times" class="field sm" inputmode="numeric" placeholder="1" /></label>
@@ -258,7 +259,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
 
     const reset = (k = kind) => {
       form.reset(); rating = 0; loved = false; priv = false; picked = new Set(); updating = null;
-      F('date').value = today(); $('#from').hidden = true; $('#saveerr').hidden = true;
+      F('date').value = today(); F('cover').value = ''; $('#from').hidden = true; $('#saveerr').hidden = true;
       $('#loved').setAttribute('aria-pressed', 'false');
       $('#priv').setAttribute('aria-pressed', 'false'); $('#priv').textContent = 'Everyone can see this';
       root.querySelectorAll<HTMLElement>('#entry input, #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((el) => (el.style.display = ''));
@@ -268,7 +269,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
     };
     const fill = (h: any) => {
       reset(h.type);
-      for (const k of ['title', 'creator', 'year', 'pages', 'runtime', 'words', 'link', 'source']) if (h[k] != null && F(k)) F(k).value = String(h[k]);
+      for (const k of ['title', 'creator', 'year', 'pages', 'runtime', 'words', 'link', 'source', 'cover']) if (h[k] != null && F(k)) F(k).value = String(h[k]);
       if (h.from) { $('#from').hidden = false; $('#from').textContent = `✓ Filled in from ${h.from}. Change anything.`; }
       paintCover(); go('form');
     };
@@ -316,7 +317,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
       if (!r || !r.ok) { hits.innerHTML = ''; err.hidden = false; err.textContent = j.error ?? 'We couldn’t reach the catalogue. Fill it in by hand instead.'; return; }
       (root as any)._hits = j.hits;
       hits.innerHTML = j.hits.length ? j.hits.map((h: any, i: number) =>
-        `<li><button type="button" data-hit="${i}"><span class="wash sw" style="background:${colorFor(h.title)}"></span><span class="stack grow" style="gap:3px"><span class="serif" style="font-size:18px">${esc(h.title)}</span><span class="muted small">${esc([h.creator, h.year, h.pages && h.pages + ' pages', h.runtime && h.runtime + ' min', h.words && Math.round(h.words / 230) + '-minute read'].filter(Boolean).join(' · '))}</span></span><span class="eyebrow" style="font-size:10px">${esc(h.type)}</span></button></li>`).join('')
+        `<li><button type="button" data-hit="${i}">${h.cover ? `<img class="sw" src="${esc(h.cover)}" alt="" loading="lazy" style="object-fit:cover" />` : `<span class="wash sw" style="background:${colorFor(h.title)}"></span>`}<span class="stack grow" style="gap:3px"><span class="serif" style="font-size:18px">${esc(h.title)}</span><span class="muted small">${esc([h.creator, h.year, h.pages && h.pages + ' pages', h.runtime && h.runtime + ' min', h.words && Math.round(h.words / 230) + '-minute read'].filter(Boolean).join(' · '))}</span></span><span class="eyebrow" style="font-size:10px">${esc(h.type)}</span></button></li>`).join('')
         : `<li class="muted small">Nothing found. Try fewer words, or fill it in by hand.</li>`;
     };
     $('#q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, /^https?:/.test($<HTMLInputElement>('#q').value) ? 50 : 400); });
@@ -367,7 +368,7 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
         ? { action: 'update', slug: updating.slug, status: done ? 'done' : 'progress', progress: +v('progress'), rating: done ? rating : undefined, note: v('note'), date: v('date') }
         : {
             type: kind, title: v('title'), creator: v('creator'), year: v('year'), pages: v('pages'), runtime: v('runtime'), words: v('words'),
-            link: v('link'), source: v('source'), where: v('where'), times: v('times'), date: v('date'),
+            link: v('link'), source: v('source'), cover: v('cover'), where: v('where'), times: v('times'), date: v('date'),
             status: done ? 'done' : kind === 'book' ? 'reading' : 'watching', progress: +v('progress'),
             rating: done && kind !== 'essay' ? rating || undefined : undefined, loved: kind === 'essay' && loved,
             note: v('note'), quote: v('quote'), quoteMine: (F('quoteMine') as HTMLInputElement).checked,

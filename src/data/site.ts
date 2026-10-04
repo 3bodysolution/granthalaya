@@ -18,6 +18,9 @@ export const site = {
   minutesPerPage: 1.1,
   // Reading speed used for essays (words per minute).
   wordsPerMinute: 230,
+  // Covers: 'real' shows real book covers and film posters where we have them (public/covers/),
+  // 'painted' shows the painted covers everywhere.
+  covers: 'real' as 'real' | 'painted',
   // The one goal shown on the Stats page.
   goal: { label: 'Books this year', target: 30 },
 };
