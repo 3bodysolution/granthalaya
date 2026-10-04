@@ -64,6 +64,7 @@ Avoid: plot summary, cast lists, dull dates, awards lists, anything a reader cou
 
 Rules:
 - Use ONLY what this article says. Do not add anything from memory.
+- Never describe the plot, characters or story. Only facts about how it was made, written, cast, released or received.
 - Each fact is one or two plain sentences, under 30 words.
 - Do not use em dashes or en dashes. Use full stops or commas.
 - Write in simple, natural English.
@@ -117,7 +118,15 @@ export async function getTrivia(item, keys) {
     const page = await findWikipediaPage(item);
     if (!page) return null;
     const text = prompt(item, page);
-    const raw = keys.gemini ? await askGemini(keys.gemini, keys.geminiModel, text, keys.tries) : await askGroq(keys.groq, keys.groqModel, text);
+    // Gemini first; if it fails or its daily limit is used up, Groq (when there's a key for it)
+    let raw;
+    try {
+      if (!keys.gemini) throw new Error('no Gemini key');
+      raw = await askGemini(keys.gemini, keys.geminiModel, text, keys.tries);
+    } catch (e) {
+      if (!keys.groq) throw e;
+      raw = await askGroq(keys.groq, keys.groqModel, text);
+    }
     const facts = (JSON.parse(raw.replace(/^```(?:json)?|```$/g, '').trim()).facts ?? [])
       .filter((f) => typeof f === 'string' && f.trim().length > 15)
       .map(clean)
