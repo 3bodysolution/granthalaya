@@ -47,14 +47,26 @@ function front(text) {
   return out;
 }
 
+// try a dropped connection up to three times before giving up
+async function get(url, opts = {}) {
+  for (let i = 1; ; i++) {
+    try {
+      return await fetch(url, { headers: UA, ...opts });
+    } catch (e) {
+      if (i === 3) throw new Error(`${e.cause?.code ?? e.message} from ${new URL(url).host}`);
+      await new Promise((r) => setTimeout(r, 1000 * i));
+    }
+  }
+}
+
 async function getJSON(url) {
-  const r = await fetch(url, { headers: UA });
+  const r = await get(url);
   if (!r.ok) throw new Error(`${r.status} from ${new URL(url).host}`);
   return r.json();
 }
 
 async function save(url, slug) {
-  const r = await fetch(url, { headers: UA, redirect: 'follow' });
+  const r = await get(url, { redirect: 'follow' });
   if (!r.ok) throw new Error(`${r.status} downloading image`);
   const buf = Buffer.from(await r.arrayBuffer());
   if (buf.length < 2000) throw new Error('image too small (probably a placeholder)');
