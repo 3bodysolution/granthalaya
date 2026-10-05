@@ -17,25 +17,28 @@ const d = entry.data;
 const vars = `--c-bg:${p.bg};--c-accent:${p.accent};--c-hill:${p.hill};--c-r:${radius(entry)}`;
 const tname = vt ? `cover-${entry.id.replace(/[^a-z0-9-]/gi, '')}` : undefined;
 const src = coverSrc(entry);
-const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpperCase() : ''}`;
+const stub = d.type === 'tv' && d.season
+  ? `SEASON ${d.season} · ${short(d.date).toUpperCase()}`
+  : `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpperCase() : ''}`;
+const isFilm = d.type === 'film' || d.type === 'tv';
 ---
 {variant === 'tile' && d.type === 'book' && (
   <div class:list={['c book', src ? 'real' : 'wash']} style={vars} transition:name={tname}>
-    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
+    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
     <i class="spine" /><i class="sun" /><i class="hill" />
     <span class="k">Book</span>
     <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}</span></span>
   </div>
 )}
-{variant === 'tile' && d.type === 'film' && (
+{variant === 'tile' && isFilm && (
   <div class="film" style={vars} transition:name={tname}>
     <div class:list={['c filmtop', src ? 'real' : 'wash']}>
-      {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
+      {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
       <i class="sun" /><i class="hill" />
-      <span class="k">Film</span>
+      <span class="k">{kind(entry)}</span>
       <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}{d.year ? ` · ${d.year}` : ''}</span></span>
     </div>
-    <div class="type stub ticket"><b>ADMIT ONE</b><span>{stub}</span></div>
+    <div class="type stub ticket"><b>{d.type === 'tv' ? 'NOW SHOWING' : 'ADMIT ONE'}</b><span>{stub}</span></div>
   </div>
 )}
 {variant === 'tile' && d.type === 'essay' && (
@@ -43,12 +46,12 @@ const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpper
     <span class="type src">{(d.source ?? d.creator).toUpperCase()}</span>
     <span class="serif et">{d.title}</span>
     <span class="serif ex">{excerpt(entry, 96)}</span>
-    <span class="go">Note + link ↗</span>
+    <span class="go">{d.status === 'want' ? 'Saved for later ↗' : 'Note + link ↗'}</span>
   </div>
 )}
 {variant === 'poster' && (
   <div class:list={['c poster', src ? 'real' : 'wash']} style={vars}>
-    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
+    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
     <i class="sun" /><i class="hill" />
     <span class="serif num pn">{n}</span>
     <span class="tt"><span class="serif">{d.title}</span><span class="pk">{kind(entry)}</span></span>
@@ -56,14 +59,14 @@ const stub = `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpper
 )}
 {variant === 'mini' && (
   <div class:list={['c mini', src ? 'real' : 'wash']} style={vars}>
-    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" />}
+    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
     <i class="sun" /><i class="hill" />
     <span class="serif mt">{d.title}</span>
   </div>
 )}
 {variant === 'swatch' && (
   <span class:list={['c sw', src ? 'real' : 'wash']} style={`${vars};width:${w}px;height:${h}px`} aria-hidden="true">
-    {src ? <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" /> : w >= 60 && (<><i class="sun" /><i class="hill" /></>)}
+    {src ? <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" /> : w >= 60 && (<><i class="sun" /><i class="hill" /></>)}
   </span>
 )}
 

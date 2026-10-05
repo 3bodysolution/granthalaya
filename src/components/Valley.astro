@@ -2,13 +2,15 @@
 // The footer: a painted Sahyadri valley, by day and by night.
 // The painting is shown exactly as painted. It's cut into four solid layers (sky, mesas, valley, near hill)
 // that slide a few pixels with the cursor, and a few small things move: the flag, a banyan leaf,
-// and the river. When it's raining where the owner lives, it rains here too.
+// and the river. When it's raining in the Sahyadris, it rains here too.
 import { site } from '../data/site';
 import overlay from '../data/valley.json';
-const line = site.owner.lineOfTheWeek;
+interface Props { line?: { text: string; by?: string; source?: string } }
+const line = Astro.props.line?.text ? Astro.props.line : site.line;
+const said = `“${line.text}”` + (line.by || line.source ? ` (${[line.by, line.source].filter(Boolean).join(', ')})` : '');
 const layers = [0, 1, 2, 3];
 ---
-<div class="valley" data-overlay={JSON.stringify(overlay)} data-weather={JSON.stringify(site.owner.weather)}>
+<div class="valley" data-overlay={JSON.stringify(overlay)} data-weather={JSON.stringify(site.weather)}>
   <div class="frame">
     <div class="set skyL" data-set="day">
       {layers.map((k) => <img class="layer" data-k={k} src={`/img/valley-day-${k}.webp`} alt="" width="2172" height="629" loading="lazy" decoding="async" draggable="false" />)}
@@ -18,7 +20,7 @@ const layers = [0, 1, 2, 3];
     </div>
     <canvas class="fx" aria-hidden="true"></canvas>
     <button class="shepherd" type="button" aria-label="The shepherd has something to say"
-            data-line={`“${line.text}” (${line.by}, ${line.source})`}></button>
+            data-line={said}></button>
   </div>
   <div class="tip" aria-live="polite"></div>
 </div>

@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import ShelfStrip from '../../components/ShelfStrip.astro';
+import { openShelf } from '../../lib/shelfpage';
+import { loadShelf, href, stars, starsLabel, kind, typeColor, fullTitle, monthNames } from '../../lib/data';
+import { statusLabel } from '../../lib/kinds';
+export const prerender = false;
+
+const o = await openShelf(Astro, '/diary/');
+if (o.out) return o.out;
+const { profile, isMe, visible } = o.shelf;
+if (!visible) return Astro.redirect(`/@${profile.username}/`);
+const all = await loadShelf(Astro.locals.supabase, profile);
+const name = profile.display_name || profile.username;
+// month by month, newest first
+const months: { key: string; label: string; items: typeof all }[] = [];
+for (const e of all) {
+  const key = `${e.data.date.getUTCFullYear()}-${e.data.date.getUTCMonth()}`;
+  let m = months.find((x) => x.key === key);
+  if (!m) months.push((m = { key, label: `${monthNames[e.data.date.getUTCMonth()]} ${e.data.date.getUTCFullYear()}`, items: [] }));
+  m.items.push(e);
+}
+---
+<Base title={isMe ? 'Your diary' : `${name}’s diary`} shelf={profile.username} description={`Everything ${name} has logged, day by day.`}>
+  <section class="pad head">
+    <div class="rise d1" style="margin-bottom: 30px"><ShelfStrip shelf={o.shelf} current="diary" /></div>
+    <p class="eyebrow rise" style="color: var(--lat)">Diary</p>
+    <h1 class="title rise d1">Day by day</h1>
+  </section>
+  {all.length === 0 && <p class="pad muted" style="font-size: 16px; padding-top: 24px">{isMe ? 'Your diary fills in as you log things.' : 'Nothing logged yet.'}</p>}
+  {months.map((m, i) => (
+    <section class:list={['pad month rise', i ? 'd3' : 'd2']}>
+      <h2 class="serif mn">{m.label}</h2>
+      <ol class="days">
+        {m.items.map((e) => (
+          <li>
+            <a href={href(e)} class="day">
+              <span class="dn num">{e.data.date.getUTCDate()}</span>
+              <Cover entry={e} variant="swatch" w={36} h={52} />
+              <span class="stack grow" style="gap: 3px">
+                <span class="serif t">{fullTitle(e)}</span>
+                <span class="muted s">{e.data.creator}{e.data.year ? ` · ${e.data.year}` : ''}</span>
+              </span>
+              <span class="k" style={`color: ${typeColor(e.data.type)}`}>{kind(e)}</span>
+              <span class="r">{e.data.status === 'done' ? <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || '·'}</span> : <span class="muted">{statusLabel(e.data.type, e.data.status)}</span>}{e.data.again && <span class="again" title="Again">↻</span>}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </section>
+  ))}
+</Base>
+<style>
+  .head { padding-top: 40px; display: flex; flex-direction: column; gap: 10px; }
+  .month { padding-top: 40px; }
+  .mn { margin: 0 0 12px; font-weight: 400; font-size: 26px; }
+  .days { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .day { display: grid; grid-template-columns: 44px 36px minmax(0, 1fr) 70px 130px; align-items: center; gap: 18px; padding: 10px 12px; border-bottom: 1px solid var(--line); border-radius: 10px; transition: background-color .3s ease; }
+  .day:hover { background: var(--card); color: inherit; }
+  .dn { font-family: Fraunces, Georgia, serif; font-size: 22px; color: var(--muted); text-align: right; }
+  .t { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .s { font-size: 13px; }
+  .k { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
+  .r { text-align: right; font-size: 14px; }
+  .again { margin-left: 8px; color: var(--lat); }
+  .grow { min-width: 0; }
+  @media (max-width: 780px) { .day { grid-template-columns: 30px 36px minmax(0, 1fr) auto; gap: 12px; } .k { display: none; } }
+</style>

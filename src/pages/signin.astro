@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import GoogleButton from '../components/ui/GoogleButton.astro';
+import { safeNext } from '../lib/nav';
+import { supabaseReady } from '../lib/supabase';
+export const prerender = false;
+
+const next = safeNext(Astro.url.searchParams.get('next'));
+if (Astro.locals.me) return Astro.redirect(next);
+const error = Astro.url.searchParams.get('error');
+const points = [
+  'Log books, films, TV and essays in seconds',
+  'Keep your notes and the lines you underlined',
+  'A profile that’s public or private, your choice',
+];
+---
+<Base title="Sign in" noindex>
+  <section class="pad wrap">
+    <div class="split rise">
+      <div class="art paint" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
+      <div class="side">
+        <div class="stack" style="gap: 8px">
+          <h1 class="serif h">Welcome to Granthalaya</h1>
+          <p class="lede">Sign in, or start your shelf. It’s the same button for both.</p>
+        </div>
+        <ul class="points">
+          {points.map((p) => (
+            <li><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>{p}</li>
+          ))}
+        </ul>
+        {error && <p class="notice bad">{error === 'setup' || !supabaseReady() ? 'Sign-in isn’t set up on this copy of the site yet.' : 'Signing in didn’t finish. Please try again.'}</p>}
+        <GoogleButton next={next} />
+        <p class="fine">By continuing you agree to the <a href="/terms/">terms</a> and the <a href="/privacy/">privacy policy</a>. We only use your Google name, email and photo, and we never post anything for you.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .wrap { padding-top: 56px; }
+  .split { max-width: 980px; margin: 0 auto; display: grid; grid-template-columns: 1.05fr 1fr; border-radius: 22px; overflow: hidden; background: var(--card); border: 1px solid var(--line); box-shadow: 0 30px 60px -30px var(--shadow); min-height: 520px; }
+  .paint { background-position: center 60%; }
+  .side { display: flex; flex-direction: column; justify-content: center; gap: 24px; padding: 40px; }
+  .h { margin: 0; font-weight: 400; font-size: 36px; line-height: 1.1; }
+  .points { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; font-size: 15px; }
+  .points li { display: flex; gap: 12px; align-items: flex-start; }
+  .points svg { color: var(--lat); flex-shrink: 0; margin-top: 1px; }
+  .fine { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  .fine a { text-decoration: underline; text-underline-offset: 2px; }
+  @media (max-width: 780px) { .wrap { padding-top: 24px; } .split { grid-template-columns: 1fr; min-height: 0; } .paint { height: 200px; } .side { padding: 28px 22px; } }
+</style>

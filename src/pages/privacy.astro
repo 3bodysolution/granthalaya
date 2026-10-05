@@ -1,0 +1,51 @@
+---
+import Policy from '../components/Policy.astro';
+import { site } from '../data/site';
+export const prerender = false;
+---
+<Policy title="Privacy" updated="October 6, 2026" description="What Granthalaya keeps about you, who can see it, and how to take it with you or delete it.">
+  <p class="lead">Granthalaya keeps only what it needs to give you a shelf. It has no ads, no tracking scripts and sells nothing.</p>
+
+  <h2>What we keep</h2>
+  <ul>
+    <li><b>From Google, when you sign in:</b> your name, email address and profile photo. Your email is never shown to anyone.</li>
+    <li><b>What you add:</b> the things on your shelf, their status, ratings, dates, notes, the lines you underline, threads, and your profile (username, bio, links, season line, line of the week, goal).</li>
+    <li><b>Safety records:</b> people you block, and reports you send.</li>
+    <li><b>Technical records:</b> the companies that run the site keep short-lived server logs (like your IP address and browser) to keep it working and secure.</li>
+  </ul>
+
+  <h2>Who can see it</h2>
+  <ul>
+    <li>Your name, username and photo are visible to everyone, even on a private account, so people can find and block you.</li>
+    <li>With a public account, your shelf, notes, threads and stats are visible to anyone, except entries you mark <b>Only me</b>.</li>
+    <li>With a private account, only you can see your shelf, notes, threads and stats.</li>
+    <li>If you block someone, neither of you can see the other’s profile.</li>
+    <li>Your shelf appears on the welcome page for new visitors only if you turn on <b>Feature my shelf</b>.</li>
+  </ul>
+
+  <h2>Who helps run the site</h2>
+  <ul>
+    <li><b>Supabase</b> stores the database, on servers in Mumbai, India, and handles signing in.</li>
+    <li><b>Vercel</b> hosts the website.</li>
+    <li><b>Google</b> confirms who you are when you sign in.</li>
+    <li><b>Cloudflare Turnstile</b> runs a quick check that a person, not a bot, is creating a new shelf.</li>
+    <li><b>Open Library, TMDB, Wikipedia, Google Gemini and Groq</b> help look up titles, covers and short facts about them. They’re only sent the title you’re adding, never anything about you.</li>
+  </ul>
+
+  <h2>Cookies</h2>
+  <p>One cookie keeps you signed in for up to 90 days on a device. Your choice of light or dark lives in your browser. There are no advertising or tracking cookies.</p>
+
+  <h2>Your choices</h2>
+  <ul>
+    <li>Change anything on your profile or shelf at any time.</li>
+    <li>Make your account private, or mark single entries <b>Only me</b>.</li>
+    <li><b>Download your data</b> in Settings: everything you’ve logged, in a file you keep.</li>
+    <li><b>Delete your account</b> in Settings. Your profile, shelf, notes and lines are removed right away. Copies can stay in the database provider’s backups for a short time before they’re gone too.</li>
+  </ul>
+
+  <h2>Age</h2>
+  <p>You need to be 18 or older to make a shelf.</p>
+
+  <h2>Questions</h2>
+  <p>To ask about your data, {site.contact ? <>email <a href={`mailto:${site.contact}`}>{site.contact}</a></> : 'use the options in Settings, or report it from any profile'}. If this policy changes in a way that matters, the site will say so before it takes effect.</p>
+</Policy>

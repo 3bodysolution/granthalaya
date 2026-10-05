@@ -1,18 +1,20 @@
 ---
 import Base from '../layouts/Base.astro';
+export const prerender = false;
+const me = Astro.locals.me;
 ---
-<Base title="Not found">
+<Base title="Not found" noindex>
   <section class="nf bleed">
     <div class="art melt settle bg" style="--day: url(/art/lost-day.webp); --night: url(/art/lost-night.webp)" aria-hidden="true"></div>
     <div class="pad words">
       <p class="eyebrow rise d1">404</p>
-      <h1 class="title rise d2">Nothing on this shelf</h1>
-      <p class="lede rise d3">This page doesn’t exist, or it has moved. Try the library or search.</p>
+      <h1 class="title rise d2">Not on the shelf yet</h1>
+      <p class="lede rise d3">This page doesn’t exist, or it has moved. {me ? 'Your library or search will help you find it.' : 'The home page will help you find your way.'}</p>
     </div>
   </section>
   <div class="pad rise d4 row">
-    <a href="/library/" class="btn primary">Go to the library</a>
-    <button class="btn" data-search-open>Search</button>
+    {me ? <a href={`/@${me.username}/library/`} class="btn primary">Go to your library</a> : <a href="/" class="btn primary">Go home</a>}
+    {me && <button class="btn" data-search-open>Search</button>}
   </div>
 </Base>
 

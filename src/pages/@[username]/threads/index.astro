@@ -1,0 +1,37 @@
+---
+import Base from '../../../layouts/Base.astro';
+import ThreadCard from '../../../components/ThreadCard.astro';
+import ShelfStrip from '../../../components/ShelfStrip.astro';
+import { openShelf } from '../../../lib/shelfpage';
+import { loadShelf, loadThreads } from '../../../lib/data';
+export const prerender = false;
+
+const o = await openShelf(Astro, '/threads/');
+if (o.out) return o.out;
+const { profile, isMe, visible } = o.shelf;
+if (!visible) return Astro.redirect(`/@${profile.username}/`);
+const sb = Astro.locals.supabase;
+const [entries, threads] = await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]);
+const name = profile.display_name || profile.username;
+---
+<Base title={isMe ? 'Your threads' : `${name}’s threads`} active={isMe ? 'threads' : undefined} shelf={profile.username} description={`Hand-picked paths through ${name}’s library.`}>
+  <div class="art melt settle banner bleed" style="--day: url(/art/threads-day.webp); --night: url(/art/threads-night.webp)" aria-hidden="true"></div>
+  <section class="pad head rise">
+    <h1 class="title">Threads</h1>
+    <p class="lede">Books and films that go well together, in the order {isMe ? 'I’d' : 'they’d'} take them.</p>
+  </section>
+  <div class="pad rise d1" style="padding-top: 26px"><ShelfStrip shelf={o.shelf} current="threads" /></div>
+  {threads.length === 0 && <p class="pad muted" style="padding-top: 32px; font-size: 16px">{isMe ? 'No threads yet. Making your own threads comes soon.' : `${name} hasn’t made any threads yet.`}</p>}
+  <section class="pad grid">
+    {threads.map((t, i) => <div class="rise" style={`animation-delay: ${(0.15 + i * 0.08).toFixed(2)}s`}><ThreadCard thread={t} entries={entries} /></div>)}
+  </section>
+</Base>
+
+<style>
+  .banner { height: clamp(220px, 27vw, 400px); background-position: center 70%; }
+  .head { margin-top: -20px; position: relative; display: flex; flex-direction: column; gap: 12px; }
+  .grid { padding-top: 40px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  .grid > div > :global(a) { height: 100%; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 780px) { .banner { height: 190px; } .head { margin-top: -8px; } .grid { grid-template-columns: 1fr; } }
+</style>

@@ -2,150 +2,222 @@
 import Base from '../layouts/Base.astro';
 import Cover from '../components/Cover.astro';
 import Tile from '../components/Tile.astro';
-import { site } from '../data/site';
-import { getEntries, href, short, kind, remaining, duration, excerpt, percent, whereAt } from '../lib/data';
+import Face from '../components/Face.astro';
+import GoogleButton from '../components/ui/GoogleButton.astro';
+import StatusTag from '../components/ui/StatusTag.astro';
+import { loadShelf, loadFeatured, loadProfile, href, short, fullTitle, profileHref } from '../lib/data';
+import { statusLabel } from '../lib/kinds';
+import { supabaseReady } from '../lib/supabase';
+export const prerender = false;
 
-const all = await getEntries();
-const latest = all[0];
-const reading = all.find((e) => e.data.type === 'book' && e.data.status === 'reading');
-const watching = all.find((e) => e.data.type === 'film' && e.data.status === 'watching') ?? all.find((e) => e.data.type === 'film');
-const recent = all.filter((e) => e.data.status === 'done').slice(0, 6);
-const start = all.filter((e) => e.data.startHere).sort((a, b) => a.data.startHere! - b.data.startHere!).slice(0, 5);
-const otd = all.filter((e) => e.data.status === 'done').map((e) => ({ t: e.data.title, d: e.data.date.toISOString().slice(0, 10), h: href(e), v: e.data.type === 'film' ? 'watched' : 'finished' }));
-const hrefs = all.map(href);
-const quote = site.owner.lineOfTheWeek;
+const me = Astro.locals.me;
+const sb = Astro.locals.supabase;
+let featured: Awaited<ReturnType<typeof loadFeatured>> = [];
+try { if (sb) featured = await loadFeatured(sb, 6); } catch {}
+
+// signed in: your own home
+let shelf: Awaited<ReturnType<typeof loadShelf>> = [];
+let details: any = null;
+if (me && sb) {
+  const [s, p] = await Promise.all([loadShelf(sb, me), loadProfile(sb, me.username)]);
+  shelf = s;
+  if (p && !('redirect' in p)) details = p.details;
+}
+const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
+const wants = shelf.filter((e) => e.data.status === 'want');
+const now = [...going, ...wants].slice(0, 2);
+const recent = shelf.filter((e) => e.data.status === 'done').slice(0, 6);
+const quote = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by, source: details.lotw_source } : null;
+const otd = shelf.filter((e) => e.data.status === 'done').map((e) => ({ t: e.data.title, d: e.data.date.toISOString().slice(0, 10), h: href(e), v: e.data.type === 'film' || e.data.type === 'tv' ? 'watched' : 'finished' }));
+const others = featured.filter((f) => f.profile.username !== me?.username);
+const features = [
+  ['Everything in one place', 'Books, films, TV seasons and essays on one shelf.'],
+  ['Keep what stayed', 'Notes, the lines you underlined, and your own lines.'],
+  ['Behind the film', 'Three short facts about how each one was made.'],
+  ['A shelf to share', 'A public profile, or a private one. Your choice.'],
+];
 ---
-<Base>
-  <section class="hero bleed">
-    <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
-    <div class="pad words">
-      <p class="eyebrow rise">{site.owner.season}</p>
-      <h1 class="title rise d1">Books, films and everything I’ve spent time with.</h1>
-    </div>
-  </section>
-
-  <section class="pad block rise d4" style="padding-top: 16px">
-    <div class="rule">
-      <div class="inline"><h2 class="eyebrow">Now</h2><span class="small muted">Updated {short(latest.data.date)}</span></div>
-      <a class="small muted otd" data-otd={JSON.stringify(otd)} hidden></a>
-    </div>
-    <div class="now">
-      {reading && (
-        <a href={href(reading)} class="card lift nowcard">
-          <Cover entry={reading} variant="swatch" w={84} h={126} />
-          <div class="stack grow" style="gap: 6px">
-            <p class="eyebrow" style="color: var(--lat)">Reading</p>
-            <span class="serif nt">{reading.data.title}</span>
-            <span class="small muted">{reading.data.creator}</span>
-            <div role="progressbar" aria-label="Reading progress" aria-valuenow={percent(reading)} aria-valuemin="0" aria-valuemax="100" class="bar">
-              <div class="growX" style={`animation-delay: 1s; width: ${percent(reading)}%`}></div>
-            </div>
-            <span class="num tiny muted">{whereAt(reading)} · about {duration(remaining(reading), 'words')} left</span>
-          </div>
-        </a>
-      )}
-      {watching && (
-        <a href={href(watching)} class="card lift nowcard">
-          <Cover entry={watching} variant="swatch" w={84} h={126} />
-          <div class="stack grow" style="gap: 6px">
-            <p class="eyebrow" style="color: var(--sky)">{watching.data.status === 'watching' ? 'Watching' : 'Last watched'}</p>
-            <span class="serif nt">{watching.data.title}</span>
-            <span class="small muted">{watching.data.creator}{watching.data.year ? ` · ${watching.data.year}` : ''}</span>
-            <span class="small muted" style="margin-top: auto; line-height: 1.45">{excerpt(watching, 90)}</span>
-          </div>
-        </a>
-      )}
-      <a href="/notes/" class="card lift nowcard stack" style="gap: 10px">
-        <p class="eyebrow" style="color: var(--moss)">Thinking about</p>
-        <p class="serif" style="margin: 0; font-size: 19px; line-height: 1.45; font-style: italic">“{quote.text}”</p>
-        <span class="small muted" style="margin-top: auto">{quote.by.split(' ').slice(-1)}, <em>{quote.source}</em> · in my notes →</span>
-      </a>
-    </div>
-  </section>
-
-  <section class="pad block rise d5">
-    <div class="rule"><h2 class="eyebrow">Recently</h2><a href="/library/" class="more">The whole library →</a></div>
-    <div class="shelf">
-      {recent.map((e, n) => <Tile entry={e} vt cls="rise" delay={`${(0.6 + n * 0.08).toFixed(2)}s`} />)}
-    </div>
-  </section>
-
-  {start.length > 0 && (
-    <section class="pad block rise d6" style="padding-top: 72px">
-      <div class="rule start-rule">
-        <div class="stack" style="gap: 8px">
-          <h2 class="eyebrow" style="color: var(--lat)">Start here</h2>
-          <p class="serif" style="margin: 0; font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2">New here? Start with these {start.length === 5 ? 'five' : start.length}.</p>
-        </div>
-        <div class="inline" style="gap: 10px">
-          <button class="btn" data-surprise={JSON.stringify(hrefs)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>Surprise me
-          </button>
-          <a href="/library/" class="btn hide-sm">Everything</a>
-        </div>
-      </div>
-      <div class="starts">
-        {start.map((e, i) => (
-          <a href={href(e)} class="lift stack" style="gap: 14px">
-            <Cover entry={e} variant="poster" n={String(i + 1).padStart(2, '0')} />
-            <p class="small muted" style="margin: 0; font-size: 14px; line-height: 1.5">{e.data.startWhy ?? excerpt(e, 70)}</p>
-          </a>
-        ))}
+{!me ? (
+  <Base>
+    <section class="hero bleed">
+      <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
+      <div class="pad words">
+        <h1 class="title rise d1">A shelf for everything you read and watch.</h1>
+        <p class="sub rise d2">Books, films, TV and essays, with the lines that stayed with you.</p>
       </div>
     </section>
-  )}
-</Base>
+
+    <section class="pad start rise d3">
+      {supabaseReady() && <div class="cta"><GoogleButton next="/" /></div>}
+      <span class="small muted">Free. No ads. Takes a minute.</span>
+    </section>
+
+    <section class="pad feats rise d4">
+      {features.map(([b, t]) => <div class="feat"><b>{b}</b><span>{t}</span></div>)}
+    </section>
+
+    {featured.length > 0 && (
+      <section class="pad block rise d5">
+        <div class="rule"><h2 class="eyebrow">Shelves to visit</h2></div>
+        <div class="shelves">
+          {featured.map((f) => (
+            <a class="card shelfcard" href={profileHref(f.profile.username)}>
+              <div class="who"><Face name={f.profile.display_name || f.profile.username} src={f.profile.avatar_url} size={40} /><div class="stack"><span class="serif" style="font-size: 19px">{f.profile.display_name || f.profile.username}</span><span class="small muted">@{f.profile.username} · {f.count} on the shelf</span></div></div>
+              <div class="covers">{f.covers.map((e) => <Cover entry={e} variant="swatch" w={56} h={84} />)}</div>
+              {f.bio && <p class="small muted" style="margin: 0">{f.bio}</p>}
+            </a>
+          ))}
+          <div class="shelfcard dashed">
+            <span class="serif" style="font-size: 20px">Your shelf here</span>
+            <p class="small muted" style="margin: 0">Turn on “Feature my shelf” in Settings and new visitors can find you from this page.</p>
+          </div>
+        </div>
+      </section>
+    )}
+  </Base>
+) : (
+  <Base line={quote ?? undefined}>
+    <section class="hero bleed mine">
+      <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
+      <div class="pad words">
+        {details?.season_line && <p class="eyebrow rise">{details.season_line}</p>}
+        <h1 class="title rise d1">{details?.bio || 'Books, films and everything I’ve spent time with.'}</h1>
+      </div>
+    </section>
+
+    {shelf.length === 0 ? (
+      <section class="pad block rise d3">
+        <div class="card first">
+          <h2 class="serif">Welcome, {me.display_name.split(' ')[0] || me.username}</h2>
+          <p class="muted">Your shelf is ready. Start with whatever you’re reading or watching this week.</p>
+          <a href="/add/" class="btn primary big">Add your first book or film</a>
+          <a href={profileHref(me.username)} class="small muted" style="margin-top: 4px">See your profile →</a>
+        </div>
+      </section>
+    ) : (
+      <>
+        <section class="pad block rise d4" style="padding-top: 16px">
+          <div class="rule">
+            <div class="inline"><h2 class="eyebrow">Now</h2><span class="small muted">Updated {short(shelf[0].data.date)}</span></div>
+            <a class="small muted otd" data-otd={JSON.stringify(otd)} hidden></a>
+          </div>
+          <div class="now">
+            {now.map((e) => (
+              <a href={href(e)} class="card lift nowcard">
+                <Cover entry={e} variant="swatch" w={84} h={126} />
+                <div class="stack grow" style="gap: 8px">
+                  <StatusTag status={e.data.status as any} label={statusLabel(e.data.type, e.data.status)} />
+                  <span class="serif nt">{fullTitle(e)}</span>
+                  <span class="small muted">{e.data.creator}{e.data.year ? ` · ${e.data.year}` : ''}</span>
+                  <span class="small muted" style="margin-top: auto">{e.data.status === 'want' ? `Added ${short(e.data.date)}` : `Since ${short(e.data.started ?? e.data.date)}`}</span>
+                </div>
+              </a>
+            ))}
+            {now.length < 2 && (
+              <a href="/add/" class="card lift nowcard addcard">
+                <span class="plus" aria-hidden="true">+</span>
+                <div class="stack" style="gap: 6px"><span class="serif nt">Add something</span><span class="small muted">What are you reading or watching?</span></div>
+              </a>
+            )}
+            {quote ? (
+              <a href={`/@${me.username}/notes/`} class="card lift nowcard stack" style="gap: 10px">
+                <p class="eyebrow" style="color: var(--moss)">Thinking about</p>
+                <p class="serif" style="margin: 0; font-size: 19px; line-height: 1.45; font-style: italic">“{quote.text}”</p>
+                <span class="small muted" style="margin-top: auto">{quote.by ? `${quote.by.split(' ').slice(-1)}, ` : ''}{quote.source && <em>{quote.source}</em>} · in my notes →</span>
+              </a>
+            ) : (
+              <a href="/settings/" class="card lift nowcard stack" style="gap: 10px">
+                <p class="eyebrow" style="color: var(--moss)">Thinking about</p>
+                <p class="serif" style="margin: 0; font-size: 19px; line-height: 1.45">Add a line of the week in Settings. It shows here and on your Notes page.</p>
+              </a>
+            )}
+          </div>
+        </section>
+
+        {recent.length > 0 && (
+          <section class="pad block rise d5">
+            <div class="rule"><h2 class="eyebrow">Recently</h2><a href={`/@${me.username}/library/`} class="more">Your whole library →</a></div>
+            <div class="shelf">
+              {recent.map((e, n) => <Tile entry={e} vt cls="rise" delay={`${(0.6 + n * 0.08).toFixed(2)}s`} />)}
+            </div>
+          </section>
+        )}
+      </>
+    )}
+
+    {others.length > 0 && (
+      <section class="pad block rise d6">
+        <div class="rule"><h2 class="eyebrow">Shelves to visit</h2></div>
+        <div class="shelves">
+          {others.slice(0, 3).map((f) => (
+            <a class="card shelfcard" href={profileHref(f.profile.username)}>
+              <div class="who"><Face name={f.profile.display_name || f.profile.username} src={f.profile.avatar_url} size={40} /><div class="stack"><span class="serif" style="font-size: 19px">{f.profile.display_name || f.profile.username}</span><span class="small muted">@{f.profile.username} · {f.count} on the shelf</span></div></div>
+              <div class="covers">{f.covers.map((e) => <Cover entry={e} variant="swatch" w={56} h={84} />)}</div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </Base>
+)}
 
 <style>
   /* the painting fills the width; the words sit in its sky */
   .hero { position: relative; aspect-ratio: 2172 / 724; min-height: 460px; max-height: 760px; }
+  .hero.mine { min-height: 460px; }
   .hero .bg { position: absolute; inset: 0; background-position: center bottom; }
   .words { position: relative; padding-top: clamp(40px, 5.5vw, 84px); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
   .words .title { max-width: 820px; color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .55); }
-  .words .title em { color: #0B5552; }
   .words .eyebrow { color: #0B5552; }
+  .sub { margin: 0; max-width: 680px; font-size: 18px; line-height: 1.5; color: #3A2E25; text-shadow: 0 1px 12px rgba(255, 240, 220, .8); }
+  .small { font-size: 13px; }
+  .words .small { color: #3A2E25; text-shadow: 0 1px 10px rgba(255, 240, 220, .9); }
+  .start { display: flex; flex-direction: column; align-items: center; gap: 12px; padding-top: 4px; padding-bottom: 36px; }
+  .cta { width: 100%; max-width: 340px; }
   :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
-  :global(html[data-theme="dark"]) .words .title em { color: #8FDCD2; }
   :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
+  :global(html[data-theme="dark"]) .sub, :global(html[data-theme="dark"]) .words .small { color: #E4DCCB; text-shadow: 0 2px 12px rgba(8, 14, 32, .7); }
+  .feats { padding-top: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+  .feat { display: flex; flex-direction: column; gap: 6px; }
+  .feat b { font-size: 15px; font-weight: 600; }
+  .feat span { font-size: 14px; line-height: 1.5; color: var(--muted); }
   .block { padding-top: 60px; display: flex; flex-direction: column; gap: 24px; }
   .inline { display: flex; align-items: baseline; gap: 14px; }
-  .small { font-size: 13px; }
-  .tiny { font-size: 12px; }
   .grow { flex-grow: 1; min-width: 0; }
   .now { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
   .nowcard { display: flex; gap: 20px; padding: 22px; }
+  .nowcard:hover { color: inherit; }
   .nt { font-size: 20px; line-height: 1.2; }
-  .bar { margin-top: auto; height: 4px; border-radius: 2px; background: var(--soft); overflow: hidden; }
-  .bar div { height: 4px; border-radius: 2px; background: var(--lat); }
-  .start-rule { align-items: flex-end; padding-bottom: 16px; }
-  .starts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 32px; }
-  .otd em { font-family: Fraunces, Georgia, serif; color: var(--ink); }
+  .addcard { align-items: center; border-style: dashed; box-shadow: none; background: transparent; }
+  .plus { width: 84px; height: 126px; flex-shrink: 0; border-radius: 6px; border: 1.5px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 34px; color: var(--muted); }
+  .first { max-width: 620px; margin: 0 auto; padding: 40px 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+  .first h2 { margin: 0; font-weight: 400; font-size: 30px; }
+  .first p { margin: 0 0 8px; }
+  .shelves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .shelfcard { padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .shelfcard:hover { color: inherit; border-color: var(--lat); }
+  .shelfcard.dashed { border: 1px dashed var(--line); border-radius: 14px; background: transparent; justify-content: center; gap: 8px; }
+  .who { display: flex; align-items: center; gap: 12px; }
+  .covers { display: flex; gap: 10px; overflow: hidden; }
+  .otd :global(em) { font-family: Fraunces, Georgia, serif; color: var(--ink); }
   @media (max-width: 1100px) {
     .now { grid-template-columns: 1fr 1fr; }
     .now > :last-child { grid-column: 1 / -1; }
-    .starts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+    .feats { grid-template-columns: 1fr 1fr; }
+    .shelves { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 780px) {
-    .hero { aspect-ratio: auto; min-height: 520px; }
+    .hero { aspect-ratio: auto; min-height: 560px; }
+    .hero.mine { min-height: 420px; }
     .hero .bg { background-position: 6% bottom; }
     .block { padding-top: 44px; }
-    .now { grid-template-columns: 1fr; }
-    .starts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-    .start-rule { flex-direction: column; align-items: flex-start; }
+    .now, .shelves, .feats { grid-template-columns: 1fr; }
     .rule .otd { display: none; }
   }
 </style>
 
 <script>
-  import { navigate } from 'astro:transitions/client';
-  // "Surprise me" — any entry, at random
-  document.addEventListener('click', (ev) => {
-    const b = (ev.target as Element).closest<HTMLElement>('[data-surprise]');
-    if (!b) return;
-    const list: string[] = JSON.parse(b.dataset.surprise!);
-    navigate(list[Math.floor(Math.random() * list.length)]);
-  });
-  // "On this day" — something finished on today's date in an earlier year
+  // "On this day": something finished on today's date in an earlier year
   function onThisDay() {
     const el = document.querySelector<HTMLAnchorElement>('[data-otd]');
     if (!el) return;
@@ -158,7 +230,7 @@ const quote = site.owner.lineOfTheWeek;
     const yrs = now.getFullYear() - +x.d.slice(0, 4);
     const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
     el.href = x.h;
-    el.innerHTML = `On this day ${yrs === 1 ? 'last year' : yrs + ' years ago'}, I ${x.v} <em>${esc(x.t)}</em> →`;
+    el.innerHTML = `On this day ${yrs === 1 ? 'last year' : yrs + ' years ago'}, you ${x.v} <em>${esc(x.t)}</em> →`;
     el.hidden = false;
   }
   document.addEventListener('astro:page-load', onThisDay);

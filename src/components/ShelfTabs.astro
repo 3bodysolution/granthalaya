@@ -1,0 +1,26 @@
+---
+// The row of tabs on every page of a shelf.
+interface Props { username: string; current: 'profile' | 'library' | 'diary' | 'notes' | 'threads' | 'want' | 'stats' }
+const { username, current } = Astro.props;
+const base = `/@${username}`;
+const tabs = [
+  ['profile', 'Profile', `${base}/`],
+  ['library', 'Library', `${base}/library/`],
+  ['diary', 'Diary', `${base}/diary/`],
+  ['notes', 'Notes', `${base}/notes/`],
+  ['threads', 'Threads', `${base}/threads/`],
+  ['want', 'Want to', `${base}/library/?status=want`],
+  ['stats', 'Stats', `${base}/stats/`],
+] as const;
+---
+<nav class="ptabs" aria-label="This shelf">
+  {tabs.map(([k, label, href]) => <a href={href} class:list={['ptab', k === current && 'on']} aria-current={k === current ? 'page' : undefined}>{label}</a>)}
+</nav>
+<style>
+  .ptabs { display: flex; gap: 26px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+  .ptabs::-webkit-scrollbar { display: none; }
+  .ptab { display: inline-flex; align-items: center; height: 48px; font-size: 14.5px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+  .ptab:hover { color: var(--ink); }
+  .ptab.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--lat); }
+  @media (max-width: 780px) { .ptabs { gap: 20px; } .ptab { font-size: 14px; } }
+</style>

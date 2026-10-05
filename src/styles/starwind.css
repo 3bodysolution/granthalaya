@@ -1,0 +1,115 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/forms";
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--starwind-accordion-content-height);
+    }
+  }
+
+  @keyframes accordion-up {
+    from {
+      height: var(--starwind-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-accent: var(--primary-accent);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-accent: var(--secondary-accent);
+  --color-muted: var(--sw-muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-outline: var(--outline);
+
+  --radius-xs: calc(var(--radius) - 0.375rem);
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --radius-2xl: calc(var(--radius) + 0.5rem);
+  --radius-3xl: calc(var(--radius) + 1rem);
+
+  --color-sidebar: var(--sidebar-background);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-outline: var(--sidebar-outline);
+}
+
+/* Starwind tokens mapped to Granthalaya's palette (see global.css). Our own --card / --muted keep their meaning;
+   Starwind's "muted" background is --sw-muted. */
+html[data-theme="light"] {
+  --background: #F8ECD6; --foreground: #1F1C18;
+  --card-foreground: #1F1C18; --popover: #FFFBF3; --popover-foreground: #1F1C18;
+  --primary: #0F6A66; --primary-foreground: #FFFBF3; --primary-accent: #0F6A66;
+  --secondary: #EFE1CA; --secondary-foreground: #1F1C18; --secondary-accent: #1F1C18;
+  --sw-muted: #EFE1CA; --muted-foreground: #5C554D;
+  --accent: #F2E4CC; --accent-foreground: #1F1C18;
+  --info: #CFE3EE; --info-foreground: #163A52;
+  --success: #DCE8CF; --success-foreground: #2E4B1E;
+  --warning: #F3DFB2; --warning-foreground: #5A3A05;
+  --error: #B3261E; --error-foreground: #FFFBF3;
+  --border: #E3D3BA; --input: #DCCAAE; --outline: #0F6A66;
+  --radius: 0.75rem;
+}
+html[data-theme="dark"] {
+  --background: #15171B; --foreground: #ECE5D6;
+  --card-foreground: #ECE5D6; --popover: #1F2227; --popover-foreground: #ECE5D6;
+  --primary: #6CC9BF; --primary-foreground: #10201F; --primary-accent: #8FDCD2;
+  --secondary: #24272D; --secondary-foreground: #ECE5D6; --secondary-accent: #ECE5D6;
+  --sw-muted: #24272D; --muted-foreground: #A39D92;
+  --accent: #2A2D33; --accent-foreground: #ECE5D6;
+  --info: #1E3443; --info-foreground: #BFD6E6;
+  --success: #233322; --success-foreground: #BFD8AE;
+  --warning: #3A2E14; --warning-foreground: #F0D08A;
+  --error: #F2B8B5; --error-foreground: #3A0B08;
+  --border: #2D3036; --input: #383B42; --outline: #6CC9BF;
+  --radius: 0.75rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-outline/50;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+}

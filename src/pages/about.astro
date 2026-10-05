@@ -1,9 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { site } from '../data/site';
-import { getEntries } from '../lib/data';
-const all = await getEntries();
-const n = (t: string) => all.filter((e) => e.data.type === t).length;
+export const prerender = false;
 const swatches = [
   { name: 'Laterite', v: '--lat', note: 'Fort walls, old brick' },
   { name: 'Haldi', v: '--haldi', note: 'Ratings, the sun' },
@@ -21,10 +19,11 @@ const swatches = [
     <p class="eyebrow rise d1" style="color: var(--lat)">About</p>
     <h1 class="title rise d2">About Granthalaya</h1>
     <div class="rise d3 prose">
-      <p class="serif first"><em>Granthalaya</em> (ग्रंथालय) is Marathi for library. This one is mine: the books, films and essays I’ve spent time with, and a few lines about each.</p>
+      <p class="serif first"><em>Granthalaya</em> (ग्रंथालय) is Marathi for library. It started as my own shelf: the books, films and essays I’ve spent time with, and a few lines about each. Now anyone can keep one.</p>
+      <p>Each person gets a shelf for books, films, TV seasons and essays, with notes, the lines they underlined and a profile that’s public or private. Covers, runtimes and the short “Behind the film” facts belong to each title, so they’re shared by everyone who adds it.</p>
       <p>The paintings use the colours of old fort walls, monsoon evenings and hills after rain. Book covers come from Open Library and film posters from TMDB. When there isn’t one, the site paints a cover from the title.</p>
-      <p>Essays aren’t copied here. Each one links to the original, and this page only keeps why I saved it. Time spent is worked out from runtimes, pages and word counts, so there’s nothing to log.</p>
-      <p class="num muted">So far: {n('book')} books · {n('film')} films · {n('essay')} essays.</p>
+      <p>Essays aren’t copied here. Each one links to the original, and the shelf only keeps why you saved it. Time spent is worked out from runtimes, pages and word counts, so there’s nothing to time.</p>
+      <p class="muted">It’s free, with no ads and no tracking. Made by {site.maker}.</p>
     </div>
 
     <div class="rise d4 sw">
@@ -38,10 +37,10 @@ const swatches = [
     </div>
 
     <div class="rise d5 links">
-      <a href="/library/" class="btn primary">Browse the library</a>
-      <a href="/rss.xml" class="btn">Follow with RSS</a>
+      <a href="/signin/" class="btn primary" data-astro-prefetch="false">Start your shelf</a>
+      <a href={`/@${site.founder}/`} class="btn">Visit {site.maker}’s shelf</a>
     </div>
-    <p class="rise d5 muted tip">Tip: press <kbd>⌘K</kbd> or <kbd>/</kbd> anywhere to search.</p>
+    <p class="rise d5 muted tip">Tip: on any shelf, press <kbd>⌘K</kbd> or <kbd>/</kbd> to search it.</p>
   </div>
     <div class="art desk settle d2" style="--day: url(/art/about-day.webp); --night: url(/art/about-night.webp)" aria-hidden="true"></div>
   </section>

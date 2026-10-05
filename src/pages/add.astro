@@ -1,95 +1,86 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getThreads, getAllEntries, palette, percent } from '../lib/data';
-import { site } from '../data/site';
+import { STATUSES, kindName } from '../lib/kinds';
+import { paletteFor } from '../lib/data';
+export const prerender = false;
 
-// Everything the Add screen needs to know, baked in at build time.
-const all = await getAllEntries();
-const now = all.filter((e) => e.data.status !== 'done').map((e) => ({
-  slug: e.id, title: e.data.title, type: e.data.type, page: e.data.page ?? 0, pages: e.data.pages ?? 0, pct: percent(e), bg: palette(e).bg,
-}));
-const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.title }));
+const me = Astro.locals.me;
+if (!me) return Astro.redirect(`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`);
+const sb = Astro.locals.supabase;
+const params = Astro.url.searchParams;
+
+// three ways in: something new, a title already in the catalogue (?title=), or one of your entries (?log=)
+let start: Record<string, any> = { mode: 'new', kind: ['book', 'film', 'tv', 'essay'].includes(params.get('type') ?? '') ? params.get('type') : 'book' };
+const logId = params.get('log');
+const titleId = params.get('title');
+if (logId) {
+  const { data: l } = await sb.from('logs').select('*, title:titles(*), highlights(body, where_at, note, mine, position)').eq('id', logId).eq('user_id', me.id).maybeSingle<any>();
+  if (!l) return Astro.redirect('/add/');
+  start = {
+    mode: 'edit', id: l.id, kind: l.title.kind, title: l.title, status: l.status, rating: l.rating == null ? null : Number(l.rating), loved: l.loved,
+    started: l.started_on, finished: l.finished_on, again: l.again, notes: l.notes, where: l.where_seen, onlyMe: l.only_me,
+    lines: [...(l.highlights ?? [])].sort((a: any, b: any) => a.position - b.position).map((h: any) => ({ text: h.body, where: h.where_at, note: h.note, mine: h.mine })),
+  };
+} else if (titleId && /^[0-9a-f-]{36}$/i.test(titleId)) {
+  const { data: t } = await sb.from('titles').select('*').eq('id', titleId).maybeSingle<any>();
+  if (t) start = { mode: 'title', kind: t.kind, title: t, again: params.get('again') === '1', status: params.get('again') === '1' ? 'done' : undefined };
+}
+if (start.title) start.title.bg = paletteFor(start.title.title, start.title.color).bg;
+const kinds = (['book', 'film', 'tv', 'essay'] as const).map((k) => [k, k === 'essay' ? 'Essay' : kindName[k]]);
+const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log it again' : 'Add to your shelf';
 ---
-<Base title="Add" description="Add something to the library.">
-  <div id="add" class="wrap" data-inprogress={JSON.stringify(now)} data-threadlist={JSON.stringify(threads)} data-mpp={site.owner.minutesPerPage} data-step="loading">
+<Base title={start.mode === 'edit' ? 'Edit entry' : 'Add'} active="add" noindex>
+  <section class="pad wrap">
+    <div id="add" class="box rise" data-start={JSON.stringify(start)} data-statuses={JSON.stringify(STATUSES)} data-me={me.username}>
+      <h1 class="serif h">{heading}</h1>
 
-    <!-- checking -->
-    <section class="step" data-s="loading" aria-live="polite"><div class="sk" style="height: 180px"></div></section>
-
-    <!-- sign in -->
-    <section class="step" data-s="signin">
-      <p class="eyebrow" style="color: var(--lat)">Only for {site.owner.name}</p>
-      <h1 class="serif h">Sign in to add things</h1>
-      <form class="stack" style="gap: 12px" id="signin">
-        <label class="sr" for="pw">Password</label>
-        <input id="pw" class="field" type="password" autocomplete="current-password" placeholder="Password" required />
-        <p class="err" hidden></p>
-        <button class="btn primary big" type="submit">Sign in</button>
-      </form>
-      <p class="muted small" id="setup" hidden></p>
-    </section>
-
-    <!-- find it -->
-    <section class="step" data-s="find">
-      <div class="between"><h1 class="serif h">What are you adding?</h1></div>
-      <div class="seg" role="tablist" aria-label="Kind" id="kind">
-        <button type="button" role="tab" data-k="book" aria-selected="true">Book</button>
-        <button type="button" role="tab" data-k="film" aria-selected="false">Film</button>
-        <button type="button" role="tab" data-k="essay" aria-selected="false">Essay or article</button>
+      <!-- 1. what kind, and find it -->
+      <div class="step" data-step="find">
+        <div class="kinds" role="tablist" aria-label="Kind">
+          {kinds.map(([k, label]) => <button type="button" role="tab" data-kind={k} aria-selected={k === start.kind ? 'true' : 'false'}>{label}</button>)}
+        </div>
+        <form class="findbox" id="find">
+          <label class="sr" for="q">Search a title or paste a link</label>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          <input id="q" class="field" type="text" autocomplete="off" placeholder="Search a title, or paste a link" />
+        </form>
+        <ul class="hits" id="hits" aria-live="polite"></ul>
+        <p class="notice bad" id="finderr" hidden></p>
+        <button type="button" class="linkbtn" id="manual">Fill it in by hand →</button>
+        <p class="hint center" id="findhint">Works with Goodreads, Letterboxd, IMDb, Substack and most article links.</p>
       </div>
-      <form id="find" class="findbox">
-        <label class="sr" for="q">Search a title or paste a link</label>
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-        <input id="q" class="field" type="text" autocomplete="off" placeholder="Search a title, or paste a link" />
-      </form>
-      <ul class="hits" id="hits" aria-live="polite"></ul>
-      <p class="err" id="finderr" hidden></p>
-      <button type="button" class="linkbtn" data-go="manual">Fill it in by hand →</button>
 
-      <div class="stack nowlist" id="nowlist" style="gap: 10px"></div>
-      <p class="muted small center">Works with Goodreads, Letterboxd, Substack and most article links.</p>
-    </section>
-
-    <!-- the details -->
-    <section class="step" data-s="form">
-      <form id="entry" class="stack" style="gap: 22px">
-        <div class="card preview">
-          <span class="wash pc" id="pc"></span>
-          <div class="stack grow" style="gap: 8px">
+      <!-- 2. the details -->
+      <form class="step" data-step="form" id="entry" novalidate>
+        <div class="preview">
+          <span class="pc wash" id="pc"><img id="pcimg" alt="" hidden referrerpolicy="no-referrer" /></span>
+          <div class="stack grow" style="gap: 6px">
             <span class="eyebrow" id="pk" style="font-size: 10px"></span>
-            <input name="title" class="bare serif pt" placeholder="Title" required aria-label="Title" />
-            <input name="creator" class="bare" placeholder="Author" required aria-label="Author or director" />
-            <div class="row3">
-              <label>Year<input name="year" class="field sm" inputmode="numeric" /></label>
-              <label class="only-book">Pages<input name="pages" class="field sm" inputmode="numeric" /></label>
-              <label class="only-film">Minutes<input name="runtime" class="field sm" inputmode="numeric" /></label>
-              <label class="only-essay">Words<input name="words" class="field sm" inputmode="numeric" /></label>
+            <div id="fixed" class="stack" style="gap: 4px">
+              <span class="serif pt" id="ptitle"></span>
+              <span class="muted small" id="pmeta"></span>
             </div>
-            <span class="found small" id="from" hidden></span>
+            <div id="editable" class="stack" style="gap: 8px" hidden>
+              <input name="title" class="bare serif pt" placeholder="Title" aria-label="Title" maxlength="300" />
+              <input name="creator" class="bare" placeholder="Author" aria-label="Author or director" maxlength="200" />
+              <div class="row3">
+                <label>Year<input name="year" class="field sm" inputmode="numeric" maxlength="4" /></label>
+                <label class="only-book">Pages<input name="pages" class="field sm" inputmode="numeric" /></label>
+                <label class="only-film">Minutes<input name="runtime" class="field sm" inputmode="numeric" /></label>
+                <label class="only-tv">Season<input name="season" class="field sm" inputmode="numeric" /></label>
+                <label class="only-essay">Link<input name="link" class="field sm" type="url" placeholder="https://" /></label>
+              </div>
+            </div>
+            <button type="button" class="linkbtn sm" id="change">Change</button>
           </div>
         </div>
 
-        <div class="seg wide" role="radiogroup" aria-label="Status" id="status">
-          <button type="button" data-st="done" aria-pressed="true">Finished</button>
-          <button type="button" data-st="progress" aria-pressed="false" class="not-essay"><span class="only-book">Still reading</span><span class="only-film">Still watching</span></button>
+        <div class="stack" style="gap: 10px">
+          <span class="lbl">Status</span>
+          <div class="statuses" id="statuses" role="radiogroup" aria-label="Status"></div>
         </div>
 
-        <div class="stack progress-only only-book pagebox" style="gap: 12px">
-          <span class="eyebrow">Where you are</span>
-          <div class="pagerow">
-            <label>On page<input name="page" class="field sm" inputmode="numeric" placeholder="0" /></label>
-            <span class="of">of</span>
-            <label>Pages in all<input name="ptotal" class="field sm" inputmode="numeric" placeholder="320" /></label>
-          </div>
-          <div class="chips">
-            <button type="button" class="chip" data-addp="10">+10 pages</button>
-            <button type="button" class="chip" data-addp="25">+25</button>
-            <button type="button" class="chip" data-addp="50">+50</button>
-          </div>
-          <span class="muted small" id="pv"></span>
-        </div>
-
-        <div class="stack center done-only rating-wrap" style="gap: 6px">
+        <div class="stack center done-only" style="gap: 6px">
           <div class="stars-in not-essay" role="radiogroup" aria-label="Your rating" id="stars">
             {[1, 2, 3, 4, 5].map((n) => <button type="button" data-n={n} aria-label={`${n} star${n > 1 ? 's' : ''}`}>★</button>)}
           </div>
@@ -97,332 +88,376 @@ const threads = (await getThreads()).map((t) => ({ slug: t.id, title: t.data.tit
           <span class="muted small not-essay" id="rl">Tap a star. Tap again for a half.</span>
         </div>
 
+        <div class="dates">
+          <div class="stack not-want" style="gap: 8px">
+            <span class="lbl">Started</span>
+            <input type="date" name="started" class="field sm" aria-label="Started" />
+          </div>
+          <div class="stack done-only" style="gap: 8px">
+            <span class="lbl">Finished</span>
+            <input type="date" name="finished" class="field sm" aria-label="Finished" />
+            <div class="quick"><button type="button" class="gchip" data-day="0">Today</button><button type="button" class="gchip" data-day="1">Yesterday</button></div>
+          </div>
+        </div>
+
         <label class="stack" style="gap: 8px">
-          <span class="eyebrow">A few lines to remember</span>
-          <textarea name="note" class="field serif" rows="3" placeholder="Optional. What stayed with you?"></textarea>
+          <span class="lbl" id="noteslbl">A few lines to remember</span>
+          <textarea name="notes" class="field serif" rows="3" maxlength="10000" placeholder="Optional. What stayed with you?"></textarea>
         </label>
 
-        <details class="more-box">
-          <summary>Add a quote, a link, where you watched it…</summary>
+        <div class="opts">
+          <label class="opt">
+            <span class="stack" style="gap: 2px"><b>Again</b><span class="hint" id="againhint">A re-read or re-watch. Your first time stays as its own entry.</span></span>
+            <input type="checkbox" class="onoff" name="again" />
+          </label>
+          <label class="opt">
+            <span class="stack" style="gap: 2px"><b>Only me</b><span class="hint">Hide this one entry from your profile.</span></span>
+            <input type="checkbox" class="onoff" name="onlyMe" />
+          </label>
+        </div>
+
+        <details class="more-box" id="morebox">
+          <summary>+ A line you underlined, where you watched it</summary>
           <div class="stack" style="gap: 14px; padding-top: 14px">
-            <label class="stack" style="gap: 6px"><span class="eyebrow">A line you underlined</span><textarea name="quote" class="field serif" rows="2"></textarea></label>
-            <label class="check"><input type="checkbox" name="quoteMine" /> This line is mine, not a quote</label>
-            <label class="stack" style="gap: 6px"><span class="eyebrow">Link</span><input name="link" class="field" type="url" placeholder="https://" /></label>
-            <input type="hidden" name="cover" />
-            <label class="stack only-essay" style="gap: 6px"><span class="eyebrow">Published in</span><input name="source" class="field" placeholder="Substack, a magazine, a blog…" /></label>
-            <label class="stack only-film" style="gap: 6px"><span class="eyebrow">Where</span><input name="where" class="field" placeholder="at home, at the cinema, film club…" /></label>
-            <label class="stack" style="gap: 6px"><span class="eyebrow">Times read or watched</span><input name="times" class="field sm" inputmode="numeric" placeholder="1" /></label>
+            <div id="lines" class="stack" style="gap: 14px"></div>
+            <button type="button" class="linkbtn sm" id="addline">+ Another line</button>
+            <label class="stack only-filmish" style="gap: 6px"><span class="lbl">Where</span><input name="where" class="field" maxlength="80" placeholder="at home, at the cinema, film club…" /></label>
           </div>
         </details>
 
+        <p class="notice bad" id="saveerr" hidden></p>
         <div class="stack" style="gap: 10px">
-          <span class="eyebrow">Threads</span>
-          <div class="chips" id="tchips"></div>
-          <input name="newThread" class="field" placeholder="+ Start a new thread (optional)" />
-        </div>
-
-        <div class="chips">
-          <button type="button" class="chip" data-day="0">Today</button>
-          <button type="button" class="chip" data-day="1">Yesterday</button>
-          <label class="chip"><input type="date" name="date" class="date" aria-label="Date" /></label>
-          <button type="button" class="chip" id="priv" aria-pressed="false">Everyone can see this</button>
-        </div>
-
-        <p class="err" id="saveerr" hidden></p>
-        <div class="stack" style="gap: 10px">
-          <button class="btn primary big" type="submit" id="savebtn">Save to library</button>
-          <button type="button" class="linkbtn" data-go="find">← Start over</button>
+          <button class="btn primary big" type="submit" id="savebtn">Save to my shelf</button>
+          <div class="between">
+            <button type="button" class="linkbtn" id="startover">← Start over</button>
+            {start.mode === 'edit' && <button type="button" class="linkbtn danger" id="remove">Remove from my shelf</button>}
+          </div>
         </div>
       </form>
-    </section>
 
-    <!-- saved -->
-    <section class="step center" data-s="saved" role="status">
-      <div class="done-mark"><span class="ring"></span><span class="pop"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#FFFBF3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span></div>
-      <h2 class="serif h">Saved</h2>
-      <p class="muted" id="savedmsg"></p>
-      <div class="stack" style="gap: 10px; width: 100%">
-        <button class="btn primary big" type="button" data-go="find">Add another</button>
-        <a class="btn big" id="viewlink" href="/">View the entry</a>
+      <!-- 3. saved -->
+      <div class="step center" data-step="saved" role="status">
+        <div class="done-mark"><span class="ring"></span><span class="pop"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#FFFBF3" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"/></svg></span></div>
+        <h2 class="serif h">Saved</h2>
+        <p class="muted" id="savedmsg">It’s on your shelf.</p>
+        <div class="stack" style="gap: 10px; width: 100%">
+          <a class="btn primary big" id="viewlink" href="/">View the entry</a>
+          <button class="btn big" type="button" id="another">Add another</button>
+        </div>
       </div>
-    </section>
-
-    <button type="button" class="linkbtn signout" id="signout" hidden>Sign out</button>
-  </div>
+    </div>
+  </section>
 </Base>
 
 <style is:global>
-  #add.wrap { max-width: 600px; margin: 0 auto; padding: 48px 20px 0; }
-  #add .step { display: none; flex-direction: column; gap: 22px; }
-  #add[data-step="loading"] [data-s="loading"], #add[data-step="signin"] [data-s="signin"], #add[data-step="find"] [data-s="find"],
-  #add[data-step="form"] [data-s="form"], #add[data-step="saved"] [data-s="saved"] { display: flex; animation: rise .6s var(--spring) backwards; }
-  #add .h { margin: 0; font-weight: 400; font-size: clamp(30px, 5vw, 40px); line-height: 1.1; }
-  #add .h em { color: var(--lat); }
+  #add.box { max-width: 620px; margin: 0 auto; padding: 32px; display: flex; flex-direction: column; gap: 22px; border-radius: 22px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 30px 60px -30px var(--shadow); }
+  .wrap { padding-top: 40px; }
+  #add .h { margin: 0; font-weight: 400; font-size: clamp(28px, 4vw, 36px); line-height: 1.1; }
+  #add .step { display: none; flex-direction: column; gap: 20px; }
+  #add[data-at="find"] [data-step="find"], #add[data-at="form"] [data-step="form"], #add[data-at="saved"] [data-step="saved"] { display: flex; animation: rise .5s var(--spring) backwards; }
+  #add[data-at="saved"] > .h { display: none; }
   #add .small { font-size: 13px; }
   #add .center { text-align: center; align-items: center; }
   #add .between { display: flex; justify-content: space-between; align-items: center; }
   #add .grow { flex: 1; min-width: 0; }
-  #add .field { width: 100%; height: 52px; padding: 0 16px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-family: inherit; font-size: 16px; outline: none; transition: border-color .3s ease, box-shadow .3s ease; }
-  #add textarea.field { height: auto; padding: 14px 16px; line-height: 1.45; resize: vertical; }
-  #add .field:focus { border-color: var(--lat); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lat) 18%, transparent); }
-  #add .field.sm { height: 40px; padding: 0 10px; font-size: 15px; border-radius: 10px; }
-  #add .findbox { position: relative; }
+  #add .kinds { display: grid; grid-template-columns: repeat(4, 1fr); padding: 4px; border-radius: 12px; background: var(--soft); }
+  #add .kinds button { height: 38px; border: 0; border-radius: 9px; background: transparent; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; }
+  #add .kinds button[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  #add .findbox { position: relative; margin: 0; }
   #add .findbox svg { position: absolute; left: 16px; top: 17px; color: var(--muted); }
-  #add .findbox .field { padding-left: 46px; height: 56px; }
-  #add .seg { align-self: flex-start; }
-  #add .seg.wide { align-self: stretch; display: flex; }
-  #add .seg.wide button { flex: 1; }
+  #add .findbox .field { padding-left: 46px; height: 54px; }
+  #add .field.sm { height: 42px; font-size: 15px; padding: 0 10px; }
   #add .hits:empty { display: none; }
   #add .hits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-  #add .hits button { width: 100%; text-align: left; display: flex; gap: 14px; align-items: center; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; font-family: inherit; transition: transform .4s var(--spring), border-color .3s ease; }
+  #add .hits button { width: 100%; text-align: left; display: flex; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; font-family: inherit; transition: transform .4s var(--spring), border-color .3s ease; }
   #add .hits button:hover { border-color: var(--lat); transform: translateX(4px); }
-  #add .hits .sw { width: 36px; height: 52px; border-radius: 3px; flex-shrink: 0; }
-  #add .sk { border-radius: 14px; background: linear-gradient(90deg, var(--soft), var(--card), var(--soft)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+  #add .hits .sw { width: 40px; height: 58px; border-radius: 3px; flex-shrink: 0; overflow: hidden; display: block; background-size: cover; background-position: center; }
+  #add .hits .ht { font-family: Fraunces, Georgia, serif; font-size: 18px; line-height: 1.2; }
+  #add .hits .hm { font-size: 13px; color: var(--muted); }
+  #add .sk { height: 66px; border-radius: 14px; background: linear-gradient(90deg, var(--soft), var(--card), var(--soft)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
   @keyframes shimmer { to { background-position: -200% 0; } }
-  #add .linkbtn { align-self: flex-start; height: 40px; padding: 0; border: 0; background: transparent; color: var(--lat); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
-  #add .err { margin: 0; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--lat); color: var(--ink); font-size: 14px; }
-  #add .nowrow { width: 100%; text-align: left; padding: 12px 14px; display: flex; align-items: center; gap: 14px; cursor: pointer; color: var(--ink); font-family: inherit; }
-  #add .nowrow .sw { width: 36px; height: 52px; border-radius: 2px 4px 4px 2px; flex-shrink: 0; }
-
-  #add .preview { padding: 16px; display: flex; gap: 16px; align-items: flex-start; }
-  #add .pc { width: 84px; height: 124px; border-radius: 4px; flex-shrink: 0; transition: background-color .5s ease; }
+  #add .linkbtn { align-self: flex-start; height: 36px; padding: 0; border: 0; background: transparent; color: var(--lat); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #add .linkbtn.sm { height: 24px; font-size: 13px; }
+  #add .linkbtn.danger { color: #B4473B; }
+  #add .preview { display: flex; gap: 16px; align-items: flex-start; padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--bg); }
+  #add .pc { position: relative; width: 72px; height: 108px; border-radius: 4px; flex-shrink: 0; overflow: hidden; }
+  #add .pc img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; }
   #add .bare { width: 100%; border: 0; border-bottom: 1px dashed var(--line); background: transparent; color: var(--ink); font-family: inherit; font-size: 15px; padding: 4px 0; outline: none; }
   #add .bare:focus { border-bottom-color: var(--lat); }
-  #add .pt { font-family: Fraunces, Georgia, serif; font-size: 24px; }
-  #add .row3 { display: flex; gap: 10px; }
-  #add .pagerow { display: flex; align-items: flex-end; gap: 12px; }
-  #add .pagerow label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: 1; }
-  #add .pagerow .of { padding-bottom: 10px; color: var(--muted); }
-  #add .row3 label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: 1; }
-  #add .found { color: var(--moss); }
+  #add .pt { font-family: Fraunces, Georgia, serif; font-size: 22px; line-height: 1.15; }
+  #add .row3 { display: flex; gap: 10px; flex-wrap: wrap; }
+  #add .row3 label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); flex: 1; min-width: 90px; }
+  #add .statuses { display: grid; grid-template-columns: repeat(var(--n, 5), 1fr); gap: 8px; }
+  #add .st { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); font-size: 12.5px; font-weight: 600; color: var(--muted); text-align: center; line-height: 1.2; cursor: pointer; font-family: inherit; }
+  #add .st svg { width: 20px; height: 20px; }
+  #add .st:hover { border-color: var(--lat); color: var(--ink); }
+  #add .st[aria-checked="true"] { border-color: var(--lat); background: color-mix(in srgb, var(--lat) 12%, var(--card)); color: var(--lat); box-shadow: 0 0 0 1px var(--lat) inset; }
   #add .stars-in { display: flex; gap: 4px; }
-  #add .stars-in button { width: 52px; height: 52px; border: 0; background: transparent; font-size: 38px; line-height: 1; color: var(--line); cursor: pointer; padding: 0; transition: transform .3s var(--spring), color .2s ease; }
+  #add .stars-in button { width: 50px; height: 50px; border: 0; background: transparent; font-size: 38px; line-height: 1; color: var(--line); cursor: pointer; padding: 0; transition: transform .3s var(--spring), color .2s ease; }
   #add .stars-in button.on { color: var(--haldi); }
   #add .stars-in button.half { background: linear-gradient(90deg, var(--haldi) 50%, var(--line) 50%); -webkit-background-clip: text; background-clip: text; color: transparent; }
   #add .stars-in button:active { transform: scale(.85); }
-  #add .heart { height: 48px; padding: 0 22px; border-radius: 24px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
+  #add .heart { height: 46px; padding: 0 22px; border-radius: 23px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
   #add .heart[aria-pressed="true"] { background: var(--lat); border-color: var(--lat); color: var(--bg); }
-  #add .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  #add .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
-  #add .date { border: 0; background: transparent; color: inherit; font: inherit; }
+  #add .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  #add .quick { display: flex; gap: 6px; }
+  #add .opts { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: 16px; }
+  #add .opt { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; cursor: pointer; }
+  #add .opt + .opt { border-top: 1px solid var(--line); }
+  #add .opt b { font-size: 15px; font-weight: 600; }
   #add .more-box summary { cursor: pointer; color: var(--lat); font-size: 14px; font-weight: 600; list-style: none; }
   #add .more-box summary::-webkit-details-marker { display: none; }
+  #add .line { padding: 14px; border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; gap: 10px; }
   #add .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
-
-  /* show the right fields for each kind */
-  #add[data-kind="book"] .only-film, #add[data-kind="book"] .only-essay,
-  #add[data-kind="film"] .only-book, #add[data-kind="film"] .only-essay,
-  #add[data-kind="essay"] .only-book, #add[data-kind="essay"] .only-film, #add[data-kind="essay"] .not-essay { display: none !important; }
-  #add[data-st="done"] .progress-only, #add[data-st="progress"] .done-only { display: none !important; }
-
-  #add .done-mark { position: relative; width: 104px; height: 104px; margin-top: 40px; }
-  #add .done-mark span { position: absolute; inset: 0; border-radius: 52px; }
+  #add .check input { accent-color: var(--lat); }
+  #add[data-kind="book"] .only-film, #add[data-kind="book"] .only-tv, #add[data-kind="book"] .only-essay, #add[data-kind="book"] .only-filmish,
+  #add[data-kind="film"] .only-book, #add[data-kind="film"] .only-tv, #add[data-kind="film"] .only-essay,
+  #add[data-kind="tv"] .only-book, #add[data-kind="tv"] .only-essay,
+  #add[data-kind="essay"] .only-book, #add[data-kind="essay"] .only-film, #add[data-kind="essay"] .only-tv, #add[data-kind="essay"] .only-filmish, #add[data-kind="essay"] .not-essay { display: none !important; }
+  #add[data-kind="tv"] .only-film:not(.only-tv) { display: none !important; }
+  #add:not([data-status="done"]) .done-only { display: none !important; }
+  #add[data-status="want"] .not-want { display: none !important; }
+  #add .done-mark { position: relative; width: 96px; height: 96px; margin-top: 20px; }
+  #add .done-mark span { position: absolute; inset: 0; border-radius: 48px; }
   #add .ring { border: 2px solid var(--moss); animation: ring 1.2s var(--spring) .3s backwards; opacity: 0; }
-  #add .pop { background: var(--moss); display: flex; align-items: center; justify-content: center; animation: pop .7s var(--spring) backwards; }
-  @keyframes pop { from { transform: scale(.3); opacity: 0; } }
-  @keyframes ring { from { transform: scale(1); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
-  #add .signout { margin-top: 40px; color: var(--muted); }
+  #add .pop { background: var(--moss); display: flex; align-items: center; justify-content: center; animation: pop .6s var(--spring) backwards; }
+  @keyframes ring { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.5); opacity: 0; } }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } }
+  @media (max-width: 780px) {
+    .wrap { padding-top: 16px; }
+    #add.box { padding: 22px 16px; }
+    #add .statuses { grid-template-columns: repeat(3, 1fr); }
+    #add .dates { grid-template-columns: 1fr; }
+  }
 </style>
 
 <script>
-  type Now = { slug: string; title: string; type: string; page: number; pages: number; pct: number; bg: string };
-  const COLORS = ['#2F4A5C', '#6B3A2E', '#4E5B3A', '#3C4E6B', '#7A4E5A', '#4E6A3F', '#8A5A2B', '#355E6B', '#2E5049', '#5C4A6E', '#8C3F3A', '#46525E'];
-  const hash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
-  const colorFor = (t: string) => COLORS[hash(t || 'x') % COLORS.length];
-  const esc = (s: string) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
-  const today = (back = 0) => { const d = new Date(Date.now() - back * 86400000); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  import { navigate } from 'astro:transitions/client';
+  type Kind = 'book' | 'film' | 'tv' | 'essay';
+  const ICONS: Record<string, string> = {
+    want: '<path d="M18 7v14l-6-4-6 4V7a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4z"/>',
+    reading: '<path d="M5 4h4a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H5zM19 4h-4a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h5z"/>',
+    watching: '<path d="M7 4v16l13-8z"/>',
+    done: '<circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/>',
+    paused: '<path d="M8 5v14M16 5v14"/>',
+    dnf: '<circle cx="12" cy="12" r="9"/><path d="M10 10l4 4m0-4l-4 4"/>',
+    dropped: '<circle cx="12" cy="12" r="9"/><path d="M10 10l4 4m0-4l-4 4"/>',
+  };
+  const esc = (s: string) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+  const iso = (d: Date) => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
-  function init() {
+  function setup() {
     const root = document.getElementById('add');
     if (!root || root.dataset.ready) return;
     root.dataset.ready = '1';
-    const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
-    const form = $<HTMLFormElement>('#entry');
-    const F = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
-    const now: Now[] = JSON.parse(root.dataset.inprogress!);
-    const MPP = +(root.dataset.mpp || 1.1);
-    let lastKind = 'book';
-    try { lastKind = localStorage.getItem('addKind') || 'book'; } catch (e) {}
-    const threads: { slug: string; title: string }[] = JSON.parse(root.dataset.threadlist!);
-    let kind = 'book', rating = 0, loved = false, priv = false, picked = new Set<string>(), updating: Now | null = null;
+    const start = JSON.parse(root.dataset.start!);
+    const STATUSES: Record<Kind, [string, string][]> = JSON.parse(root.dataset.statuses!);
+    const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+    const form = $('entry') as HTMLFormElement;
+    const f = (n: string) => form.elements.namedItem(n) as HTMLInputElement;
+    let kind: Kind = start.kind;
+    let pick: any = null;          // a found title (from search) or {title: {...}} already in the catalogue
+    let titleId: string | null = null;
+    let manual = false;
+    let rating = 0;
+    let status = '';
 
-    const go = (s: string) => { root.dataset.step = s; window.scrollTo({ top: 0, behavior: 'smooth' }); if (s === 'find') setTimeout(() => $<HTMLInputElement>('#q').focus(), 50); };
-    const setKind = (k: string) => {
+    const at = (s: string) => { root.dataset.at = s; window.scrollTo({ top: 0, behavior: 'smooth' }); };
+    const setKind = (k: Kind) => {
       kind = k; root.dataset.kind = k;
-      root.querySelectorAll('#kind [data-k]').forEach((b) => b.setAttribute('aria-selected', String((b as HTMLElement).dataset.k === k)));
-      $('#pk').textContent = { book: 'Book', film: 'Film', essay: 'Essay' }[k]!;
-      $('#pk').style.color = { book: 'var(--lat)', film: 'var(--sky)', essay: 'var(--moss)' }[k]!;
-      F('creator').placeholder = { book: 'Author', film: 'Director', essay: 'Writer' }[k]!;
-      $('#q').setAttribute('placeholder', k === 'essay' ? 'Paste the link to the essay' : 'Search a title, or paste a link');
-      if (k === 'essay') setStatus('done');
-      try { localStorage.setItem('addKind', k); } catch (e) {}
+      root.querySelectorAll<HTMLElement>('[data-kind]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.kind === k)));
+      ($('q') as HTMLInputElement).placeholder = k === 'essay' ? 'Paste the link to the essay or article' : k === 'tv' ? 'Search a show' : 'Search a title, or paste a link';
+      ($('hits')).innerHTML = '';
+      $('findhint').textContent = k === 'tv' ? 'Find the show, then pick the season you watched.' : 'Works with Goodreads, Letterboxd, IMDb, Substack and most article links.';
+      f('creator').placeholder = k === 'book' ? 'Author' : k === 'film' ? 'Director' : k === 'tv' ? 'Created by' : 'Writer';
+      $('noteslbl').textContent = k === 'essay' ? 'Why you saved it' : 'A few lines to remember';
+      $('againhint').textContent = k === 'book' || k === 'essay' ? 'A re-read. Your first time stays as its own entry.' : 'A re-watch. Your first time stays as its own entry.';
+      drawStatuses();
     };
-    const setStatus = (s: string) => { root.dataset.st = s; root.querySelectorAll('#status [data-st]').forEach((b) => b.setAttribute('aria-pressed', String((b as HTMLElement).dataset.st === s))); };
+    const setStatus = (s: string) => {
+      status = s; root.dataset.status = s;
+      root.querySelectorAll<HTMLElement>('#statuses [data-st]').forEach((b) => b.setAttribute('aria-checked', String(b.dataset.st === s)));
+      if (s === 'done' && !f('finished').value) f('finished').value = iso(new Date());
+      if ((s === 'reading' || s === 'watching') && !f('started').value) f('started').value = iso(new Date());
+    };
+    function drawStatuses() {
+      const list = STATUSES[kind];
+      const box = $('statuses');
+      box.style.setProperty('--n', String(list.length));
+      box.innerHTML = list.map(([k, label]) => `<button type="button" role="radio" class="st" data-st="${k}" aria-checked="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${ICONS[k]}</svg><span>${esc(label)}</span></button>`).join('');
+      if (!list.some(([k]) => k === status)) setStatus(list.find(([k]) => k === 'done') ? 'done' : list[0][0]);
+      else setStatus(status);
+    }
     const paintStars = () => {
-      root.querySelectorAll<HTMLElement>('#stars button').forEach((b) => {
+      root.querySelectorAll<HTMLButtonElement>('#stars button').forEach((b) => {
         const n = +b.dataset.n!;
-        b.classList.toggle('on', n <= rating); b.classList.toggle('half', n - 0.5 === rating);
-        b.setAttribute('aria-checked', String(Math.ceil(rating) === n));
+        b.classList.toggle('on', rating >= n);
+        b.classList.toggle('half', rating === n - 0.5);
       });
-      const L = ['Tap a star. Tap again for a half.', 'Not for me', 'It was okay', 'Liked it', 'Really liked it', 'Loved it'];
-      $('#rl').textContent = rating ? `${rating} · ${L[Math.ceil(rating)]}` : L[0];
+      $('rl').textContent = rating ? `${rating} out of 5. Tap again for a half.` : 'Tap a star. Tap again for a half.';
     };
-    const paintCover = () => { $('#pc').style.background = colorFor(F('title').value); };
-    const paintThreads = () => {
-      $('#tchips').innerHTML = threads.map((t) => `<button type="button" class="chip" data-t="${esc(t.slug)}" aria-pressed="${picked.has(t.slug)}">${picked.has(t.slug) ? '✓ ' : ''}${esc(t.title)}</button>`).join('');
-    };
-    const paintNow = () => {
-      $('#nowlist').innerHTML = now.length ? `<span class="eyebrow">Update something you’re on</span>` + now.map((n) =>
-        `<button type="button" class="card nowrow" data-now="${esc(n.slug)}"><span class="wash sw" style="background:${n.bg}"></span><span class="stack grow" style="gap:3px"><span class="serif" style="font-size:16px">${esc(n.title)}</span><span class="muted small">${n.type === 'book' ? 'Reading · ' + (n.page ? 'page ' + n.page + (n.pages ? ' of ' + n.pages : '') : n.pct + '%') : 'Watching'}</span></span><span class="chip" style="height:32px">Update</span></button>`).join('') : '';
-    };
-
-    // pages: "38% · about 3 hours left at your pace"
-    const paintPages = () => {
-      const p = +F('page').value || 0, t = +F('ptotal').value || 0;
-      if (!p) { $('#pv').textContent = t ? 'Type the page you are on.' : 'Type the page you are on, and the total if you know it.'; return; }
-      if (!t) { $('#pv').textContent = `Page ${p}.`; return; }
-      const left = Math.max(0, Math.round((t - Math.min(p, t)) * MPP)), h = Math.floor(left / 60), m = left % 60;
-      $('#pv').textContent = p >= t ? 'That is the last page. Mark it finished?' : `${Math.round((p / t) * 100)}% · about ${h ? h + 'h ' : ''}${m}m left at your pace`;
-    };
-    const reset = (k = kind) => {
-      form.reset(); rating = 0; loved = false; priv = false; picked = new Set(); updating = null;
-      F('date').value = today(); F('cover').value = ''; $('#from').hidden = true; $('#saveerr').hidden = true;
-      $('#loved').setAttribute('aria-pressed', 'false');
-      $('#priv').setAttribute('aria-pressed', 'false'); $('#priv').textContent = 'Everyone can see this';
-      root.querySelectorAll<HTMLElement>('#entry input, #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((el) => (el.style.display = ''));
-      $('#tchips').parentElement!.style.display = '';
-      $('#savebtn').textContent = 'Save to library';
-      F('title').required = true; F('creator').required = true;
-      setKind(k); setStatus('done'); paintStars(); paintThreads(); paintCover(); paintPages();
-    };
-    const fill = (h: any) => {
-      reset(h.type);
-      for (const k of ['title', 'creator', 'year', 'pages', 'runtime', 'words', 'link', 'source', 'cover']) if (h[k] != null && F(k)) F(k).value = String(h[k]);
-      if (h.from) { $('#from').hidden = false; $('#from').textContent = `✓ Filled in from ${h.from}. Change anything.`; }
-      paintCover(); go('form');
+    const addLine = (l: any = {}) => {
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.innerHTML = `<textarea class="field serif" rows="2" maxlength="2000" placeholder="The line, as it was written" data-l="text">${esc(l.text ?? '')}</textarea>
+        <input class="field sm" maxlength="80" placeholder="Where: a chapter, a page, a scene (optional)" data-l="where" value="${esc(l.where ?? '')}" />
+        <input class="field sm" maxlength="1000" placeholder="Your note about it (optional)" data-l="note" value="${esc(l.note ?? '')}" />
+        <label class="check"><input type="checkbox" data-l="mine" ${l.mine ? 'checked' : ''} /> This line is mine, not a quote</label>`;
+      $('lines').appendChild(div);
     };
 
-    // ——— who is this? ———
-    fetch('/api/me', { cache: 'no-store' }).then((r) => r.json()).then((me) => {
-      if (!me.ready) { const s = $('#setup'); s.hidden = false; s.textContent = `Adding isn’t switched on yet. In Vercel, add: ${me.missing.join(', ')}.`; }
-      $('#signout').hidden = !me.owner;
-      reset(lastKind); paintNow();
-      go(me.owner ? 'find' : 'signin');
-    }).catch(() => {
-      reset(lastKind); go('signin');
-      const s = $('#setup'); s.hidden = false; s.textContent = 'Adding only works on the live site, not in preview.';
-    });
+    // the chosen title, shown above the form
+    function showPick(t: any) {
+      const p = $('pc'), img = $('pcimg') as HTMLImageElement;
+      p.style.background = t.bg || '#46525E';
+      if (t.cover || t.cover_url) { img.src = t.cover || t.cover_url; img.hidden = false; img.onerror = () => (img.hidden = true); } else img.hidden = true;
+      $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[t.kind]}${t.from && t.from !== 'you' ? ' · from ' + t.from : ''}`;
+      $('ptitle').textContent = t.kind === 'tv' && t.season ? `${t.title}, season ${t.season}` : t.title;
+      $('pmeta').textContent = [t.creator, t.year, t.pages ? `${t.pages} pages` : '', t.runtime && t.kind === 'film' ? `${t.runtime} min` : '', t.episodes ? `${t.episodes} episodes` : '', t.source && t.kind === 'essay' ? t.source : ''].filter(Boolean).join(' · ');
+      $('fixed').hidden = false; $('editable').hidden = true;
+    }
+    function toForm(t: any, isManual = false) {
+      manual = isManual;
+      if (isManual) {
+        $('pc').style.background = '#46525E'; ($('pcimg') as HTMLImageElement).hidden = true;
+        $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[kind]} · by hand`;
+        $('fixed').hidden = true; $('editable').hidden = false;
+        f('title').value = t?.title ?? ''; f('creator').value = t?.creator ?? '';
+      } else showPick(t);
+      at('form');
+      if (isManual) f('title').focus();
+    }
 
-    $<HTMLFormElement>('#signin').addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      const err = $<HTMLElement>('[data-s="signin"] .err');
-      const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: $<HTMLInputElement>('#pw').value }) });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) { err.hidden = false; err.textContent = j.error ?? 'That didn’t work.'; return; }
-      document.dispatchEvent(new Event('owner-changed'));
-      $('#signout').hidden = false; go('find');
-    });
-    $('#signout').addEventListener('click', async () => {
-      await fetch('/api/logout', { method: 'POST' });
-      document.dispatchEvent(new Event('owner-changed'));
-      $('#signout').hidden = true; go('signin');
-    });
-
-    // ——— searching ———
-    let timer: any, seq = 0;
-    const search = async () => {
-      const q = $<HTMLInputElement>('#q').value.trim();
-      const hits = $('#hits'), err = $('#finderr');
+    // search
+    let timer = 0, seq = 0;
+    async function search() {
+      const q = ($('q') as HTMLInputElement).value.trim();
+      const hits = $('hits'), err = $('finderr');
       err.hidden = true;
       if (q.length < 2) { hits.innerHTML = ''; return; }
-      if (kind === 'essay' && !/^https?:\/\//.test(q)) { hits.innerHTML = ''; return; }
+      if (kind === 'essay' && !/^https?:\/\//i.test(q)) { hits.innerHTML = ''; return; }
       const my = ++seq;
-      hits.innerHTML = '<li class="sk" style="height:76px"></li><li class="sk" style="height:76px"></li>';
-      const r = await fetch(`/api/lookup?type=${kind}&q=${encodeURIComponent(q)}`).catch(() => null);
+      hits.innerHTML = '<li class="sk"></li><li class="sk"></li>';
+      const r = await fetch(`/api/lookup?type=${kind}&q=${encodeURIComponent(q)}`).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
       if (my !== seq) return;
-      const j = r ? await r.json().catch(() => ({})) : {};
-      if (r?.status === 401) { go('signin'); return; }
-      if (!r || !r.ok) { hits.innerHTML = ''; err.hidden = false; err.textContent = j.error ?? 'We couldn’t reach the catalogue. Fill it in by hand instead.'; return; }
-      (root as any)._hits = j.hits;
-      hits.innerHTML = j.hits.length ? j.hits.map((h: any, i: number) =>
-        `<li><button type="button" data-hit="${i}">${h.cover ? `<img class="sw" src="${esc(h.cover)}" alt="" loading="lazy" style="object-fit:cover" />` : `<span class="wash sw" style="background:${colorFor(h.title)}"></span>`}<span class="stack grow" style="gap:3px"><span class="serif" style="font-size:18px">${esc(h.title)}</span><span class="muted small">${esc([h.creator, h.year, h.pages && h.pages + ' pages', h.runtime && h.runtime + ' min', h.words && Math.round(h.words / 230) + '-minute read'].filter(Boolean).join(' · '))}</span></span><span class="eyebrow" style="font-size:10px">${esc(h.type)}</span></button></li>`).join('')
-        : `<li class="muted small">Nothing found. Try fewer words, or fill it in by hand.</li>`;
-    };
-    $('#q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(search, /^https?:/.test($<HTMLInputElement>('#q').value) ? 50 : 400); });
-    $('#find').addEventListener('submit', (ev) => { ev.preventDefault(); clearTimeout(timer); search(); });
-
-    // ——— clicks ———
-    root.addEventListener('click', (ev) => {
-      const el = ev.target as HTMLElement;
-      const k = el.closest<HTMLElement>('#kind [data-k]');
-      if (k) { setKind(k.dataset.k!); $<HTMLInputElement>('#q').value = ''; $('#hits').innerHTML = ''; $('#q').focus(); return; }
-      const hit = el.closest<HTMLElement>('[data-hit]');
-      if (hit) { fill((root as any)._hits[+hit.dataset.hit!]); return; }
-      const g = el.closest<HTMLElement>('[data-go]');
-      if (g) { if (g.dataset.go === 'manual') { reset(kind); go('form'); F('title').focus(); } else { $<HTMLInputElement>('#q').value = ''; $('#hits').innerHTML = ''; go(g.dataset.go!); } return; }
-      const ap = el.closest<HTMLElement>('[data-addp]');
-      if (ap) { const t = +F('ptotal').value || Infinity; F('page').value = String(Math.min(t, (+F('page').value || 0) + +ap.dataset.addp!)); paintPages(); return; }
-      const dy = el.closest<HTMLElement>('[data-day]');
-      if (dy) { F('date').value = today(+dy.dataset.day!); return; }
-      const st = el.closest<HTMLElement>('#status [data-st]');
-      if (st) { setStatus(st.dataset.st!); return; }
-      const s = el.closest<HTMLElement>('#stars [data-n]');
-      if (s) { const n = +s.dataset.n!; rating = rating === n ? n - 0.5 : rating === n - 0.5 ? n : n; paintStars(); return; }
-      if (el.closest('#loved')) { loved = !loved; $('#loved').setAttribute('aria-pressed', String(loved)); return; }
-      if (el.closest('#priv')) { priv = !priv; $('#priv').setAttribute('aria-pressed', String(priv)); $('#priv').textContent = priv ? 'Only me' : 'Everyone can see this'; return; }
-      const t = el.closest<HTMLElement>('[data-t]');
-      if (t) { picked.has(t.dataset.t!) ? picked.delete(t.dataset.t!) : picked.add(t.dataset.t!); paintThreads(); return; }
-      const nw = el.closest<HTMLElement>('[data-now]');
-      if (nw) {
-        const n = now.find((x) => x.slug === nw.dataset.now)!;
-        reset(n.type); updating = n;
-        F('title').value = n.title; paintCover();
-        F('title').required = false; F('creator').required = false;
-        // only status, page, rating, note and date matter when updating
-        root.querySelectorAll<HTMLElement>('#entry [name=title], #entry [name=creator], #entry .row3, #entry .more-box, #entry [name=newThread], #tchips').forEach((x) => (x.style.display = 'none'));
-        $('#tchips').parentElement!.style.display = 'none';
-        (F('title').parentElement!.querySelector('.eyebrow') as HTMLElement).textContent = n.title;
-        F('page').value = n.page ? String(n.page) : ''; F('ptotal').value = n.pages ? String(n.pages) : ''; setStatus(n.type === 'book' ? 'progress' : 'done'); paintPages();
-        $('#savebtn').textContent = 'Save';
-        go('form');
+      if (r.error) { hits.innerHTML = ''; err.textContent = r.error; err.hidden = false; return; }
+      const list: any[] = r.hits ?? [];
+      if (!list.length) { hits.innerHTML = `<li class="muted small" style="padding: 6px 2px">Nothing found. Try other words, or fill it in by hand.</li>`; return; }
+      hits.innerHTML = list.map((h, i) => `<li><button type="button" data-hit="${i}"><span class="sw" style="background:#46525E${h.cover ? `;background-image:url('${esc(h.cover)}')` : ''}"></span>
+        <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(h.title)}</span><span class="hm">${esc([h.creator, h.year, h.kind !== kind ? ({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[h.kind] : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+      hits.querySelectorAll<HTMLButtonElement>('[data-hit]').forEach((b) => b.addEventListener('click', () => choose(list[+b.dataset.hit!])));
+    }
+    async function choose(h: any) {
+      if (h.kind !== kind) setKind(h.kind);
+      if (h.kind === 'tv' && !h.season) {
+        // pick the season
+        const hits = $('hits');
+        hits.innerHTML = '<li class="sk"></li>';
+        const r = await fetch(`/api/lookup?show=${h.tmdbId}`).then((x) => x.json()).catch(() => ({}));
+        const seasons: any[] = r.show?.seasons ?? [];
+        if (!seasons.length) { hits.innerHTML = '<li class="muted small">Couldn’t find its seasons. Fill it in by hand instead.</li>'; return; }
+        hits.innerHTML = `<li class="lbl" style="padding: 2px">${esc(r.show.title)}: which season?</li>` + seasons.map((s, i) => `<li><button type="button" data-season="${i}"><span class="sw" style="background:#46525E${s.cover ? `;background-image:url('${esc(s.cover)}')` : ''}"></span><span class="stack" style="gap:3px"><span class="ht">${esc(s.name)}</span><span class="hm">${esc([s.year, s.episodes ? s.episodes + ' episodes' : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+        hits.querySelectorAll<HTMLButtonElement>('[data-season]').forEach((b) => b.addEventListener('click', () => {
+          const s = seasons[+b.dataset.season!];
+          pick = { ...r.show, seasons: undefined, season: s.n, episodes: s.episodes, year: s.year ?? r.show.year, cover: s.cover ?? r.show.cover };
+          titleId = null;
+          toForm(pick);
+        }));
+        return;
       }
-    });
-    F('title').addEventListener('input', paintCover);
-    F('page').addEventListener('input', paintPages);
-    F('ptotal').addEventListener('input', () => { F('pages').value = F('ptotal').value; paintPages(); });
-    F('pages').addEventListener('input', () => { F('ptotal').value = F('pages').value; paintPages(); });
+      pick = h; titleId = null;
+      toForm(h);
+    }
 
-    // ——— saving ———
+    // wire up
+    root.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach((b) => b.addEventListener('click', () => { setKind(b.dataset.kind as Kind); ($('q') as HTMLInputElement).focus(); search(); }));
+    $('q').addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(search, 400); });
+    $('find').addEventListener('submit', (ev) => { ev.preventDefault(); clearTimeout(timer); search(); });
+    $('manual').addEventListener('click', () => { pick = null; titleId = null; toForm({ title: ($('q') as HTMLInputElement).value.trim() }, true); });
+    $('change').addEventListener('click', () => { if (start.mode === 'edit') return; at('find'); ($('q') as HTMLInputElement).focus(); });
+    $('startover').addEventListener('click', () => { if (start.mode === 'edit') { history.back(); return; } form.reset(); $('lines').innerHTML = ''; addLine(); rating = 0; paintStars(); at('find'); });
+    $('statuses').addEventListener('click', (ev) => { const b = (ev.target as Element).closest<HTMLElement>('[data-st]'); if (b) setStatus(b.dataset.st!); });
+    root.querySelectorAll<HTMLButtonElement>('#stars button').forEach((b) => b.addEventListener('click', () => {
+      const n = +b.dataset.n!;
+      rating = rating === n ? n - 0.5 : rating === n - 0.5 ? 0 : n;
+      paintStars();
+    }));
+    $('loved').addEventListener('click', () => { const v = $('loved').getAttribute('aria-pressed') !== 'true'; $('loved').setAttribute('aria-pressed', String(v)); });
+    root.querySelectorAll<HTMLButtonElement>('[data-day]').forEach((b) => b.addEventListener('click', () => { const d = new Date(); d.setDate(d.getDate() - +b.dataset.day!); f('finished').value = iso(d); }));
+    $('addline').addEventListener('click', () => addLine());
+    $('another').addEventListener('click', () => { location.href = '/add/'; });
+    $('remove')?.addEventListener('click', async () => {
+      if (!confirmRemove()) return;
+      const r = await fetch('/api/log', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: start.id }) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
+      if (r.ok) navigate(r.href); else { $('saveerr').textContent = r.error; $('saveerr').hidden = false; }
+    });
+    function confirmRemove() {
+      const b = $('remove');
+      if (b.dataset.sure) return true;
+      b.dataset.sure = '1'; b.textContent = 'Tap again to remove it for good';
+      setTimeout(() => { delete b.dataset.sure; b.textContent = 'Remove from my shelf'; }, 4000);
+      return false;
+    }
+
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const btn = $<HTMLButtonElement>('#savebtn'), err = $('#saveerr');
-      err.hidden = true; btn.disabled = true; btn.textContent = 'Saving…';
-      const done = root.dataset.st === 'done';
-      const v = (n: string) => (F(n)?.value ?? '').trim();
-      const body = updating
-        ? { action: 'update', slug: updating.slug, status: done ? 'done' : 'progress', page: v('page'), pages: v('ptotal'), rating: done ? rating : undefined, note: v('note'), date: v('date') }
-        : {
-            type: kind, title: v('title'), creator: v('creator'), year: v('year'), pages: v('pages') || v('ptotal'), runtime: v('runtime'), words: v('words'),
-            link: v('link'), source: v('source'), cover: v('cover'), where: v('where'), times: v('times'), date: v('date'),
-            status: done ? 'done' : kind === 'book' ? 'reading' : 'watching', page: v('page'),
-            rating: done && kind !== 'essay' ? rating || undefined : undefined, loved: kind === 'essay' && loved,
-            note: v('note'), quote: v('quote'), quoteMine: (F('quoteMine') as HTMLInputElement).checked,
-            threads: [...picked], newThread: v('newThread'), private: priv,
-          };
-      const r = await fetch('/api/save', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).catch(() => null);
-      const j = r ? await r.json().catch(() => ({})) : {};
-      btn.disabled = false; btn.textContent = updating ? 'Save' : 'Save to library';
-      if (r?.status === 401) { go('signin'); return; }
-      if (!r || !r.ok) { err.hidden = false; err.textContent = j.error ?? 'Saving failed. Check your connection and try again.'; return; }
-      const title = updating ? updating.title : v('title');
-      const tnames = (j.threads ?? []).map((s: string) => threads.find((t) => t.slug === s)?.title ?? v('newThread')).filter(Boolean);
-      $('#savedmsg').innerHTML = `<em class="serif">${esc(title)}</em> ${updating ? 'was updated' : 'was added'}${tnames.length ? ` to <strong>${esc(tnames.join(', '))}</strong>` : ''}. ` +
-        (j.private ? 'It’s private, so only this file knows about it.' : 'It’ll appear on the site in about a minute, once Vercel rebuilds.');
-      ($('#viewlink') as HTMLAnchorElement).href = j.private ? '/library/' : j.href;
-      ($('#viewlink') as HTMLAnchorElement).dataset.astroReload = '';
-      if (updating) now.splice(now.indexOf(updating), 1), paintNow();
-      go('saved');
+      const err = $('saveerr'); err.hidden = true;
+      const lines = [...$('lines').querySelectorAll<HTMLElement>('.line')].map((el) => ({
+        text: (el.querySelector('[data-l=text]') as HTMLTextAreaElement).value.trim(),
+        where: (el.querySelector('[data-l=where]') as HTMLInputElement).value.trim(),
+        note: (el.querySelector('[data-l=note]') as HTMLInputElement).value.trim(),
+        mine: (el.querySelector('[data-l=mine]') as HTMLInputElement).checked,
+      })).filter((l) => l.text);
+      const data: any = {
+        status, rating: rating || null, loved: $('loved').getAttribute('aria-pressed') === 'true',
+        started: f('started').value || null, finished: f('finished').value || null,
+        again: f('again').checked, onlyMe: f('onlyMe').checked, notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value, where: f('where').value, lines,
+      };
+      if (start.mode === 'edit') { data.id = start.id; data.full = true; }
+      else if (titleId) data.title = titleId;
+      else if (manual) {
+        const title = f('title').value.trim();
+        if (!title) { err.textContent = 'A title is needed.'; err.hidden = false; return; }
+        data.hit = { kind, title, creator: f('creator').value.trim(), year: f('year').value, pages: f('pages').value, runtime: f('runtime').value, season: f('season').value, link: f('link').value, source: kind === 'essay' && f('link').value ? (() => { try { return new URL(f('link').value).hostname.replace(/^www\./, ''); } catch { return ''; } })() : undefined };
+        if (kind === 'tv' && !data.hit.season) { err.textContent = 'Which season?'; err.hidden = false; return; }
+      } else if (pick) data.hit = pick;
+      else { at('find'); return; }
+      const btn = $('savebtn') as HTMLButtonElement;
+      const label = btn.textContent;
+      btn.disabled = true; btn.textContent = 'Saving…';
+      const r = await fetch('/api/log', { method: start.mode === 'edit' ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+        .then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site. Check your connection and try again.' }));
+      btn.disabled = false; btn.textContent = label;
+      if (!r.ok) { err.textContent = r.error || 'That didn’t save. Please try again.'; err.hidden = false; return; }
+      if (start.mode === 'edit') { navigate(r.href); return; }
+      ($('viewlink') as HTMLAnchorElement).href = r.href;
+      $('savedmsg').textContent = 'It’s on your shelf.';
+      at('saved');
     });
+
+    // starting point
+    setKind(kind);
+    addLine();
+    if (start.mode === 'edit' || start.mode === 'title') {
+      titleId = start.title.id;
+      toForm({ ...start.title, from: 'you' });
+      $('change').hidden = start.mode === 'edit';
+      if (start.status) setStatus(start.status);
+      if (start.mode === 'edit') {
+        rating = start.rating ?? 0; paintStars();
+        $('loved').setAttribute('aria-pressed', String(!!start.loved));
+        f('started').value = start.started ?? ''; f('finished').value = start.finished ?? '';
+        f('again').checked = !!start.again; f('onlyMe').checked = !!start.onlyMe;
+        (form.elements.namedItem('notes') as HTMLTextAreaElement).value = start.notes ?? '';
+        f('where').value = start.where ?? '';
+        $('lines').innerHTML = '';
+        (start.lines?.length ? start.lines : [{}]).forEach(addLine);
+        if (start.lines?.length || start.where) ($('morebox') as HTMLDetailsElement).open = true;
+        ($('savebtn')).textContent = 'Save changes';
+      } else if (start.again) {
+        f('again').checked = true;
+      }
+    } else at('find');
   }
-  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:page-load', setup);
 </script>

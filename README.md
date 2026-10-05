@@ -1,148 +1,45 @@
 # Granthalaya
 
-A personal library of books, films and essays, in hand-painted scenes. It's built with [Astro](https://astro.build) and hosted free on Vercel.
+A shelf for everything you read and watch: books, films, TV seasons and essays, in hand-painted scenes. Anyone can sign in with Google, keep a shelf, and have a public (or private) profile at `/@username`.
 
-## Adding from the site (the easy way)
+Built with [Astro](https://astro.build), hosted on Vercel, with the shelves in a [Supabase](https://supabase.com) database. Everything runs on free plans.
 
-Go to **/add** on your site (or click **Sign in** in the footer). Once you're signed in, an **Add** button sits in the header on every page.
+## Using it
 
-1. Pick Book, Film or Essay, then search a title or paste a link (Goodreads, Letterboxd, Substack, any article).
-2. Rate it, write a line, pick threads, save.
-3. It appears on the site about a minute later.
+- **Sign in** with Google, pick a username, and you land on your home page.
+- **Add** (the button in the header): pick Book, Film, TV or Essay, search or paste a link (Goodreads, Letterboxd, IMDb, Substack, any article), choose a status tag, rate it, write a few lines, save. It's on your shelf straight away.
+- **Status tags** instead of pages or percent:
+  - Books: Want to read · Reading · Read · Paused · Didn't finish
+  - Films: Want to watch · Watched · Didn't finish
+  - TV seasons: Want to watch · Watching · Watched · Paused · Dropped
+  - Essays: Saved for later · Read
+- **Again** logs a re-read or re-watch as a new visit. **Only me** hides one entry from everyone else.
+- **Settings** has your profile, links, privacy (private account, feature my shelf, blocked people), downloading your data and deleting your account.
 
-"Finish something from Now" updates a book you're reading or a film you're watching.
+## Addresses
 
-### One-time setup in Vercel
-
-In Vercel, open your project, then **Settings → Environment Variables**, and add:
-
-| Name | Value |
+| Address | What it is |
 | --- | --- |
-| `ADMIN_PASSWORD` | A long password only you know |
-| `GITHUB_REPO` | `your-username/granthalaya` |
-| `GITHUB_TOKEN` | A fine-grained GitHub token (github.com → Settings → Developer settings → Fine-grained tokens). Give it access to **only** the granthalaya repository, with **Contents: Read and write**. |
-| `TMDB_API_KEY` | Optional, for better film search |
+| `/` | Welcome page when signed out; your home when signed in |
+| `/@username` | A profile |
+| `/@username/library`, `/diary`, `/notes`, `/threads`, `/stats` | The parts of a shelf |
+| `/@username/library/<title>` | One entry |
+| `/add`, `/settings` | Adding things; your settings |
+| `/admin` | Reports (only for accounts with `is_admin` set in the database) |
+| `/privacy`, `/terms`, `/about` | The fine print |
 
-Then click **Redeploy** once. The token stays on Vercel's servers and is never sent to the browser.
+Old addresses like `/library/paterson` redirect to `/@sarthak/library/paterson`.
 
-## Adding by hand
+## Setting it up
 
-You can also add one Markdown file to `src/content/library/`. The file name becomes the web address, so `perfect-days.md` is served at `/library/perfect-days/`.
+1. **Database:** in Supabase, open SQL Editor → New query, paste all of `supabase/schema.sql`, and Run. It creates the tables and the privacy rules.
+2. **Sign-in:** Supabase → Authentication → Sign In / Providers → Google, with a client ID and secret from Google Cloud. Add your site's address under Authentication → URL Configuration.
+3. **Environment variables** (Vercel → Settings → Environment Variables, and the `.env` file for scripts). See `.env.example` for the list.
+4. **Make yourself admin** (for the reports page): in SQL Editor, `update profiles set is_admin = true where username = 'sarthak';`
 
-### A book
+## Scripts
 
-```md
----
-title: "Walden"
-type: "book"
-creator: "Henry David Thoreau"
-year: 1854
-date: "2026-09-29"        # the day you finished it
-rating: 4.5                # 0–5, halves allowed
-pages: 352                 # used to work out reading time
-highlights:
-  - text: "Time is but the stream I go a-fishing in."
-    where: "Chapter 2"
-    note: "My thought about it (optional)"
----
-
-What you thought. The first paragraph is shown large, with a painted drop cap.
-```
-
-### A film
-
-```md
----
-title: "Perfect Days"
-type: "film"
-creator: "Wim Wenders"     # the director
-year: 2023
-date: "2026-09-27"         # the day you watched it
-rating: 5
-runtime: 124               # minutes
-where: "at home"           # printed on the ticket stub
----
-```
-
-### An essay, Substack post or article
-
-```md
----
-title: "How to Do Great Work"
-type: "essay"
-creator: "Paul Graham"
-source: "paulgraham.com"   # or "Substack", a magazine…
-date: "2026-09-23"
-loved: true                # a heart instead of stars
-words: 11000               # used to work out reading time
-link: "https://paulgraham.com/greatwork.html"
----
-
-Why you saved it.
-```
-
-### Optional fields for any entry
-
-| Field | What it does |
-| --- | --- |
-| `status: "reading"` + `progress: 62` | Shows the entry under **Now** on the home page, with a progress bar |
-| `status: "watching"` | Shows a film under **Now** |
-| `times: 2` | How many times you've read or watched it |
-| `startHere: 1` + `startWhy: "…"` | Adds it to **Start here** on the home page (1–5) |
-| `color: "#2F4A5C"` | Chooses the painted cover colour yourself |
-| `private: true` | Keeps the entry off the site |
-| `highlights` with `mine: true` | A line you wrote, rather than a quote |
-
-## Covers
-
-Books and films show their real cover or poster when there is one, and a painted cover otherwise. Essays always use their own card.
-
-- **Things you add from the site** pick up a cover automatically when you choose a search result.
-- **To fetch covers for everything else,** ask Claude Code to run `npm run covers`. It saves them in `public/covers/`. Film posters need a free TMDB key in a `.env` file (`TMDB_API_KEY=...`); without one, films keep their painted covers.
-- **Wrong cover?** Put your own image at `public/covers/<file name>.jpg`, or add `cover: painted` to that entry to keep the painted one.
-- **Painted covers everywhere:** set `covers: 'painted'` in `src/data/site.ts`.
-
-## Reading progress
-
-When you're partway through a book, the site keeps the page you're on (`page: 142`) next to the total (`pages: 320`) and works out the percent and time left. On the Add screen, tap **Update** next to the book and use the +10, +25 or +50 buttons.
-
-## Behind the film
-
-Films and books get a "Behind the film" (or "Behind the book") box with 3 short facts from their Wikipedia page, picked by a free AI model.
-
-- **New things you add from the site** get facts automatically about a minute after saving, once `GEMINI_API_KEY` is set in Vercel (free key from aistudio.google.com).
-- **Older entries:** put the same key in `.env` (`GEMINI_API_KEY=...`) and ask Claude Code to run `npm run trivia`. Add `-- --dry` to only preview.
-- **Edit them by hand** any time: they're the `trivia:` list in the entry, with `triviaSource:` for the link. Delete the list to hide the box.
-
-## Threads
-
-A thread is a hand-picked path through the library. Each one is a file in `src/content/threads/`. The `slug` of each item is the file name of the entry, without `.md`.
-
-```md
----
-title: "On slowness"
-order: 1
-items:
-  - slug: perfect-days
-    why: "Start here."
-  - slug: walden
-    why: "The original case for doing less."
----
-
-One or two sentences about the thread.
-```
-
-## Site settings
-
-`src/data/site.ts` holds your name, the season line, the line of the week, your reading pace and your yearly goal.
-
-## Running it on your computer (optional)
-
-```sh
-npm install
-npm run dev      # opens at http://localhost:4321
-```
-
-## Publishing
-
-When you change a file on GitHub, Vercel rebuilds the site by itself within about a minute.
+- `npm run dev` starts a local copy at http://localhost:4321 (it needs the Supabase values in `.env`).
+- `npm run build` builds the site. Run it before every commit.
+- `npm run migrate` copies the old markdown library (`src/content/`) onto the `sarthak` shelf. Safe to run again: it replaces that shelf with the files' version.
+- `npm run trivia` fills in "Behind the film" facts for titles that don't have them yet.

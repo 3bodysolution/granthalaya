@@ -1,0 +1,12 @@
+---
+// Small caps label, a thin rule under it, and an optional link on the right.
+interface Props { title: string; more?: string; href?: string }
+const { title, more, href = '#' } = Astro.props;
+---
+<div class="sechead"><h2>{title}</h2>{more && <a href={href}>{more} →</a>}</div>
+<style>
+  .sechead { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .sechead h2 { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .sechead a { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .sechead a:hover { color: var(--lat); }
+</style>

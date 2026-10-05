@@ -1,0 +1,42 @@
+---
+import Policy from '../components/Policy.astro';
+import { site } from '../data/site';
+export const prerender = false;
+---
+<Policy title="Terms of use" updated="October 6, 2026" description="The simple rules for keeping a shelf on Granthalaya.">
+  <p class="lead">Granthalaya is a free place to keep a shelf of what you read and watch. These are the rules for using it.</p>
+
+  <h2>Your account</h2>
+  <ul>
+    <li>You sign in with Google and need to be 18 or older.</li>
+    <li>One account per person. Keep your Google account safe; whoever can use it can use your shelf.</li>
+    <li>Pick a username that isn’t pretending to be someone else, and isn’t offensive. Usernames that break this can be changed or removed.</li>
+  </ul>
+
+  <h2>What you post</h2>
+  <ul>
+    <li>Your notes and your own lines stay yours. By posting them, you let Granthalaya store them and show them to the people your settings allow.</li>
+    <li>Keep quotes from books and films short, the way you’d quote them in a review.</li>
+    <li>Don’t post harassment, hate, threats, sexual content involving anyone under 18, anything illegal, other people’s private information, or spam.</li>
+    <li>Don’t try to break, overload or scrape the site, or get into anyone else’s account.</li>
+  </ul>
+
+  <h2>The shared catalogue</h2>
+  <p>Titles, covers, runtimes and the short “Behind the film” facts are shared by everyone who adds the same title. The facts are picked by an AI model from Wikipedia and can be wrong. Covers and posters belong to their publishers and studios.</p>
+
+  <h2>When things go wrong</h2>
+  <ul>
+    <li>Anyone can report a profile or an entry. Reports are read by the person who runs the site.</li>
+    <li>Content or accounts that break these rules can be hidden or removed, sometimes without warning when it’s serious.</li>
+    <li>You can delete your account at any time in Settings.</li>
+  </ul>
+
+  <h2>The fine print</h2>
+  <ul>
+    <li>Granthalaya is provided as it is, without promises that it will always be available or error-free.</li>
+    <li>It may change or, one day, close. If it closes, you’ll get notice and a way to download your shelf first.</li>
+    <li>These terms may be updated; the site will say so when they change in a way that matters.</li>
+    <li>These terms are governed by the laws of India.</li>
+  </ul>
+  {site.contact && <p>Questions: <a href={`mailto:${site.contact}`}>{site.contact}</a>.</p>}
+</Policy>

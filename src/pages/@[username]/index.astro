@@ -1,0 +1,236 @@
+---
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import Face from '../../components/Face.astro';
+import ShelfTabs from '../../components/ShelfTabs.astro';
+import PersonMenu from '../../components/PersonMenu.astro';
+import SectionHead from '../../components/ui/SectionHead.astro';
+import StatusTag from '../../components/ui/StatusTag.astro';
+import SocialLink from '../../components/ui/SocialLink.astro';
+import { openShelf } from '../../lib/shelfpage';
+import { loadShelf, loadThreads, href, short, fullTitle, threadHref, type Entry } from '../../lib/data';
+import { statusLabel, socialLinks } from '../../lib/kinds';
+export const prerender = false;
+
+const o = await openShelf(Astro);
+if (o.out) return o.out;
+const { profile, details, isMe, visible, blockedByMe } = o.shelf;
+const sb = Astro.locals.supabase;
+const me = Astro.locals.me;
+const [shelf, threads] = visible ? await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]) : [[], []];
+
+const name = profile.display_name || profile.username;
+const done = shelf.filter((e) => e.data.status === 'done');
+const year = new Date().getUTCFullYear();
+const lines = shelf.reduce((n, e) => n + e.data.highlights.length, 0);
+const base = `/@${profile.username}`;
+const nums = [
+  [done.length, 'Finished', `${base}/library/?status=done`],
+  [done.filter((e) => e.data.date.getUTCFullYear() === year).length, 'This year', `${base}/stats/`],
+  [lines, 'Lines', `${base}/notes/`],
+  [threads.length, 'Threads', `${base}/threads/`],
+] as const;
+
+// favourites: the titles they pinned, in their order
+const byTitle = new Map<string, Entry>();
+for (const e of shelf) if (!byTitle.has(e.titleId)) byTitle.set(e.titleId, e);
+const favs = (details?.favourites ?? []).map((id) => byTitle.get(id)).filter(Boolean).slice(0, 4) as Entry[];
+
+const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
+const wants = shelf.filter((e) => e.data.status === 'want');
+const now = [...going.slice(0, 2), ...wants.slice(0, Math.max(0, 2 - going.length))].slice(0, 2);
+const recent = done.slice(0, 6);
+const diary = shelf.slice(0, 6);
+const links = socialLinks(details?.links);
+const dm = (d: Date) => `${d.getUTCDate()} ${d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }).slice(0, 3)}`;
+const since = new Date(profile.created_at).toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by, source: details.lotw_source } : undefined;
+---
+<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} active={isMe ? 'profile' : undefined} line={line} noindex={profile.is_private}>
+  <div class="art banner bleed" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
+
+  <section class="pad">
+    <div class="phead">
+      <Face name={name} src={profile.avatar_url} size={112} class="pface" />
+      <div class="pid">
+        <div class="flex items-center gap-3 flex-wrap">
+          <h1 class="serif pname">{name}</h1>
+          {profile.is_private && <span class="lock" title="Private account">Private</span>}
+          <PersonMenu username={profile.username} id={profile.id} isMe={isMe} signedIn={!!me} blocked={blockedByMe} />
+        </div>
+        <div class="pmeta">
+          <span>@{profile.username}</span>
+          {links.map((l) => <SocialLink kind={l.key} label={l.label} href={l.href} bare />)}
+        </div>
+      </div>
+      {visible && (
+        <div class="nums">
+          {nums.map(([n, l, h]) => <a href={h} class="num-cell"><b class="num">{n}</b><span>{l}</span></a>)}
+        </div>
+      )}
+      {isMe && <a href="/settings/" class="btn edit">Edit profile</a>}
+    </div>
+    {details?.bio && <p class="bio">{details.bio}</p>}
+    <p class="since">On Granthalaya since {since}</p>
+    {visible && <div class="tabs"><ShelfTabs username={profile.username} current="profile" /></div>}
+  </section>
+
+  {!visible ? (
+    <section class="pad pt-12">
+      <div class="card private">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <h2 class="serif">This shelf is private</h2>
+        <p class="muted">Only {name} can see what’s on it.</p>
+      </div>
+    </section>
+  ) : shelf.length === 0 ? (
+    <section class="pad pt-12">
+      <div class="card private">
+        {isMe ? (
+          <>
+            <h2 class="serif">Your shelf is empty, for now</h2>
+            <p class="muted">Start with whatever you’re reading or watching this week.</p>
+            <a href="/add/" class="btn primary big">Add your first book or film</a>
+          </>
+        ) : (
+          <>
+            <h2 class="serif">Nothing on this shelf yet</h2>
+            <p class="muted">{name} hasn’t added anything so far.</p>
+          </>
+        )}
+      </div>
+    </section>
+  ) : (
+    <div class="pad pbody">
+      <div class="flex flex-col gap-12 min-w-0">
+        {(favs.length > 0 || isMe) && (
+          <section class="flex flex-col gap-5">
+            <SectionHead title="Favourites" />
+            {favs.length > 0 ? (
+              <div class="favs">
+                {favs.map((e) => <a href={href(e)} class="fav lift" title={`${fullTitle(e)}${e.data.year ? ` (${e.data.year})` : ''}`} aria-label={fullTitle(e)}><Cover entry={e} variant="mini" /></a>)}
+              </div>
+            ) : (
+              <p class="muted hintline">Pin up to four favourites from any entry on your shelf. They show here, big.</p>
+            )}
+          </section>
+        )}
+
+        {now.length > 0 && (
+          <section class="flex flex-col gap-5">
+            <SectionHead title="Now" />
+            <div class="grid gap-5 md:grid-cols-2">
+              {now.map((e) => (
+                <a href={href(e)} class="nowcard">
+                  <Cover entry={e} variant="swatch" w={64} h={96} />
+                  <div class="flex flex-col gap-2 items-start min-w-0">
+                    <StatusTag status={e.data.status as any} label={statusLabel(e.data.type, e.data.status)} />
+                    <span class="serif nt">{fullTitle(e)}</span>
+                    <span class="small muted">{e.data.creator}{e.data.status === 'want' ? ` · added ${short(e.data.date)}` : ` · since ${short(e.data.started ?? e.data.date)}`}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {recent.length > 0 && (
+          <section class="flex flex-col gap-5">
+            <SectionHead title="Recently finished" more="All" href={`${base}/library/`} />
+            <div class="recent">
+              {recent.map((e) => (
+                <a href={href(e)} class="rc lift" title={fullTitle(e)} aria-label={fullTitle(e)}>
+                  <Cover entry={e} variant="mini" />
+                  {e.data.again && <span class="again">Again</span>}
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      <aside class="flex flex-col gap-10">
+        {(details?.season_line || details?.lotw_text) && (
+          <section class="flex flex-col gap-4">
+            <SectionHead title={details?.season_line || 'Line of the week'} />
+            {details?.lotw_text && (
+              <a href={`${base}/notes/`} class="lotw">
+                <span class="serif q">“{details.lotw_text}”</span>
+                <span class="hint">Line of the week{details.lotw_by ? ` · ${details.lotw_by.split(' ').slice(-1)}` : ''}</span>
+              </a>
+            )}
+          </section>
+        )}
+        <section class="flex flex-col gap-4">
+          <SectionHead title="Diary" more="All" href={`${base}/diary/`} />
+          <ol class="diary">
+            {diary.map((e) => <li><span class="dd">{dm(e.data.date)}</span><a href={href(e)}>{fullTitle(e)}</a>{e.data.status !== 'done' && <span class="hint"> · {statusLabel(e.data.type, e.data.status)}</span>}</li>)}
+          </ol>
+        </section>
+        {threads.length > 0 && (
+          <section class="flex flex-col gap-4">
+            <SectionHead title="Threads" more="All" href={`${base}/threads/`} />
+            {threads.slice(0, 4).map((t) => <a href={threadHref(t)} class="tl">{t.data.title} <span class="muted">· {t.data.items.length}</span></a>)}
+          </section>
+        )}
+      </aside>
+    </div>
+  )}
+</Base>
+
+<style>
+  .banner { height: clamp(220px, 24vw, 320px); background-position: center 70%; -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent); mask-image: linear-gradient(to bottom, #000 62%, transparent); }
+  .phead { position: relative; margin-top: -56px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: end; gap: 22px; }
+  .phead :global(.pface) { box-shadow: 0 0 0 5px var(--bg), 0 18px 30px -14px var(--shadow); }
+  .pid { padding-bottom: 8px; min-width: 0; }
+  .pname { margin: 0; font-weight: 400; font-size: 34px; line-height: 1; }
+  .lock { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--soft); color: var(--muted); }
+  .pmeta { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; font-size: 14px; color: var(--muted); }
+  .edit { margin-bottom: 12px; height: 38px; }
+  .nums { display: flex; padding-bottom: 6px; }
+  .num-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 18px; border-left: 1px solid var(--line); }
+  .num-cell:first-child { border-left: 0; }
+  .num-cell b { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 24px; line-height: 1.1; color: var(--ink); }
+  .num-cell span { font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .num-cell:hover b { color: var(--lat); }
+  .bio { margin: 18px 0 0; max-width: 620px; font-size: 16px; line-height: 1.6; }
+  .since { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
+  .tabs { margin-top: 24px; }
+  .pbody { padding-top: 40px; display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 56px; }
+  .favs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .fav :global(.mini), .rc :global(.mini) { width: 100%; height: auto; aspect-ratio: 2 / 3; border-radius: 6px; transition: box-shadow .25s ease; }
+  .fav:hover :global(.mini), .rc:hover :global(.mini) { box-shadow: 0 0 0 2px var(--lat); }
+  .recent { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; }
+  .rc { position: relative; }
+  .again { position: absolute; left: 6px; bottom: 6px; font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 5px; background: color-mix(in srgb, var(--card) 92%, transparent); color: var(--ink); }
+  .nowcard { display: flex; gap: 16px; padding: 16px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); transition: border-color .3s ease; }
+  .nowcard:hover { border-color: var(--lat); color: inherit; }
+  .nt { font-size: 19px; line-height: 1.2; }
+  .small { font-size: 13px; }
+  .hintline { margin: 0; font-size: 14px; }
+  .lotw { display: flex; flex-direction: column; gap: 10px; }
+  .lotw .q { font-size: 17px; font-style: italic; line-height: 1.45; }
+  .diary { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+  .diary li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; font-size: 14.5px; }
+  .diary li .hint { grid-column: 2; margin-top: -8px; }
+  .dd { white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding-top: 2px; }
+  .tl { font-size: 15px; }
+  .private { max-width: 560px; margin: 0 auto; padding: 40px 32px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+  .private svg { color: var(--muted); }
+  .private h2 { margin: 0; font-weight: 400; font-size: 26px; }
+  .private p { margin: 0 0 8px; }
+  @media (max-width: 980px) {
+    .phead { grid-template-columns: auto minmax(0, 1fr); }
+    .nums { grid-column: 1 / -1; justify-content: space-between; }
+    .num-cell:first-child { padding-left: 0; }
+    .edit { position: absolute; right: 0; top: 64px; }
+    .pbody { grid-template-columns: 1fr; }
+    .recent { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 600px) {
+    .phead :global(.pface) { width: 88px !important; height: 88px !important; font-size: 38px !important; }
+    .pname { font-size: 28px; }
+    .num-cell { padding: 0 10px; }
+    .favs { gap: 10px; }
+  }
+</style>

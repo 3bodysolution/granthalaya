@@ -1,0 +1,31 @@
+---
+// A small round icon for a cover corner. The word lives in the tooltip and for screen readers.
+import BookOpen from '@tabler/icons/outline/book-2.svg';
+import Eye from '@tabler/icons/outline/eye.svg';
+import Bookmark from '@tabler/icons/outline/bookmark.svg';
+import Pause from '@tabler/icons/outline/player-pause.svg';
+import X from '@tabler/icons/outline/x.svg';
+type S = 'reading' | 'watching' | 'want' | 'paused' | 'dnf' | 'dropped' | 'saved' | 'done';
+interface Props { status: S; label?: string; class?: string }
+const { status, label, class: cls } = Astro.props;
+const map = {
+  reading: { t: 'Reading', c: 'var(--lat)', I: BookOpen },
+  watching: { t: 'Watching', c: 'var(--lat)', I: Eye },
+  want: { t: 'Want to', c: 'var(--sky)', I: Bookmark },
+  saved: { t: 'Saved for later', c: 'var(--sky)', I: Bookmark },
+  paused: { t: 'Paused', c: 'var(--haldi)', I: Pause },
+  dnf: { t: 'Didn’t finish', c: 'var(--muted)', I: X },
+  dropped: { t: 'Dropped', c: 'var(--muted)', I: X },
+  done: { t: 'Finished', c: 'var(--moss)', I: Eye },
+} as const;
+const m = map[status];
+const I = m.I;
+const t = label ?? m.t;
+---
+<span class:list={['status-icon', cls]} style={`--c:${m.c}`} title={t} role="img" aria-label={t}><I aria-hidden="true" /></span>
+<style>
+  .status-icon { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+    color: var(--c); background: color-mix(in srgb, var(--card) 92%, transparent); box-shadow: 0 4px 12px -4px rgba(0,0,0,.4);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .status-icon :global(svg) { width: 16px; height: 16px; stroke-width: 2.2; }
+</style>

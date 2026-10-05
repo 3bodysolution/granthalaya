@@ -1,0 +1,369 @@
+-- Granthalaya, Phase 1: the database.
+--
+-- Run this once in Supabase → SQL Editor → New query → paste → Run.
+-- It is safe to read: it only creates tables, privacy rules and a few helpers.
+--
+-- The privacy rules (row level security) live here, in the database, so they hold
+-- no matter which page or tool asks for the data:
+--   · everyone can see public shelves; a private account shows only name and photo
+--   · "Only me" entries are seen by their owner alone
+--   · blocked people can't see each other at all
+--   · each person can change only their own rows
+--   · the shared catalogue of titles is written only by the website's server
+
+begin;
+
+-- ───────────────────────── helpers ─────────────────────────
+
+-- Usernames people can't take.
+create or replace function public.username_reserved(u text)
+returns boolean language sql immutable set search_path = '' as $$
+  select u = any (array[
+    'about','account','accounts','add','admin','administrator','api','app','auth','blog','callback','contact',
+    'delete','diary','edit','everyone','explore','feed','films','granthalaya','help','home','index','info',
+    'library','login','logout','mail','me','mod','moderator','new','news','notes','null','official','owner',
+    'privacy','profile','report','reports','root','rss','search','security','settings','signin','signout',
+    'signup','staff','stats','support','system','team','terms','threads','undefined','user','users','welcome',
+    'www','you','fuck','fucker','shit','bitch','cunt','nigger','nigga','faggot','whore','slut','rape','porn',
+    'chutiya','madarchod','bhenchod','behenchod','randi','gandu','bhosdike','lund'
+  ]) or u like 'admin%' or u like 'granthalaya%' or u like '%official%';
+$$;
+
+-- When was something logged: the finish date, else the start date, else today.
+create or replace function public.touch_log()
+returns trigger language plpgsql set search_path = '' as $$
+begin
+  new.logged_on := coalesce(new.finished_on, new.started_on, new.logged_on, (now() at time zone 'utc')::date);
+  new.updated_at := now();
+  return new;
+end $$;
+
+create or replace function public.touch_updated()
+returns trigger language plpgsql set search_path = '' as $$
+begin new.updated_at := now(); return new; end $$;
+
+-- ───────────────────────── people ─────────────────────────
+
+create table public.profiles (
+  id uuid primary key references auth.users (id) on delete cascade,
+  username text not null,
+  display_name text not null default '',
+  avatar_url text,
+  is_private boolean not null default false,
+  featured boolean not null default false,           -- "Feature my shelf" on the signed-out home page
+  is_admin boolean not null default false,           -- can open the reports page; set by hand
+  username_changed_at timestamptz,
+  created_at timestamptz not null default now(),
+  constraint username_format check (username ~ '^[a-z0-9_]{3,20}$'),
+  constraint display_name_length check (char_length(display_name) <= 60),
+  constraint avatar_url_ok check (avatar_url is null or (avatar_url ~ '^https://' and char_length(avatar_url) <= 600))
+);
+create unique index profiles_username_key on public.profiles (username);
+create index profiles_featured on public.profiles (featured) where featured;
+
+-- Old usernames keep pointing at their person, so old links redirect and nobody else can take them.
+create table public.username_history (
+  old_username text primary key,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  changed_at timestamptz not null default now()
+);
+
+create table public.profile_details (
+  id uuid primary key references public.profiles (id) on delete cascade,
+  bio text not null default '' check (char_length(bio) <= 160),
+  season_line text not null default '' check (char_length(season_line) <= 40),
+  lotw_text text not null default '' check (char_length(lotw_text) <= 400),   -- line of the week
+  lotw_by text not null default '' check (char_length(lotw_by) <= 80),
+  lotw_source text not null default '' check (char_length(lotw_source) <= 120),
+  goal_books int check (goal_books between 1 and 1000),
+  links jsonb not null default '{}'::jsonb check (jsonb_typeof(links) = 'object' and pg_column_size(links) < 2000),
+  favourites uuid[] not null default '{}' check (cardinality(favourites) <= 4),  -- title ids
+  updated_at timestamptz not null default now()
+);
+create trigger profile_details_touch before update on public.profile_details
+  for each row execute function public.touch_updated();
+
+-- Username rules: not reserved, not someone's old name, and changed at most once every 30 days.
+create or replace function public.check_username()
+returns trigger language plpgsql security definer set search_path = '' as $$
+begin
+  if tg_op = 'UPDATE' and new.username = old.username then return new; end if;
+  if public.username_reserved(new.username) then
+    raise exception 'That username isn''t available.' using errcode = 'P0001', hint = 'reserved';
+  end if;
+  if exists (select 1 from public.username_history h where h.old_username = new.username and h.user_id <> new.id) then
+    raise exception 'That username isn''t available.' using errcode = 'P0001', hint = 'taken';
+  end if;
+  if tg_op = 'UPDATE' then
+    if old.username_changed_at is not null and old.username_changed_at > now() - interval '30 days'
+       and coalesce(auth.role(), '') <> 'service_role' then
+      raise exception 'You can change your username once every 30 days.' using errcode = 'P0001', hint = 'too_soon';
+    end if;
+    new.username_changed_at := now();
+    insert into public.username_history (old_username, user_id) values (old.username, old.id)
+      on conflict (old_username) do update set user_id = excluded.user_id, changed_at = now();
+    delete from public.username_history where old_username = new.username;
+  end if;
+  return new;
+end $$;
+create trigger profiles_username before insert or update of username on public.profiles
+  for each row execute function public.check_username();
+
+-- ───────────────────────── the shared catalogue ─────────────────────────
+
+create table public.titles (
+  id uuid primary key default gen_random_uuid(),
+  kind text not null check (kind in ('book', 'film', 'tv', 'essay')),
+  slug text not null unique check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(slug) <= 90),
+  title text not null check (char_length(title) between 1 and 300),
+  creator text not null default '' check (char_length(creator) <= 200),
+  year int check (year between 0 and 2100),
+  season int check (season between 0 and 300),       -- TV only
+  episodes int check (episodes between 0 and 5000),
+  runtime int check (runtime between 0 and 100000),  -- minutes: a film, or a whole TV season
+  pages int check (pages between 0 and 100000),
+  words int check (words between 0 and 10000000),    -- essays
+  cover_url text check (cover_url is null or char_length(cover_url) <= 600),
+  link text check (link is null or char_length(link) <= 1000),
+  source text check (source is null or char_length(source) <= 120),
+  tmdb_id int,
+  ol_key text,                                       -- Open Library work, like OL45883W
+  trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),
+  trivia_source text,
+  color text check (color is null or color ~ '^#[0-9a-fA-F]{6}$'),
+  created_by uuid references public.profiles (id) on delete set null,
+  created_at timestamptz not null default now()
+);
+create unique index titles_tmdb_key on public.titles (kind, tmdb_id, coalesce(season, -1)) where tmdb_id is not null;
+create unique index titles_ol_key on public.titles (ol_key) where ol_key is not null;
+create unique index titles_link_key on public.titles (link) where kind = 'essay' and link is not null;
+create index titles_created_by on public.titles (created_by, created_at);
+
+-- ───────────────────────── shelves ─────────────────────────
+
+-- One row per visit: a re-read or re-watch is a new row with again = true.
+create table public.logs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  title_id uuid not null references public.titles (id) on delete restrict,
+  status text not null check (status in ('want', 'reading', 'watching', 'paused', 'done', 'dnf', 'dropped')),
+  rating numeric(2, 1) check (rating between 0.5 and 5 and rating * 2 = floor(rating * 2)),
+  loved boolean not null default false,              -- essays: a heart instead of stars
+  started_on date,
+  finished_on date,
+  logged_on date not null default ((now() at time zone 'utc')::date),
+  again boolean not null default false,
+  notes text not null default '' check (char_length(notes) <= 10000),
+  where_seen text not null default '' check (char_length(where_seen) <= 80),
+  only_me boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index logs_user_day on public.logs (user_id, logged_on desc);
+create index logs_title on public.logs (title_id);
+create trigger logs_touch before insert or update on public.logs
+  for each row execute function public.touch_log();
+
+-- Each kind has its own status tags.
+create or replace function public.check_log()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare k text; n int;
+begin
+  select kind into k from public.titles where id = new.title_id;
+  if k is null then raise exception 'Unknown title.' using errcode = 'P0001'; end if;
+  if not (
+       (k = 'book'  and new.status in ('want', 'reading', 'done', 'paused', 'dnf'))
+    or (k = 'film'  and new.status in ('want', 'done', 'dnf'))
+    or (k = 'tv'    and new.status in ('want', 'watching', 'done', 'paused', 'dropped'))
+    or (k = 'essay' and new.status in ('want', 'done'))
+  ) then
+    raise exception 'That status doesn''t fit a %.', k using errcode = 'P0001';
+  end if;
+  -- a gentle limit on how fast one account can add things (the website's own server is exempt)
+  if tg_op = 'INSERT' and coalesce(auth.role(), '') <> 'service_role' then
+    select count(*) into n from public.logs where user_id = new.user_id and created_at > now() - interval '1 hour';
+    if n >= 120 then raise exception 'That''s a lot at once. Try again in a little while.' using errcode = 'P0001', hint = 'rate'; end if;
+  end if;
+  return new;
+end $$;
+create trigger logs_check before insert or update of status, title_id on public.logs
+  for each row execute function public.check_log();
+
+create table public.highlights (
+  id uuid primary key default gen_random_uuid(),
+  log_id uuid not null references public.logs (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  body text not null check (char_length(body) between 1 and 2000),
+  where_at text not null default '' check (char_length(where_at) <= 80),
+  note text not null default '' check (char_length(note) <= 1000),
+  mine boolean not null default false,               -- your own line, not a quote
+  position int not null default 0,
+  created_at timestamptz not null default now()
+);
+create index highlights_log on public.highlights (log_id, position);
+create index highlights_user on public.highlights (user_id, created_at desc);
+
+create table public.threads (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  slug text not null check (slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$' and char_length(slug) <= 70),
+  name text not null check (char_length(name) between 1 and 120),
+  intro text not null default '' check (char_length(intro) <= 1000),
+  position int not null default 99,
+  created_at timestamptz not null default now(),
+  unique (user_id, slug)
+);
+create table public.thread_items (
+  thread_id uuid not null references public.threads (id) on delete cascade,
+  title_id uuid not null references public.titles (id) on delete restrict,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  position int not null default 0,
+  why text not null default '' check (char_length(why) <= 300),
+  primary key (thread_id, title_id)
+);
+create index thread_items_title on public.thread_items (title_id);
+
+-- ───────────────────────── safety ─────────────────────────
+
+create table public.blocks (
+  blocker uuid not null references public.profiles (id) on delete cascade,
+  blocked uuid not null references public.profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker, blocked),
+  check (blocker <> blocked)
+);
+create index blocks_blocked on public.blocks (blocked);
+
+create table public.reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter uuid references public.profiles (id) on delete set null,
+  target_user uuid references public.profiles (id) on delete cascade,
+  target_log uuid references public.logs (id) on delete cascade,
+  reason text not null check (reason in ('spam', 'abuse', 'sexual', 'hate', 'illegal', 'other')),
+  details text not null default '' check (char_length(details) <= 1000),
+  status text not null default 'open' check (status in ('open', 'dismissed', 'actioned')),
+  created_at timestamptz not null default now(),
+  check (target_user is not null or target_log is not null)
+);
+create index reports_open on public.reports (status, created_at desc);
+
+create or replace function public.check_report()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare n int;
+begin
+  select count(*) into n from public.reports where reporter = new.reporter and created_at > now() - interval '1 day';
+  if n >= 20 then raise exception 'You''ve sent a lot of reports today. Thank you; try again tomorrow.' using errcode = 'P0001', hint = 'rate'; end if;
+  return new;
+end $$;
+create trigger reports_check before insert on public.reports
+  for each row execute function public.check_report();
+
+-- ───────────────────────── who can see what ─────────────────────────
+
+-- These two run with the owner's rights so they can look across tables without loops in the rules.
+-- blocked_with only ever answers about the person asking, so it can't be used to snoop on others' blocks.
+create or replace function public.blocked_with(other uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select auth.uid() is not null and other is not null and exists (
+    select 1 from public.blocks
+    where (blocker = auth.uid() and blocked = other) or (blocker = other and blocked = auth.uid())
+  );
+$$;
+
+create or replace function public.can_see_shelf(owner uuid)
+returns boolean language sql stable security definer set search_path = '' as $$
+  select owner = auth.uid()
+      or exists (
+        select 1 from public.profiles p
+        where p.id = owner and not p.is_private and not public.blocked_with(owner)
+      );
+$$;
+
+alter table public.profiles enable row level security;
+alter table public.username_history enable row level security;
+alter table public.profile_details enable row level security;
+alter table public.titles enable row level security;
+alter table public.logs enable row level security;
+alter table public.highlights enable row level security;
+alter table public.threads enable row level security;
+alter table public.thread_items enable row level security;
+alter table public.blocks enable row level security;
+alter table public.reports enable row level security;
+
+-- profiles: name, username and photo are visible to everyone (even for private accounts), except across a block
+create policy "profiles: visible unless blocked" on public.profiles for select to anon, authenticated
+  using (not public.blocked_with(id));
+create policy "profiles: create your own" on public.profiles for insert to authenticated
+  with check (id = auth.uid());
+create policy "profiles: edit your own" on public.profiles for update to authenticated
+  using (id = auth.uid()) with check (id = auth.uid());
+
+create policy "username history: readable" on public.username_history for select to anon, authenticated using (true);
+
+create policy "details: visible with the shelf" on public.profile_details for select to anon, authenticated
+  using (public.can_see_shelf(id));
+create policy "details: create your own" on public.profile_details for insert to authenticated
+  with check (id = auth.uid());
+create policy "details: edit your own" on public.profile_details for update to authenticated
+  using (id = auth.uid()) with check (id = auth.uid());
+
+create policy "titles: readable by everyone" on public.titles for select to anon, authenticated using (true);
+
+create policy "logs: yours, or a visible shelf" on public.logs for select to anon, authenticated
+  using (user_id = auth.uid() or (not only_me and public.can_see_shelf(user_id)));
+create policy "logs: add your own" on public.logs for insert to authenticated with check (user_id = auth.uid());
+create policy "logs: edit your own" on public.logs for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "logs: delete your own" on public.logs for delete to authenticated using (user_id = auth.uid());
+
+create policy "highlights: visible with their entry" on public.highlights for select to anon, authenticated
+  using (exists (select 1 from public.logs l where l.id = log_id));
+create policy "highlights: add to your own entries" on public.highlights for insert to authenticated
+  with check (user_id = auth.uid() and exists (select 1 from public.logs l where l.id = log_id and l.user_id = auth.uid()));
+create policy "highlights: edit your own" on public.highlights for update to authenticated
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid() and exists (select 1 from public.logs l where l.id = log_id and l.user_id = auth.uid()));
+create policy "highlights: delete your own" on public.highlights for delete to authenticated using (user_id = auth.uid());
+
+create policy "threads: visible with the shelf" on public.threads for select to anon, authenticated
+  using (public.can_see_shelf(user_id));
+create policy "threads: add your own" on public.threads for insert to authenticated with check (user_id = auth.uid());
+create policy "threads: edit your own" on public.threads for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "threads: delete your own" on public.threads for delete to authenticated using (user_id = auth.uid());
+
+create policy "thread items: visible with the shelf" on public.thread_items for select to anon, authenticated
+  using (public.can_see_shelf(user_id));
+create policy "thread items: add to your own threads" on public.thread_items for insert to authenticated
+  with check (user_id = auth.uid() and exists (select 1 from public.threads t where t.id = thread_id and t.user_id = auth.uid()));
+create policy "thread items: edit your own" on public.thread_items for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy "thread items: delete your own" on public.thread_items for delete to authenticated using (user_id = auth.uid());
+
+create policy "blocks: see your own" on public.blocks for select to authenticated using (blocker = auth.uid());
+create policy "blocks: block someone" on public.blocks for insert to authenticated with check (blocker = auth.uid());
+create policy "blocks: unblock" on public.blocks for delete to authenticated using (blocker = auth.uid());
+
+create policy "reports: see the ones you sent" on public.reports for select to authenticated using (reporter = auth.uid());
+create policy "reports: send one" on public.reports for insert to authenticated
+  with check (reporter = auth.uid() and status = 'open');
+
+-- ───────────────────────── what each kind of visitor may do at all ─────────────────────────
+-- (new tables aren't exposed automatically in this project, so every permission is listed here)
+
+grant select on public.profiles, public.username_history, public.profile_details, public.titles,
+  public.logs, public.highlights, public.threads, public.thread_items to anon, authenticated;
+grant insert (id, username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
+grant update (username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
+grant insert, update on public.profile_details to authenticated;
+grant insert, update, delete on public.logs, public.highlights, public.threads, public.thread_items to authenticated;
+grant select, insert, delete on public.blocks to authenticated;
+grant select on public.reports to authenticated;
+grant insert (reporter, target_user, target_log, reason, details) on public.reports to authenticated;
+grant all on all tables in schema public to service_role;
+
+revoke all on function public.blocked_with(uuid), public.can_see_shelf(uuid) from public;
+grant execute on function public.blocked_with(uuid), public.can_see_shelf(uuid), public.username_reserved(text)
+  to anon, authenticated, service_role;
+
+commit;

@@ -1,0 +1,140 @@
+---
+import Base from '../layouts/Base.astro';
+import Face from '../components/Face.astro';
+import { safeNext } from '../lib/nav';
+import { suggestUsernames } from '../lib/usernames';
+import { turnstileSiteKey } from '../lib/turnstile';
+export const prerender = false;
+
+const next = safeNext(Astro.url.searchParams.get('next'));
+const user = Astro.locals.user;
+if (!user) return Astro.redirect(`/signin/?next=${encodeURIComponent(next)}`);
+if (Astro.locals.me) return Astro.redirect(next);
+const seed = user.name || user.email?.split('@')[0] || 'reader';
+let ideas: string[] = [];
+try { ideas = await suggestUsernames(seed, user.id); } catch {}
+const first = ideas[0] ?? '';
+const siteKey = turnstileSiteKey();
+---
+<Base title="Pick your username" noindex>
+  {siteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}
+  <section class="pad wrap">
+    <form id="welcome" class="box rise" data-next={next} novalidate>
+      <div class="who">
+        <Face name={user.name || user.email || '?'} src={user.avatar} size={48} />
+        <div class="stack"><span class="hint">Signed in as</span><b>{user.name || user.email}</b></div>
+      </div>
+      <div class="stack" style="gap: 8px">
+        <h1 class="serif h">Pick your username</h1>
+        <p class="lede">It’s your address on Granthalaya. You can change it once a month.</p>
+      </div>
+
+      <label class="stack" style="gap: 8px">
+        <span class="lbl">Username</span>
+        <span class="uwrap">
+          <span class="at">@</span>
+          <input class="field u" name="username" value={first} autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="20" required aria-describedby="ustate" />
+          <span class="ustate" id="ustate" aria-live="polite"></span>
+        </span>
+        <span class="hint">Lowercase letters, numbers and _, 3 to 20 characters.</span>
+      </label>
+      {ideas.length > 1 && (
+        <div class="stack" style="gap: 8px">
+          <span class="hint">Or one of these</span>
+          <div class="ideas">{ideas.map((u) => <button type="button" class="gchip" data-idea={u}>{u}</button>)}</div>
+        </div>
+      )}
+
+      <label class="stack" style="gap: 8px">
+        <span class="lbl">Your name</span>
+        <input class="field" name="name" value={user.name ?? ''} maxlength="60" required />
+      </label>
+      <label class="stack" style="gap: 8px">
+        <span class="lbl">One line about you <span class="hint">(optional)</span></span>
+        <input class="field" name="bio" maxlength="160" placeholder="Books, films and everything I’ve spent time with." />
+      </label>
+
+      <label class="row">
+        <span class="stack" style="gap: 2px"><b>Private account</b><span class="hint">Only you see your shelf. Others see just your name and photo.</span></span>
+        <input type="checkbox" class="onoff" name="private" />
+      </label>
+      <label class="agree">
+        <input type="checkbox" name="agree" required />
+        <span>I agree to the <a href="/terms/" target="_blank">terms</a> and the <a href="/privacy/" target="_blank">privacy policy</a>.</span>
+      </label>
+
+      {siteKey && <div class="cf-turnstile" data-sitekey={siteKey} data-size="flexible" data-theme="auto" data-appearance="interaction-only"></div>}
+      <p class="notice bad" id="err" hidden></p>
+      <button class="btn primary big" type="submit" id="go">Start my shelf</button>
+      <p class="hint center">Your photo comes from Google. Add a bio, links and a line of the week later in Settings.</p>
+    </form>
+  </section>
+</Base>
+<style>
+  .wrap { padding-top: 48px; }
+  .box { max-width: 500px; margin: 0 auto; padding: 36px; display: flex; flex-direction: column; gap: 22px; border-radius: 22px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 30px 60px -30px var(--shadow); }
+  .who { display: flex; align-items: center; gap: 14px; }
+  .who b { font-weight: 600; }
+  .h { margin: 0; font-weight: 400; font-size: 32px; line-height: 1.1; }
+  .uwrap { position: relative; display: block; }
+  .at { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+  .u { padding-left: 32px; padding-right: 120px; }
+  .ustate { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 600; color: var(--muted); }
+  .ustate.ok { color: var(--moss); }
+  .ustate.no { color: #B4473B; }
+  .ideas { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; cursor: pointer; }
+  .row b { font-size: 15px; font-weight: 600; }
+  .agree { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; cursor: pointer; }
+  .agree input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--lat); flex-shrink: 0; }
+  .agree a { text-decoration: underline; text-underline-offset: 2px; }
+  .center { text-align: center; margin: 0; }
+  @media (max-width: 780px) { .wrap { padding-top: 20px; } .box { padding: 26px 20px; } }
+</style>
+<script>
+  function setup() {
+    const f = document.getElementById('welcome') as HTMLFormElement | null;
+    if (!f || f.dataset.ready) return;
+    f.dataset.ready = '1';
+    const u = f.elements.namedItem('username') as HTMLInputElement;
+    const state = document.getElementById('ustate')!;
+    const err = document.getElementById('err')!;
+    let timer = 0;
+    async function check() {
+      const v = u.value.trim().toLowerCase().replace(/^@/, '');
+      if (v !== u.value) u.value = v;
+      if (!v) { state.textContent = ''; return; }
+      state.textContent = 'Checking…'; state.className = 'ustate';
+      try {
+        const r = await fetch(`/api/username?u=${encodeURIComponent(v)}`).then((x) => x.json());
+        if (u.value.trim().toLowerCase() !== v) return;
+        state.textContent = r.ok ? '✓ Available' : r.message;
+        state.className = 'ustate ' + (r.ok ? 'ok' : 'no');
+      } catch { state.textContent = ''; }
+    }
+    u.addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(check, 350); });
+    f.querySelectorAll<HTMLButtonElement>('[data-idea]').forEach((b) => b.addEventListener('click', () => { u.value = b.dataset.idea!; check(); }));
+    if (u.value) check();
+    f.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      err.hidden = true;
+      const fd = new FormData(f);
+      if (!fd.get('agree')) { err.textContent = 'Please agree to the terms and privacy policy.'; err.hidden = false; return; }
+      const go = document.getElementById('go') as HTMLButtonElement;
+      go.disabled = true; go.textContent = 'Setting up your shelf…';
+      const res = await fetch('/api/welcome', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: fd.get('username'), name: fd.get('name'), bio: fd.get('bio'), private: !!fd.get('private'), agree: true,
+          turnstile: fd.get('cf-turnstile-response'), next: f.dataset.next,
+        }),
+      }).then((r) => r.json()).catch(() => ({ error: 'Couldn’t reach the site. Check your connection and try again.' }));
+      if (res.ok) { location.href = res.next; return; }
+      err.textContent = res.error; err.hidden = false;
+      go.disabled = false; go.textContent = 'Start my shelf';
+      // @ts-ignore
+      window.turnstile?.reset?.();
+    });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

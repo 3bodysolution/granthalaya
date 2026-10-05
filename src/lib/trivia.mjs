@@ -23,7 +23,9 @@ async function getJSON(url, init = {}, ms = 8000) {
 const KINDS = {
   film: /\bfilm\b|\bmovie\b|\bdocumentary\b/i,
   book: /\bnovel\b|\bbook\b|\bcollection\b|\bpoems?\b|\bpoetry\b|\bmemoir\b|\bnovella\b|\bshort stor|\bessays?\b/i,
+  tv: /\btelevision\b|\btv\b|\bseries\b|\bsitcom\b|\bminiseries\b|\bdrama\b/i,
 };
+const SEARCH_WORD = { film: 'film', book: 'novel', tv: 'TV series' };
 
 // "Paterson (film)" matches "Paterson"; "Applesauce (novel)" doesn't match "A Room of One's Own"
 const norm = (s = '') => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
@@ -34,7 +36,7 @@ export async function findWikipediaPage({ title, year, type, creator }) {
   const kind = KINDS[type];
   if (!kind) return null;
   const tries = [
-    `${title} ${year ?? ''} ${type === 'film' ? 'film' : 'novel'}`,
+    `${title} ${year ?? ''} ${SEARCH_WORD[type]}`,
     `${title} ${creator ?? ''}`,
     title,
   ];
@@ -55,9 +57,9 @@ export async function findWikipediaPage({ title, year, type, creator }) {
   return null;
 }
 
-const prompt = ({ title, year, type }, page) => `You are picking facts for the "Behind the ${type}" box on a personal library website.
+const prompt = ({ title, year, type }, page) => `You are picking facts for the "Behind the ${type === 'tv' ? 'show' : type}" box on a personal library website.
 
-Below is the English Wikipedia article for the ${type} "${title}"${year ? ` (${year})` : ''}.
+Below is the English Wikipedia article for the ${type === 'tv' ? 'TV series' : type} "${title}"${year ? ` (${year})` : ''}.
 Pick the 3 most surprising, specific and fun facts about how it was made, written or received.
 Good facts: production stories, odd constraints, real-life inspirations, records, unexpected reactions.
 Avoid: plot summary, cast lists, dull dates, awards lists, anything a reader could guess.

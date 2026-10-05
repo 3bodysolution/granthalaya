@@ -187,3 +187,50 @@ body, .card, .btn, .chip, .iconbtn, .site-wrap, .foot-wrap, .rule { transition: 
   .foot-wrap { margin-top: 32px; }
   .hide-sm { display: none !important; }
 }
+
+/* account menu in the header */
+.menu { position: relative; }
+.menu > summary { list-style: none; cursor: pointer; }
+.menu > summary::-webkit-details-marker { display: none; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: var(--lat); color: var(--bg); font-family: Fraunces, Georgia, serif; font-size: 18px; border: 1px solid var(--line); }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.menu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; min-width: 220px; padding: 6px; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 40px -18px var(--shadow); animation: rise .25s var(--spring); }
+.menu-list a, .menu-list button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: 9px; border: 0; background: transparent; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; }
+.menu-list a:hover, .menu-list button:hover { background: var(--soft); color: var(--ink); }
+.menu-list form { margin: 0; border-top: 1px solid var(--line); margin-top: 4px; padding-top: 4px; }
+.menu-who { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px 12px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.menu-who b { font-size: 14px; font-weight: 600; }
+.menu-who span { font-size: 13px; color: var(--muted); }
+
+/* round photos and letters for people */
+.face { border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--lat); color: var(--bg); font-family: Fraunces, Georgia, serif; }
+.face img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* small form bits shared by Welcome, Settings and Add */
+.field { width: 100%; height: 48px; padding: 0 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-family: inherit; font-size: 16px; outline: none; transition: border-color .3s ease, box-shadow .3s ease; }
+textarea.field { height: auto; padding: 12px 14px; line-height: 1.5; resize: vertical; }
+.field:focus { border-color: var(--lat); box-shadow: 0 0 0 3px color-mix(in srgb, var(--lat) 18%, transparent); }
+.lbl { font-size: 13px; font-weight: 600; color: var(--ink); }
+.hint { font-size: 12.5px; color: var(--muted); }
+.notice { margin: 0; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--lat); background: color-mix(in srgb, var(--lat) 8%, var(--card)); font-size: 14px; }
+.notice.bad { border-color: #B4473B; background: color-mix(in srgb, #B4473B 8%, var(--card)); }
+.onoff { position: relative; width: 44px; height: 26px; flex-shrink: 0; appearance: none; -webkit-appearance: none; border-radius: 13px; background: var(--line); cursor: pointer; transition: background-color .25s ease; margin: 0; }
+.onoff::after { content: ""; position: absolute; left: 3px; top: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .3s var(--spring); }
+.onoff:checked { background: var(--lat); }
+.onoff:checked::after { transform: translateX(18px); }
+.gchip { display: inline-flex; align-items: center; height: 30px; padding: 0 11px; border-radius: 6px; border: 0; background: var(--soft); font-size: 13px; color: var(--muted); cursor: pointer; transition: background-color .2s ease, color .2s ease; }
+.gchip:hover { color: var(--ink); }
+.gchip.on, .gchip[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+.chip[aria-pressed="true"] { border-color: var(--lat); color: var(--lat); }
+
+/* small dialogs: report, confirm */
+dialog.box { width: min(460px, calc(100vw - 32px)); padding: 26px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 30px 60px -20px var(--shadow); }
+dialog.box::backdrop { background: var(--scrim); }
+dialog.box h2 { margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 22px; }
+dialog.box p { margin: 0 0 14px; font-size: 14.5px; line-height: 1.5; color: var(--muted); }
+dialog.box .reasons { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 14px; }
+dialog.box .reasons label { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }
+dialog.box .reasons input { accent-color: var(--lat); width: 17px; height: 17px; }
+dialog.box .row { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 60; padding: 12px 18px; border-radius: 14px; background: var(--ink); color: var(--bg); font-size: 14px; box-shadow: 0 18px 30px -12px var(--shadow); animation: rise .3s var(--spring); }
+@media (max-width: 780px) { .toast { bottom: 96px; } }

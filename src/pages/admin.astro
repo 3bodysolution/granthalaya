@@ -1,0 +1,67 @@
+---
+// Reports, for the person who runs the site (profiles.is_admin, set by hand in the database).
+import Base from '../layouts/Base.astro';
+import { adminClient } from '../lib/supabase';
+export const prerender = false;
+
+const me = Astro.locals.me;
+if (!me?.is_admin) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const show = Astro.url.searchParams.get('show') === 'all' ? 'all' : 'open';
+const db = adminClient();
+let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug))').order('created_at', { ascending: false }).limit(100);
+if (show === 'open') q = q.eq('status', 'open');
+const { data: reports, error } = await q;
+const REASON: Record<string, string> = { spam: 'Spam or fake', abuse: 'Harassment', sexual: 'Sexual content', hate: 'Hate', illegal: 'Illegal', other: 'Something else' };
+const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
+---
+<Base title="Reports" noindex>
+  <section class="pad wrap">
+    <div class="top">
+      <h1 class="title">Reports</h1>
+      <div class="flex gap-2"><a class:list={['gchip', show === 'open' && 'on']} href="/admin/">Open</a><a class:list={['gchip', show === 'all' && 'on']} href="/admin/?show=all">All</a></div>
+    </div>
+    {error && <p class="notice bad">Couldn’t load reports: {error.message}</p>}
+    {!error && (reports ?? []).length === 0 && <p class="muted" style="font-size: 16px">Nothing to look at. All quiet.</p>}
+    <div class="list">
+      {(reports ?? []).map((r: any) => (
+        <article class="card rep">
+          <div class="between"><b>{REASON[r.reason] ?? r.reason}</b><span class="muted small">{when(r.created_at)} · {r.status}</span></div>
+          <p class="small">
+            {r.target ? <>About <a class="accent" href={`/@${r.target.username}/`}>@{r.target.username}</a>{r.target.featured ? ' (featured)' : ''}</> : 'About a removed account'}
+            {r.log?.title && <> · entry <a class="accent" href={`/@${r.target?.username}/library/${r.log.title.slug}/`}>{r.log.title.title}</a>{r.log.only_me ? ' (hidden)' : ''}</>}
+            {' '}· from {r.reporter ? `@${r.reporter.username}` : 'a removed account'}
+          </p>
+          {r.details && <p class="quote">“{r.details}”</p>}
+          {r.log?.notes && <p class="small muted">Their note: {r.log.notes.slice(0, 280)}</p>}
+          <div class="flex gap-2 flex-wrap">
+            {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'dismiss' })}>Dismiss</button>}
+            {r.log && !r.log.only_me && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'hide_entry' })}>Hide the entry</button>}
+            {r.target?.featured && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'unfeature' })}>Stop featuring them</button>}
+            {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'done' })}>Mark as dealt with</button>}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</Base>
+<style>
+  .wrap { padding-top: 48px; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+  .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; }
+  .list { display: flex; flex-direction: column; gap: 14px; }
+  .rep { padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .rep p { margin: 0; }
+  .between { display: flex; justify-content: space-between; gap: 12px; }
+  .small { font-size: 14px; }
+  .quote { font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 17px; }
+  .btn.sm { height: 34px; padding: 0 12px; font-size: 13px; }
+</style>
+<script>
+  import { navigate } from 'astro:transitions/client';
+  document.addEventListener('click', async (ev) => {
+    const b = (ev.target as Element).closest<HTMLButtonElement>('[data-admin]');
+    if (!b) return;
+    b.disabled = true;
+    const r = await fetch('/api/admin', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: b.dataset.admin }).then((x) => x.json()).catch(() => ({}));
+    if (r.ok) navigate(location.pathname + location.search, { history: 'replace' }); else b.disabled = false;
+  });
+</script>

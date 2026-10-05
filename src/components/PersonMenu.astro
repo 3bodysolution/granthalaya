@@ -1,0 +1,26 @@
+---
+// The ⋯ menu on someone's shelf: copy the link, report, block.
+interface Props { username: string; id: string; isMe: boolean; signedIn: boolean; blocked: boolean; logId?: string }
+const { username, id, isMe, signedIn, blocked, logId } = Astro.props;
+const link = new URL(`/@${username}/`, Astro.url).href;
+---
+<details class="menu pmenu">
+  <summary class="iconbtn sm" aria-label="More">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>
+  </summary>
+  <div class="menu-list" role="menu">
+    <button role="menuitem" type="button" data-copy={link}>Copy link to this shelf</button>
+    {!isMe && signedIn && (
+      <>
+        <button role="menuitem" type="button" data-report={JSON.stringify({ user: id, log: logId ?? null, who: username })}>{logId ? 'Report this entry' : 'Report'}</button>
+        <button role="menuitem" type="button" data-block={JSON.stringify({ id, who: username, blocked })}>{blocked ? `Unblock @${username}` : `Block @${username}`}</button>
+      </>
+    )}
+    {!isMe && !signedIn && <a role="menuitem" href={`/signin/?next=/@${username}/`} data-astro-prefetch="false">Sign in to report or block</a>}
+  </div>
+</details>
+<style>
+  .iconbtn.sm { width: 38px; height: 38px; }
+  .pmenu .menu-list { min-width: 240px; }
+  .pmenu .menu-list button[data-copy] { border-bottom: 0; }
+</style>

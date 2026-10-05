@@ -1,0 +1,33 @@
+---
+// A small status label: soft tint of the status colour, a little icon, normal case.
+// onCover: a solid card background so it stays readable on top of a cover image.
+import BookOpen from '@tabler/icons/outline/book-2.svg';
+import Play from '@tabler/icons/outline/player-play.svg';
+import Bookmark from '@tabler/icons/outline/bookmark.svg';
+import Pause from '@tabler/icons/outline/player-pause.svg';
+import X from '@tabler/icons/outline/circle-x.svg';
+import Check from '@tabler/icons/outline/circle-check.svg';
+type S = 'reading' | 'watching' | 'want' | 'paused' | 'dnf' | 'dropped' | 'read' | 'watched' | 'saved';
+interface Props { status: S; label?: string; onCover?: boolean; class?: string }
+const { status, label, onCover = false, class: cls } = Astro.props;
+const map = {
+  reading: { t: 'Reading', c: 'var(--lat)', I: BookOpen },
+  watching: { t: 'Watching', c: 'var(--lat)', I: Play },
+  want: { t: 'Want to', c: 'var(--sky)', I: Bookmark },
+  saved: { t: 'Saved', c: 'var(--sky)', I: Bookmark },
+  paused: { t: 'Paused', c: 'var(--haldi)', I: Pause },
+  dnf: { t: 'Didn’t finish', c: 'var(--muted)', I: X },
+  dropped: { t: 'Dropped', c: 'var(--muted)', I: X },
+  read: { t: 'Read', c: 'var(--moss)', I: Check },
+  watched: { t: 'Watched', c: 'var(--moss)', I: Check },
+} as const;
+const m = map[status];
+const I = m.I;
+---
+<span class:list={['status-tag', onCover && 'on-cover', cls]} style={`--c:${m.c}`}><I aria-hidden="true" />{label ?? m.t}</span>
+<style>
+  .status-tag { display: inline-flex; align-items: center; gap: 5px; height: 24px; padding: 0 9px 0 7px; border-radius: 7px; font-size: 12.5px; font-weight: 600; line-height: 1; white-space: nowrap;
+    color: var(--c); background: color-mix(in srgb, var(--c) 13%, var(--card)); }
+  .status-tag :global(svg) { width: 14px; height: 14px; stroke-width: 2.2; }
+  .on-cover { background: color-mix(in srgb, var(--card) 94%, transparent); box-shadow: 0 4px 12px -4px rgba(0,0,0,.35); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+</style>

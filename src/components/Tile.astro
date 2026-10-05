@@ -1,15 +1,29 @@
 ---
 import Cover from './Cover.astro';
+import StatusIcon from './ui/StatusIcon.astro';
 import { href, stars, starsLabel, short, type Entry } from '../lib/data';
+import { statusLabel } from '../lib/kinds';
 interface Props { entry: Entry; vt?: boolean; delay?: string; cls?: string }
 const { entry, vt = false, delay, cls = '' } = Astro.props;
+const d = entry.data;
 const s = stars(entry);
+const open = d.status !== 'done';
+const label = statusLabel(d.type, d.status);
 ---
 <a href={href(entry)} class:list={['tile lift', cls]} style={delay ? `animation-delay:${delay}` : undefined}
-   data-type={entry.data.type}>
-  <Cover entry={entry} vt={vt} />
+   data-type={d.type} data-status={d.status} title={open ? `${d.title} · ${label}` : undefined}>
+  <span class="tile-cover">
+    <Cover entry={entry} vt={vt} />
+    {open && <StatusIcon status={d.status as any} label={label} class="tile-status" />}
+    {d.private && <span class="tile-lock" title="Only you can see this" aria-label="Only you can see this"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>}
+  </span>
   <div class="tile-foot">
-    {s ? <span class="stars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="date">{entry.data.status !== 'done' ? 'In progress' : ''}</span>}
-    <span class="date num">{short(entry.data.date)}</span>
+    {s ? <span class="stars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="date">{open ? label : ''}</span>}
+    <span class="date num">{short(d.date)}</span>
   </div>
 </a>
+<style>
+  .tile-cover { position: relative; display: block; }
+  .tile-cover :global(.tile-status) { position: absolute; top: 8px; right: 8px; z-index: 2; }
+  .tile-lock { position: absolute; top: 8px; left: 8px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); background: color-mix(in srgb, var(--card) 92%, transparent); box-shadow: 0 4px 12px -4px rgba(0,0,0,.4); }
+</style>

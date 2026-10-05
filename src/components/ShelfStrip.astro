@@ -1,0 +1,26 @@
+---
+// The small "whose shelf is this" strip and tabs, under the painting on a shelf's inner pages.
+import Face from './Face.astro';
+import ShelfTabs from './ShelfTabs.astro';
+import PersonMenu from './PersonMenu.astro';
+import type { Shelf } from '../lib/shelfpage';
+interface Props { shelf: Shelf; current: 'library' | 'diary' | 'notes' | 'threads' | 'want' | 'stats' }
+const { shelf, current } = Astro.props;
+const p = shelf.profile;
+const name = p.display_name || p.username;
+---
+<div class="strip">
+  <a href={`/@${p.username}/`} class="who">
+    <Face name={name} src={p.avatar_url} size={36} />
+    <span class="stack"><b>{name}</b><span>@{p.username}</span></span>
+  </a>
+  <PersonMenu username={p.username} id={p.id} isMe={shelf.isMe} signedIn={!!Astro.locals.me} blocked={shelf.blockedByMe} />
+</div>
+<ShelfTabs username={p.username} current={current} />
+<style>
+  .strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 0 14px; }
+  .who { display: inline-flex; align-items: center; gap: 12px; }
+  .who b { font-size: 15px; font-weight: 600; line-height: 1.2; }
+  .who span span { font-size: 13px; color: var(--muted); }
+  .who:hover b { color: var(--lat); }
+</style>

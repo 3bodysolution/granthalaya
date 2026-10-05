@@ -1,14 +1,14 @@
 ---
-import { palette, type Entry, type Thread } from '../lib/data';
+import { palette, threadHref, type Entry, type Thread } from '../lib/data';
 interface Props { thread: Thread; entries: Entry[] }
 const { thread, entries } = Astro.props;
 const bySlug = new Map(entries.map((e) => [e.id, e]));
 const list = thread.data.items.map((i) => bySlug.get(i.slug)).filter(Boolean) as Entry[];
 const c = [0, 1, 2].map((i) => (list[i] ? palette(list[i]).bg : '#46525E'));
 const n = (t: string) => list.filter((e) => e.data.type === t).length;
-const meta = [`${list.length} things`, n('film') && `${n('film')} film${n('film') > 1 ? 's' : ''}`, n('book') && `${n('book')} book${n('book') > 1 ? 's' : ''}`, n('essay') && `${n('essay')} essay${n('essay') > 1 ? 's' : ''}`].filter(Boolean).join(' · ');
+const meta = [`${list.length} things`, n('film') && `${n('film')} film${n('film') > 1 ? 's' : ''}`, n('book') && `${n('book')} book${n('book') > 1 ? 's' : ''}`, n('tv') && `${n('tv')} season${n('tv') > 1 ? 's' : ''} of TV`, n('essay') && `${n('essay')} essay${n('essay') > 1 ? 's' : ''}`].filter(Boolean).join(' · ');
 ---
-<a href={`/threads/${thread.id}/`} class="card threadcard">
+<a href={threadHref(thread)} class="card threadcard">
   <div class="fanwrap" aria-hidden="true">
     <span class="wash st l" style={`background: ${c[0]}`}></span>
     <span class="wash st r" style={`background: ${c[2]}`}></span>
