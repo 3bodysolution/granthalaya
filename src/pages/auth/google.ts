@@ -8,6 +8,7 @@ export const GET: APIRoute = async ({ locals, url, redirect }) => {
   const next = safeNext(url.searchParams.get('next'));
   const { data, error } = await locals.supabase.auth.signInWithOAuth({
     provider: 'google',
+    // url.origin is only right because astro.config.mjs lists the site's domains (security.allowedDomains)
     options: { redirectTo: `${url.origin}/auth/callback?next=${encodeURIComponent(next)}`, queryParams: { prompt: 'select_account' } },
   });
   if (error || !data?.url) return redirect('/signin/?error=google');

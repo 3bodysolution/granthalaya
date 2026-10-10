@@ -17,6 +17,7 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - **Design:** `src/styles/global.css` holds the tokens for light and dark (`html[data-theme]`); Starwind UI + Tailwind 4 are set up (`src/styles/starwind.css`, `src/components/starwind/`), plus our own pieces in `src/components/ui/` (`StatusTag`, `StatusIcon`, `SectionHead`, `SocialLink`, `GoogleButton`). Watch for class names that clash with `global.css` (`.foot`, `.date`, `.key` are taken).
 - `public/art/` holds the page paintings (day and night), shown as CSS backgrounds with `.art` and `--day`/`--night`. `.melt` fades a painting into the page, `.bleed` runs it full width. `src/components/Valley.astro` is the footer painting; its shepherd says the page's line of the week.
 - `src/content/` (the old markdown library) is kept as a backup and as the source for `npm run migrate`. The site no longer reads it.
+- `astro.config.mjs` → `security.allowedDomains` lists the site's addresses (the main one and `*.vercel.app` previews). Astro only trusts the address Vercel passes on for these, so a custom domain must be added there too, or sign-in and saving break on it (Astro would think the page is at `https://localhost`).
 - `vercel.json`: functions in `bom1` (next to the database in Mumbai) and a daily cron to `/api/keepalive` so the free database never pauses.
 
 ## Rules Sarthak cares about

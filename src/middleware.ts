@@ -26,6 +26,17 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   if (old) return ctx.redirect(old, 301);
   if (ctx.isPrerendered) return next();
 
+  // If Supabase sends someone back to the wrong page after Google (it falls back to the home page
+  // when it doesn't trust the return address), finish signing in or explain what went wrong.
+  if (!path.startsWith('/auth/')) {
+    const q = ctx.url.searchParams;
+    const code = q.get('code');
+    if (code && /^[0-9a-f-]{36}$/i.test(code)) {
+      return ctx.redirect(`/auth/callback?code=${code}&next=${encodeURIComponent(path)}`);
+    }
+    if (q.has('error_description') || q.has('error_code')) return ctx.redirect('/signin/?error=google');
+  }
+
   ctx.locals.user = null;
   ctx.locals.me = null;
   if (!supabaseReady()) return next();

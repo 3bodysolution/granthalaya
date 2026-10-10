@@ -11,6 +11,15 @@ export default defineConfig({
   adapter: vercel({ maxDuration: 30 }), // saving can take a few seconds while it looks a title up
   trailingSlash: 'ignore',
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
-  security: { checkOrigin: true },
+  security: {
+    checkOrigin: true,
+    // Vercel tells the site which address someone opened, but Astro only believes it for the
+    // domains listed here. Without this list Astro thinks every page lives at https://localhost,
+    // which breaks Google sign-in and every save. Add your custom domain here when you connect one.
+    allowedDomains: [
+      { protocol: 'https', hostname: 'granthalaya-sarthak.vercel.app' },
+      { protocol: 'https', hostname: '*.vercel.app' }, // preview copies
+    ],
+  },
   vite: { plugins: [tailwindcss()] },
 });
