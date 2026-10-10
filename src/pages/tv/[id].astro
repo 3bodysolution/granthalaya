@@ -1,0 +1,149 @@
+---
+// A TV show: its seasons (each logged on its own), cast, where to watch, and what people here thought.
+import Base from '../../layouts/Base.astro';
+import TitleLayout from '../../components/title/TitleLayout.astro';
+import Poster from '../../components/title/Poster.astro';
+import Where from '../../components/title/Where.astro';
+import Tabs from '../../components/title/Tabs.astro';
+import PeopleGrid from '../../components/title/PeopleGrid.astro';
+import Voices from '../../components/title/Voices.astro';
+import OnSiteBox from '../../components/title/OnSiteBox.astro';
+import LogPanel from '../../components/LogPanel.astro';
+import StatusTag from '../../components/ui/StatusTag.astro';
+import { show, idFrom, showHref } from '../../lib/catalog/tmdb';
+import { slug } from '../../lib/catalog/fetch';
+import { rowsForShow, onSite } from '../../lib/catalog/onsite';
+import { statusLabel, type Status } from '../../lib/kinds';
+export const prerender = false;
+
+const param = String(Astro.params.id ?? '');
+const sb = Astro.locals.supabase;
+const me = Astro.locals.me;
+const id = idFrom(param);
+if (!id) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const [t, rows] = await Promise.all([show(id), sb ? rowsForShow(sb, id) : Promise.resolve([])]);
+if (!t) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+if (param !== `${id}-${slug(t.title)}` && slug(t.title)) return Astro.redirect(showHref(id, t.title) + Astro.url.search, 301);
+const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
+const rowFor = (n: number) => rows.find((r) => r.season === n);
+const mineFor = (n: number) => site.mine.find((m) => m.season === n);
+const parts = t.seasons.map((s) => ({
+  key: `s${s.n}`, label: `Season ${s.n}${s.year ? ` (${s.year})` : ''}`,
+  hit: { kind: 'tv', tmdbId: id, season: s.n, title: t.title, year: s.year ?? t.year, episodes: s.episodes, cover: s.poster ?? t.poster, creator: t.creators[0]?.name },
+  titleId: rowFor(s.n)?.id, mine: mineFor(s.n),
+}));
+const pick = site.mine[0]?.season ? `s${site.mine[0].season}` : parts[0]?.key;
+const share = new URL(showHref(id, t.title), Astro.site).href;
+const years = t.year ? (t.lastYear && t.lastYear !== t.year ? `${t.year}–${t.lastYear}` : `${t.year}`) : '';
+const tabs = [
+  t.cast.length && { key: 'cast', label: 'Cast' },
+  t.crew.length && { key: 'crew', label: 'Crew' },
+  { key: 'details', label: 'Details' },
+  t.genres.length && { key: 'genres', label: 'Genres' },
+].filter(Boolean) as { key: string; label: string }[];
+const first = tabs[0]?.key;
+const facts = rows.find((r) => (r.trivia ?? []).length);
+---
+<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} image={t.poster}>
+  <TitleLayout backdrop={t.backdrop}>
+    <Poster slot="poster" src={t.poster} title={t.title} by={t.creators[0]?.name} kind="tv" year={t.year} />
+    <Fragment slot="side"><Where where={t.where} title={t.title} /></Fragment>
+
+    <h1 class="title tt">{t.title}</h1>
+    <p class="meta">
+      {t.year && <a href={`/films/?kind=tv&year=${t.year}`} class="ul">{years}</a>}
+      {t.creators.length > 0 && <span> · Created by {t.creators.map((c, i) => <>{i > 0 && ', '}<a href={c.href} class="ul">{c.name}</a></>)}</span>}
+      {t.seasons.length > 0 && <span> · {t.seasons.length} season{t.seasons.length > 1 ? 's' : ''}</span>}
+      {t.networks[0] && <span> · {t.networks[0]}</span>}
+    </p>
+    {t.tagline && <p class="tagline">{t.tagline}</p>}
+    {t.overview && <p class="overview">{t.overview}</p>}
+
+    <Tabs id="show" tabs={tabs}>
+      {t.cast.length > 0 && <div role="tabpanel" id="show-p-cast" aria-labelledby="show-t-cast" class="tp" hidden={first !== 'cast'}><PeopleGrid people={t.cast} /></div>}
+      {t.crew.length > 0 && (
+        <div role="tabpanel" id="show-p-crew" aria-labelledby="show-t-crew" class="tp" hidden={first !== 'crew'}>
+          <dl class="facts">{t.crew.map((g) => <><dt>{g.job}</dt><dd>{g.people.map((p, i) => <>{i > 0 && ', '}<a href={p.href} class="ul">{p.name}</a></>)}</dd></>)}</dl>
+        </div>
+      )}
+      <div role="tabpanel" id="show-p-details" aria-labelledby="show-t-details" class="tp" hidden={first !== 'details'}>
+        <dl class="facts">
+          {t.episodeRuntime && <><dt>Episodes</dt><dd>About {t.episodeRuntime} minutes each</dd></>}
+          {t.language && <><dt>Language</dt><dd><a href={`/films/?kind=tv&language=${t.language.code}`} class="ul">{t.language.name}</a></dd></>}
+          {t.countries.length > 0 && <><dt>{t.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{t.countries.map((c) => c.name).join(', ')}</dd></>}
+          {t.networks.length > 0 && <><dt>Shown on</dt><dd>{t.networks.join(', ')}</dd></>}
+          {t.status && <><dt>Status</dt><dd>{t.status === 'Returning Series' ? 'More seasons coming' : t.status}</dd></>}
+          {t.original && t.original !== t.title && <><dt>Original title</dt><dd>{t.original}</dd></>}
+        </dl>
+      </div>
+      {t.genres.length > 0 && (
+        <div role="tabpanel" id="show-p-genres" aria-labelledby="show-t-genres" class="tp" hidden={first !== 'genres'}>
+          <div class="chips">{t.genres.map((g) => <a href={`/films/?kind=tv&genre=${g.slug}`} class="gchip">{g.name}</a>)}</div>
+        </div>
+      )}
+    </Tabs>
+
+    <p class="more-at">
+      {t.trailer && <a href={t.trailer} target="_blank" rel="noopener" class="ext">Trailer ↗</a>}
+      {t.imdb && <a href={`https://www.imdb.com/title/${t.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
+      <a href={`https://www.themoviedb.org/tv/${id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>
+    </p>
+
+    <Fragment slot="panel">
+      {parts.length > 0 ? <LogPanel kind="tv" parts={parts} selected={pick} share={share} what={t.title} /> : <p class="muted">No seasons listed yet.</p>}
+      <OnSiteBox site={site} film />
+    </Fragment>
+
+    <Fragment slot="below">
+      {t.seasons.length > 0 && (
+        <section class="pad block">
+          <div class="rule"><h2 class="eyebrow">Seasons</h2></div>
+          <div class="seasons">
+            {t.seasons.map((s) => {
+              const m = mineFor(s.n);
+              return (
+                <div class="card season">
+                  <span class="sp">{s.poster ? <img src={s.poster} alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" /> : null}</span>
+                  <span class="stack" style="gap: 6px; min-width: 0">
+                    <b class="serif sn">{s.name}</b>
+                    <span class="muted small">{[s.year, s.episodes && `${s.episodes} episodes`].filter(Boolean).join(' · ')}</span>
+                    {m && <StatusTag status={(m.status === 'done' ? 'watched' : m.status) as any} label={statusLabel('tv', m.status as Status)} />}
+                    {s.overview && <span class="so">{s.overview}</span>}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+      <Voices site={site} facts={facts ? { list: facts.trivia, source: facts.trivia_source, label: 'Behind the show' } : undefined} />
+      <p class="pad credit-line">TV data from TMDB. Streaming data from JustWatch.</p>
+    </Fragment>
+  </TitleLayout>
+</Base>
+
+<style>
+  .tt { font-size: clamp(40px, 5.2vw, 62px); line-height: 1.02; }
+  .meta { margin: 0; font-size: 16px; color: var(--muted); }
+  .ul { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; transition: text-decoration-color .2s ease, color .2s ease; }
+  .ul:hover { color: var(--lat); text-decoration-color: var(--lat); }
+  .tagline { margin: 4px 0 0; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .overview { margin: 0; max-width: 640px; font-family: Fraunces, Georgia, serif; font-size: 19px; line-height: 1.6; }
+  .tp { padding-top: 16px; }
+  .facts { margin: 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px 18px; font-size: 14.5px; }
+  .facts dt { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding-top: 2px; }
+  .facts dd { margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .more-at { margin: 0; display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 13px; }
+  .ext { font-weight: 600; }
+  .block { padding-top: 56px; display: flex; flex-direction: column; gap: 22px; }
+  .seasons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .season { display: flex; gap: 16px; padding: 14px; }
+  .sp { flex: none; width: 72px; height: 108px; border-radius: 6px; background: var(--soft); overflow: hidden; }
+  .sp img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sn { font-size: 18px; font-weight: 400; }
+  .small { font-size: 13px; }
+  .so { font-size: 13.5px; line-height: 1.5; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .credit-line { margin: 40px 0 0; font-size: 12px; color: var(--muted); }
+  @media (max-width: 780px) { .facts { grid-template-columns: 110px minmax(0, 1fr); } .seasons { grid-template-columns: 1fr; } .overview { font-size: 17px; } }
+</style>

@@ -1,9 +1,10 @@
 ---
-// A person's photo, or the first letter of their name.
+// A person's photo, or the first letter of their name (also shown if the photo doesn't load).
 import { initial } from '../lib/data';
 interface Props { name: string; src?: string | null; size?: number; class?: string }
 const { name, src, size = 44, class: cls } = Astro.props;
 ---
 <span class:list={['face', cls]} style={`width:${size}px;height:${size}px;font-size:${Math.round(size * 0.44)}px`} aria-hidden="true">
-  {src ? <img src={src} alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" /> : initial(name)}
+  <span class="face-l">{initial(name)}</span>
+  {src && <img src={src} alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()" />}
 </span>

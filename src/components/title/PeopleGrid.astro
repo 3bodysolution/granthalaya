@@ -1,0 +1,30 @@
+---
+// Faces and names for cast lists: photo, name and role, each linking to the person's page.
+import type { Person } from '../../lib/catalog/tmdb';
+import Face from '../Face.astro';
+interface Props { people: Person[]; limit?: number }
+const { people, limit = 18 } = Astro.props;
+const shown = people.slice(0, limit);
+const rest = people.slice(limit);
+---
+<ul class="pg">
+  {shown.map((p) => <li><a href={p.href}><Face name={p.name} src={p.photo} size={44} /><span class="pn"><b>{p.name}</b>{p.role && <span>{p.role}</span>}</span></a></li>)}
+</ul>
+{rest.length > 0 && (
+  <details class="pg-more">
+    <summary>Show all {people.length}</summary>
+    <ul class="pg">{rest.map((p) => <li><a href={p.href}><Face name={p.name} src={p.photo} size={44} /><span class="pn"><b>{p.name}</b>{p.role && <span>{p.role}</span>}</span></a></li>)}</ul>
+  </details>
+)}
+<style>
+  .pg { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; }
+  .pg a { display: flex; align-items: center; gap: 12px; padding: 6px; border-radius: 10px; transition: background-color .2s ease; }
+  .pg a:hover { background: var(--soft); color: var(--ink); }
+  .pn { display: flex; flex-direction: column; min-width: 0; }
+  .pn b { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pn span { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pg-more { margin-top: 8px; }
+  .pg-more summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--lat); padding: 6px; list-style: none; }
+  .pg-more summary::-webkit-details-marker { display: none; }
+  .pg-more[open] summary { display: none; }
+</style>

@@ -1,0 +1,32 @@
+---
+// Where to watch it in India: streaming, free, rent and buy. Data from JustWatch, through TMDB.
+import type { Where } from '../../lib/catalog/tmdb';
+interface Props { where: Where | null; title: string }
+const { where, title } = Astro.props;
+const rows = where ? ([['Stream', where.stream], ['Free', where.free], ['Rent', where.rent], ['Buy', where.buy]] as const).filter(([, l]) => l.length) : [];
+const jw = `https://www.justwatch.com/in/search?q=${encodeURIComponent(title)}`;
+---
+<div class="where">
+  <p class="w-h">Where to watch</p>
+  {rows.length ? rows.map(([label, list]) => (
+    <div class="w-row">
+      <span class="w-k">{label}</span>
+      <span class="w-logos">{list.slice(0, 6).map((p) => <a href={where!.link ?? jw} target="_blank" rel="noopener" title={p.name} aria-label={`${label} on ${p.name}`}>{p.logo ? <img src={p.logo} alt="" loading="lazy" referrerpolicy="no-referrer" /> : <span class="w-n">{p.name}</span>}</a>)}</span>
+    </div>
+  )) : <p class="w-none">Not streaming in India right now.</p>}
+  <a class="w-jw" href={where?.link ?? jw} target="_blank" rel="noopener">All services <span aria-hidden="true">↗</span><span class="w-src">JustWatch</span></a>
+</div>
+<style>
+  .where { border-radius: 12px; border: 1px solid var(--line); background: var(--card); overflow: hidden; }
+  .w-h { margin: 0; padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .w-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  .w-k { width: 44px; flex: none; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .w-logos { display: flex; flex-wrap: wrap; gap: 6px; }
+  .w-logos a { display: block; border-radius: 8px; transition: transform .25s var(--spring); }
+  .w-logos a:hover { transform: translateY(-2px); }
+  .w-logos img { width: 34px; height: 34px; border-radius: 8px; display: block; outline: 1px solid rgba(0,0,0,.08); outline-offset: -1px; }
+  .w-n { font-size: 12px; padding: 4px 8px; border-radius: 6px; background: var(--soft); }
+  .w-none { margin: 0; padding: 12px 14px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .w-jw { display: flex; align-items: center; gap: 6px; padding: 10px 14px; font-size: 13px; color: var(--lat); }
+  .w-src { margin-left: auto; font-size: 11px; color: var(--muted); }
+</style>

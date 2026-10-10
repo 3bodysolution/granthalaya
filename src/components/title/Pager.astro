@@ -1,0 +1,16 @@
+---
+// Previous and next pages for a list, keeping the filters in the address.
+interface Props { page: number; pages: number }
+const { page, pages } = Astro.props;
+const at = (n: number) => { const u = new URL(Astro.url); n > 1 ? u.searchParams.set('page', String(n)) : u.searchParams.delete('page'); return u.pathname + u.search; };
+---
+{pages > 1 && (
+  <nav class="pager" aria-label="Pages">
+    {page > 1 ? <a class="btn" href={at(page - 1)} rel="prev">← Previous</a> : <span></span>}
+    <span class="muted num">Page {page} of {pages}</span>
+    {page < pages ? <a class="btn" href={at(page + 1)} rel="next">Next →</a> : <span></span>}
+  </nav>
+)}
+<style>
+  .pager { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding-top: 36px; font-size: 14px; }
+</style>

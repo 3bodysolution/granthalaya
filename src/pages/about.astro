@@ -23,7 +23,9 @@ const swatches = [
       <p>Each person gets a shelf for books, films, TV seasons and essays, with notes, the lines they underlined and a profile that’s public or private. Covers, runtimes and the short “Behind the film” facts belong to each title, so they’re shared by everyone who adds it.</p>
       <p>The paintings use the colours of old fort walls, monsoon evenings and hills after rain. Book covers come from Open Library and film posters from TMDB. When there isn’t one, the site paints a cover from the title.</p>
       <p>Essays aren’t copied here. Each one links to the original, and the shelf only keeps why you saved it. Time spent is worked out from runtimes, pages and word counts, so there’s nothing to time.</p>
+      <p>Every film, show and book has its own page, with where to watch it in India and what people here thought of it.</p>
       <p class="muted">It’s free, with no ads and no tracking. Made by {site.maker}.</p>
+      <p class="muted credits">Film and TV information comes from TMDB. This product uses the TMDB API but is not endorsed or certified by TMDB. Where-to-watch information comes from JustWatch. Book information comes from Open Library and Google Books.</p>
     </div>
 
     <div class="rise d4 sw">
@@ -40,7 +42,7 @@ const swatches = [
       <a href="/signin/" class="btn primary" data-astro-prefetch="false">Start your shelf</a>
       <a href={`/@${site.founder}/`} class="btn">Visit {site.maker}’s shelf</a>
     </div>
-    <p class="rise d5 muted tip">Tip: on any shelf, press <kbd>⌘K</kbd> or <kbd>/</kbd> to search it.</p>
+    <p class="rise d5 muted tip">Tip: press <kbd>⌘K</kbd> or <kbd>/</kbd> anywhere to search films, books and people.</p>
   </div>
     <div class="art desk settle d2" style="--day: url(/art/about-day.webp); --night: url(/art/about-night.webp)" aria-hidden="true"></div>
   </section>
@@ -56,6 +58,7 @@ const swatches = [
   .prose { display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
   .prose p { margin: 0; font-size: 17px; line-height: 1.7; }
   .prose .first { font-size: 23px; line-height: 1.55; }
+  .prose .credits { font-size: 13.5px; line-height: 1.6; }
   .sw { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 18px; }
   .swc { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
   .chipc { height: 64px; border-radius: 10px; margin-bottom: 6px; }

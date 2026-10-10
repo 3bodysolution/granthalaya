@@ -1,0 +1,23 @@
+---
+// Small numbers about a title on Granthalaya, under the log panel.
+import type { OnSite } from '../../lib/catalog/onsite';
+interface Props { site: OnSite; film: boolean }
+const { site, film } = Astro.props;
+---
+{(site.done > 0 || site.saved > 0 || site.average != null) && (
+  <div class="osb">
+    <p class="osb-h">On Granthalaya</p>
+    <div class="osb-row num">
+      {site.average != null && <span><b class="avg">★ {site.average.toFixed(1)}</b>{` from ${site.ratings} ratings`}</span>}
+      <span><b>{site.done}</b>{film ? ' watched' : ' read'}</span>
+      <span><b>{site.saved}</b>{' saved'}</span>
+    </div>
+  </div>
+)}
+<style>
+  .osb { padding: 12px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); }
+  .osb-h { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .osb-row { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+  .osb-row b { color: var(--ink); font-weight: 600; }
+  .avg { color: var(--haldi) !important; }
+</style>

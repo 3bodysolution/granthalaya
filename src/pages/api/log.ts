@@ -90,6 +90,11 @@ export const PATCH: APIRoute = async (ctx) => {
     const status = String(b.status ?? cur.status);
     if (!statusFits(kind, status)) return oops('Pick a status.');
     change = fields(b, kind, status);
+  } else if ('rating' in b) {
+    // a quick rating from a title page: rating something means you've finished it
+    if (kind === 'essay') return oops('Essays get a heart, not stars.');
+    const r = rating(b.rating);
+    change = r == null ? { rating: null } : { rating: r, status: 'done', finished_on: cur.finished_on ?? today() };
   } else {
     // a quick status change from the entry page
     const status = String(b.status ?? '');

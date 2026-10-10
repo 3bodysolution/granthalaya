@@ -5,7 +5,8 @@ import CollectionCard from '../../../components/CollectionCard.astro';
 import Face from '../../../components/Face.astro';
 import { openShelf } from '../../../lib/shelfpage';
 import { md } from '../../../lib/md';
-import { loadShelf, loadCollections, href, palette, kind, typeColor, minutes, duration, aboutHours, fullTitle, type Entry } from '../../../lib/data';
+import { loadShelf, loadCollections, href, palette, kind, typeColor, minutes, duration, aboutHours, fullTitle, titleAsEntry, type Entry } from '../../../lib/data';
+import { titlePageHref } from '../../../lib/catalog/onsite';
 export const prerender = false;
 
 const slug = String(Astro.params.collection ?? '');
@@ -20,7 +21,13 @@ if (!col) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const name = profile.display_name || profile.username;
 const bySlug = new Map<string, Entry>();
 for (const e of entries) if (!bySlug.has(e.id)) bySlug.set(e.id, e);
-const path = col.data.items.map((i) => ({ ...i, e: bySlug.get(i.slug) })).filter((x) => x.e) as { slug: string; why: string; e: Entry }[];
+// each thing links to the owner's entry when it's on their shelf, otherwise to the film or book's own page
+const path = col.data.items.map((i) => {
+  const own = bySlug.get(i.slug);
+  const e = own ?? titleAsEntry(i.title, profile.username);
+  return { ...i, e, link: own ? href(own) : titlePageHref(i.title as any) ?? '#' };
+});
+const editing = isMe && Astro.url.searchParams.get('edit') === '1';
 const n = (t: string) => path.filter((x) => x.e.data.type === t).length;
 const plural = (k: number, w: string) => `${k} ${w}${k > 1 ? 's' : ''}`;
 const total = path.reduce((s, x) => s + minutes(x.e), 0);
@@ -36,12 +43,28 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
       {fan[0] && <div class="wash f m" style={`background: ${fan[0].bg}`}><i style={`background: ${fan[0].accent}`}></i><b style={`background: ${fan[0].hill}`}></b></div>}
     </div>
     <a href={`/@${profile.username}/collections/`} class="by rise d2"><Face name={name} src={profile.avatar_url} size={24} /><span>A collection by {isMe ? 'you' : name}</span></a>
-    <h1 class="serif rise d3 tt">{col.data.title}</h1>
-    {col.body && <div class="serif rise d4 intro" set:html={md(col.body)} />}
+    {editing ? (
+      <form class="edit-head" data-col-edit={col.uuid}>
+        <label class="sr" for="cname">Name</label>
+        <input id="cname" class="field serif ename" name="name" value={col.data.title} maxlength="120" required />
+        <label class="sr" for="cintro">About this collection</label>
+        <textarea id="cintro" class="field" name="intro" rows="3" maxlength="1000" placeholder="What ties these together? (optional)">{col.body}</textarea>
+        <div class="row"><span class="saved muted" hidden>Saved</span><button class="btn primary" type="submit">Save name and intro</button></div>
+      </form>
+    ) : (
+      <>
+        <h1 class="serif rise d3 tt">{col.data.title}</h1>
+        {col.body && <div class="serif rise d4 intro" set:html={md(col.body)} />}
+      </>
+    )}
     <div class="rise d4 row">
       <span class="num muted" style="font-size: 14px">{meta}</span>
-      <button class="btn" data-copy={Astro.url.href}>Copy link</button>
+      <button class="btn" data-copy={new URL(Astro.url.pathname, Astro.site).href}>Copy link</button>
+      {isMe && (editing
+        ? <a class="btn primary" href={Astro.url.pathname}>Done</a>
+        : <a class="btn" href={`${Astro.url.pathname}?edit=1`}>Edit</a>)}
     </div>
+    {isMe && path.length === 0 && !editing && <p class="muted empty-c">Nothing here yet. Use “Add to a collection” on any film, book or entry.</p>}
   </section>
 
   <div class="path">
@@ -49,7 +72,22 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
     <ol aria-label="Suggested order">
       {path.map((x, i) => (
         <li>
-          <a href={href(x.e)} class="step rise" style={`animation-delay: ${(0.5 + i * 0.1).toFixed(2)}s`}>
+          {editing ? (
+            <div class="step edit" data-item={x.titleId}>
+              <span class="serif num dot" style={`border-color: ${typeColor(x.e.data.type)}; color: ${typeColor(x.e.data.type)}`}>{i + 1}</span>
+              <Cover entry={x.e} variant="swatch" w={56} h={82} />
+              <span class="stack body">
+                <span class="serif st">{fullTitle(x.e)}</span>
+                <input class="field why-in" value={x.why} maxlength="300" placeholder="Why it’s here (optional)" aria-label={`Why ${fullTitle(x.e)} is here`} data-why />
+              </span>
+              <span class="ctrls">
+                <button type="button" class="iconbtn sm" data-move="-1" disabled={i === 0} aria-label="Move up">↑</button>
+                <button type="button" class="iconbtn sm" data-move="1" disabled={i === path.length - 1} aria-label="Move down">↓</button>
+                <button type="button" class="iconbtn sm" data-drop aria-label={`Remove ${fullTitle(x.e)}`}>×</button>
+              </span>
+            </div>
+          ) : (
+          <a href={x.link} class="step rise" style={`animation-delay: ${(0.5 + i * 0.1).toFixed(2)}s`}>
             <span class="serif num dot" style={`border-color: ${typeColor(x.e.data.type)}; color: ${typeColor(x.e.data.type)}`}>{i + 1}</span>
             <Cover entry={x.e} variant="swatch" w={72} h={104} />
             <span class="stack body">
@@ -59,12 +97,20 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
             </span>
             <span class="num muted m">{x.e.data.type === 'film' || x.e.data.type === 'tv' ? duration(minutes(x.e)) : x.e.data.type === 'essay' ? `${minutes(x.e)} min` : `≈ ${duration(minutes(x.e))}`}</span>
           </a>
+          )}
         </li>
       ))}
     </ol>
   </div>
 
-  {others.length > 0 && (
+  {editing && (
+    <section class="pad danger-zone">
+      <button type="button" class="btn del" data-col-delete={col.uuid}>Delete this collection</button>
+      <span class="muted">The films and books stay on your shelf.</span>
+    </section>
+  )}
+
+  {others.length > 0 && !editing && (
     <section class="pad more-t">
       <div class="rule"><h2 class="eyebrow">More collections</h2><a href={`/@${profile.username}/collections/`} class="more">All {collections.length} collections →</a></div>
       <div class="grid">{others.map((t) => <CollectionCard collection={t} entries={entries} />)}</div>
@@ -104,6 +150,17 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
   .m { font-size: 13px; white-space: nowrap; }
 
   .more-t { padding-top: 72px; display: flex; flex-direction: column; gap: 24px; }
+  .edit-head { width: min(640px, 100%); display: flex; flex-direction: column; gap: 10px; }
+  .ename { height: 64px; font-size: 32px; text-align: center; }
+  .empty-c { margin: 8px 0 0; }
+  .step.edit { gap: 16px; background: var(--card); border: 1px solid var(--line); }
+  .step.edit:hover { transform: none; }
+  .why-in { height: 40px; font-size: 14px; }
+  .ctrls { display: flex; gap: 6px; flex: none; }
+  .iconbtn.sm { width: 36px; height: 36px; font-size: 16px; }
+  .danger-zone { padding-top: 32px; display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; font-size: 14px; }
+  .btn.del { border-color: color-mix(in srgb, #B4473B 50%, var(--line)); color: #B4473B; }
+  .btn.del:hover { background: #B4473B; color: #fff; border-color: #B4473B; }
   .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
   @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 780px) {
@@ -116,3 +173,52 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
     .grid { grid-template-columns: 1fr; }
   }
 </style>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+  function setup() {
+    const head = document.querySelector<HTMLFormElement>('[data-col-edit]:not([data-ready])');
+    if (!head) return;
+    head.dataset.ready = '1';
+    const id = head.dataset.colEdit!;
+    const post = (data: Record<string, unknown>) => fetch('/api/collection', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ collection: id, ...data }) }).then((r) => r.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
+    const again = () => navigate(location.pathname + location.search, { history: 'replace' });
+    head.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(head);
+      const r = await post({ action: 'update', name: fd.get('name'), intro: fd.get('intro') });
+      const s = head.querySelector<HTMLElement>('.saved')!;
+      s.textContent = r.ok ? 'Saved' : r.error || 'Didn’t save'; s.hidden = false; setTimeout(() => (s.hidden = true), 2500);
+    });
+    document.querySelectorAll<HTMLInputElement>('[data-why]').forEach((input) => input.addEventListener('change', async () => {
+      const item = input.closest<HTMLElement>('[data-item]')!.dataset.item;
+      await post({ action: 'why', title: item, why: input.value });
+    }));
+    document.querySelectorAll<HTMLButtonElement>('[data-move]').forEach((b) => b.addEventListener('click', async () => {
+      b.disabled = true;
+      const r = await post({ action: 'move', title: b.closest<HTMLElement>('[data-item]')!.dataset.item, dir: Number(b.dataset.move) });
+      if (r.ok) again(); else b.disabled = false;
+    }));
+    document.querySelectorAll<HTMLButtonElement>('[data-drop]').forEach((b) => b.addEventListener('click', async () => {
+      b.disabled = true;
+      const r = await post({ action: 'remove', title: b.closest<HTMLElement>('[data-item]')!.dataset.item });
+      if (r.ok) again(); else b.disabled = false;
+    }));
+    document.querySelector<HTMLButtonElement>('[data-col-delete]')?.addEventListener('click', async (ev) => {
+      const b = ev.currentTarget as HTMLButtonElement;
+      const d = document.getElementById('confirm-box') as HTMLDialogElement;
+      d.querySelector('#confirm-h')!.textContent = 'Delete this collection?';
+      d.querySelector('#confirm-p')!.textContent = 'The collection goes, with its intro and the lines about each title. Everything stays on your shelf.';
+      d.querySelector('#confirm-ok')!.textContent = 'Delete';
+      d.returnValue = '';
+      d.showModal();
+      d.addEventListener('close', async () => {
+        if (d.returnValue !== 'ok') return;
+        b.disabled = true;
+        const r = await post({ action: 'delete' });
+        if (r.ok) navigate(r.href); else b.disabled = false;
+      }, { once: true });
+    });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

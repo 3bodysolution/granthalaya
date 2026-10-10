@@ -39,7 +39,7 @@ export interface Entry {
     date: Date; started?: Date; finished?: Date; status: Status; rating?: number; loved: boolean;
     runtime?: number; pages?: number; words?: number; link?: string; source?: string; where?: string;
     again: boolean; times: number; color?: string; cover?: string; private: boolean;
-    trivia: string[]; triviaSource?: string;
+    trivia: string[]; triviaSource?: string; tmdbId?: number; olKey?: string;
     highlights: { id: string; text: string; where?: string; note?: string; mine: boolean }[];
   };
 }
@@ -49,7 +49,7 @@ export interface Collection {
   uuid: string;
   owner: string;
   body: string;      // the intro
-  data: { title: string; order: number; items: { slug: string; why: string }[] };
+  data: { title: string; order: number; items: { slug: string; why: string; titleId: string; title: Title }[] };
 }
 
 const day = (s?: string | null) => (s ? new Date(`${s}T00:00:00Z`) : undefined);
@@ -65,7 +65,7 @@ function toEntry(r: LogRow, owner: string): Entry {
       rating: r.rating == null ? undefined : Number(r.rating), loved: r.loved,
       runtime: opt(t.runtime), pages: opt(t.pages), words: opt(t.words), link: opt(t.link), source: opt(t.source),
       where: opt(r.where_seen), again: r.again, times: 1, color: opt(t.color), cover: opt(t.cover_url), private: r.only_me,
-      trivia: Array.isArray(t.trivia) ? t.trivia : [], triviaSource: opt(t.trivia_source),
+      trivia: Array.isArray(t.trivia) ? t.trivia : [], triviaSource: opt(t.trivia_source), tmdbId: opt(t.tmdb_id), olKey: opt(t.ol_key),
       highlights: [...(r.highlights ?? [])].sort((a, b) => a.position - b.position)
         .map((h) => ({ id: h.id, text: h.body, where: opt(h.where_at), note: opt(h.note), mine: h.mine })),
     },
@@ -115,13 +115,14 @@ export async function loadVisits(sb: SupabaseClient, profile: Pick<Profile, 'id'
 }
 
 export async function loadCollections(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<Collection[]> {
-  const { data } = await sb.from('threads').select('id, slug, name, intro, position, thread_items(position, why, title:titles(slug))')
+  const { data } = await sb.from('threads').select('id, slug, name, intro, position, thread_items(position, why, title_id, title:titles(*))')
     .eq('user_id', profile.id).order('position').order('created_at');
   return (data ?? []).map((t: any) => ({
     id: t.slug, uuid: t.id, owner: profile.username, body: t.intro ?? '',
     data: {
       title: t.name, order: t.position,
-      items: [...(t.thread_items ?? [])].sort((a: any, b: any) => a.position - b.position).map((i: any) => ({ slug: i.title?.slug, why: i.why ?? '' })).filter((i: any) => i.slug),
+      items: [...(t.thread_items ?? [])].sort((a: any, b: any) => a.position - b.position)
+        .map((i: any) => ({ slug: i.title?.slug, why: i.why ?? '', titleId: i.title_id, title: i.title })).filter((i: any) => i.slug),
     },
   }));
 }
@@ -141,6 +142,14 @@ export async function loadFeatured(sb: SupabaseClient, limit = 6) {
     const covers = ((logs ?? []) as any[]).filter((l) => l.title).map((l) => toEntry({ ...l, highlights: [], status: 'done', notes: '' } as LogRow, p.username));
     return { profile: p, bio: det?.bio ?? '', count: count ?? 0, covers };
   }));
+}
+
+/** a catalogue title shown like a shelf entry (for collections with things that aren't on the owner's shelf) */
+export function titleAsEntry(t: Title, owner: string): Entry {
+  return toEntry({
+    id: '', user_id: '', title_id: t.id, status: 'done', rating: null, loved: false, started_on: null, finished_on: null,
+    logged_on: new Date().toISOString().slice(0, 10), again: false, notes: '', where_seen: '', only_me: false, created_at: '', title: t, highlights: [],
+  }, owner);
 }
 
 /* ——— addresses ——— */

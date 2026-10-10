@@ -1,0 +1,35 @@
+---
+// The filter bar on Films and Books: each choice reloads the list, and the address keeps them all.
+interface Props { fields: { name: string; label: string; value: string; options: [string, string][] }[]; keep?: Record<string, string> }
+const { fields, keep = {} } = Astro.props;
+---
+<form class="filters" method="get" data-filters>
+  {Object.entries(keep).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
+  {fields.map((f) => (
+    <label class:list={['fl', f.value && 'on']}>
+      <span class="sr">{f.label}</span>
+      <select name={f.name} onchange="this.form.requestSubmit()">
+        {f.options.map(([v, t]) => <option value={v} selected={v === f.value}>{t}</option>)}
+      </select>
+    </label>
+  ))}
+  <noscript><button class="btn" type="submit">Show</button></noscript>
+  <a href={Astro.url.pathname + (keep.kind ? `?kind=${keep.kind}` : '')} class="clear" hidden={!fields.some((f) => f.value && f.name !== 'sort')}>Clear</a>
+</form>
+<style>
+  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .fl select { height: 38px; padding: 0 34px 0 14px; border-radius: 19px; border: 1px solid var(--line); background-color: var(--card); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: border-color .2s ease; }
+  .fl select:hover { border-color: var(--lat); }
+  .fl.on select { border-color: var(--lat); color: var(--lat); }
+  .clear { font-size: 13px; font-weight: 600; color: var(--muted); padding: 0 6px; }
+  .clear:hover { color: var(--lat); }
+</style>
+<script>
+  // drop empty choices from the address, so it stays short
+  document.addEventListener('submit', (ev) => {
+    const f = ev.target as HTMLFormElement;
+    if (!f.matches('[data-filters]')) return;
+    f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input[type=hidden]').forEach((el) => { el.disabled = !el.value; });
+    setTimeout(() => f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input').forEach((el) => (el.disabled = false)), 0);
+  }, true);
+</script>

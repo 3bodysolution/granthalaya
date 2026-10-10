@@ -1,0 +1,120 @@
+---
+// A director, actor or anyone else who makes films and TV: their work, most known first.
+import Base from '../../layouts/Base.astro';
+import Face from '../../components/Face.astro';
+import PosterTile from '../../components/title/PosterTile.astro';
+import { personPage, idFrom, personHref } from '../../lib/catalog/tmdb';
+import { slug } from '../../lib/catalog/fetch';
+import { myMarks } from '../../lib/catalog/onsite';
+export const prerender = false;
+
+const param = String(Astro.params.id ?? '');
+const id = idFrom(param);
+if (!id) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const p = await personPage(id);
+if (!p) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+if (param !== `${id}-${slug(p.name)}` && slug(p.name)) return Astro.redirect(personHref(id, p.name), 301);
+const sb = Astro.locals.supabase;
+const all = p.groups.flatMap((g) => g.items);
+const marks = sb ? await myMarks(sb, Astro.locals.me, all.map((c) => ({ kind: c.kind, tmdb: c.id }))) : new Map();
+const day = (d?: string) => (d ? new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '');
+const bioParas = p.bio.split(/\n{2,}/).filter(Boolean);
+const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted in', Writer: 'Wrote', Cinematography: 'Shot', Music: 'Music for', Editor: 'Edited', Producer: 'Produced' } as Record<string, string>)[l] ?? l;
+---
+<Base title={p.name} description={p.bio ? p.bio.slice(0, 180) : `${p.name}: films and TV on Granthalaya.`} image={p.photo}>
+  <section class="pad head">
+    <div class="ph">{p.photo ? <img src={p.photo} alt="" referrerpolicy="no-referrer" onerror="this.remove()" /> : <Face name={p.name} size={160} />}</div>
+    <div class="stack" style="gap: 10px; min-width: 0">
+      {p.known && <p class="eyebrow" style="color: var(--lat)">{p.known}</p>}
+      <h1 class="title">{p.name}</h1>
+      <p class="muted lifeline">
+        {p.born && <span>Born {day(p.born)}{p.place ? ` in ${p.place}` : ''}</span>}
+        {p.died && <span> · Died {day(p.died)}</span>}
+      </p>
+      {bioParas.length > 0 && (
+        <details class="bio">
+          <summary><span class="bp">{bioParas[0]}</span>{bioParas.length > 1 && <span class="more-b">Read more</span>}</summary>
+          {bioParas.slice(1).map((x) => <p>{x}</p>)}
+        </details>
+      )}
+      <p class="links">
+        {p.imdb && <a href={`https://www.imdb.com/name/${p.imdb}/`} target="_blank" rel="noopener">IMDb ↗</a>}
+        <a href={`https://www.themoviedb.org/person/${p.id}`} target="_blank" rel="noopener">TMDB ↗</a>
+      </p>
+    </div>
+  </section>
+
+  {p.groups.length > 0 && (
+    <section class="pad work" data-work>
+      <div class="bar">
+        <div class="seg" role="tablist" aria-label="Their work">
+          {p.groups.map((g, i) => <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-g={i}>{label(g.label, g.items.length)} <span class="muted num">{g.items.length}</span></button>)}
+        </div>
+        <div class="seg sort" role="group" aria-label="Order">
+          <button type="button" aria-pressed="true" data-sort="known">Best known</button>
+          <button type="button" aria-pressed="false" data-sort="new">Newest</button>
+        </div>
+      </div>
+      {p.groups.map((g, i) => (
+        <div class="grid" data-gp={i} hidden={i !== 0}>
+          {g.items.map((c, n) => (
+            <div data-y={c.year ?? 0} data-n={n}>
+              <PosterTile href={c.href} title={c.title} year={c.year} poster={c.poster} kind={c.kind} sub={g.label === 'Actor' ? c.role : c.kind === 'tv' ? 'TV' : undefined}
+                status={marks.get(`${c.kind}:${c.id}`)} save={c.kind === 'film' ? { kind: 'film', tmdbId: c.id, title: c.title, year: c.year, cover: c.poster } : undefined} />
+            </div>
+          ))}
+        </div>
+      ))}
+    </section>
+  )}
+  <p class="pad credit-line">Data from TMDB.</p>
+</Base>
+
+<style>
+  .head { padding-top: 56px; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 40px; align-items: start; }
+  .ph { width: 200px; aspect-ratio: 2 / 3; border-radius: 10px; overflow: hidden; background: var(--soft); box-shadow: 0 22px 34px -18px var(--shadow); display: grid; place-items: center; }
+  .ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .lifeline { margin: 0; font-size: 15px; }
+  .bio { max-width: 680px; }
+  .bio summary { list-style: none; cursor: pointer; }
+  .bio summary::-webkit-details-marker { display: none; }
+  .bio p, .bp { display: block; margin: 0 0 10px; font-size: 15.5px; line-height: 1.65; }
+  .bio[open] .more-b { display: none; }
+  .more-b { font-size: 13px; font-weight: 600; color: var(--lat); }
+  .links { margin: 0; display: flex; gap: 18px; font-size: 13px; font-weight: 600; }
+  .work { padding-top: 48px; display: flex; flex-direction: column; gap: 24px; }
+  .bar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  .seg { flex-wrap: wrap; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
+  .credit-line { margin: 40px 0 0; font-size: 12px; color: var(--muted); }
+  @media (max-width: 780px) {
+    .head { grid-template-columns: 1fr; gap: 20px; padding-top: 32px; }
+    .ph { width: 140px; }
+    .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; }
+  }
+</style>
+
+<script>
+  function setup() {
+    const root = document.querySelector<HTMLElement>('[data-work]:not([data-ready])');
+    if (!root) return;
+    root.dataset.ready = '1';
+    root.addEventListener('click', (ev) => {
+      const g = (ev.target as Element).closest<HTMLElement>('[data-g]');
+      if (g) {
+        root.querySelectorAll<HTMLElement>('[data-g]').forEach((b) => b.setAttribute('aria-selected', String(b === g)));
+        root.querySelectorAll<HTMLElement>('[data-gp]').forEach((p) => (p.hidden = p.dataset.gp !== g.dataset.g));
+      }
+      const s = (ev.target as Element).closest<HTMLElement>('[data-sort]');
+      if (s) {
+        root.querySelectorAll<HTMLElement>('[data-sort]').forEach((b) => b.setAttribute('aria-pressed', String(b === s)));
+        root.querySelectorAll<HTMLElement>('[data-gp]').forEach((grid) => {
+          const items = [...grid.children] as HTMLElement[];
+          items.sort((a, b) => s.dataset.sort === 'new' ? +b.dataset.y! - +a.dataset.y! : +a.dataset.n! - +b.dataset.n!);
+          items.forEach((x) => grid.appendChild(x));
+        });
+      }
+    });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

@@ -7,6 +7,7 @@ Built with [Astro](https://astro.build), hosted on Vercel, with the shelves in a
 ## Using it
 
 - **Sign in** with Google, pick a username, and you land on your home page.
+- **Find anything** with the search in the top bar (or ⌘K): films, TV, books, directors, actors, authors and people here. Each has its own page where you can save it, mark it, rate it or add it to a collection.
 - **Add** (the button in the header): pick Book, Film, TV or Essay, search or paste a link (Goodreads, Letterboxd, IMDb, Substack, any article), choose a status tag, rate it, write a few lines, save. It's on your shelf straight away.
 - **Status tags** instead of pages or percent:
   - Books: Want to read · Reading · Read · Paused · Didn't finish
@@ -26,6 +27,9 @@ Built with [Astro](https://astro.build), hosted on Vercel, with the shelves in a
 | `/@username/library`, `/diary`, `/collections`, `/stats` | The parts of a shelf (the tabs) |
 | `/@username/lines` | Every line saved on a shelf |
 | `/@username/library/<title>` | One entry |
+| `/films`, `/books` | Browse by genre or subject, year, language and streaming service |
+| `/film/…`, `/tv/…`, `/book/…` | A film, show or book: cast, where to watch, what people thought, your log |
+| `/person/…`, `/author/…` | Everything someone directed, acted in or wrote |
 | `/add`, `/settings` | Adding things; your settings |
 | `/admin` | Reports (only for accounts with `is_admin` set in the database) |
 | `/privacy`, `/terms`, `/about` | The fine print |

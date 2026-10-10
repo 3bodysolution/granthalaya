@@ -11,7 +11,7 @@ export const slugify = (s: string) =>
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 70).replace(/-+$/, '') || 'untitled';
 
 // Covers are only taken from places we trust to serve real covers.
-const COVER_HOSTS = /^https:\/\/(image\.tmdb\.org|covers\.openlibrary\.org)\//;
+const COVER_HOSTS = /^https:\/\/(image\.tmdb\.org\/|covers\.openlibrary\.org\/|books\.google\.com\/books\/content\?)/;
 const clip = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined);
 const num = (v: unknown, min: number, max: number) => {
   const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() ? Number(v) : NaN;

@@ -24,6 +24,8 @@ import {
   minutes, duration, kind, collectionsFor, excerpt, fullTitle, collectionHref, linesHref, pickLine, type Entry,
 } from '../../../lib/data';
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
+import { titlePageHref } from '../../../lib/catalog/onsite';
+import Stack from '@tabler/icons/outline/stack-2.svg';
 export const prerender = false;
 
 const slug = String(Astro.params.slug ?? '');
@@ -60,11 +62,9 @@ const year = d.date.getUTCFullYear();
 const filmNo = d.type === 'film' && d.status === 'done' ? all.filter((e) => e.data.type === 'film' && e.data.status === 'done' && e.data.date.getUTCFullYear() === year)
   .sort((a, b) => a.data.date.getTime() - b.data.date.getTime()).findIndex((e) => e.logId === entry.logId) + 1 : 0;
 
-const q = encodeURIComponent(d.title + (d.type === 'book' ? ' ' + d.creator : ''));
-const findOn = isFilm
-  ? [{ label: 'Letterboxd', url: `https://letterboxd.com/search/films/${encodeURIComponent(d.title)}/` }, { label: 'IMDb', url: `https://www.imdb.com/find/?q=${encodeURIComponent(d.title + ' ' + (d.year ?? ''))}` }]
-  : [{ label: 'Goodreads', url: `https://www.goodreads.com/search?q=${q}` }, { label: 'Open Library', url: `https://openlibrary.org/search?q=${q}` }];
-if (d.link && d.type !== 'essay' && !/themoviedb\.org|openlibrary\.org/.test(d.link)) findOn.unshift({ label: new URL(d.link).hostname.replace('www.', ''), url: d.link });
+// the film or book's own page (cast, where to watch, what others thought)
+const about = titlePageHref({ kind: d.type, slug: entry.id, title: d.title, tmdb_id: d.tmdbId ?? null, ol_key: d.olKey ?? null, link: d.link ?? null });
+const aboutLabel = d.type === 'tv' ? 'About the show' : isFilm ? 'About the film' : 'About the book';
 
 const s = stars(entry);
 const mins = minutes(entry);
@@ -127,10 +127,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
             <span title={`Saved by ${wanted ?? 0} ${wanted === 1 ? 'person' : 'people'} here`}><Mark solid size={15} />{wanted ?? 0}</span>
             {inCols.length > 0 && <span title={`In ${inCols.length} of ${name}’s collections`}><Route />{inCols.length}</span>}
           </div>
-          <div class="find rise d5">
-            <p class="eyebrow" style="font-size: 11px">Find it on</p>
-            {findOn.slice(0, 3).map((f) => <a href={f.url} class="btn" target="_blank" rel="noopener">{f.label} <span aria-hidden="true">↗</span></a>)}
-          </div>
+          {about && <a href={about} class="btn about rise d5">{aboutLabel} <span aria-hidden="true">→</span></a>}
         </div>
 
         <div class="main">
@@ -187,6 +184,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Calendar /><span>{dateRow}</span></a>
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Notes /><span>Edit rating, notes and lines</span></a>
               {done && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
+              <button class="lrow2" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}><Stack /><span>Add to a collection</span></button>
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
             </>
           ) : me ? (
@@ -276,6 +274,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
           <>
             {STATUSES.essay.map(([k, label]) => <button class="chip" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })}>{label}</button>)}
             <a class="chip" href={`/add/?log=${entry.logId}`}>Edit</a>
+            <button class="chip" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}>Add to a collection</button>
           </>
         ) : me ? (
           mine.length ? <a class="chip" href={href(mine[0])}>On your shelf · {statusLabel('essay', mine[0].data.status)}</a>
@@ -342,8 +341,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
   .ticket .tr { display: flex; justify-content: space-between; gap: 8px; }
   .ticket b { font-size: 14px; letter-spacing: .22em; color: var(--lat); }
   .ticket span { font-size: 12px; color: var(--muted); }
-  .find { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-  .find .btn { justify-content: space-between; }
+  .about { margin-top: 14px; justify-content: space-between; }
 
   .main { flex: 1; min-width: 0; padding-top: 176px; display: flex; flex-direction: column; gap: 18px; }
   .bigtitle { font-size: clamp(42px, 5.5vw, 64px); line-height: 1; }
@@ -391,7 +389,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
     .hero-film, .hero-book { width: 220px; }
     .hero-film .hc { height: 280px; }
     .hero-book { height: 320px; }
-    .find { width: 100%; }
+    .about { width: 100%; }
     .ticket { padding: 14px 16px; }
     .ticket b { font-size: 12px; letter-spacing: .16em; }
     .ticket span { font-size: 11px; }

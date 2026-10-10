@@ -1,0 +1,43 @@
+---
+// Simple tabs for a title page (Cast, Crew, Details, Genres). Arrow keys move between them.
+interface Props { tabs: { key: string; label: string }[]; id: string }
+const { tabs, id } = Astro.props;
+---
+<div class="ttabs" data-ttabs>
+  <div class="tt-list" role="tablist" aria-label="About this title">
+    {tabs.map((t, i) => <button type="button" role="tab" id={`${id}-t-${t.key}`} aria-controls={`${id}-p-${t.key}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-tt={t.key}>{t.label}</button>)}
+  </div>
+  <slot />
+</div>
+<style>
+  .tt-list { display: flex; gap: 24px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
+  .tt-list::-webkit-scrollbar { display: none; }
+  .tt-list button { position: relative; height: 42px; padding: 0; border: 0; background: none; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color .2s ease; }
+  .tt-list button::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--lat); transform: scaleX(0); transition: transform .25s var(--spring); }
+  .tt-list button:hover { color: var(--ink); }
+  .tt-list button[aria-selected="true"] { color: var(--ink); }
+  .tt-list button[aria-selected="true"]::after { transform: none; }
+</style>
+<script>
+  function setup() {
+    document.querySelectorAll<HTMLElement>('[data-ttabs]:not([data-ready])').forEach((root) => {
+      root.dataset.ready = '1';
+      const tabs = [...root.querySelectorAll<HTMLButtonElement>('[data-tt]')];
+      const show = (b: HTMLButtonElement) => {
+        tabs.forEach((t) => { const on = t === b; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
+        root.querySelectorAll<HTMLElement>('[role=tabpanel]').forEach((p) => (p.hidden = p.id !== b.getAttribute('aria-controls')));
+      };
+      tabs.forEach((t, i) => {
+        t.addEventListener('click', () => show(t));
+        t.addEventListener('keydown', (ev) => {
+          const d = ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowLeft' ? -1 : 0;
+          if (!d) return;
+          ev.preventDefault();
+          const n = tabs[(i + d + tabs.length) % tabs.length];
+          n.focus(); show(n);
+        });
+      });
+    });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

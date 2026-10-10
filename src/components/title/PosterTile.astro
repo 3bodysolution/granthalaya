@@ -1,0 +1,53 @@
+---
+// One title in a grid (lists, a person's films, an author's books): poster, title, year.
+// Signed in, a bookmark in the corner saves it to your shelf; if it's already there, its status shows instead.
+import Mark from '../ui/Mark.astro';
+import StatusIcon from '../ui/StatusIcon.astro';
+import { paletteFor } from '../../lib/data';
+import { statusLabel, type Kind, type Status } from '../../lib/kinds';
+interface Props {
+  href: string; title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
+  status?: string; save?: Record<string, unknown>;
+}
+const { href, title, year, poster, kind, sub, status, save } = Astro.props;
+const me = Astro.locals.me;
+const p = paletteFor(title);
+---
+<div class="pt">
+  <a href={href} class="pt-link">
+    <span class:list={['pt-cover', kind === 'book' ? 'book' : 'film', poster ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
+      {poster && <img src={poster} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
+      <i class="sun"></i><i class="hill"></i><span class="serif pt-w">{title}</span>
+    </span>
+    <span class="pt-t">{title}</span>
+    <span class="pt-s">{[year, sub].filter(Boolean).join(' · ')}</span>
+  </a>
+  {status ? (
+    <StatusIcon status={(status === 'done' ? 'done' : status) as any} label={statusLabel(kind as Kind, status as Status)} class="pt-badge" />
+  ) : me && save ? (
+    <button type="button" class="pt-save" data-quick-add={JSON.stringify({ hit: save, status: 'want' })} aria-label={`Save ${title}`} title="Save to your shelf"><Mark size={16} /></button>
+  ) : null}
+</div>
+<style>
+  .pt { position: relative; min-width: 0; }
+  .pt-link { display: flex; flex-direction: column; gap: 8px; }
+  .pt-link:hover { color: inherit; }
+  .pt-cover { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; background: var(--bg); color: #F6EEDF; box-shadow: 0 10px 18px -12px var(--shadow); transition: transform .35s var(--spring), box-shadow .35s ease; }
+  .pt-cover.film { border-radius: 6px; }
+  .pt-cover.book { border-radius: 2px 6px 6px 2px; }
+  .pt-link:hover .pt-cover { transform: translateY(-4px); box-shadow: 0 0 0 2px var(--lat), 0 18px 24px -14px var(--shadow); }
+  .pt-cover img { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; object-fit: cover; outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
+  .sun, .hill { position: absolute; display: block; }
+  .sun { width: 56%; aspect-ratio: 1; border-radius: 50%; right: -12%; top: 22%; background: var(--accent); opacity: .78; }
+  .hill { left: -20%; width: 140%; bottom: -8px; height: 32%; border-radius: 50% 50% 0 0; background: var(--hill); }
+  .pt-w { position: absolute; left: 10px; right: 10px; bottom: 12px; font-size: 15px; line-height: 1.15; overflow-wrap: anywhere; }
+  .real .sun, .real .hill, .real .pt-w { visibility: hidden; }
+  .pt-t { font-size: 14px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .pt-s { margin-top: -4px; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pt :global(.pt-badge) { position: absolute; top: 8px; right: 8px; z-index: 2; }
+  .pt-save { position: absolute; top: 6px; right: 6px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(12, 14, 18, .55); color: #fff; cursor: pointer; opacity: 0; transition: opacity .2s ease, transform .25s var(--spring); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .pt:hover .pt-save, .pt-save:focus-visible, .pt-save:global(.is-saved) { opacity: 1; }
+  .pt-save:active { transform: scale(.92); }
+  .pt-save:global(.is-saved) :global(.mk-edge) { stroke: #fff; }
+  @media (hover: none) { .pt-save { opacity: 1; } }
+</style>

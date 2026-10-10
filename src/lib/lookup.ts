@@ -2,6 +2,7 @@
 // Server only (the TMDB key stays here).
 import { env } from './supabase';
 import type { Kind } from './kinds';
+import { base } from './catalog/fetch';
 
 export type Hit = {
   kind: Kind; title: string; creator?: string; year?: number;
@@ -32,7 +33,7 @@ const yearOf = (d?: string | null) => (d ? +d.slice(0, 4) || undefined : undefin
 
 /* ——— books: Open Library (free, no key) ——— */
 export async function books(q: string, limit = 6): Promise<Hit[]> {
-  const j = await getJSON(`https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year,number_of_pages_median,cover_i`);
+  const j = await getJSON(`${base.ol()}/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year,number_of_pages_median,cover_i`);
   return (j.docs ?? []).map((d: any) => ({
     kind: 'book', title: d.title, creator: d.author_name?.[0], year: d.first_publish_year, pages: d.number_of_pages_median,
     cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` : undefined,
@@ -45,7 +46,7 @@ export async function books(q: string, limit = 6): Promise<Hit[]> {
 export async function filmDetails(id: number): Promise<Hit | null> {
   const key = tmdbKey();
   if (!key) return null;
-  const m = await getJSON(`https://api.themoviedb.org/3/movie/${id}?append_to_response=credits&api_key=${key}`).catch(() => null);
+  const m = await getJSON(`${base.tmdb()}/movie/${id}?append_to_response=credits&api_key=${key}`).catch(() => null);
   if (!m?.id) return null;
   return {
     kind: 'film', title: m.title, year: yearOf(m.release_date), runtime: m.runtime || undefined,
@@ -56,7 +57,7 @@ export async function filmDetails(id: number): Promise<Hit | null> {
 export async function films(q: string): Promise<Hit[]> {
   const key = tmdbKey();
   if (key) {
-    const j = await getJSON(`https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(q)}&api_key=${key}`);
+    const j = await getJSON(`${base.tmdb()}/search/movie?query=${encodeURIComponent(q)}&api_key=${key}`);
     const top = (j.results ?? []).slice(0, 5);
     const full = await Promise.all(top.map((m: any) => filmDetails(m.id)));
     return full.filter(Boolean) as Hit[];
@@ -78,7 +79,7 @@ export async function films(q: string): Promise<Hit[]> {
 export async function shows(q: string): Promise<Hit[]> {
   const key = tmdbKey();
   if (!key) return [];
-  const j = await getJSON(`https://api.themoviedb.org/3/search/tv?query=${encodeURIComponent(q)}&api_key=${key}`);
+  const j = await getJSON(`${base.tmdb()}/search/tv?query=${encodeURIComponent(q)}&api_key=${key}`);
   return (j.results ?? []).slice(0, 6).map((t: any) => ({
     kind: 'tv', title: t.name, year: yearOf(t.first_air_date), cover: poster(t.poster_path), tmdbId: t.id, from: 'TMDB',
   }));
@@ -86,7 +87,7 @@ export async function shows(q: string): Promise<Hit[]> {
 export async function showSeasons(id: number): Promise<Hit | null> {
   const key = tmdbKey();
   if (!key) return null;
-  const t = await getJSON(`https://api.themoviedb.org/3/tv/${id}?api_key=${key}`).catch(() => null);
+  const t = await getJSON(`${base.tmdb()}/tv/${id}?api_key=${key}`).catch(() => null);
   if (!t?.id) return null;
   return {
     kind: 'tv', title: t.name, year: yearOf(t.first_air_date), creator: t.created_by?.[0]?.name, cover: poster(t.poster_path), tmdbId: t.id, from: 'TMDB',
@@ -98,7 +99,7 @@ export async function showSeasons(id: number): Promise<Hit | null> {
 export async function seasonDetails(id: number, n: number): Promise<Hit | null> {
   const show = await showSeasons(id);
   if (!show) return null;
-  const s = await getJSON(`https://api.themoviedb.org/3/tv/${id}/season/${n}?api_key=${tmdbKey()}`).catch(() => null);
+  const s = await getJSON(`${base.tmdb()}/tv/${id}/season/${n}?api_key=${tmdbKey()}`).catch(() => null);
   if (!s) return null;
   const eps: any[] = s.episodes ?? [];
   const runtime = eps.reduce((m, e) => m + (e.runtime || 0), 0) || undefined;

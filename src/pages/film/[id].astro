@@ -1,0 +1,128 @@
+---
+// A film: everything about it from TMDB, where to watch it in India, and what people here thought.
+import Base from '../../layouts/Base.astro';
+import TitleLayout from '../../components/title/TitleLayout.astro';
+import Poster from '../../components/title/Poster.astro';
+import Where from '../../components/title/Where.astro';
+import Tabs from '../../components/title/Tabs.astro';
+import PeopleGrid from '../../components/title/PeopleGrid.astro';
+import Voices from '../../components/title/Voices.astro';
+import OnSiteBox from '../../components/title/OnSiteBox.astro';
+import LogPanel from '../../components/LogPanel.astro';
+import { film, idFrom, filmHref, type FilmPage } from '../../lib/catalog/tmdb';
+import { slug } from '../../lib/catalog/fetch';
+import { rowsForFilm, rowBySlug, onSite, healFilm, type TitleRow } from '../../lib/catalog/onsite';
+import { duration } from '../../lib/data';
+export const prerender = false;
+
+const param = String(Astro.params.id ?? '');
+const sb = Astro.locals.supabase;
+const me = Astro.locals.me;
+const id = idFrom(param);
+let f: FilmPage | null = null;
+let rows: TitleRow[] = [];
+if (id) {
+  [f, rows] = await Promise.all([film(id), sb ? rowsForFilm(sb, id) : Promise.resolve([])]);
+  if (f && param !== `${id}-${slug(f.title)}` && slug(f.title)) return Astro.redirect(filmHref(id, f.title) + Astro.url.search, 301);
+} else if (sb) {
+  // a film in our catalogue by its address name: go to its TMDB page, or show what we have
+  const row = await rowBySlug(sb, 'film', param);
+  const known = row ? row.tmdb_id ?? (await healFilm(row)) : null;
+  if (row && known) return Astro.redirect(filmHref(known, row.title), row.tmdb_id ? 301 : 302);
+  if (row) {
+    rows = [row];
+    f = { kind: 'film', id: 0, title: row.title, year: row.year ?? undefined, overview: '', poster: row.cover_url ?? undefined, genres: [], countries: [], cast: [], crew: [], where: null, keywords: [], studios: [], writers: [], directors: row.creator ? [{ id: 0, name: row.creator, role: 'Director', href: '' }] : [] };
+  }
+}
+if (!f) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
+const row = rows[0];
+const onTmdb = !!f.id;
+const hit = { kind: 'film', tmdbId: f.id || undefined, title: f.title, year: f.year, runtime: f.runtime, creator: f.directors[0]?.name, cover: f.poster, link: f.id ? `https://www.themoviedb.org/movie/${f.id}` : undefined };
+const share = new URL(f.id ? filmHref(f.id, f.title) : Astro.url.pathname, Astro.site).href;
+const released = f.released ? new Date(`${f.released}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : null;
+const tabs = [
+  f.cast.length && { key: 'cast', label: 'Cast' },
+  f.crew.length && { key: 'crew', label: 'Crew' },
+  { key: 'details', label: 'Details' },
+  f.genres.length && { key: 'genres', label: 'Genres' },
+].filter(Boolean) as { key: string; label: string }[];
+const first = tabs[0]?.key;
+const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${f.year})` : ''} on Granthalaya.`;
+---
+<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} image={f.poster}>
+  <TitleLayout backdrop={f.backdrop}>
+    <Poster slot="poster" src={f.poster} title={f.title} by={f.directors[0]?.name} kind="film" year={f.year} />
+    <Fragment slot="side">
+      {onTmdb && <Where where={f.where} title={f.title} />}
+    </Fragment>
+
+    <h1 class="title tt">{f.title}</h1>
+    <p class="meta">
+      {f.year && <a href={`/films/?year=${f.year}`} class="ul">{f.year}</a>}
+      {f.directors.length > 0 && <span> · Directed by {f.directors.map((d, i) => <>{i > 0 && ', '}{d.href ? <a href={d.href} class="ul">{d.name}</a> : d.name}</>)}</span>}
+    </p>
+    {f.tagline && <p class="tagline">{f.tagline}</p>}
+    {f.overview && <p class="overview">{f.overview}</p>}
+
+    <Tabs id="film" tabs={tabs}>
+      {f.cast.length > 0 && <div role="tabpanel" id="film-p-cast" aria-labelledby="film-t-cast" class="tp" hidden={first !== 'cast'}><PeopleGrid people={f.cast} /></div>}
+      {f.crew.length > 0 && (
+        <div role="tabpanel" id="film-p-crew" aria-labelledby="film-t-crew" class="tp" hidden={first !== 'crew'}>
+          <dl class="facts">{f.crew.map((g) => <><dt>{g.job}</dt><dd>{g.people.map((p, i) => <>{i > 0 && ', '}<a href={p.href} class="ul">{p.name}</a></>)}</dd></>)}</dl>
+        </div>
+      )}
+      <div role="tabpanel" id="film-p-details" aria-labelledby="film-t-details" class="tp" hidden={first !== 'details'}>
+        <dl class="facts">
+          {f.runtime && <><dt>Runtime</dt><dd>{duration(f.runtime, 'words')}</dd></>}
+          {f.language && <><dt>Language</dt><dd><a href={`/films/?language=${f.language.code}`} class="ul">{f.language.name}</a></dd></>}
+          {f.countries.length > 0 && <><dt>{f.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{f.countries.map((c) => c.name).join(', ')}</dd></>}
+          {released && <><dt>Released</dt><dd>{released}</dd></>}
+          {f.original && f.original !== f.title && <><dt>Original title</dt><dd>{f.original}</dd></>}
+          {f.studios.length > 0 && <><dt>Studios</dt><dd>{f.studios.join(', ')}</dd></>}
+        </dl>
+      </div>
+      {f.genres.length > 0 && (
+        <div role="tabpanel" id="film-p-genres" aria-labelledby="film-t-genres" class="tp" hidden>
+          <div class="chips">{f.genres.map((g) => <a href={`/films/?genre=${g.slug}`} class="gchip">{g.name}</a>)}</div>
+        </div>
+      )}
+    </Tabs>
+
+    <p class="more-at">
+      {f.runtime && <span class="num">{duration(f.runtime)}</span>}
+      {f.trailer && <a href={f.trailer} target="_blank" rel="noopener" class="ext">Trailer ↗</a>}
+      {f.imdb && <a href={`https://www.imdb.com/title/${f.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
+      {onTmdb && <a href={`https://www.themoviedb.org/movie/${f.id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>}
+    </p>
+
+    <Fragment slot="panel">
+      <LogPanel kind="film" parts={[{ key: 'film', hit, titleId: row?.id, mine: site.mine[0] }]} share={share} what={f.title} />
+      <OnSiteBox site={site} film />
+    </Fragment>
+
+    <Fragment slot="below">
+      <Voices site={site} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the film' } : undefined} />
+      <p class="pad credit-line">Film data from TMDB. Streaming data from JustWatch.</p>
+    </Fragment>
+  </TitleLayout>
+</Base>
+
+<style>
+  .tt { font-size: clamp(40px, 5.2vw, 62px); line-height: 1.02; }
+  .meta { margin: 0; font-size: 16px; color: var(--muted); }
+  .ul { color: var(--ink); text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; transition: text-decoration-color .2s ease, color .2s ease; }
+  .ul:hover { color: var(--lat); text-decoration-color: var(--lat); }
+  .tagline { margin: 4px 0 0; font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .overview { margin: 0; max-width: 640px; font-family: Fraunces, Georgia, serif; font-size: 19px; line-height: 1.6; }
+  .tp { padding-top: 16px; }
+  .facts { margin: 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px 18px; font-size: 14.5px; }
+  .facts dt { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding-top: 2px; }
+  .facts dd { margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .more-at { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; font-size: 13px; color: var(--muted); }
+  .ext { font-weight: 600; color: var(--ink); }
+  .ext:hover { color: var(--lat); }
+  .credit-line { margin: 40px 0 0; font-size: 12px; color: var(--muted); }
+  @media (max-width: 780px) { .facts { grid-template-columns: 110px minmax(0, 1fr); } .overview { font-size: 17px; } }
+</style>

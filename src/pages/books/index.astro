@@ -1,0 +1,79 @@
+---
+// Books by subject, original language and decade, from Open Library. The target of every linked year,
+// subject and language on a book page.
+import Base from '../../layouts/Base.astro';
+import PosterTile from '../../components/title/PosterTile.astro';
+import Filters from '../../components/title/Filters.astro';
+import Pager from '../../components/title/Pager.astro';
+import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
+import { myMarks } from '../../lib/catalog/onsite';
+export const prerender = false;
+
+const SUBJECTS: [string, string][] = [
+  ['fiction', 'Fiction'], ['literary-fiction', 'Literary fiction'], ['historical-fiction', 'Historical fiction'], ['mystery', 'Mystery'],
+  ['thriller', 'Thrillers'], ['science-fiction', 'Science fiction'], ['fantasy', 'Fantasy'], ['romance', 'Romance'], ['horror', 'Horror'],
+  ['short-stories', 'Short stories'], ['poetry', 'Poetry'], ['drama', 'Plays'], ['essays', 'Essays'], ['biography', 'Biography'],
+  ['autobiography', 'Memoir'], ['history', 'History'], ['philosophy', 'Philosophy'], ['psychology', 'Psychology'], ['self-help', 'Self-help'],
+  ['science', 'Science'], ['politics', 'Politics'], ['religion', 'Religion'], ['travel', 'Travel'], ['humor', 'Humour'], ['graphic-novels', 'Graphic novels'],
+];
+const q = Astro.url.searchParams;
+const rawSubject = (q.get('subject') ?? '').toLowerCase();
+const subject = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(rawSubject) && rawSubject.length <= 60 ? rawSubject : undefined;
+const language = /^[a-z]{3}$/.test(q.get('language') ?? '') ? q.get('language')! : undefined;
+const yr = Number(q.get('year')); const year = Number.isInteger(yr) && yr > 0 && yr < 2100 ? yr : undefined;
+const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && Number.isInteger(dc) && dc >= 1000 && dc < 2100 ? dc - (dc % 10) : undefined;
+const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort')) ?? 'popular';
+const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
+
+const list = await browseBooks({ subject, language, year, decade, sort, page });
+const sb = Astro.locals.supabase;
+const marks = sb ? await myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
+
+const known = SUBJECTS.find(([s]) => s === subject)?.[1];
+const subjectName = subject ? known ?? subject.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()) : '';
+const langName = language ? bookLanguageName(language) : '';
+let title = subject ? (known ? `${langName ? langName + ' ' : ''}${known.toLowerCase()}` : `${langName ? langName + ' books' : 'Books'} about ${subjectName.toLowerCase()}`) : `${langName ? langName + ' ' : ''}books`;
+title += year ? ` from ${year}` : decade ? ` from the ${decade}s` : '';
+title = title.replace(/^./, (c) => c.toUpperCase());
+
+const now = new Date().getUTCFullYear();
+const decades: [string, string][] = Array.from({ length: Math.floor((now - 1850) / 10) + 1 }, (_, i) => { const d = Math.floor(now / 10) * 10 - i * 10; return [String(d), `${d}s`]; });
+const subjects: [string, string][] = [['', 'Any subject'], ...(subject && !known ? [[subject, subjectName]] as [string, string][] : []), ...SUBJECTS];
+const fields = [
+  { name: 'subject', label: 'Subject', value: subject ?? '', options: subjects },
+  { name: 'language', label: 'Language', value: language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][] },
+  year
+    ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
+    : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+  { name: 'sort', label: 'Order', value: sort === 'popular' ? '' : sort, options: [['', 'Most editions'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][] },
+];
+---
+<Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`}>
+  <section class="pad head">
+    <p class="eyebrow" style="color: var(--book)">Books</p>
+    <h1 class="title">{title}</h1>
+    <Filters fields={fields} />
+  </section>
+  <section class="pad">
+    {list.items.length === 0 ? (
+      <div class="empty">
+        <p class="muted">Nothing matches all of that{language ? ', and Open Library has few books in some Indian languages' : ''}. Try fewer filters.</p>
+        <a href="/add/?type=book" class="btn">Add a book by hand</a>
+      </div>
+    ) : (
+      <div class="grid">
+        {list.items.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
+      </div>
+    )}
+    <Pager page={page} pages={list.pages} />
+    <p class="credit-line">Book data from Open Library.</p>
+  </section>
+</Base>
+<style>
+  .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
+  .empty { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; font-size: 16px; }
+  .empty p { margin: 0; }
+  .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }
+  @media (max-width: 780px) { .head { padding-top: 28px; } .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; } }
+</style>
