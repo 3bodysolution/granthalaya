@@ -61,8 +61,10 @@ const titleIds = new Map();
 
 if (!dry) {
   // start this shelf afresh, so running the script twice doesn't double anything
-  await db.from('threads').delete().eq('user_id', who.id);
-  await db.from('logs').delete().eq('user_id', who.id);
+  for (const table of ['threads', 'logs']) {
+    const { error } = await db.from(table).delete().eq('user_id', who.id);
+    if (error) { console.log(`Couldn’t clear the old ${table} first (${error.message}), so nothing was copied.`); process.exit(1); }
+  }
 }
 
 for (const { slug, fm, body } of entries) {
@@ -117,6 +119,7 @@ const favourites = entries.filter((e) => e.fm.startHere).sort((a, b) => a.fm.sta
 if (!dry) {
   const { error } = await db.from('profile_details').upsert({ id: who.id, ...OLD_PROFILE, favourites });
   if (error) console.log(`  ✗ profile: ${error.message}`);
-  await db.from('profiles').update({ featured: true }).eq('id', who.id);
+  const { error: e4 } = await db.from('profiles').update({ featured: true }).eq('id', who.id);
+  if (e4) console.log(`  ✗ feature my shelf: ${e4.message}`);
 }
 console.log(`\nDone: ${entries.length} entries and ${threads.length} threads${dry ? ' would be copied' : ' copied'} to @${who.username}.`);
