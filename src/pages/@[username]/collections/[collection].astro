@@ -1,43 +1,43 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import Cover from '../../../components/Cover.astro';
-import ThreadCard from '../../../components/ThreadCard.astro';
+import CollectionCard from '../../../components/CollectionCard.astro';
 import Face from '../../../components/Face.astro';
 import { openShelf } from '../../../lib/shelfpage';
 import { md } from '../../../lib/md';
-import { loadShelf, loadThreads, href, palette, kind, typeColor, minutes, duration, aboutHours, fullTitle, type Entry } from '../../../lib/data';
+import { loadShelf, loadCollections, href, palette, kind, typeColor, minutes, duration, aboutHours, fullTitle, type Entry } from '../../../lib/data';
 export const prerender = false;
 
-const slug = String(Astro.params.thread ?? '');
-const o = await openShelf(Astro, `/threads/${slug}/`);
+const slug = String(Astro.params.collection ?? '');
+const o = await openShelf(Astro, `/collections/${slug}/`);
 if (o.out) return o.out;
 const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
-const [entries, threads] = await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]);
-const thread = threads.find((t) => t.id === slug);
-if (!thread) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const [entries, collections] = await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]);
+const col = collections.find((t) => t.id === slug);
+if (!col) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const name = profile.display_name || profile.username;
 const bySlug = new Map<string, Entry>();
 for (const e of entries) if (!bySlug.has(e.id)) bySlug.set(e.id, e);
-const path = thread.data.items.map((i) => ({ ...i, e: bySlug.get(i.slug) })).filter((x) => x.e) as { slug: string; why: string; e: Entry }[];
+const path = col.data.items.map((i) => ({ ...i, e: bySlug.get(i.slug) })).filter((x) => x.e) as { slug: string; why: string; e: Entry }[];
 const n = (t: string) => path.filter((x) => x.e.data.type === t).length;
 const plural = (k: number, w: string) => `${k} ${w}${k > 1 ? 's' : ''}`;
 const total = path.reduce((s, x) => s + minutes(x.e), 0);
 const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), n('tv') && plural(n('tv'), 'TV season'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' · ');
 const fan = path.slice(0, 3).map((x) => palette(x.e));
-const others = threads.filter((t) => t.id !== thread.id).slice(0, 3);
+const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
 ---
-<Base title={`${thread.data.title} · @${profile.username}`} active={isMe ? 'threads' : undefined} shelf={profile.username} description={`A thread by ${name}: ${thread.data.title}. ${meta}.`}>
+<Base title={`${col.data.title} · @${profile.username}`} shelf={profile.username} description={`A collection by ${name}: ${col.data.title}. ${meta}.`}>
   <section class="pad head">
     <div class="fan" aria-hidden="true">
       {fan[1] && <div class="wash f l" style={`background: ${fan[1].bg}`}></div>}
       {fan[2] && <div class="wash f r" style={`background: ${fan[2].bg}`}></div>}
       {fan[0] && <div class="wash f m" style={`background: ${fan[0].bg}`}><i style={`background: ${fan[0].accent}`}></i><b style={`background: ${fan[0].hill}`}></b></div>}
     </div>
-    <a href={`/@${profile.username}/threads/`} class="by rise d2"><Face name={name} src={profile.avatar_url} size={24} /><span>A thread by {isMe ? 'you' : name}</span></a>
-    <h1 class="serif rise d3 tt">{thread.data.title}</h1>
-    {thread.body && <div class="serif rise d4 intro" set:html={md(thread.body)} />}
+    <a href={`/@${profile.username}/collections/`} class="by rise d2"><Face name={name} src={profile.avatar_url} size={24} /><span>A collection by {isMe ? 'you' : name}</span></a>
+    <h1 class="serif rise d3 tt">{col.data.title}</h1>
+    {col.body && <div class="serif rise d4 intro" set:html={md(col.body)} />}
     <div class="rise d4 row">
       <span class="num muted" style="font-size: 14px">{meta}</span>
       <button class="btn" data-copy={Astro.url.href}>Copy link</button>
@@ -66,8 +66,8 @@ const others = threads.filter((t) => t.id !== thread.id).slice(0, 3);
 
   {others.length > 0 && (
     <section class="pad more-t">
-      <div class="rule"><h2 class="eyebrow">More threads</h2><a href={`/@${profile.username}/threads/`} class="more">All {threads.length} threads →</a></div>
-      <div class="grid">{others.map((t) => <ThreadCard thread={t} entries={entries} />)}</div>
+      <div class="rule"><h2 class="eyebrow">More collections</h2><a href={`/@${profile.username}/collections/`} class="more">All {collections.length} collections →</a></div>
+      <div class="grid">{others.map((t) => <CollectionCard collection={t} entries={entries} />)}</div>
     </section>
   )}
 </Base>

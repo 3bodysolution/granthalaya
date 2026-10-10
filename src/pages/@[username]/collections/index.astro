@@ -1,29 +1,29 @@
 ---
 import Base from '../../../layouts/Base.astro';
-import ThreadCard from '../../../components/ThreadCard.astro';
+import CollectionCard from '../../../components/CollectionCard.astro';
 import ShelfStrip from '../../../components/ShelfStrip.astro';
 import { openShelf } from '../../../lib/shelfpage';
-import { loadShelf, loadThreads } from '../../../lib/data';
+import { loadShelf, loadCollections } from '../../../lib/data';
 export const prerender = false;
 
-const o = await openShelf(Astro, '/threads/');
+const o = await openShelf(Astro, '/collections/');
 if (o.out) return o.out;
 const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
-const [entries, threads] = await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]);
+const [entries, collections] = await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]);
 const name = profile.display_name || profile.username;
 ---
-<Base title={isMe ? 'Your threads' : `${name}’s threads`} active={isMe ? 'threads' : undefined} shelf={profile.username} description={`Hand-picked paths through ${name}’s library.`}>
+<Base title={isMe ? 'Your collections' : `${name}’s collections`} shelf={profile.username} description={`Hand-picked paths through ${name}’s library.`}>
   <div class="art melt settle banner bleed" style="--day: url(/art/threads-day.webp); --night: url(/art/threads-night.webp)" aria-hidden="true"></div>
   <section class="pad head rise">
-    <h1 class="title">Threads</h1>
+    <h1 class="title">Collections</h1>
     <p class="lede">Books and films that go well together, in the order {isMe ? 'I’d' : 'they’d'} take them.</p>
   </section>
-  <div class="pad rise d1" style="padding-top: 26px"><ShelfStrip shelf={o.shelf} current="threads" /></div>
-  {threads.length === 0 && <p class="pad muted" style="padding-top: 32px; font-size: 16px">{isMe ? 'No threads yet. Making your own threads comes soon.' : `${name} hasn’t made any threads yet.`}</p>}
+  <div class="pad rise d1" style="padding-top: 26px"><ShelfStrip shelf={o.shelf} current="collections" /></div>
+  {collections.length === 0 && <p class="pad muted" style="padding-top: 32px; font-size: 16px">{isMe ? 'No collections yet.' : `${name} hasn’t made any collections yet.`}</p>}
   <section class="pad grid">
-    {threads.map((t, i) => <div class="rise" style={`animation-delay: ${(0.15 + i * 0.08).toFixed(2)}s`}><ThreadCard thread={t} entries={entries} /></div>)}
+    {collections.map((t, i) => <div class="rise" style={`animation-delay: ${(0.15 + i * 0.08).toFixed(2)}s`}><CollectionCard collection={t} entries={entries} /></div>)}
   </section>
 </Base>
 

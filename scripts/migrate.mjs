@@ -27,14 +27,10 @@ if (!url || !key) { console.log('Add PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY
 const db = createClient(url, key, { auth: { persistSession: false } });
 
 // What site.ts used to hold for Sarthak, before it moved into the profile.
-const OLD_PROFILE = {
-  bio: 'Books, films and everything I’ve spent time with.',
-  season_line: 'Monsoon 2026',
-  lotw_text: 'Clouds come floating into my life, no longer to carry rain or usher storm, but to add color to my sunset sky.',
-  lotw_by: 'Rabindranath Tagore',
-  lotw_source: 'Stray Birds',
-  goal_books: 30,
-};
+const OLD_PROFILE = { bio: 'Books, films and everything I’ve spent time with.' };
+// The old "line of the week" is one of the saved lines, so it becomes the pinned line.
+const PIN_TEXT = 'Clouds come floating into my life';
+let pinned = null;
 
 const LIB = 'src/content/library', THREADS = 'src/content/threads';
 function read(file) {
@@ -94,7 +90,8 @@ for (const { slug, fm, body } of entries) {
   if (e2) { console.log(`    ✗ entry: ${e2.message}`); continue; }
   const hl = (fm.highlights ?? []).map((h, i) => ({ log_id: row.id, user_id: who.id, body: h.text, where_at: h.where ?? '', note: h.note ?? '', mine: !!h.mine, position: i }));
   if (hl.length) {
-    const { error: e3 } = await db.from('highlights').insert(hl);
+    const { data: saved, error: e3 } = await db.from('highlights').insert(hl).select('id, body');
+    pinned ??= (saved ?? []).find((h) => h.body.startsWith(PIN_TEXT))?.id ?? null;
     if (e3) console.log(`    ✗ lines: ${e3.message}`);
   }
 }
@@ -117,7 +114,7 @@ for (const { slug, fm, body } of threads) {
 // profile: the old settings, and the "Start here" picks as favourites
 const favourites = entries.filter((e) => e.fm.startHere).sort((a, b) => a.fm.startHere - b.fm.startHere).slice(0, 4).map((e) => titleIds.get(e.slug)).filter(Boolean);
 if (!dry) {
-  const { error } = await db.from('profile_details').upsert({ id: who.id, ...OLD_PROFILE, favourites });
+  const { error } = await db.from('profile_details').upsert({ id: who.id, ...OLD_PROFILE, favourites, pinned_line: pinned });
   if (error) console.log(`  ✗ profile: ${error.message}`);
   const { error: e4 } = await db.from('profiles').update({ featured: true }).eq('id', who.id);
   if (e4) console.log(`  ✗ feature my shelf: ${e4.message}`);

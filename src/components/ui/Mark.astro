@@ -1,0 +1,12 @@
+---
+// The bookmark as an icon. Empty it's an outline; when its button is pressed or saved
+// (aria-pressed="true" or .is-saved on any parent) it fills from the top and becomes the logo.
+// solid: always filled, in the text colour (for status icons and tags).
+import { MARK_BODY, MARK_PATH } from '../../lib/mark';
+interface Props { size?: number; solid?: boolean; class?: string }
+const { size = 18, solid = false, class: cls } = Astro.props;
+---
+<svg class:list={['mk', solid && 'solid', cls]} width={size} height={size} viewBox="0 0 100 100" aria-hidden="true">
+  {!solid && <path class="mk-edge" d={MARK_BODY} />}
+  <path class="mk-fill" fill-rule="evenodd" d={MARK_PATH} />
+</svg>

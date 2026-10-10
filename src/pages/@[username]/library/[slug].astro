@@ -4,7 +4,6 @@ import Cover from '../../../components/Cover.astro';
 import Face from '../../../components/Face.astro';
 import PersonMenu from '../../../components/PersonMenu.astro';
 import Eye from '@tabler/icons/outline/eye.svg';
-import Bookmark from '@tabler/icons/outline/bookmark.svg';
 import BookOpen from '@tabler/icons/outline/book-2.svg';
 import Play from '@tabler/icons/outline/player-play.svg';
 import Pause from '@tabler/icons/outline/player-pause.svg';
@@ -13,16 +12,16 @@ import XIcon from '@tabler/icons/outline/circle-x.svg';
 import Calendar from '@tabler/icons/outline/calendar.svg';
 import Notes from '@tabler/icons/outline/notes.svg';
 import Repeat from '@tabler/icons/outline/repeat.svg';
-import Heart from '@tabler/icons/outline/heart.svg';
 import Share from '@tabler/icons/outline/share.svg';
 import Plus from '@tabler/icons/outline/plus.svg';
 import Lock from '@tabler/icons/outline/lock.svg';
 import Route from '@tabler/icons/outline/route.svg';
+import Mark from '../../../components/ui/Mark.astro';
 import { openShelf } from '../../../lib/shelfpage';
 import { md } from '../../../lib/md';
 import {
-  loadShelf, loadThreads, loadVisits, href, palette, coverSrc, stars, starsLabel, long, ticketDate, timesWord,
-  minutes, duration, kind, threadsFor, excerpt, fullTitle, threadHref, type Entry,
+  loadShelf, loadCollections, loadVisits, href, palette, coverSrc, stars, starsLabel, long, ticketDate, timesWord,
+  minutes, duration, kind, collectionsFor, excerpt, fullTitle, collectionHref, linesHref, pickLine, type Entry,
 } from '../../../lib/data';
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
 export const prerender = false;
@@ -38,8 +37,8 @@ const visits = await loadVisits(sb, profile, slug);
 if (!visits.length) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const entry = visits[0];
 const d = entry.data;
-const [all, threads] = await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]);
-const inThreads = threadsFor(entry, threads);
+const [all, collections] = await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]);
+const inCols = collectionsFor(entry, collections);
 const p = palette(entry);
 const cover = coverSrc(entry);
 const tname = `cover-${entry.id.replace(/[^a-z0-9-]/gi, '')}`;
@@ -47,9 +46,9 @@ const bySlug = new Map(all.map((e) => [e.id, e]));
 const name = profile.display_name || profile.username;
 const isFilm = d.type === 'film' || d.type === 'tv';
 
-// "Sits well next to": neighbours from the same threads, then the same kind
+// "Sits well next to": neighbours from the same collections, then the same kind
 const related: Entry[] = [];
-for (const t of inThreads) for (const it of t.items) {
+for (const t of inCols) for (const it of t.items) {
   const e = bySlug.get(it.slug);
   if (e && e.id !== entry.id && !related.includes(e)) related.push(e);
 }
@@ -70,7 +69,7 @@ if (d.link && d.type !== 'essay' && !/themoviedb\.org|openlibrary\.org/.test(d.l
 const s = stars(entry);
 const mins = minutes(entry);
 const done = d.status === 'done';
-const nav = inThreads[0];
+const nav = inCols[0];
 const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : undefined;
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
 const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
@@ -84,16 +83,16 @@ const [{ count: seen }, { count: wanted }] = await Promise.all([
 ]);
 
 // the log panel: your own entry, or what this title is on YOUR shelf
-const ICON: Record<Status, any> = { want: Bookmark, reading: BookOpen, watching: Play, done: Check, paused: Pause, dnf: XIcon, dropped: XIcon };
+const ICON: Record<Status, any> = { want: null, reading: BookOpen, watching: Play, done: Check, paused: Pause, dnf: XIcon, dropped: XIcon };
 let mine: Entry[] = [];
 if (me && !isMe) mine = await loadVisits(sb, me, slug);
-const isFav = (details?.favourites ?? []).includes(entry.titleId);
-const myFav = isMe ? isFav : false;
 const dateRow = d.status === 'want' ? `Added ${long(d.date)}` : d.status === 'done' ? `${d.type === 'film' || d.type === 'tv' ? 'Watched' : 'Finished'} ${long(d.finished ?? d.date)}` : `Started ${long(d.started ?? d.date)}`;
 const againWord = isFilm ? 'Watch it again' : 'Read it again';
 const verb = isFilm ? 'watch' : 'read';
 const link = new URL(href(entry), Astro.url).href;
-const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by, source: details.lotw_source } : undefined;
+const shown = pickLine(all, details, name);
+const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
+const pinnedId = shown?.pinned ? shown.id : null;
 ---
 <Base title={`${fullTitle(entry)} · @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private}>
   {d.type !== 'essay' ? (
@@ -125,8 +124,8 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
           )}
           <div class="counts" aria-label="On Granthalaya">
             <span title={`${isFilm ? 'Watched' : 'Read'} by ${seen ?? 0} ${seen === 1 ? 'person' : 'people'} here`}><Eye />{seen ?? 0}</span>
-            <span title={`On ${wanted ?? 0} want-to list${wanted === 1 ? '' : 's'}`}><Bookmark />{wanted ?? 0}</span>
-            {inThreads.length > 0 && <span title={`In ${inThreads.length} of ${name}’s threads`}><Route />{inThreads.length}</span>}
+            <span title={`Saved by ${wanted ?? 0} ${wanted === 1 ? 'person' : 'people'} here`}><Mark solid size={15} />{wanted ?? 0}</span>
+            {inCols.length > 0 && <span title={`In ${inCols.length} of ${name}’s collections`}><Route />{inCols.length}</span>}
           </div>
           <div class="find rise d5">
             <p class="eyebrow" style="font-size: 11px">Find it on</p>
@@ -157,10 +156,10 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
               <div class="note" set:html={notes} />
             </div>
           )}
-          {inThreads.length > 0 && (
+          {inCols.length > 0 && (
             <div class="chips rise d6">
-              <span class="eyebrow" style="margin-right: 4px">In threads</span>
-              {inThreads.map((t, i) => <a href={threadHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
+              <span class="eyebrow" style="margin-right: 4px">In collections</span>
+              {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
             </div>
           )}
           {visits.length > 1 && (
@@ -182,13 +181,12 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
               <div class="toggles" role="group" aria-label="Status">
                 {STATUSES[d.type].map(([k, label]) => {
                   const I = ICON[k];
-                  return <button class="tg" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })}><I aria-hidden="true" /><span>{label}</span></button>;
+                  return <button class="tg" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })}>{I ? <I aria-hidden="true" /> : <Mark size={24} />}<span>{label}</span></button>;
                 })}
               </div>
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Calendar /><span>{dateRow}</span></a>
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Notes /><span>Edit rating, notes and lines</span></a>
               {done && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
-              <button class="lrow2" type="button" data-fav={JSON.stringify({ title: entry.titleId, on: !myFav })}><Heart /><span>{myFav ? 'Unpin from favourites' : 'Pin as a favourite'}</span></button>
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
             </>
           ) : me ? (
@@ -202,7 +200,7 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
                 </>
               ) : (
                 <>
-                  <button class="lrow2" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })}><Bookmark /><span>{statusLabel(d.type, 'want')}</span></button>
+                  <button class="lrow2 save" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })} data-saved-label="Saved to your shelf"><Mark /><span data-label>{statusLabel(d.type, 'want')}</span></button>
                   <a class="lrow2" href={`/add/?title=${entry.titleId}`}><Plus /><span>Log it on your shelf</span></a>
                 </>
               )}
@@ -223,11 +221,15 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
 
       {d.highlights.length > 0 && (
         <section class="pad block rise d6">
-          <div class="rule"><h2 class="eyebrow">{d.highlights.every((h) => h.mine) ? 'Lines I wrote' : 'Lines I underlined'}</h2><a href={`/@${profile.username}/notes/`} class="more">All in Notes →</a></div>
+          <div class="rule"><h2 class="eyebrow">{d.highlights.every((h) => h.mine) ? (isMe ? 'Lines I wrote' : 'Their lines') : (isMe ? 'Lines I underlined' : 'Lines they underlined')}</h2><a href={linesHref(profile.username)} class="more">All lines →</a></div>
           <div class="hl">
             {d.highlights.map((h) => (
               <article class="card lift hlc">
-                <p class="serif q">{h.mine ? h.text : `“${h.text}”`}</p>
+                {isMe && (
+                  <button type="button" class:list={['pinbtn', pinnedId === h.id && 'on']} data-pin={JSON.stringify({ id: h.id, on: pinnedId !== h.id })} aria-pressed={pinnedId === h.id ? 'true' : 'false'}
+                    title={pinnedId === h.id ? 'Pinned to your profile' : 'Pin to your profile'}><Mark size={14} /><span>{pinnedId === h.id ? 'Pinned' : 'Pin to profile'}</span></button>
+                )}
+                <p class:list={['serif q', h.mine && 'own']}>{h.mine ? h.text : `“${h.text}”`}</p>
                 {h.note && <p class="soft-note"><span class="eyebrow">My note</span>{h.note}</p>}
                 {h.where && <span class="num muted" style="margin-top: auto; font-size: 12px">{h.where}</span>}
               </article>
@@ -274,26 +276,25 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
           <>
             {STATUSES.essay.map(([k, label]) => <button class="chip" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })}>{label}</button>)}
             <a class="chip" href={`/add/?log=${entry.logId}`}>Edit</a>
-            <button class="chip" type="button" data-fav={JSON.stringify({ title: entry.titleId, on: !myFav })}>{myFav ? 'Unpin favourite' : 'Pin as a favourite'}</button>
           </>
         ) : me ? (
           mine.length ? <a class="chip" href={href(mine[0])}>On your shelf · {statusLabel('essay', mine[0].data.status)}</a>
-            : <button class="chip" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })}>Save for later</button>
+            : <button class="chip" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })} data-saved-label="Saved"><Mark size={15} /><span data-label>Save for later</span></button>
         ) : (
           <a class="chip" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname)}`} data-astro-prefetch="false">Sign in to save it</a>
         )}
         {!isMe && me && <PersonMenu username={profile.username} id={profile.id} isMe={false} signedIn={true} blocked={false} logId={entry.logId} />}
       </div>
-      {inThreads.length > 0 && (
+      {inCols.length > 0 && (
         <div class="chips rise d5">
-          <span class="eyebrow" style="margin-right: 4px">In threads</span>
-          {inThreads.map((t, i) => <a href={threadHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
+          <span class="eyebrow" style="margin-right: 4px">In collections</span>
+          {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
         </div>
       )}
       {(prev || next) && (
         <div class="pn rise d5">
-          {prev ? <a href={href(prev)} class="stack" style="gap: 4px"><span class="eyebrow" style="font-size: 11px">← Previous in thread</span><span class="serif" style="font-size: 18px">{prev.data.title}</span></a> : <span></span>}
-          {next && <a href={href(next)} class="stack" style="gap: 4px; text-align: right"><span class="eyebrow" style="font-size: 11px">Next in thread →</span><span class="serif" style="font-size: 18px">{next.data.title}</span></a>}
+          {prev ? <a href={href(prev)} class="stack" style="gap: 4px"><span class="eyebrow" style="font-size: 11px">← Previous in collection</span><span class="serif" style="font-size: 18px">{prev.data.title}</span></a> : <span></span>}
+          {next && <a href={href(next)} class="stack" style="gap: 4px; text-align: right"><span class="eyebrow" style="font-size: 11px">Next in collection →</span><span class="serif" style="font-size: 18px">{next.data.title}</span></a>}
         </div>
       )}
     </article>
@@ -301,7 +302,7 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
 
   {rel.length > 0 && (
     <section class="pad block rise d6">
-      <div class="rule"><h2 class="eyebrow">Sits well next to</h2>{inThreads[0] ? <a href={threadHref(inThreads[0])} class="more">Open the thread →</a> : <a href={`/@${profile.username}/library/`} class="more">The library →</a>}</div>
+      <div class="rule"><h2 class="eyebrow">Sits well next to</h2>{inCols[0] ? <a href={collectionHref(inCols[0])} class="more">Open the collection →</a> : <a href={`/@${profile.username}/library/`} class="more">The library →</a>}</div>
       <div class="rel">
         {rel.map((e) => (
           <a href={href(e)} class="lift stack" style="gap: 10px">
@@ -359,8 +360,16 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
 
   .block { padding-top: 64px; display: flex; flex-direction: column; gap: 24px; }
   .hl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-  .hlc { padding: 26px; display: flex; flex-direction: column; gap: 16px; }
+  .hlc { position: relative; padding: 26px; display: flex; flex-direction: column; gap: 16px; }
+  .pinbtn { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; margin: -8px 0 -4px -6px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0; transition: opacity .2s ease, background-color .2s ease, color .2s ease; }
+  .hlc:hover .pinbtn, .pinbtn:focus-visible, .pinbtn.on { opacity: 1; }
+  .pinbtn:hover { background: var(--soft); color: var(--ink); }
+  .pinbtn.on { color: var(--lat); }
+  @media (hover: none) { .pinbtn { opacity: 1; } }
+  .save[aria-busy], .save:disabled { opacity: 1; cursor: default; }
+  .save.is-saved { color: var(--lat); }
   .q { margin: 0; font-size: 20px; line-height: 1.5; font-style: italic; }
+  .q.own { font-style: normal; }
   .rel { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 28px; }
 
   .essay-page { width: min(720px, calc(100% - 2 * var(--gut))); margin: 0 auto; padding-top: 64px; display: flex; flex-direction: column; gap: 22px; }

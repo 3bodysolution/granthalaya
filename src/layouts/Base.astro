@@ -2,6 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import Logo from '../components/Logo.astro';
 import Valley from '../components/Valley.astro';
+import Drawn from '../components/ui/Drawn.astro';
 import { site } from '../data/site';
 import { initial } from '../lib/data';
 import '../styles/starwind.css';
@@ -9,7 +10,8 @@ import '../styles/global.css';
 
 interface Props {
   title?: string; description?: string; image?: string;
-  active?: 'library' | 'notes' | 'threads' | 'stats' | 'about' | 'add' | 'profile';
+  /** which top-bar link is the current page (the top bar gets Films, Books and Collections with browse) */
+  active?: string;
   /** whose shelf this page belongs to (for the menu and search); defaults to yours */
   shelf?: string;
   /** a line of the week for the shepherd in the footer */
@@ -22,12 +24,8 @@ const me = Astro.locals.me;
 const shelf = Astro.props.shelf ?? me?.username;
 const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · a shelf for everything you read and watch`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const nav = shelf ? [
-  { key: 'library', label: 'Library', href: `/@${shelf}/library/` },
-  { key: 'notes', label: 'Notes', href: `/@${shelf}/notes/` },
-  { key: 'threads', label: 'Threads', href: `/@${shelf}/threads/` },
-  { key: 'stats', label: 'Stats', href: `/@${shelf}/stats/` },
-] : [];
+// Site-wide links only. A shelf's own pages (Library, Diary, Collections, Stats) live in its tabs.
+const nav: { key: string; label: string; href: string }[] = [];
 const avatar = me?.avatar_url;
 ---
 <!doctype html>
@@ -69,9 +67,11 @@ const avatar = me?.avatar_url;
   <div class="site-wrap">
     <header class="site">
       <a href="/" class="brand" aria-label={`${site.name}, home`}><Logo /><span>{site.name}</span></a>
-      <nav class="nav" aria-label={shelf && shelf !== me?.username ? `@${shelf}’s shelf` : 'Your shelf'}>
-        {nav.map((n) => <a href={n.href} aria-current={active === n.key ? 'page' : undefined}>{n.label}</a>)}
-      </nav>
+      {nav.length > 0 ? (
+        <nav class="nav" aria-label="Browse">
+          {nav.map((n) => <a href={n.href} aria-current={active === n.key ? 'page' : undefined}>{n.label}</a>)}
+        </nav>
+      ) : null}
       <div class="actions">
         {shelf && (
           <button class="iconbtn" data-search-open aria-label="Search this shelf (⌘K)" title="Search  ⌘K">
@@ -84,15 +84,14 @@ const avatar = me?.avatar_url;
         </button>
         {me ? (
           <>
-            <a href="/add/" class="btn primary"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add</a>
+            <a href="/add/" class="btn primary addbtn" aria-label="Add a book, film or essay"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></a>
             <details class="menu">
               <summary class="avatar" aria-label="Your account">
                 {avatar ? <img src={avatar} alt="" referrerpolicy="no-referrer" /> : <span>{initial(me.display_name || me.username)}</span>}
               </summary>
               <div class="menu-list" role="menu">
                 <div class="menu-who"><b>{me.display_name || me.username}</b><span>@{me.username}</span></div>
-                <a role="menuitem" href={`/@${me.username}/`}>Your profile</a>
-                <a role="menuitem" href={`/@${me.username}/library/`}>Your library</a>
+                <a role="menuitem" href={`/@${me.username}/`}>Profile</a>
                 <a role="menuitem" href="/settings/">Settings</a>
                 {me.is_admin && <a role="menuitem" href="/admin/">Reports</a>}
                 <form method="post" action="/auth/signout" data-astro-reload><button role="menuitem" type="submit">Sign out</button></form>
@@ -147,6 +146,8 @@ const avatar = me?.avatar_url;
       <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" value="send">Send report</button></div>
     </form>
   </dialog>
+  <div class="pageload" id="pageload" aria-hidden="true"><Drawn size={44} /></div>
+
   <dialog class="box" id="confirm-box" aria-labelledby="confirm-h">
     <form method="dialog">
       <h2 id="confirm-h"></h2>
@@ -182,12 +183,32 @@ const avatar = me?.avatar_url;
 
 
     // ——— small actions on shelves: status, favourites, quick add, report, block ———
-    function toast(msg: string) {
+    const MARK = document.querySelector('#pageload .dr-fill')?.getAttribute('d') ?? '';
+    function toast(msg: string, opts: { mark?: boolean; action?: { label: string; run: () => void } } = {}) {
       document.querySelectorAll('.toast').forEach((t) => t.remove());
       const t = document.createElement('div');
-      t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg;
+      t.className = 'toast'; t.setAttribute('role', 'status');
+      if (opts.mark && MARK) t.insertAdjacentHTML('beforeend', `<svg class="mk" viewBox="0 0 100 100" aria-hidden="true"><path class="mk-fill" fill-rule="evenodd" d="${MARK}"/></svg>`);
+      const span = document.createElement('span'); span.textContent = msg; t.appendChild(span);
+      const close = () => { t.classList.add('out'); setTimeout(() => t.remove(), 160); };
+      if (opts.action) {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = opts.action.label;
+        b.addEventListener('click', () => { close(); opts.action!.run(); });
+        t.appendChild(b);
+      }
       document.body.appendChild(t);
-      setTimeout(() => t.remove(), 3200);
+      setTimeout(close, opts.action ? 5000 : 3200);
+    }
+    // a button that's waiting: its icon becomes the Ink loader
+    function busy(b: HTMLElement, on: boolean) {
+      if (on) {
+        b.setAttribute('aria-busy', 'true');
+        if (!b.querySelector(':scope > .ink')) b.insertAdjacentHTML('afterbegin', '<span class="ink" aria-hidden="true"></span>');
+      } else {
+        b.removeAttribute('aria-busy');
+        b.querySelector(':scope > .ink')?.remove();
+      }
+      (b as HTMLButtonElement).disabled = on;
     }
     async function send(path: string, method: string, data: unknown) {
       try {
@@ -226,22 +247,31 @@ const avatar = me?.avatar_url;
       if (st) {
         const v = JSON.parse(st.dataset.setStatus!);
         if (st.getAttribute('aria-pressed') === 'true') return;
-        st.disabled = true;
-        if (await send('/api/log', 'PATCH', v)) reload(); else st.disabled = false;
+        busy(st, true);
+        if (await send('/api/log', 'PATCH', v)) reload(); else busy(st, false);
         return;
       }
-      const fav = el.closest<HTMLButtonElement>('[data-fav]');
-      if (fav) {
-        const v = JSON.parse(fav.dataset.fav!);
-        const r = await send('/api/favourite', 'POST', v);
-        if (r) { toast(v.on ? 'Pinned to your favourites.' : 'Unpinned.'); reload(); }
-        return;
-      }
+      // Save (want to read / watch): the bookmark fills in, with a way to take it back
       const qa = el.closest<HTMLButtonElement>('[data-quick-add]');
       if (qa) {
-        qa.disabled = true;
+        if (qa.classList.contains('is-saved')) return;
+        const label = qa.querySelector<HTMLElement>('[data-label]');
+        const before = label?.textContent ?? '';
+        qa.classList.add('is-saved'); qa.disabled = true;
         const r = await send('/api/log', 'POST', JSON.parse(qa.dataset.quickAdd!));
-        if (r) { toast('Added to your shelf.'); reload(); } else qa.disabled = false;
+        if (!r) { qa.classList.remove('is-saved'); qa.disabled = false; return; }
+        if (label) label.textContent = qa.dataset.savedLabel || 'Saved';
+        toast('Saved to your shelf', { mark: true, action: { label: 'Undo', run: async () => {
+          if (await send('/api/log', 'DELETE', { id: r.id })) { qa.classList.remove('is-saved'); qa.disabled = false; if (label) label.textContent = before; }
+        } } });
+        return;
+      }
+      const pin = el.closest<HTMLButtonElement>('[data-pin]');
+      if (pin) {
+        const v = JSON.parse(pin.dataset.pin!);
+        busy(pin, true);
+        const r = await send('/api/profile', 'POST', { section: 'pin', line: v.on ? v.id : null });
+        if (r) { toast(v.on ? 'Pinned to your profile' : 'Unpinned', { mark: v.on }); reload(); } else busy(pin, false);
         return;
       }
       const rep = el.closest<HTMLElement>('[data-report]');
@@ -261,6 +291,16 @@ const avatar = me?.avatar_url;
         if (r) { toast(v.blocked ? `Unblocked @${v.who}.` : `Blocked @${v.who}.`); if (!v.blocked) navigate('/'); else reload(); }
       }
     });
+
+    // ——— a page that takes more than a moment shows the Drawn loader ———
+    let loadTimer = 0;
+    document.addEventListener('astro:before-preparation', () => {
+      clearTimeout(loadTimer);
+      loadTimer = window.setTimeout(() => document.getElementById('pageload')?.classList.add('on'), 450);
+    });
+    const loaded = () => { clearTimeout(loadTimer); document.getElementById('pageload')?.classList.remove('on'); };
+    document.addEventListener('astro:after-swap', loaded);
+    document.addEventListener('astro:page-load', loaded);
 
     // ——— the paintings stay on the page: no right-click saving, no dragging ———
     const guarded = (t: EventTarget | null) => !!(t as Element)?.closest?.('.art, .valley, .cover, img');

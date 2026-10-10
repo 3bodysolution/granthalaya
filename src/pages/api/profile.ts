@@ -1,6 +1,6 @@
-// Settings: profile, links, photo and privacy switches.
+// Settings: profile, favourites, the pinned line, links, photo and privacy switches.
 import type { APIRoute } from 'astro';
-import { json, oops, body, str, int, needMe, sameOrigin } from '../../lib/http';
+import { json, oops, body, str, needMe, sameOrigin } from '../../lib/http';
 import { dbMessage } from '../../lib/supabase';
 import { usernameStatus } from '../../lib/usernames';
 import { LINKS } from '../../lib/kinds';
@@ -24,14 +24,38 @@ export const POST: APIRoute = async (ctx) => {
     }
     const { error } = await sb.from('profiles').update(change).eq('id', me.id);
     if (error) return oops(dbMessage(error));
-    const goal = int(b.goal_books, 0, 1000);
-    const { error: e2 } = await sb.from('profile_details').upsert({
-      id: me.id, bio: str(b.bio, 160) ?? '', season_line: str(b.season_line, 40) ?? '',
-      lotw_text: str(b.lotw_text, 400) ?? '', lotw_by: str(b.lotw_by, 80) ?? '', lotw_source: str(b.lotw_source, 120) ?? '',
-      goal_books: goal ? goal : null,
-    });
+    const { error: e2 } = await sb.from('profile_details').upsert({ id: me.id, bio: str(b.bio, 160) ?? '' });
     if (e2) return oops(dbMessage(e2));
     return json({ ok: true, reload: !!change.username });
+  }
+
+  // up to four favourites, in order, each something on your own shelf
+  if (b.section === 'favourites') {
+    const UUID = /^[0-9a-f-]{36}$/i;
+    const asked = Array.isArray(b.ids) ? [...new Set(b.ids.filter((x): x is string => typeof x === 'string' && UUID.test(x)))].slice(0, 4) : [];
+    let favourites: string[] = [];
+    if (asked.length) {
+      const { data, error } = await sb.from('logs').select('title_id').eq('user_id', me.id).in('title_id', asked);
+      if (error) return oops(dbMessage(error));
+      const onShelf = new Set((data ?? []).map((r) => r.title_id));
+      favourites = asked.filter((id) => onShelf.has(id));
+    }
+    const { error } = await sb.from('profile_details').upsert({ id: me.id, favourites });
+    if (error) return oops(dbMessage(error));
+    return json({ ok: true, favourites });
+  }
+
+  // pin one of your own lines to your profile (or unpin with line: null)
+  if (b.section === 'pin') {
+    let line: string | null = null;
+    if (typeof b.line === 'string') {
+      const { data } = await sb.from('highlights').select('id').eq('id', b.line).eq('user_id', me.id).maybeSingle();
+      if (!data) return oops('Couldn’t find that line.', 404);
+      line = data.id;
+    }
+    const { error } = await sb.from('profile_details').upsert({ id: me.id, pinned_line: line });
+    if (error) return oops(dbMessage(error));
+    return json({ ok: true });
   }
 
   if (b.section === 'links') {

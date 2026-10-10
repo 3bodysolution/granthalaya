@@ -1,4 +1,4 @@
-// The one door to the data. Pages read shelves, profiles and threads only through this file.
+// The one door to the data. Pages read shelves, profiles and collections only through this file.
 // Everything comes from the database through the visitor's own connection, so the database's
 // privacy rules (private accounts, "Only me" entries, blocks) always apply.
 import type { SupabaseClient } from '@supabase/supabase-js';
@@ -11,8 +11,7 @@ export interface Profile {
   is_private: boolean; featured: boolean; is_admin: boolean; username_changed_at: string | null; created_at: string;
 }
 export interface Details {
-  id: string; bio: string; season_line: string; lotw_text: string; lotw_by: string; lotw_source: string;
-  goal_books: number | null; links: Record<string, string>; favourites: string[];
+  id: string; bio: string; links: Record<string, string>; favourites: string[]; pinned_line: string | null;
 }
 export interface Title {
   id: string; kind: Kind; slug: string; title: string; creator: string; year: number | null; season: number | null;
@@ -44,7 +43,8 @@ export interface Entry {
     highlights: { id: string; text: string; where?: string; note?: string; mine: boolean }[];
   };
 }
-export interface Thread {
+/** A collection: a short, ordered list of titles with a line about each. Stored in the `threads` tables. */
+export interface Collection {
   id: string;        // address name
   uuid: string;
   owner: string;
@@ -114,7 +114,7 @@ export async function loadVisits(sb: SupabaseClient, profile: Pick<Profile, 'id'
   return list;
 }
 
-export async function loadThreads(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<Thread[]> {
+export async function loadCollections(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<Collection[]> {
   const { data } = await sb.from('threads').select('id, slug, name, intro, position, thread_items(position, why, title:titles(slug))')
     .eq('user_id', profile.id).order('position').order('created_at');
   return (data ?? []).map((t: any) => ({
@@ -146,7 +146,8 @@ export async function loadFeatured(sb: SupabaseClient, limit = 6) {
 /* ——— addresses ——— */
 export const profileHref = (username: string) => `/@${username}/`;
 export const href = (e: Pick<Entry, 'id' | 'owner'>) => `/@${e.owner}/library/${e.id}/`;
-export const threadHref = (t: Pick<Thread, 'id' | 'owner'>) => `/@${t.owner}/threads/${t.id}/`;
+export const collectionHref = (t: Pick<Collection, 'id' | 'owner'>) => `/@${t.owner}/collections/${t.id}/`;
+export const linesHref = (username: string) => `/@${username}/lines/`;
 
 /* ——— covers ——— */
 export function coverSrc(e: Entry): string | undefined {
@@ -242,12 +243,25 @@ export function excerpt(e: Pick<Entry, 'body'>, max = 110) {
   return text.slice(0, max).replace(/\s+\S*$/, '') + '…';
 }
 
-/* ——— threads an entry belongs to ——— */
-export function threadsFor(e: Entry, threads: Thread[]) {
-  return threads
+/* ——— collections an entry belongs to ——— */
+export function collectionsFor(e: Entry, collections: Collection[]) {
+  return collections
     .map((t) => ({ t, i: t.data.items.findIndex((x) => x.slug === e.id) }))
     .filter((x) => x.i >= 0)
     .map(({ t, i }) => ({ id: t.id, owner: t.owner, title: t.data.title, pos: i + 1, of: t.data.items.length, items: t.data.items }));
+}
+
+/* ——— the line on a profile: the one pinned, or else the newest saved ——— */
+export interface ShownLine { id: string; text: string; by: string; source: string; href: string; pinned: boolean; mine: boolean }
+export function pickLine(shelf: Entry[], details: Pick<Details, 'pinned_line'> | null, ownerName: string): ShownLine | null {
+  const all = shelf.flatMap((e) => e.data.highlights.map((h) => ({ e, h })));
+  if (!all.length) return null;
+  const pinned = details?.pinned_line ? all.find((x) => x.h.id === details.pinned_line) : undefined;
+  const x = pinned ?? all[0];
+  return {
+    id: x.h.id, text: x.h.text, by: x.h.mine ? ownerName : x.e.data.creator, source: x.e.data.title,
+    href: href(x.e), pinned: !!pinned, mine: x.h.mine,
+  };
 }
 
 /** the first letter of a name, for an avatar without a photo */

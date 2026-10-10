@@ -1,11 +1,10 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import Tile from '../../../components/Tile.astro';
-import Cover from '../../../components/Cover.astro';
 import ShelfStrip from '../../../components/ShelfStrip.astro';
 import { openShelf } from '../../../lib/shelfpage';
-import { loadShelf, href, stars, starsLabel, short, kind, typeColor, fullTitle } from '../../../lib/data';
-import { KINDS, kindPlural, statusLabel, type Status } from '../../../lib/kinds';
+import { loadShelf } from '../../../lib/data';
+import { KINDS, kindPlural, type Status } from '../../../lib/kinds';
 export const prerender = false;
 
 const o = await openShelf(Astro, '/library/');
@@ -28,21 +27,17 @@ const STATUS_FILTERS: [string, string, (s: Status) => boolean][] = [
 const filters = STATUS_FILTERS.map(([k, label, f]) => ({ k, label, n: all.filter((e) => f(e.data.status)).length })).filter((f) => f.n > 0);
 const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s === 'dropped' ? 'dnf' : s);
 ---
-<Base title={isMe ? 'Your library' : `${name}’s library`} active={isMe ? 'library' : undefined} shelf={profile.username} description={`Everything on ${name}’s shelf, by year.`}>
+<Base title={isMe ? 'Your library' : `${name}’s library`} shelf={profile.username} description={`Everything on ${name}’s shelf, by year.`}>
   <div class="art melt settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
 
-  <div id="lib" data-view="grid" data-type="all" data-status="all">
+  <div id="lib" data-type="all" data-status="all">
     <section class="pad head rise">
       <div class="stack" style="gap: 6px">
         <h1 class="title">{isMe ? 'Your library' : 'Library'}</h1>
       </div>
-      <div class="seg" role="group" aria-label="Layout">
-        <button data-view-btn="grid" aria-pressed="true">Covers</button>
-        <button data-view-btn="list" aria-pressed="false">List</button>
-      </div>
     </section>
 
-    <div class="pad rise d1 top"><ShelfStrip shelf={o.shelf} current={Astro.url.searchParams.get('status') === 'want' ? 'want' : 'library'} /></div>
+    <div class="pad rise d1 top"><ShelfStrip shelf={o.shelf} current="library" /></div>
 
     {all.length === 0 ? (
       <section class="pad empty">
@@ -76,19 +71,6 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
               <div class="shelf grid">
                 {items.map((e) => <div class="cell" data-type={e.data.type} data-status={group(e.data.status)}><Tile entry={e} vt /></div>)}
               </div>
-              <div class="list" role="table" aria-label={`Library ${y}`}>
-                <div class="lrow lh" role="row"><span></span><span>Title</span><span>By</span><span>Type</span><span>Rating</span><span style="text-align: right">Date</span></div>
-                {items.map((e) => (
-                  <a href={href(e)} class="lrow cell" role="row" data-type={e.data.type} data-status={group(e.data.status)}>
-                    <Cover entry={e} variant="swatch" />
-                    <span class="serif lt">{fullTitle(e)}{e.data.private && <span class="muted" title="Only you can see this"> · only you</span>}</span>
-                    <span class="muted ell">{e.data.creator}</span>
-                    <span class="lk" style={`color: ${typeColor(e.data.type)}`}>{kind(e)}</span>
-                    <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || (e.data.status !== 'done' ? <span class="muted st">{statusLabel(e.data.type, e.data.status)}</span> : '·')}</span>
-                    <span class="num muted" style="text-align: right">{short(e.data.date)}</span>
-                  </a>
-                ))}
-              </div>
               <p class="none muted">Nothing like that in {y}.</p>
             </details>
           </section>
@@ -119,16 +101,6 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
   .yr[open] > .grid, .yr[open] > .list { animation: rise .7s var(--spring) backwards; }
   .cell > :global(.tile) { height: 100%; }
 
-  #lib[data-view="grid"] .list, #lib[data-view="list"] .grid { display: none; }
-  .lrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) 180px 90px 130px 80px; align-items: center; gap: 20px; min-height: 68px; padding: 0 16px; border-bottom: 1px solid var(--line); border-radius: 10px; transition: background-color .3s ease; }
-  a.lrow:hover { background: var(--card); color: inherit; }
-  .lh { min-height: 36px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
-  .lt { font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ell { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lk { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; }
-  .st { font-size: 13px; letter-spacing: 0; }
-  .lrow .num { font-size: 13px; }
-  .lrow :global(.sw) { margin: 10px 0; }
 
   .none { display: none; margin: 0; font-size: 15px; }
   :global(.is-hidden) { display: none !important; }
@@ -138,8 +110,6 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
 
   @media (max-width: 780px) {
     .head { margin-top: -12px; }
-    .lrow { grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; }
-    .lrow > :nth-child(3), .lrow > :nth-child(4), .lrow > :nth-child(6) { display: none; }
     .tabs { gap: 22px; }
   }
 </style>
@@ -158,7 +128,7 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
         yr.querySelectorAll<HTMLElement>('.cell').forEach((el) => {
           const ok = (t === 'all' || el.dataset.type === t) && (st === 'all' || el.dataset.status === st);
           el.classList.toggle('is-hidden', !ok);
-          if (ok && !el.matches('.lrow')) shown++;
+          if (ok) shown++;
         });
         total += shown;
         yr.classList.toggle('empty', shown === 0);
@@ -172,11 +142,6 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
         history.replaceState(history.state, '', u);
       }
     };
-    const setView = (v: string) => {
-      lib.dataset.view = v;
-      lib.querySelectorAll<HTMLElement>('[data-view-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.viewBtn === v)));
-      try { localStorage.setItem('libView', v); } catch (e) {}
-    };
     const setType = (t: string, push = true) => {
       lib.dataset.type = t;
       lib.querySelectorAll<HTMLElement>('[data-type-btn]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.typeBtn === t)));
@@ -189,16 +154,11 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
     };
     lib.addEventListener('click', (ev) => {
       const el = ev.target as Element;
-      const v = el.closest<HTMLElement>('[data-view-btn]');
-      if (v) setView(v.dataset.viewBtn!);
       const t = el.closest<HTMLElement>('[data-type-btn]');
       if (t) setType(t.dataset.typeBtn!);
       const s = el.closest<HTMLElement>('[data-status-btn]');
       if (s) setStatus(s.dataset.statusBtn!);
     });
-    let saved = 'grid';
-    try { saved = localStorage.getItem('libView') || 'grid'; } catch (e) {}
-    setView(saved);
     const q = new URLSearchParams(location.search);
     const qt = q.get('type'), qs = q.get('status');
     if (qt && lib.querySelector(`[data-type-btn="${qt}"]`)) setType(qt, false);

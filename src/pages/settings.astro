@@ -1,15 +1,19 @@
 ---
 import Base from '../layouts/Base.astro';
 import Face from '../components/Face.astro';
+import Cover from '../components/Cover.astro';
 import { LINKS } from '../lib/kinds';
 import { adminClient } from '../lib/supabase';
-import type { Details } from '../lib/data';
+import { loadShelf, fullTitle, type Details, type Entry } from '../lib/data';
 export const prerender = false;
 
 const me = Astro.locals.me;
 if (!me) return Astro.redirect('/signin/?next=/settings/');
 const sb = Astro.locals.supabase;
-const { data: det } = await sb.from('profile_details').select('*').eq('id', me.id).maybeSingle<Details>();
+const [{ data: det }, shelf] = await Promise.all([
+  sb.from('profile_details').select('*').eq('id', me.id).maybeSingle<Details>(),
+  loadShelf(sb, me),
+]);
 const d: Partial<Details> = det ?? {};
 // people you've blocked (their profiles are hidden from you, so this looks them up on the server)
 let blocked: { id: string; username: string; display_name: string }[] = [];
@@ -24,90 +28,152 @@ try {
 const googlePhoto = Astro.locals.user?.avatar ?? null;
 const nextChange = me.username_changed_at ? new Date(new Date(me.username_changed_at).getTime() + 30 * 86400000) : null;
 const canRename = !nextChange || nextChange < new Date();
-const sections = [['profile', 'Profile'], ['links', 'Links'], ['privacy', 'Privacy'], ['data', 'Your data'], ['account', 'Account']];
+
+// favourites: chosen from anything on your shelf, one entry per title
+const titles = new Map<string, Entry>();
+for (const e of shelf) if (!titles.has(e.titleId)) titles.set(e.titleId, e);
+const picks = [...titles.values()];
+const favs = (d.favourites ?? []).filter((id) => titles.has(id)).slice(0, 4);
+
+const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your data'], ['account', 'Account']] as const;
 ---
 <Base title="Settings" noindex>
   <section class="pad wrap">
     <div class="layout">
       <aside class="side">
         <h1 class="serif h">Settings</h1>
-        <nav class="sn-list" aria-label="Settings sections">{sections.map(([k, label]) => <a href={`#${k}`} class="sn">{label}</a>)}</nav>
+        <div class="sn-list" role="tablist" aria-label="Settings" aria-orientation="vertical">
+          {tabs.map(([k, label], i) => <button type="button" role="tab" class="sn" id={`tab-${k}`} aria-controls={k} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1} data-tab={k}>{label}</button>)}
+        </div>
         <a href={`/@${me.username}/`} class="sn view">View your profile →</a>
       </aside>
 
-      <div class="stack" style="gap: 24px; min-width: 0">
-        <form class="sec" id="profile" data-save="profile">
-          <div class="head"><h2>Profile</h2><p>How you appear to others.</p></div>
-          <div class="photo">
-            <Face name={me.display_name || me.username} src={me.avatar_url} size={64} />
-            <div class="stack" style="gap: 6px">
-              <span class="lbl">Photo</span>
-              <span class="hint">{me.avatar_url ? 'From your Google account.' : 'No photo: your first letter shows instead.'}</span>
-              <div class="flex gap-2">
-                {me.avatar_url && <button type="button" class="gchip" data-photo="none">Remove photo</button>}
-                {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" class="gchip" data-photo="google">Use my Google photo</button>}
+      <div class="panels">
+        <!-- ——— Profile ——— -->
+        <div class="panel" role="tabpanel" id="profile" aria-labelledby="tab-profile">
+          <form class="sec" data-save="profile">
+            <div class="head"><h2>Profile</h2><p>How you appear to others.</p></div>
+            <div class="photo">
+              <Face name={me.display_name || me.username} src={me.avatar_url} size={64} />
+              <div class="stack" style="gap: 6px">
+                <span class="lbl">Photo</span>
+                <span class="hint">{me.avatar_url ? 'From your Google account.' : 'No photo: your first letter shows instead.'}</span>
+                <div class="flex gap-2">
+                  {me.avatar_url && <button type="button" class="gchip" data-photo="none">Remove photo</button>}
+                  {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" class="gchip" data-photo="google">Use my Google photo</button>}
+                </div>
               </div>
             </div>
-          </div>
-          <div class="two">
-            <label class="fld"><span class="lbl">Name</span><input class="field" name="display_name" value={me.display_name} maxlength="60" required /></label>
-            <label class="fld">
-              <span class="lbl">Username</span>
-              <span class="uwrap"><span class="at">@</span><input class="field u" name="username" value={me.username} maxlength="20" autocapitalize="none" spellcheck="false" disabled={!canRename} /><span class="ustate" aria-live="polite"></span></span>
-              <span class="hint">{canRename ? 'Change it once every 30 days. Your old address will keep working.' : `You can change it again on ${nextChange!.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}.`}</span>
-            </label>
-          </div>
-          <label class="fld"><span class="lbl">One line about you</span><input class="field" name="bio" value={d.bio ?? ''} maxlength="160" placeholder="Books, films and everything I’ve spent time with." /><span class="hint"><span data-count="bio">{(d.bio ?? '').length}</span> of 160</span></label>
-          <div class="two">
-            <label class="fld"><span class="lbl">Season line</span><input class="field" name="season_line" value={d.season_line ?? ''} maxlength="40" placeholder="Monsoon 2026" /><span class="hint">A small heading on your profile and home.</span></label>
-            <label class="fld"><span class="lbl">Books goal this year</span><input class="field" name="goal_books" value={d.goal_books ?? ''} inputmode="numeric" placeholder="30" /><span class="hint">Shown on your Stats page.</span></label>
-          </div>
-          <div class="fld">
-            <span class="lbl">Line of the week</span>
-            <textarea class="field serif" name="lotw_text" rows="2" maxlength="400" placeholder="A line you keep thinking about">{d.lotw_text ?? ''}</textarea>
             <div class="two">
-              <input class="field" name="lotw_by" value={d.lotw_by ?? ''} maxlength="80" placeholder="Who wrote or said it" aria-label="Who wrote or said it" />
-              <input class="field" name="lotw_source" value={d.lotw_source ?? ''} maxlength="120" placeholder="From (a book, a film…)" aria-label="Where it's from" />
+              <label class="fld"><span class="lbl">Name</span><input class="field" name="display_name" value={me.display_name} maxlength="60" required /></label>
+              <label class="fld">
+                <span class="lbl">Username</span>
+                <span class="uwrap"><span class="at">@</span><input class="field u" name="username" value={me.username} maxlength="20" autocapitalize="none" spellcheck="false" disabled={!canRename} /><span class="ustate" aria-live="polite"></span></span>
+                <span class="hint">{canRename ? 'Change it once every 30 days. Your old address will keep working.' : `You can change it again on ${nextChange!.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}.`}</span>
+              </label>
+            </div>
+            <label class="fld"><span class="lbl">One line about you</span><input class="field" name="bio" value={d.bio ?? ''} maxlength="160" placeholder="Books, films and everything I’ve spent time with." /><span class="hint"><span data-count="bio">{(d.bio ?? '').length}</span> of 160</span></label>
+            <div class="sfoot"><span class="saved" hidden>Saved</span><button class="btn primary" type="submit">Save changes</button></div>
+          </form>
+
+          <div class="sec" id="favourites">
+            <div class="head"><h2>Favourites</h2><p>Up to four titles from your shelf, shown large on your profile.</p></div>
+            {picks.length === 0 ? (
+              <p class="muted" style="margin: 0; font-size: 14px">Add something to your shelf first, then choose your favourites here.</p>
+            ) : (
+              <>
+                <div class="slots" data-favs={JSON.stringify(favs)}>
+                  {[0, 1, 2, 3].map((i) => {
+                    const e = favs[i] ? titles.get(favs[i]) : undefined;
+                    return (
+                      <div class="slot" data-slot={i}>
+                        {e ? (
+                          <>
+                            <span class="slot-cover"><Cover entry={e} variant="swatch" w={96} h={144} /></span>
+                            <button type="button" class="slot-x" data-unfav={e.titleId} aria-label={`Remove ${fullTitle(e)}`}>×</button>
+                          </>
+                        ) : (
+                          <button type="button" class="slot-add" data-open-picker aria-label="Choose a favourite">+</button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div class="sfoot"><span class="saved" hidden>Saved</span><button type="button" class="btn" data-open-picker>Choose favourites</button></div>
+              </>
+            )}
+          </div>
+
+          <form class="sec" data-save="links">
+            <div class="head"><h2>Links</h2><p>Shown beside your @username. A username or a full link both work.</p></div>
+            {LINKS.map((l) => (
+              <label class="linkrow"><span class="ln">{l.label}</span><input class="field" name={`link_${l.key}`} value={(d.links ?? {})[l.key] ?? ''} maxlength="200" placeholder={l.base ? 'username' : 'https://'} /></label>
+            ))}
+            <div class="sfoot"><span class="saved" hidden>Saved</span><button class="btn primary" type="submit">Save links</button></div>
+          </form>
+        </div>
+
+        <!-- ——— Privacy ——— -->
+        <div class="panel" role="tabpanel" id="privacy" aria-labelledby="tab-privacy" hidden>
+          <div class="sec">
+            <div class="head"><h2>Privacy</h2><p>Who can see your shelf.</p></div>
+            <label class="row"><span><b>Private account</b><span>Only you see your shelf, lines, collections and stats. Others see just your name and photo.</span></span><input type="checkbox" class="onoff" data-flag="is_private" checked={me.is_private} /></label>
+            <label class="row"><span><b>Feature my shelf</b><span>Show your shelf to new visitors on the home page.</span></span><input type="checkbox" class="onoff" data-flag="featured" checked={me.featured} disabled={me.is_private} /></label>
+            <p class="notice bad" id="flagerr" hidden></p>
+          </div>
+          <div class="sec">
+            <div class="head"><h2>Blocked people</h2><p>{blocked.length ? 'They can’t see your profile, and you won’t see theirs.' : 'No one blocked.'}</p></div>
+            {blocked.map((b) => (
+              <div class="row blk"><span class="flex items-center gap-3"><Face name={b.display_name || b.username} size={32} /><span>{b.display_name || b.username} <span class="muted">@{b.username}</span></span></span><button type="button" class="btn sm" data-block={JSON.stringify({ id: b.id, who: b.username, blocked: true })}>Unblock</button></div>
+            ))}
+          </div>
+        </div>
+
+        <!-- ——— Your data ——— -->
+        <div class="panel" role="tabpanel" id="data" aria-labelledby="tab-data" hidden>
+          <div class="sec">
+            <div class="head"><h2>Export</h2><p>Everything you’ve added, in files you keep.</p></div>
+            <div class="row">
+              <span><b>Download your data</b><span>A zip of spreadsheets: your shelf, your lines, your collections and your profile. They open in Excel, Numbers or Google Sheets.</span></span>
+              <a class="btn sm" href="/api/export" download data-astro-reload>Download</a>
             </div>
           </div>
-          <div class="sfoot"><span class="saved" hidden>Saved</span><button class="btn primary" type="submit">Save changes</button></div>
-        </form>
+        </div>
 
-        <form class="sec" id="links" data-save="links">
-          <div class="head"><h2>Links</h2><p>Shown beside your @username. A username or a full link both work.</p></div>
-          {LINKS.map((l) => (
-            <label class="linkrow"><span class="ln">{l.label}</span><input class="field" name={`link_${l.key}`} value={(d.links ?? {})[l.key] ?? ''} maxlength="200" placeholder={l.base ? 'username' : 'https://'} /></label>
-          ))}
-          <div class="sfoot"><span class="saved" hidden>Saved</span><button class="btn primary" type="submit">Save links</button></div>
-        </form>
-
-        <div class="sec" id="privacy">
-          <div class="head"><h2>Privacy</h2><p>Who can see your shelf.</p></div>
-          <label class="row"><span><b>Private account</b><span>Only you see your shelf, notes, threads and stats. Others see just your name and photo.</span></span><input type="checkbox" class="onoff" data-flag="is_private" checked={me.is_private} /></label>
-          <label class="row"><span><b>Feature my shelf</b><span>Show your shelf to new visitors on the welcome page.</span></span><input type="checkbox" class="onoff" data-flag="featured" checked={me.featured} disabled={me.is_private} /></label>
-          <div class="row top">
-            <span><b>Blocked people</b><span>{blocked.length ? 'They can’t see your profile, and you won’t see theirs.' : 'No one blocked.'}</span></span>
+        <!-- ——— Account ——— -->
+        <div class="panel" role="tabpanel" id="account" aria-labelledby="tab-account" hidden>
+          <div class="sec danger">
+            <div class="head"><h2>Delete account</h2><p>Removes your profile, shelf, notes, lines and collections for good. This can’t be undone. You might want to download your data first.</p></div>
+            <label class="fld"><span class="lbl">Type your username to confirm</span><input class="field" id="confirmname" placeholder={me.username} autocapitalize="none" spellcheck="false" /></label>
+            <p class="notice bad" id="delerr" hidden></p>
+            <div><button type="button" class="btn delete" id="deleteme" disabled>Delete my account</button></div>
           </div>
-          {blocked.map((b) => (
-            <div class="row blk"><span class="flex items-center gap-3"><Face name={b.display_name || b.username} size={32} /><span>{b.display_name || b.username} <span class="muted">@{b.username}</span></span></span><button type="button" class="btn sm" data-block={JSON.stringify({ id: b.id, who: b.username, blocked: true })}>Unblock</button></div>
-          ))}
-        </div>
-
-        <div class="sec" id="data">
-          <div class="head"><h2>Your data</h2><p>Everything you’ve logged, in a file you keep.</p></div>
-          <div class="row"><span><b>Download as a spreadsheet</b><span>Your shelf as a CSV file: titles, statuses, dates, ratings and notes.</span></span><a class="btn sm" href="/api/export?format=csv" download data-astro-reload>Download CSV</a></div>
-          <div class="row"><span><b>Download everything</b><span>Profile, shelf, lines, threads and settings, as a JSON file.</span></span><a class="btn sm" href="/api/export" download data-astro-reload>Download JSON</a></div>
-        </div>
-
-        <div class="sec danger" id="account">
-          <div class="head"><h2>Delete account</h2><p>Removes your profile, shelf, notes and lines for good. This can’t be undone.</p></div>
-          <label class="fld"><span class="lbl">Type your username to confirm</span><input class="field" id="confirmname" placeholder={me.username} autocapitalize="none" spellcheck="false" /></label>
-          <p class="notice bad" id="delerr" hidden></p>
-          <div><button type="button" class="btn delete" id="deleteme" disabled>Delete my account</button></div>
         </div>
       </div>
     </div>
   </section>
+
+  {picks.length > 0 && (
+    <dialog class="box picker" id="picker" aria-labelledby="picker-h">
+      <div class="pk-top">
+        <h2 id="picker-h">Choose favourites</h2>
+        <span class="muted pk-n" aria-live="polite"></span>
+      </div>
+      <input class="field" type="search" placeholder="Search your shelf" aria-label="Search your shelf" id="pk-q" autocomplete="off" />
+      <ul class="pk-list" role="listbox" aria-multiselectable="true" aria-label="Your shelf">
+        {picks.map((e) => (
+          <li>
+            <button type="button" class="pk-item" role="option" aria-selected={favs.includes(e.titleId) ? 'true' : 'false'} data-pick={e.titleId} data-q={`${e.data.title} ${e.data.creator}`.toLowerCase()}>
+              <span class="pk-cover"><Cover entry={e} variant="swatch" w={96} h={144} /></span>
+              <span class="pk-t">{fullTitle(e)}</span>
+              <span class="pk-c muted">{e.data.creator}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+      <div class="row"><button type="button" class="btn primary" data-close-picker>Done</button></div>
+    </dialog>
+  )}
 </Base>
 
 <style>
@@ -116,10 +182,15 @@ const sections = [['profile', 'Profile'], ['links', 'Links'], ['privacy', 'Priva
   .side { position: sticky; top: 24px; display: flex; flex-direction: column; gap: 2px; }
   .h { margin: 0 0 16px; font-weight: 400; font-size: 34px; }
   .sn-list { display: flex; flex-direction: column; gap: 2px; }
-  .sn { padding: 9px 12px; border-radius: 10px; font-size: 14px; font-weight: 500; color: var(--muted); }
+  .sn { display: block; width: 100%; padding: 10px 12px; border: 0; border-radius: 10px; background: transparent; text-align: left; font: inherit; font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; transition: background-color .2s ease, color .2s ease; }
   .sn:hover { background: var(--soft); color: var(--ink); }
+  .sn[aria-selected="true"] { background: var(--soft); color: var(--ink); font-weight: 600; }
   .sn.view { margin-top: 12px; color: var(--lat); }
-  .sec { padding: 26px; display: flex; flex-direction: column; gap: 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); scroll-margin-top: 24px; }
+  .panels { min-width: 0; }
+  .panel { display: flex; flex-direction: column; gap: 24px; }
+  .panel:not([hidden]) { animation: fadein .2s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } }
+  .sec { padding: 26px; display: flex; flex-direction: column; gap: 18px; border-radius: 18px; background: var(--card); border: 1px solid var(--line); }
   .head h2 { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 21px; }
   .head p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
   .fld { display: flex; flex-direction: column; gap: 8px; }
@@ -137,53 +208,113 @@ const sections = [['profile', 'Profile'], ['links', 'Links'], ['privacy', 'Priva
   .linkrow { display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 12px; }
   .ln { font-size: 14px; font-weight: 600; }
   .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; cursor: pointer; }
-  .row.top, .row.blk { cursor: default; }
+  .row.blk { cursor: default; padding-left: 4px; }
   .row b { display: block; font-size: 15px; font-weight: 600; }
   .row > span > span { font-size: 13px; color: var(--muted); }
-  .row.blk { padding-left: 4px; }
   .btn.sm { height: 36px; padding: 0 14px; font-size: 13px; }
   .danger { border-color: color-mix(in srgb, #B4473B 40%, var(--line)); }
   .btn.delete { background: #B4473B; border-color: #B4473B; color: #fff; }
   .btn.delete:disabled { opacity: .45; cursor: not-allowed; }
+
+  /* favourites: four slots */
+  .slots { display: grid; grid-template-columns: repeat(4, 96px); gap: 16px; }
+  .slot { position: relative; width: 96px; height: 144px; }
+  .slot-cover :global(.sw) { border-radius: 6px; box-shadow: 0 10px 18px -12px var(--shadow); }
+  .slot-add { width: 100%; height: 100%; border-radius: 6px; border: 1.5px dashed var(--line); background: transparent; color: var(--muted); font-size: 30px; cursor: pointer; transition: border-color .2s ease, color .2s ease; }
+  .slot-add:hover { border-color: var(--lat); color: var(--lat); }
+  .slot-x { position: absolute; top: -8px; right: -8px; width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 16px; line-height: 1; cursor: pointer; box-shadow: 0 4px 10px -4px var(--shadow); transition: transform .25s var(--spring), border-color .2s ease; }
+  .slot-x:hover { border-color: #B4473B; color: #B4473B; }
+  .slot-x:active { transform: scale(.92); }
+
+  /* the picker */
+  .picker { width: min(720px, calc(100vw - 32px)); max-height: min(720px, 86vh); display: none; flex-direction: column; gap: 14px; }
+  .picker[open] { display: flex; }
+  .pk-top { flex: none; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .picker > .field { flex: none; }
+  .pk-top h2 { margin: 0; }
+  .pk-n { font-size: 13px; }
+  .pk-list { flex: 1 1 auto; min-height: 0; list-style: none; margin: 0; padding: 4px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 16px 12px; }
+  .pk-item { width: 100%; display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 0; border-radius: 10px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; transition: background-color .2s ease; }
+  .pk-item:hover { background: var(--soft); }
+  .pk-cover { position: relative; display: block; width: 100%; }
+  .pk-cover :global(.sw) { width: 100% !important; height: auto !important; aspect-ratio: 2 / 3; border-radius: 6px; transition: box-shadow .2s ease; }
+  .pk-item[aria-selected="true"] .pk-cover :global(.sw) { box-shadow: 0 0 0 3px var(--lat); }
+  .pk-item[aria-selected="true"] .pk-cover::after { content: "✓"; position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--lat); color: var(--bg); font-size: 13px; font-weight: 700; }
+  .pk-item:disabled { opacity: .45; cursor: not-allowed; }
+  .pk-t { font-size: 13px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .pk-c { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .picker .row { margin-top: 0; }
+
   @media (max-width: 780px) {
     .wrap { padding-top: 20px; }
     .layout { grid-template-columns: 1fr; gap: 20px; }
     .side { position: static; }
     .sn-list { flex-direction: row; flex-wrap: wrap; }
+    .sn { width: auto; }
     .two, .linkrow { grid-template-columns: 1fr; }
     .sec { padding: 20px 16px; }
+    .slots { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+    .slot { width: 100%; height: auto; aspect-ratio: 2 / 3; }
+    .slot-cover :global(.sw) { width: 100% !important; height: 100% !important; }
   }
 </style>
 
 <script>
   import { navigate } from 'astro:transitions/client';
   function setup() {
-    const prof = document.getElementById('profile') as HTMLFormElement | null;
-    if (!prof || prof.dataset.ready) return;
-    prof.dataset.ready = '1';
-    const post = async (data: unknown) => {
-      const r = await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
-      return r;
+    const root = document.querySelector<HTMLElement>('.panels');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = '1';
+
+    // ——— tabs, kept in the address (#privacy) so links and the back button work ———
+    const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
+    const show = (k: string, push = true) => {
+      if (k === 'links' || k === 'favourites') k = 'profile';
+      if (!tabs.some((t) => t.dataset.tab === k)) k = 'profile';
+      tabs.forEach((t) => { const on = t.dataset.tab === k; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
+      document.querySelectorAll<HTMLElement>('[role=tabpanel]').forEach((p) => (p.hidden = p.id !== k));
+      if (push) history.replaceState(history.state, '', `#${k}`);
     };
-    const flash = (form: HTMLElement, msg: string, bad = false) => {
-      const s = form.querySelector<HTMLElement>('.saved');
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => show(t.dataset.tab!));
+      t.addEventListener('keydown', (ev) => {
+        const d = ev.key === 'ArrowDown' || ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowUp' || ev.key === 'ArrowLeft' ? -1 : 0;
+        if (!d) return;
+        ev.preventDefault();
+        const n = tabs[(i + d + tabs.length) % tabs.length];
+        n.focus(); show(n.dataset.tab!);
+      });
+    });
+    show(location.hash.slice(1) || 'profile', false);
+
+    const post = async (data: unknown) =>
+      fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
+    const flash = (box: HTMLElement, msg: string, bad = false) => {
+      const s = box.querySelector<HTMLElement>('.saved');
       if (!s) return;
       s.textContent = msg; s.style.color = bad ? '#B4473B' : ''; s.hidden = false;
       setTimeout(() => (s.hidden = true), bad ? 6000 : 2500);
     };
+    const busy = (b: HTMLButtonElement, on: boolean) => {
+      b.disabled = on;
+      if (on) { b.setAttribute('aria-busy', 'true'); b.insertAdjacentHTML('afterbegin', '<span class="ink" aria-hidden="true"></span>'); }
+      else { b.removeAttribute('aria-busy'); b.querySelector(':scope > .ink')?.remove(); }
+    };
+
     document.querySelectorAll<HTMLFormElement>('form[data-save]').forEach((form) => form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const fd = Object.fromEntries(new FormData(form).entries());
       const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
-      btn.disabled = true;
+      busy(btn, true);
       const r = await post({ section: form.dataset.save, ...fd });
-      btn.disabled = false;
-      if (r.ok) { flash(form, 'Saved'); if (r.reload) navigate(location.pathname, { history: 'replace' }); }
+      busy(btn, false);
+      if (r.ok) { flash(form, 'Saved'); if (r.reload) navigate(location.pathname + location.hash, { history: 'replace' }); }
       else flash(form, r.error || 'Didn’t save.', true);
     }));
+
     // username check
-    const u = prof.querySelector<HTMLInputElement>('input[name=username]')!;
-    const st = prof.querySelector<HTMLElement>('.ustate')!;
+    const u = document.querySelector<HTMLInputElement>('input[name=username]')!;
+    const st = document.querySelector<HTMLElement>('.ustate')!;
     const mine = u.value;
     let t = 0;
     u.addEventListener('input', () => {
@@ -196,30 +327,88 @@ const sections = [['profile', 'Profile'], ['links', 'Links'], ['privacy', 'Priva
         st.textContent = r.ok ? '✓ Available' : r.message; st.className = 'ustate ' + (r.ok ? 'ok' : 'no');
       }, 350);
     });
-    // bio count
-    const bio = prof.querySelector<HTMLInputElement>('input[name=bio]')!;
+    const bio = document.querySelector<HTMLInputElement>('input[name=bio]')!;
     bio.addEventListener('input', () => { document.querySelector('[data-count=bio]')!.textContent = String(bio.value.length); });
-    // photo
     document.querySelectorAll<HTMLButtonElement>('[data-photo]').forEach((b) => b.addEventListener('click', async () => {
+      busy(b, true);
       const r = await post({ section: 'photo', photo: b.dataset.photo });
-      if (r.ok) navigate(location.pathname, { history: 'replace' });
+      if (r.ok) navigate(location.pathname + location.hash, { history: 'replace' }); else busy(b, false);
     }));
+
     // privacy switches save straight away
+    const flagErr = document.getElementById('flagerr')!;
     document.querySelectorAll<HTMLInputElement>('[data-flag]').forEach((c) => c.addEventListener('change', async () => {
+      flagErr.hidden = true;
       const r = await post({ section: 'flag', flag: c.dataset.flag, on: c.checked });
-      if (!r.ok) { c.checked = !c.checked; alertBox(r.error); return; }
+      if (!r.ok) { c.checked = !c.checked; flagErr.textContent = r.error || 'That didn’t save.'; flagErr.hidden = false; return; }
       if (c.dataset.flag === 'is_private') navigate(location.pathname + '#privacy', { history: 'replace' });
     }));
-    const alertBox = (m: string) => { const e = document.getElementById('delerr')!; e.textContent = m; e.hidden = false; };
-    // delete account
+
+    // ——— favourites ———
+    const slots = document.querySelector<HTMLElement>('.slots');
+    const picker = document.getElementById('picker') as HTMLDialogElement | null;
+    if (slots && picker) {
+      const favBox = document.getElementById('favourites')!;
+      let favs: string[] = JSON.parse(slots.dataset.favs || '[]');
+      const items = [...picker.querySelectorAll<HTMLButtonElement>('[data-pick]')];
+      const coverOf = (id: string) => picker.querySelector(`[data-pick="${id}"] .pk-cover`)?.innerHTML ?? '';
+      const titleOf = (id: string) => picker.querySelector(`[data-pick="${id}"] .pk-t`)?.textContent ?? '';
+      const count = picker.querySelector<HTMLElement>('.pk-n')!;
+      const paint = () => {
+        slots.querySelectorAll<HTMLElement>('[data-slot]').forEach((s, i) => {
+          const id = favs[i];
+          s.innerHTML = id
+            ? `<span class="slot-cover">${coverOf(id)}</span><button type="button" class="slot-x" data-unfav="${id}" aria-label="Remove ${titleOf(id).replace(/"/g, '')}">×</button>`
+            : '<button type="button" class="slot-add" data-open-picker aria-label="Choose a favourite">+</button>';
+        });
+        items.forEach((b) => {
+          const on = favs.includes(b.dataset.pick!);
+          b.setAttribute('aria-selected', String(on));
+          b.disabled = !on && favs.length >= 4;
+        });
+        count.textContent = `${favs.length} of 4 chosen`;
+      };
+      // Astro scopes styles to its own markup, so copy the scope attribute onto what we draw
+      const scope = [...slots.attributes].find((a) => a.name.startsWith('data-astro-cid'))?.name;
+      const scoped = () => { if (scope) slots.querySelectorAll('*').forEach((el) => el.setAttribute(scope, '')); };
+      let saving: Promise<unknown> = Promise.resolve();
+      const save = () => {
+        const ids = [...favs];
+        saving = saving.then(async () => {
+          const r = await post({ section: 'favourites', ids });
+          flash(favBox, r.ok ? 'Saved' : r.error || 'Didn’t save.', !r.ok);
+        });
+      };
+      const toggle = (id: string) => {
+        favs = favs.includes(id) ? favs.filter((x) => x !== id) : favs.length < 4 ? [...favs, id] : favs;
+        paint(); scoped(); save();
+      };
+      document.addEventListener('click', (ev) => {
+        const el = ev.target as Element;
+        if (el.closest('[data-open-picker]')) { paint(); scoped(); picker.showModal(); (document.getElementById('pk-q') as HTMLInputElement).focus(); return; }
+        if (el.closest('[data-close-picker]') || el === picker) { picker.close(); return; }
+        const un = el.closest<HTMLElement>('[data-unfav]');
+        if (un) { toggle(un.dataset.unfav!); return; }
+        const pick = el.closest<HTMLButtonElement>('[data-pick]');
+        if (pick && !pick.disabled) toggle(pick.dataset.pick!);
+      });
+      document.getElementById('pk-q')!.addEventListener('input', (ev) => {
+        const q = (ev.target as HTMLInputElement).value.trim().toLowerCase();
+        items.forEach((b) => (b.closest('li')!.hidden = !!q && !b.dataset.q!.includes(q)));
+      });
+      paint(); scoped();
+    }
+
+    // ——— delete account ———
     const confirm = document.getElementById('confirmname') as HTMLInputElement;
     const del = document.getElementById('deleteme') as HTMLButtonElement;
+    const delErr = document.getElementById('delerr')!;
     confirm.addEventListener('input', () => { del.disabled = confirm.value.trim().toLowerCase().replace(/^@/, '') !== confirm.placeholder; });
     del.addEventListener('click', async () => {
-      del.disabled = true; del.textContent = 'Deleting…';
+      busy(del, true);
       const r = await fetch('/api/account', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: confirm.value.trim().toLowerCase().replace(/^@/, '') }) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
       if (r.ok) { location.href = '/?deleted=1'; return; }
-      alertBox(r.error || 'That didn’t work.'); del.disabled = false; del.textContent = 'Delete my account';
+      delErr.textContent = r.error || 'That didn’t work.'; delErr.hidden = false; busy(del, false);
     });
   }
   document.addEventListener('astro:page-load', setup);

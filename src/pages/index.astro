@@ -5,7 +5,7 @@ import Tile from '../components/Tile.astro';
 import Face from '../components/Face.astro';
 import GoogleButton from '../components/ui/GoogleButton.astro';
 import StatusTag from '../components/ui/StatusTag.astro';
-import { loadShelf, loadFeatured, loadProfile, href, short, fullTitle, profileHref } from '../lib/data';
+import { loadShelf, loadFeatured, loadProfile, href, short, fullTitle, profileHref, linesHref, pickLine } from '../lib/data';
 import { statusLabel } from '../lib/kinds';
 import { supabaseReady } from '../lib/supabase';
 export const prerender = false;
@@ -25,9 +25,11 @@ if (me && sb) {
 }
 const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
 const wants = shelf.filter((e) => e.data.status === 'want');
-const now = [...going, ...wants].slice(0, 2);
+// what you're in the middle of; if nothing, what you saved for next
+const now = (going.length ? going : wants).slice(0, 2);
 const recent = shelf.filter((e) => e.data.status === 'done').slice(0, 6);
-const quote = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by, source: details.lotw_source } : null;
+const first = me ? (me.display_name.split(' ')[0] || me.username) : '';
+const shown = me ? pickLine(shelf, details, me.display_name || me.username) : null;
 const otd = shelf.filter((e) => e.data.status === 'done').map((e) => ({ t: e.data.title, d: e.data.date.toISOString().slice(0, 10), h: href(e), v: e.data.type === 'film' || e.data.type === 'tv' ? 'watched' : 'finished' }));
 const others = featured.filter((f) => f.profile.username !== me?.username);
 const features = [
@@ -76,29 +78,25 @@ const features = [
     )}
   </Base>
 ) : (
-  <Base line={quote ?? undefined}>
+  <Base line={shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined}>
     <section class="hero bleed mine">
       <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
       <div class="pad words">
-        {details?.season_line && <p class="eyebrow rise">{details.season_line}</p>}
-        <h1 class="title rise d1">{details?.bio || 'Books, films and everything I’ve spent time with.'}</h1>
+        <h1 class="title rise d1">{shelf.length === 0 ? `Welcome, ${first}.` : `Welcome back, ${first}.`}</h1>
+        {shelf.length === 0 && <p class="sub rise d2">Add your first book or film.</p>}
       </div>
     </section>
 
     {shelf.length === 0 ? (
-      <section class="pad block rise d3">
-        <div class="card first">
-          <h2 class="serif">Welcome, {me.display_name.split(' ')[0] || me.username}</h2>
-          <p class="muted">Your shelf is ready. Start with whatever you’re reading or watching this week.</p>
-          <a href="/add/" class="btn primary big">Add your first book or film</a>
-          <a href={profileHref(me.username)} class="small muted" style="margin-top: 4px">See your profile →</a>
-        </div>
+      <section class="pad start rise d3">
+        <a href="/add/" class="btn primary big">Add a book or film</a>
+        <a href={profileHref(me.username)} class="small muted">See your profile →</a>
       </section>
     ) : (
       <>
         <section class="pad block rise d4" style="padding-top: 16px">
           <div class="rule">
-            <div class="inline"><h2 class="eyebrow">Now</h2><span class="small muted">Updated {short(shelf[0].data.date)}</span></div>
+            <div class="inline"><h2 class="eyebrow">{going.length ? 'Continue' : 'Up next'}</h2></div>
             <a class="small muted otd" data-otd={JSON.stringify(otd)} hidden></a>
           </div>
           <div class="now">
@@ -109,7 +107,7 @@ const features = [
                   <StatusTag status={e.data.status as any} label={statusLabel(e.data.type, e.data.status)} />
                   <span class="serif nt">{fullTitle(e)}</span>
                   <span class="small muted">{e.data.creator}{e.data.year ? ` · ${e.data.year}` : ''}</span>
-                  <span class="small muted" style="margin-top: auto">{e.data.status === 'want' ? `Added ${short(e.data.date)}` : `Since ${short(e.data.started ?? e.data.date)}`}</span>
+                  <span class="small muted" style="margin-top: auto">{e.data.status === 'want' ? `Saved ${short(e.data.date)}` : `Since ${short(e.data.started ?? e.data.date)}`}</span>
                 </div>
               </a>
             ))}
@@ -119,16 +117,11 @@ const features = [
                 <div class="stack" style="gap: 6px"><span class="serif nt">Add something</span><span class="small muted">What are you reading or watching?</span></div>
               </a>
             )}
-            {quote ? (
-              <a href={`/@${me.username}/notes/`} class="card lift nowcard stack" style="gap: 10px">
-                <p class="eyebrow" style="color: var(--moss)">Thinking about</p>
-                <p class="serif" style="margin: 0; font-size: 19px; line-height: 1.45; font-style: italic">“{quote.text}”</p>
-                <span class="small muted" style="margin-top: auto">{quote.by ? `${quote.by.split(' ').slice(-1)}, ` : ''}{quote.source && <em>{quote.source}</em>} · in my notes →</span>
-              </a>
-            ) : (
-              <a href="/settings/" class="card lift nowcard stack" style="gap: 10px">
-                <p class="eyebrow" style="color: var(--moss)">Thinking about</p>
-                <p class="serif" style="margin: 0; font-size: 19px; line-height: 1.45">Add a line of the week in Settings. It shows here and on your Notes page.</p>
+            {shown && (
+              <a href={linesHref(me.username)} class="card lift nowcard stack" style="gap: 10px">
+                <p class="eyebrow" style="color: var(--moss)">{shown.pinned ? 'Pinned line' : 'Latest line'}</p>
+                <p class="serif" style={`margin: 0; font-size: 19px; line-height: 1.45${shown.mine ? '' : '; font-style: italic'}`}>{shown.mine ? shown.text : `“${shown.text}”`}</p>
+                <span class="small muted" style="margin-top: auto">{shown.by}, <em>{shown.source}</em> · all lines →</span>
               </a>
             )}
           </div>
@@ -190,9 +183,6 @@ const features = [
   .nt { font-size: 20px; line-height: 1.2; }
   .addcard { align-items: center; border-style: dashed; box-shadow: none; background: transparent; }
   .plus { width: 84px; height: 126px; flex-shrink: 0; border-radius: 6px; border: 1.5px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 34px; color: var(--muted); }
-  .first { max-width: 620px; margin: 0 auto; padding: 40px 32px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-  .first h2 { margin: 0; font-weight: 400; font-size: 30px; }
-  .first p { margin: 0 0 8px; }
   .shelves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .shelfcard { padding: 22px; display: flex; flex-direction: column; gap: 16px; }
   .shelfcard:hover { color: inherit; border-color: var(--lat); }

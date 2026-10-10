@@ -1,10 +1,10 @@
 ---
 // The small "whose shelf is this" strip and tabs, under the painting on a shelf's inner pages.
 import Face from './Face.astro';
-import ShelfTabs from './ShelfTabs.astro';
+import ShelfTabs, { type ShelfTab } from './ShelfTabs.astro';
 import PersonMenu from './PersonMenu.astro';
 import type { Shelf } from '../lib/shelfpage';
-interface Props { shelf: Shelf; current: 'library' | 'diary' | 'notes' | 'threads' | 'want' | 'stats' }
+interface Props { shelf: Shelf; current?: ShelfTab }
 const { shelf, current } = Astro.props;
 const p = shelf.profile;
 const name = p.display_name || p.username;

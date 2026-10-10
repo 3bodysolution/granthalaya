@@ -104,11 +104,20 @@ export const PATCH: APIRoute = async (ctx) => {
   const { error } = await sb.from('logs').update(change).eq('id', cur.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
   if (b.full === true) {
+    // the lines are saved afresh; if one of them was pinned to the profile, keep it pinned
+    const { data: det } = await sb.from('profile_details').select('pinned_line').eq('id', me.id).maybeSingle();
+    let pinnedText: string | null = null;
+    if (det?.pinned_line) {
+      const { data: p } = await sb.from('highlights').select('body').eq('id', det.pinned_line).eq('log_id', cur.id).maybeSingle();
+      pinnedText = p?.body ?? null;
+    }
     await sb.from('highlights').delete().eq('log_id', cur.id).eq('user_id', me.id);
     const hl = lines(b).map((l) => ({ ...l, log_id: cur.id, user_id: me.id }));
     if (hl.length) {
-      const { error: e2 } = await sb.from('highlights').insert(hl);
+      const { data: saved, error: e2 } = await sb.from('highlights').insert(hl).select('id, body');
       if (e2) return oops(dbMessage(e2));
+      const again = pinnedText ? (saved ?? []).find((h) => h.body === pinnedText) : undefined;
+      if (again) await sb.from('profile_details').update({ pinned_line: again.id }).eq('id', me.id);
     }
   }
   return json({ ok: true, id: cur.id, href: `/@${me.username}/library/${cur.title.slug}/` });

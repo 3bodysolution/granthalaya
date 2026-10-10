@@ -1,17 +1,16 @@
 ---
 // The row of tabs on every page of a shelf.
-interface Props { username: string; current: 'profile' | 'library' | 'diary' | 'notes' | 'threads' | 'want' | 'stats' }
+export type ShelfTab = 'profile' | 'library' | 'diary' | 'collections' | 'stats';
+interface Props { username: string; current?: ShelfTab }
 const { username, current } = Astro.props;
 const base = `/@${username}`;
-const tabs = [
+const tabs: [ShelfTab, string, string][] = [
   ['profile', 'Profile', `${base}/`],
   ['library', 'Library', `${base}/library/`],
   ['diary', 'Diary', `${base}/diary/`],
-  ['notes', 'Notes', `${base}/notes/`],
-  ['threads', 'Threads', `${base}/threads/`],
-  ['want', 'Want to', `${base}/library/?status=want`],
+  ['collections', 'Collections', `${base}/collections/`],
   ['stats', 'Stats', `${base}/stats/`],
-] as const;
+];
 ---
 <nav class="ptabs" aria-label="This shelf">
   {tabs.map(([k, label, href]) => <a href={href} class:list={['ptab', k === current && 'on']} aria-current={k === current ? 'page' : undefined}>{label}</a>)}
@@ -19,8 +18,10 @@ const tabs = [
 <style>
   .ptabs { display: flex; gap: 26px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: none; }
   .ptabs::-webkit-scrollbar { display: none; }
-  .ptab { display: inline-flex; align-items: center; height: 48px; font-size: 14.5px; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+  .ptab { position: relative; display: inline-flex; align-items: center; height: 48px; font-size: 14.5px; font-weight: 500; color: var(--muted); white-space: nowrap; transition: color .2s ease; }
+  .ptab::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px; background: var(--lat); transform: scaleX(0); transition: transform .25s var(--spring); }
   .ptab:hover { color: var(--ink); }
-  .ptab.on { color: var(--ink); font-weight: 600; border-bottom-color: var(--lat); }
+  .ptab.on { color: var(--ink); font-weight: 600; }
+  .ptab.on::after { transform: none; }
   @media (max-width: 780px) { .ptabs { gap: 20px; } .ptab { font-size: 14px; } }
 </style>

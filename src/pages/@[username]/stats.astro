@@ -3,20 +3,19 @@ import Base from '../../layouts/Base.astro';
 import ShelfStrip from '../../components/ShelfStrip.astro';
 import { site } from '../../data/site';
 import { openShelf } from '../../lib/shelfpage';
-import { loadShelf, loadThreads, minutes, duration, short, monthNames, kind, typeColor, href, threadHref, fullTitle, type Entry } from '../../lib/data';
+import { loadShelf, loadCollections, minutes, duration, short, monthNames, kind, typeColor, href, collectionHref, fullTitle, type Entry } from '../../lib/data';
 export const prerender = false;
 
 const o = await openShelf(Astro, '/stats/');
 if (o.out) return o.out;
-const { profile, details, isMe, visible } = o.shelf;
+const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
-const [shelf, threads] = await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]);
+const [shelf, collections] = await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]);
 const name = profile.display_name || profile.username;
 // stats count finished things only; TV counts with films
 const all = shelf.filter((e) => e.data.status === 'done');
 const bucket = (e: Entry) => (e.data.type === 'tv' ? 'film' : e.data.type) as 'book' | 'film' | 'essay';
-const goal = details?.goal_books ?? null;
 const today = new Date();
 const thisYear = today.getUTCFullYear();
 const year = all.some((e) => e.data.date.getUTCFullYear() === thisYear) ? thisYear : (all[0]?.data.date.getUTCFullYear() ?? thisYear);
@@ -92,11 +91,11 @@ const season = done.filter((e) => e.data.date.getTime() >= sFrom && e.data.date.
 const sc = (t: string) => season.filter((e) => bucket(e) === t).length;
 const loved = [...season].filter((e) => e.data.rating != null).sort((a, b) => b.data.rating! - a.data.rating! || b.data.date.getTime() - a.data.date.getTime())[0];
 const ids = new Set(season.map((e) => e.id));
-const busiest = [...threads].sort((a, b) => b.data.items.filter((i) => ids.has(i.slug)).length - a.data.items.filter((i) => ids.has(i.slug)).length)[0];
+const busiest = [...collections].sort((a, b) => b.data.items.filter((i) => ids.has(i.slug)).length - a.data.items.filter((i) => ids.has(i.slug)).length)[0];
 
 const booksDone = done.filter((e) => e.data.type === 'book').length;
 const kpis = [
-  { label: 'Books', value: booksDone, note: goal ? `of ${goal} this year` : 'finished this year', color: 'var(--book)' },
+  { label: 'Books', value: booksDone, note: 'finished this year', color: 'var(--book)' },
   { label: 'Films and TV', value: done.filter((e) => bucket(e) === 'film').length, note: `${hours(T.film)} hours on screen`, color: 'var(--sky)' },
   { label: 'Essays', value: done.filter((e) => e.data.type === 'essay').length, note: `${hours(T.essay) || '<1'} hour${hours(T.essay) === 1 ? '' : 's'} of reading`, color: 'var(--moss)' },
   { label: 'Days with a story', value: activeDays, note: `of ${daysSoFar} so far`, color: 'var(--haldi)' },
@@ -105,7 +104,7 @@ const recent = all.slice(0, 4);
 const LV = [{ c: 'var(--soft)', o: 1 }, { c: 'var(--lat)', o: 0.3 }, { c: 'var(--lat)', o: 0.55 }, { c: 'var(--lat)', o: 0.8 }, { c: 'var(--lat)', o: 1 }];
 const label = (t: number) => { const d = new Date(t); return `${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}`; };
 ---
-<Base title={isMe ? 'Your stats' : `${name}’s stats`} active={isMe ? 'stats' : undefined} shelf={profile.username} description={`${hours(total)} hours of stories in ${year}.`}>
+<Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username} description={`${hours(total)} hours of stories in ${year}.`}>
   <section class="pad head">
     <div class="rise d1" style="margin-bottom: 30px"><ShelfStrip shelf={o.shelf} current="stats" /></div>
     <div class="rise stack" style="gap: 10px">
@@ -211,7 +210,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
       </div>
       <div class="stack" style="gap: 6px; font-size: 14px; color: #E9E1D1">
         {loved && <span>Most loved · <span class="serif" style="font-style: italic">{loved.data.title}</span></span>}
-        {busiest && ids.size > 0 && busiest.data.items.some((i) => ids.has(i.slug)) && <span>Busiest thread · <a href={threadHref(busiest)} class="serif" style="font-style: italic">{busiest.data.title}</a></span>}
+        {busiest && ids.size > 0 && busiest.data.items.some((i) => ids.has(i.slug)) && <span>Busiest collection · <a href={collectionHref(busiest)} class="serif" style="font-style: italic">{busiest.data.title}</a></span>}
       </div>
     </div>
 

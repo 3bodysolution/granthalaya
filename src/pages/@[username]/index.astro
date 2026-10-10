@@ -8,7 +8,7 @@ import SectionHead from '../../components/ui/SectionHead.astro';
 import StatusTag from '../../components/ui/StatusTag.astro';
 import SocialLink from '../../components/ui/SocialLink.astro';
 import { openShelf } from '../../lib/shelfpage';
-import { loadShelf, loadThreads, href, short, fullTitle, threadHref, type Entry } from '../../lib/data';
+import { loadShelf, loadCollections, href, short, fullTitle, collectionHref, linesHref, pickLine, type Entry } from '../../lib/data';
 import { statusLabel, socialLinks } from '../../lib/kinds';
 export const prerender = false;
 
@@ -17,7 +17,7 @@ if (o.out) return o.out;
 const { profile, details, isMe, visible, blockedByMe } = o.shelf;
 const sb = Astro.locals.supabase;
 const me = Astro.locals.me;
-const [shelf, threads] = visible ? await Promise.all([loadShelf(sb, profile), loadThreads(sb, profile)]) : [[], []];
+const [shelf, collections] = visible ? await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]) : [[], []];
 
 const name = profile.display_name || profile.username;
 const done = shelf.filter((e) => e.data.status === 'done');
@@ -27,8 +27,8 @@ const base = `/@${profile.username}`;
 const nums = [
   [done.length, 'Finished', `${base}/library/?status=done`],
   [done.filter((e) => e.data.date.getUTCFullYear() === year).length, 'This year', `${base}/stats/`],
-  [lines, 'Lines', `${base}/notes/`],
-  [threads.length, 'Threads', `${base}/threads/`],
+  [lines, 'Lines', linesHref(profile.username)],
+  [collections.length, 'Collections', `${base}/collections/`],
 ] as const;
 
 // favourites: the titles they pinned, in their order
@@ -44,9 +44,10 @@ const diary = shelf.slice(0, 6);
 const links = socialLinks(details?.links);
 const dm = (d: Date) => `${d.getUTCDate()} ${d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }).slice(0, 3)}`;
 const since = new Date(profile.created_at).toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by, source: details.lotw_source } : undefined;
+const shown = visible ? pickLine(shelf, details, name) : null;
+const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 ---
-<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} active={isMe ? 'profile' : undefined} line={line} noindex={profile.is_private}>
+<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} line={line} noindex={profile.is_private}>
   <div class="art banner bleed" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
 
   <section class="pad">
@@ -68,7 +69,7 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
           {nums.map(([n, l, h]) => <a href={h} class="num-cell"><b class="num">{n}</b><span>{l}</span></a>)}
         </div>
       )}
-      {isMe && <a href="/settings/" class="btn edit">Edit profile</a>}
+      {isMe && <a href="/settings/#profile" class="btn edit">Edit profile</a>}
     </div>
     {details?.bio && <p class="bio">{details.bio}</p>}
     <p class="since">On Granthalaya since {since}</p>
@@ -111,7 +112,7 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
                 {favs.map((e) => <a href={href(e)} class="fav lift" title={`${fullTitle(e)}${e.data.year ? ` (${e.data.year})` : ''}`} aria-label={fullTitle(e)}><Cover entry={e} variant="mini" /></a>)}
               </div>
             ) : (
-              <p class="muted hintline">Pin up to four favourites from any entry on your shelf. They show here, big.</p>
+              <p class="muted hintline">Choose up to four favourites in <a href="/settings/#profile" class="accent">Settings</a>. They show here, big.</p>
             )}
           </section>
         )}
@@ -150,15 +151,13 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
       </div>
 
       <aside class="flex flex-col gap-10">
-        {(details?.season_line || details?.lotw_text) && (
+        {shown && (
           <section class="flex flex-col gap-4">
-            <SectionHead title={details?.season_line || 'Line of the week'} />
-            {details?.lotw_text && (
-              <a href={`${base}/notes/`} class="lotw">
-                <span class="serif q">“{details.lotw_text}”</span>
-                <span class="hint">Line of the week{details.lotw_by ? ` · ${details.lotw_by.split(' ').slice(-1)}` : ''}</span>
-              </a>
-            )}
+            <SectionHead title={shown.pinned ? 'Pinned line' : 'Latest line'} more="All" href={linesHref(profile.username)} />
+            <a href={shown.href} class="lotw">
+              <span class:list={['serif q', shown.mine && 'own']}>{shown.mine ? shown.text : `“${shown.text}”`}</span>
+              <span class="hint">{shown.mine ? `${isMe ? 'My' : 'Their'} line` : shown.by} · {shown.source}</span>
+            </a>
           </section>
         )}
         <section class="flex flex-col gap-4">
@@ -167,10 +166,10 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
             {diary.map((e) => <li><span class="dd">{dm(e.data.date)}</span><a href={href(e)}>{fullTitle(e)}</a>{e.data.status !== 'done' && <span class="hint"> · {statusLabel(e.data.type, e.data.status)}</span>}</li>)}
           </ol>
         </section>
-        {threads.length > 0 && (
+        {collections.length > 0 && (
           <section class="flex flex-col gap-4">
-            <SectionHead title="Threads" more="All" href={`${base}/threads/`} />
-            {threads.slice(0, 4).map((t) => <a href={threadHref(t)} class="tl">{t.data.title} <span class="muted">· {t.data.items.length}</span></a>)}
+            <SectionHead title="Collections" more="All" href={`${base}/collections/`} />
+            {collections.slice(0, 4).map((t) => <a href={collectionHref(t)} class="tl">{t.data.title} <span class="muted">· {t.data.items.length}</span></a>)}
           </section>
         )}
       </aside>
@@ -210,6 +209,8 @@ const line = details?.lotw_text ? { text: details.lotw_text, by: details.lotw_by
   .hintline { margin: 0; font-size: 14px; }
   .lotw { display: flex; flex-direction: column; gap: 10px; }
   .lotw .q { font-size: 17px; font-style: italic; line-height: 1.45; }
+  .lotw .q.own { font-style: normal; }
+  .lotw:hover .q { color: var(--ink); }
   .diary { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .diary li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; font-size: 14.5px; }
   .diary li .hint { grid-column: 2; margin-top: -8px; }

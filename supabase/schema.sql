@@ -71,13 +71,9 @@ create table public.username_history (
 create table public.profile_details (
   id uuid primary key references public.profiles (id) on delete cascade,
   bio text not null default '' check (char_length(bio) <= 160),
-  season_line text not null default '' check (char_length(season_line) <= 40),
-  lotw_text text not null default '' check (char_length(lotw_text) <= 400),   -- line of the week
-  lotw_by text not null default '' check (char_length(lotw_by) <= 80),
-  lotw_source text not null default '' check (char_length(lotw_source) <= 120),
-  goal_books int check (goal_books between 1 and 1000),
   links jsonb not null default '{}'::jsonb check (jsonb_typeof(links) = 'object' and pg_column_size(links) < 2000),
   favourites uuid[] not null default '{}' check (cardinality(favourites) <= 4),  -- title ids
+  pinned_line uuid,                                  -- one of your own lines, shown on your profile (see below)
   updated_at timestamptz not null default now()
 );
 create trigger profile_details_touch before update on public.profile_details
@@ -202,6 +198,10 @@ create table public.highlights (
 );
 create index highlights_log on public.highlights (log_id, position);
 create index highlights_user on public.highlights (user_id, created_at desc);
+
+-- The line pinned to a profile. If the line is deleted, the profile simply shows your latest line instead.
+alter table public.profile_details add constraint profile_details_pinned_line_fkey
+  foreign key (pinned_line) references public.highlights (id) on delete set null;
 
 create table public.threads (
   id uuid primary key default gen_random_uuid(),

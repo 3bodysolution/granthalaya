@@ -14,7 +14,8 @@ Built with [Astro](https://astro.build), hosted on Vercel, with the shelves in a
   - TV seasons: Want to watch · Watching · Watched · Paused · Dropped
   - Essays: Saved for later · Read
 - **Again** logs a re-read or re-watch as a new visit. **Only me** hides one entry from everyone else.
-- **Settings** has your profile, links, privacy (private account, feature my shelf, blocked people), downloading your data and deleting your account.
+- **Lines:** save the lines that stayed with you when you log something. Pin one to your profile from the entry or the Lines page.
+- **Settings** has four tabs: Profile (photo, name, username, bio, favourites, links), Privacy (private account, feature my shelf, blocked people), Your data (download everything as a zip of spreadsheets) and Account (delete it).
 
 ## Addresses
 
@@ -22,17 +23,18 @@ Built with [Astro](https://astro.build), hosted on Vercel, with the shelves in a
 | --- | --- |
 | `/` | Welcome page when signed out; your home when signed in |
 | `/@username` | A profile |
-| `/@username/library`, `/diary`, `/notes`, `/threads`, `/stats` | The parts of a shelf |
+| `/@username/library`, `/diary`, `/collections`, `/stats` | The parts of a shelf (the tabs) |
+| `/@username/lines` | Every line saved on a shelf |
 | `/@username/library/<title>` | One entry |
 | `/add`, `/settings` | Adding things; your settings |
 | `/admin` | Reports (only for accounts with `is_admin` set in the database) |
 | `/privacy`, `/terms`, `/about` | The fine print |
 
-Old addresses like `/library/paterson` redirect to `/@sarthak/library/paterson`.
+Old addresses like `/library/paterson` redirect to `/@sarthak/library/paterson`, and the old Threads and Notes pages redirect to Collections and Lines.
 
 ## Setting it up
 
-1. **Database:** in Supabase, open SQL Editor → New query, paste all of `supabase/schema.sql`, and Run. It creates the tables and the privacy rules.
+1. **Database:** in Supabase, open SQL Editor → New query, paste all of `supabase/schema.sql`, and Run. It creates the tables and the privacy rules. (An existing database instead gets the files in `supabase/changes/`, in order.)
 2. **Sign-in:** Supabase → Authentication → Sign In / Providers → Google, with a client ID and secret from Google Cloud. Add your site's address under Authentication → URL Configuration.
 3. **Environment variables** (Vercel → Settings → Environment Variables, and the `.env` file for scripts). See `.env.example` for the list.
 4. **Make yourself admin** (for the reports page): in SQL Editor, `update profiles set is_admin = true where username = 'sarthak';`
