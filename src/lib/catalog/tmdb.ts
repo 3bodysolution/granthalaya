@@ -208,7 +208,7 @@ export async function trending(kind: 'film' | 'tv'): Promise<Card[]> {
 
 /** `language` may list several with "|" ("ml|ta|te"); `since` keeps titles released after a date;
     `streaming` keeps titles on any subscription service in India */
-export interface Filters { kind: 'film' | 'tv'; genre?: number; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean }
+export interface Filters { kind: 'film' | 'tv'; genre?: number; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean; minVotes?: number }
 export async function discover(f: Filters): Promise<{ items: Card[]; pages: number; total: number }> {
   if (!key()) return { items: [], pages: 0, total: 0 };
   const tv = f.kind === 'tv';
@@ -220,7 +220,7 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
     sort_by: f.sort === 'top' ? 'vote_average.desc' : f.sort === 'new' ? `${date}.desc` : 'popularity.desc',
     // "Highest rated" needs enough votes to mean something, or this week's releases with a few hundred
     // excited votes come first. Narrower lists (a language, a decade, a genre) get a lower bar.
-    'vote_count.gte': f.sort === 'top'
+    'vote_count.gte': f.minVotes ? f.minVotes : f.sort === 'top'
       ? f.language && f.language !== 'en' ? (tv ? 8 : 15) // Marathi films rarely pass 40 votes on TMDB
         : f.year || f.decade || f.genre || f.service ? (tv ? 150 : 300) : (tv ? 800 : 2000)
       : undefined,

@@ -34,14 +34,15 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     const [week, fresh, indian, korean, top] = await Promise.all([
       safe(trending('tv'), []),
       list(discover({ kind, streaming: true, since: daysAgo(365) })),
-      list(discover({ kind, language: 'hi|mr|ta|te|ml|bn', since: daysAgo(3 * 365) })),
+      // by rating, or the row fills with daily soaps
+      list(discover({ kind, language: 'hi|mr|ta|te|ml|bn', sort: 'top', minVotes: 40 })),
       list(discover({ kind, language: 'ko', genre: 18 })),
       list(discover({ kind, sort: 'top' })),
     ]);
     return [
       { title: 'Popular this week', href: '/films/?kind=tv&sort=popular', tone: 'film', items: films(week) },
       { title: 'New series streaming in India', tone: 'film', items: films(fresh) },
-      { title: 'Indian series', href: '/films/?kind=tv&language=hi', tone: 'film', items: films(indian) },
+      { title: 'Indian series people love', href: '/films/?kind=tv&language=hi&sort=top', tone: 'film', items: films(indian) },
       { title: 'Korean dramas', href: '/films/?kind=tv&language=ko&genre=drama', tone: 'film', items: films(korean) },
       { title: 'Highest rated', href: '/films/?kind=tv&sort=top', tone: 'film', items: films(top) },
     ];

@@ -51,7 +51,7 @@ const { title, items, href, all = 'See all', tone, id = 'row-' + title.toLowerCa
   @media (hover: none), (max-width: 780px) { .prow-nav { display: none; } }
   @media (max-width: 780px) {
     /* on a phone the row runs to the screen edge, so it's clear there's more to swipe */
-    .prow-list { grid-auto-columns: 34%; gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
+    .prow-list { grid-auto-columns: clamp(108px, 34%, 156px); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
   }
 </style>
 
