@@ -45,7 +45,7 @@ const fields = [
   year
     ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
     : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
-  { name: 'sort', label: 'Order', value: sort === 'popular' ? '' : sort, options: [['', 'Most editions'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][] },
+  { name: 'sort', label: 'Order', value: sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][] },
 ];
 ---
 <Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`}>

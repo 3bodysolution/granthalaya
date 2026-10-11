@@ -164,23 +164,48 @@ function card(d: any): BookCard {
   return { kind: 'book', key, title: d.title, author: d.author_name?.[0], year: d.first_publish_year, cover: cover(d.cover_i, 'L'), href: bookHref(key, d.title) };
 }
 export interface BookFilters { subject?: string; language?: string; year?: number; decade?: number; sort?: 'popular' | 'top' | 'new'; page?: number }
+/* Open Library merges the subjects of every edition into the work, so a famous novel with thousands of editions
+   is tagged with almost everything (Robinson Crusoe is "poetry"). Three things keep the lists honest:
+   subject keys instead of free text, leaving fiction out of non-fiction subjects, and ordering "Popular" by what
+   readers log on Open Library rather than by edition count. */
+const NON_FICTION = new Set(['poetry', 'drama', 'essays', 'biography', 'autobiography', 'history', 'philosophy', 'psychology', 'self-help', 'science', 'politics', 'religion', 'travel']);
+const INDIAN = new Set(['mar', 'hin', 'ben', 'tam', 'tel', 'mal', 'kan', 'guj', 'pan', 'urd', 'ori', 'asm', 'san']);
+const ENGLISH_LIT = ['English fiction', 'American fiction', 'English literature', 'American literature', 'English drama', 'English poetry'];
+
 export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; total: number; pages: number }> {
   const parts: string[] = [];
-  if (f.subject) parts.push(`subject:"${f.subject.replace(/-/g, ' ').replace(/"/g, '')}"`);
-  if (f.language) {
+  const subject = f.subject?.replace(/[^a-z0-9-]/g, '');
+  const code = f.language?.replace(/[^a-z]/g, '');
+  if (subject) {
+    const key = subject.replace(/-/g, '_');
+    parts.push(subject.includes('-') ? `(subject_key:${key} OR subject_key:${subject})` : `subject_key:${key}`);
+    if (NON_FICTION.has(subject)) parts.push('-subject_key:fiction');
+  }
+  if (code) {
     // Open Library lists a work under every language it has been translated into, so "Marathi" alone brings back
-    // Harry Potter. Asking for the language's own literature subjects as well keeps it to books written in it.
-    const code = f.language.replace(/[^a-z]/g, '');
+    // Harry Potter. Asking for the language's own literature (and not English or American literature) keeps it
+    // to books written in it.
     const name = BOOK_LANGUAGES.find(([c]) => c === code)?.[1];
     parts.push(`language:${code}`);
-    if (name && code !== 'eng') parts.push(`(${['fiction', 'literature', 'poetry', 'drama', 'essays', 'short stories'].map((k) => `subject:"${name} ${k}"`).join(' OR ')})`);
+    // (a Hindi self-help book isn't filed under Hindi literature, so factual subjects skip that part)
+    const factual = subject && NON_FICTION.has(subject) && !['poetry', 'drama', 'essays'].includes(subject);
+    if (name && code !== 'eng') {
+      if (!factual) parts.push(`(${['fiction', 'literature', 'poetry', 'drama', 'essays', 'short stories'].map((k) => `subject:"${name} ${k}"`).join(' OR ')})`);
+      parts.push(ENGLISH_LIT.map((k) => `-subject:"${k}"`).join(' '));
+    }
   }
   if (f.year) parts.push(`first_publish_year:${f.year}`);
   else if (f.decade) parts.push(`first_publish_year:[${f.decade} TO ${f.decade + 9}]`);
-  if (!parts.length) parts.push('subject:fiction');
-  const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : 'editions';
+  else if (f.sort === 'new') parts.push(`first_publish_year:[* TO ${new Date().getFullYear()}]`); // some records say 2098
+  if (!subject && !code && !f.year && !f.decade) parts.push('subject_key:fiction');
+  // few people log Indian-language books or plays on Open Library, so those stay ordered by editions
+  const popular = (code && INDIAN.has(code)) || subject === 'drama' ? 'editions' : 'readinglog';
+  const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : popular;
   const page = Math.min(Math.max(f.page ?? 1, 1), 100);
-  const j = await getJSON(ol(`/search.json?q=${encodeURIComponent(parts.join(' '))}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=36&page=${page}`), { ttl: 21600, ms: 9000 });
+  const run = (q: string) => getJSON(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=36&page=${page}`), { ttl: 21600, ms: 9000 });
+  let j = await run(parts.join(' '));
+  // a subject from a book page ("mahabharata", "indic-fiction") may not be a subject key: try it as words
+  if (subject && j && !j.numFound) j = await run(parts.join(' ').replace(/\(subject_key:[^)]*\)|subject_key:[a-z0-9_]+/, `subject:"${subject.replace(/-/g, ' ')}"`));
   const total = j?.numFound ?? 0;
   // books with a cover first, keeping Open Library's order within each group
   const items: BookCard[] = (j?.docs ?? []).map(card).filter((b: BookCard) => b.key);

@@ -74,7 +74,9 @@ const person = (p: any, role: string): Person => ({ id: p.id, name: p.name, role
 function where(wp: any): Where | null {
   const r = wp?.results?.[REGION];
   if (!r) return null;
-  const list = (a: any[] | undefined) => (a ?? []).sort((x, y) => (x.display_priority ?? 99) - (y.display_priority ?? 99))
+  // "Amazon Prime Video with Ads" is the same service as "Amazon Prime Video", so only one is shown
+  const list = (a: any[] | undefined) => (a ?? []).filter((p) => !/with ads$/i.test(p.provider_name ?? ''))
+    .sort((x, y) => (x.display_priority ?? 99) - (y.display_priority ?? 99))
     .map((p) => ({ id: p.provider_id, name: p.provider_name, logo: img(p.logo_path, 'w92') }));
   const w = { link: r.link, stream: list(r.flatrate), free: [...list(r.free), ...list(r.ads)], rent: list(r.rent), buy: list(r.buy) };
   return w.stream.length || w.free.length || w.rent.length || w.buy.length ? w : null;
@@ -200,11 +202,16 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
     include_adult: 'false', page: Math.min(Math.max(f.page ?? 1, 1), 500),
     with_genres: f.genre, with_original_language: f.language,
     sort_by: f.sort === 'top' ? 'vote_average.desc' : f.sort === 'new' ? `${date}.desc` : 'popularity.desc',
-    'vote_count.gte': f.sort === 'top' ? (f.language && f.language !== 'en' ? 40 : 250) : undefined,
+    // "Highest rated" needs enough votes to mean something, or this week's releases with a few hundred
+    // excited votes come first. Narrower lists (a language, a decade, a genre) get a lower bar.
+    'vote_count.gte': f.sort === 'top'
+      ? f.language && f.language !== 'en' ? (tv ? 20 : 40)
+        : f.year || f.decade || f.genre || f.service ? (tv ? 150 : 300) : (tv ? 800 : 2000)
+      : undefined,
   };
   if (f.year) params[tv ? 'first_air_date_year' : 'primary_release_year'] = f.year;
   else if (f.decade) { params[`${date}.gte`] = `${f.decade}-01-01`; params[`${date}.lte`] = `${f.decade + 9}-12-31`; }
-  if (f.sort === 'new' && !params[`${date}.lte`]) params[`${date}.lte`] = today;
+  if ((f.sort === 'new' || f.sort === 'top') && !params[`${date}.lte`]) params[`${date}.lte`] = today;
   if (f.service) { params.watch_region = REGION; params.with_watch_providers = f.service; params.with_watch_monetization_types = 'flatrate|free|ads'; }
   const j = await getJSON(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600 });
   const items = (j?.results ?? []).map((m: any): Card => {
