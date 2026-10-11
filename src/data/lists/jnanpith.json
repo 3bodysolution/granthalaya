@@ -1,0 +1,529 @@
+{
+  "slug": "jnanpith",
+  "title": "Jnanpith Award winners",
+  "kind": "book",
+  "intro": "Every winner of the Jnanpith Award since 1965, India's highest literary award, with one book by each writer that is a good place to start reading them.",
+  "source": {
+    "name": "Wikipedia",
+    "url": "https://en.wikipedia.org/wiki/Jnanpith_Award"
+  },
+  "items": [
+    {
+      "year": 2025,
+      "title": "Kallikattu Ithihasam",
+      "creator": "Vairamuthu",
+      "original_title": "கள்ளிக்காட்டு இதிகாசம்",
+      "language": "ta",
+      "pick": true
+    },
+    {
+      "year": 2024,
+      "title": "Naukar Ki Kameez",
+      "creator": "Vinod Kumar Shukla",
+      "original_title": "नौकर की कमीज़",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 2023,
+      "title": "Sribhargavaraghaviyam",
+      "creator": "Rambhadracharya",
+      "language": "sa",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2023,
+      "title": "Raavi-Paar",
+      "creator": "Gulzar",
+      "language": "ur",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2022,
+      "title": "Karmelin",
+      "creator": "Damodar Mauzo",
+      "original_title": "कर्मेलीन",
+      "language": "kok",
+      "pick": true
+    },
+    {
+      "year": 2020,
+      "title": "Surya Henu Nami Ase Ei Nodiyedi",
+      "creator": "Nilamani Phookan",
+      "original_title": "সূৰ্য হেনু নামি আহে এই নদীয়েদি",
+      "language": "as",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2019,
+      "title": "Irupatham Noottandinte Ithihasam",
+      "creator": "Akkitham Achuthan Namboothiri",
+      "original_title": "ഇരുപതാം നൂറ്റാണ്ടിന്റെ ഇതിഹാസം",
+      "language": "ml",
+      "pick": true
+    },
+    {
+      "year": 2018,
+      "title": "The Shadow Lines",
+      "creator": "Amitav Ghosh",
+      "language": "en",
+      "pick": true
+    },
+    {
+      "year": 2017,
+      "title": "Zindaginama",
+      "creator": "Krishna Sobti",
+      "original_title": "ज़िन्दगीनामा",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 2016,
+      "title": "Babarer Prarthana",
+      "creator": "Shankha Ghosh",
+      "original_title": "বাবরের প্রার্থনা",
+      "language": "bn",
+      "pick": true
+    },
+    {
+      "year": 2015,
+      "title": "Amrita",
+      "creator": "Raghuveer Chaudhari",
+      "original_title": "અમૃતા",
+      "language": "gu",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2014,
+      "title": "Kosla",
+      "creator": "Bhalchandra Nemade",
+      "original_title": "कोसला",
+      "language": "mr",
+      "pick": true
+    },
+    {
+      "year": 2013,
+      "title": "Akal Mein Saras",
+      "creator": "Kedarnath Singh",
+      "original_title": "अकाल में सारस",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 2012,
+      "title": "Paakudu Raallu",
+      "creator": "Ravuri Bharadhwaja",
+      "original_title": "పాకుడురాళ్ళు",
+      "language": "te",
+      "pick": true
+    },
+    {
+      "year": 2011,
+      "title": "Yajnaseni",
+      "creator": "Pratibha Ray",
+      "original_title": "ଯାଜ୍ଞସେନୀ",
+      "language": "or",
+      "pick": true
+    },
+    {
+      "year": 2010,
+      "title": "Jokumaraswami",
+      "creator": "Chandrashekhara Kambara",
+      "original_title": "ಜೋಕುಮಾರಸ್ವಾಮಿ",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 2009,
+      "title": "Inhin Hathiyaron Se",
+      "creator": "Amarkant",
+      "original_title": "इन्हीं हथियारों से",
+      "language": "hi",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2009,
+      "title": "Raag Darbari",
+      "creator": "Shrilal Shukla",
+      "original_title": "राग दरबारी",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 2008,
+      "title": "Khwab Ka Dar Band Hai",
+      "creator": "Akhlaq Mohammed Khan",
+      "original_title": "خواب کا در بند ہے",
+      "language": "ur",
+      "pick": true
+    },
+    {
+      "year": 2007,
+      "title": "Bhoomikkoru Charamageetham",
+      "creator": "O. N. V. Kurup",
+      "original_title": "ഭൂമിക്കൊരു ചരമഗീതം",
+      "language": "ml",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2006,
+      "title": "Himalayant",
+      "creator": "Ravindra Kelekar",
+      "language": "kok",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2006,
+      "title": "Srigurugovindasimhacaritam",
+      "creator": "Satya Vrat Shastri",
+      "language": "sa",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2005,
+      "title": "Atmajayee",
+      "creator": "Kunwar Narayan",
+      "original_title": "आत्मजयी",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 2004,
+      "title": "Nawroz-e-Saba",
+      "creator": "Rehman Rahi",
+      "original_title": "نوروز صبا",
+      "language": "ks",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2003,
+      "title": "Sparshachi Palvi",
+      "creator": "Vinda Karandikar",
+      "original_title": "स्पर्शाची पालवी",
+      "language": "mr",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2002,
+      "title": "Sila Nerangalil Sila Manithargal",
+      "creator": "Jayakanthan",
+      "original_title": "சில நேரங்களில் சில மனிதர்கள்",
+      "language": "ta",
+      "pick": true
+    },
+    {
+      "year": 2001,
+      "title": "Dhwani",
+      "creator": "Rajendra Shah",
+      "original_title": "ધ્વનિ",
+      "language": "gu",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 2000,
+      "title": "The Man from Chinnamasta",
+      "creator": "Mamoni Raisom Goswami",
+      "original_title": "ছিন্নমস্তাৰ মানুহটো",
+      "language": "as",
+      "pick": true
+    },
+    {
+      "year": 1999,
+      "title": "Ve Din",
+      "creator": "Nirmal Verma",
+      "original_title": "वे दिन",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 1999,
+      "title": "Marhi Da Deewa",
+      "creator": "Gurdial Singh",
+      "original_title": "ਮੜ੍ਹੀ ਦਾ ਦੀਵਾ",
+      "language": "pa",
+      "pick": true
+    },
+    {
+      "year": 1998,
+      "title": "Hayavadana",
+      "creator": "Girish Karnad",
+      "original_title": "ಹಯವದನ",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1997,
+      "title": "Lahu Pukarta Hai",
+      "creator": "Ali Sardar Jafri",
+      "language": "ur",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 1996,
+      "title": "Hajar Churashir Maa",
+      "creator": "Mahasweta Devi",
+      "original_title": "হাজার চুরাশির মা",
+      "language": "bn",
+      "pick": true
+    },
+    {
+      "year": 1995,
+      "title": "Randamoozham",
+      "creator": "M. T. Vasudevan Nair",
+      "original_title": "രണ്ടാമൂഴം",
+      "language": "ml",
+      "pick": true
+    },
+    {
+      "year": 1994,
+      "title": "Samskara",
+      "creator": "U. R. Ananthamurthy",
+      "original_title": "ಸಂಸ್ಕಾರ",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1993,
+      "title": "Sabdar Akash",
+      "creator": "Sitakant Mahapatra",
+      "original_title": "ଶବ୍ଦର ଆକାଶ",
+      "language": "or",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 1992,
+      "title": "Aranya",
+      "creator": "Naresh Mehta",
+      "original_title": "अरण्या",
+      "language": "hi",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 1991,
+      "title": "Padatik",
+      "creator": "Subhash Mukhopadhyay",
+      "original_title": "পদাতিক",
+      "language": "bn",
+      "pick": true
+    },
+    {
+      "year": 1990,
+      "title": "Bharata Sindhu Rashmi",
+      "creator": "Vinayaka Krishna Gokak",
+      "original_title": "ಭಾರತ ಸಿಂಧೂ ರಶ್ಮಿ",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1989,
+      "title": "Aag Ka Dariya",
+      "creator": "Qurratulain Hyder",
+      "original_title": "آگ کا دریا",
+      "language": "ur",
+      "pick": true
+    },
+    {
+      "year": 1988,
+      "title": "Viswambhara",
+      "creator": "C. Narayana Reddy",
+      "original_title": "విశ్వంభర",
+      "language": "te",
+      "pick": true
+    },
+    {
+      "year": 1987,
+      "title": "Vishakha",
+      "creator": "Kusumagraj",
+      "original_title": "विशाखा",
+      "language": "mr",
+      "pick": true
+    },
+    {
+      "year": 1986,
+      "title": "Pandulipi",
+      "creator": "Sachidananda Routray",
+      "original_title": "ପାଣ୍ଡୁଲିପି",
+      "language": "or",
+      "pick": true,
+      "check": true
+    },
+    {
+      "year": 1985,
+      "title": "Manvini Bhavai",
+      "creator": "Pannalal Patel",
+      "original_title": "માનવીની ભવાઈ",
+      "language": "gu",
+      "pick": true
+    },
+    {
+      "year": 1984,
+      "title": "Chemmeen",
+      "creator": "Thakazhi Sivasankara Pillai",
+      "original_title": "ചെമ്മീൻ",
+      "language": "ml",
+      "pick": true
+    },
+    {
+      "year": 1983,
+      "title": "Chikaveera Rajendra",
+      "creator": "Masti Venkatesha Iyengar",
+      "original_title": "ಚಿಕವೀರ ರಾಜೇಂದ್ರ",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1982,
+      "title": "Yama",
+      "creator": "Mahadevi Varma",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 1981,
+      "title": "Kagaj te Canvas",
+      "creator": "Amrita Pritam",
+      "language": "pa",
+      "pick": true
+    },
+    {
+      "year": 1980,
+      "title": "Oru Desathinte Katha",
+      "creator": "S. K. Pottekkatt",
+      "language": "ml",
+      "pick": true
+    },
+    {
+      "year": 1979,
+      "title": "Mrityunjay",
+      "creator": "Birendra Kumar Bhattacharya",
+      "language": "as",
+      "pick": true
+    },
+    {
+      "year": 1978,
+      "title": "Kitni Navon Men Kitni Bar",
+      "creator": "Sachchidananda Vatsyayan 'Agyeya'",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 1977,
+      "title": "Mookajjiya Kanasugalu",
+      "creator": "K. Shivaram Karanth",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1976,
+      "title": "Prothom Protishruti",
+      "creator": "Ashapoorna Devi",
+      "language": "bn",
+      "pick": true
+    },
+    {
+      "year": 1975,
+      "title": "Chitrai Pavai",
+      "creator": "Akilan",
+      "language": "ta",
+      "pick": true
+    },
+    {
+      "year": 1974,
+      "title": "Yayati",
+      "creator": "Vishnu Sakharam Khandekar",
+      "language": "mr",
+      "pick": true
+    },
+    {
+      "year": 1973,
+      "title": "Naaku Tanti",
+      "creator": "D. R. Bendre",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1973,
+      "title": "Mati Matala",
+      "creator": "Gopinath Mohanty",
+      "language": "or",
+      "pick": true
+    },
+    {
+      "year": 1972,
+      "title": "Urvashi",
+      "creator": "Ramdhari Singh Dinkar",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 1971,
+      "title": "Smriti Satta Bhabishyat",
+      "creator": "Bishnu Dey",
+      "language": "bn",
+      "pick": true
+    },
+    {
+      "year": 1970,
+      "title": "Ramayana Kalpavruksham",
+      "creator": "Viswanatha Satyanarayana",
+      "language": "te",
+      "pick": true
+    },
+    {
+      "year": 1969,
+      "title": "Gul-e-Naghma",
+      "creator": "Firaq Gorakhpuri",
+      "language": "ur",
+      "pick": true
+    },
+    {
+      "year": 1968,
+      "title": "Chidambara",
+      "creator": "Sumitranandan Pant",
+      "language": "hi",
+      "pick": true
+    },
+    {
+      "year": 1967,
+      "title": "Nishita",
+      "creator": "Umashankar Joshi",
+      "language": "gu",
+      "pick": true
+    },
+    {
+      "year": 1967,
+      "title": "Sri Ramayana Darshanam",
+      "creator": "Kuvempu",
+      "language": "kn",
+      "pick": true
+    },
+    {
+      "year": 1966,
+      "title": "Ganadevata",
+      "creator": "Tarasankar Bandyopadhyay",
+      "language": "bn",
+      "pick": true
+    },
+    {
+      "year": 1965,
+      "title": "Odakkuzhal",
+      "creator": "G. Sankara Kurup",
+      "language": "ml",
+      "pick": true
+    }
+  ]
+}
