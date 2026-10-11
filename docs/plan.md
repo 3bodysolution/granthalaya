@@ -17,8 +17,9 @@ Read this at the start of a session; update it when a part is done.
 ## Step 3, part 2: prize and classics lists
 
 Each list is a JSON file in `src/data/lists/<slug>.json`:
-`{ slug, title, kind: "book" | "film", intro, source: { name, url }, items: [{ year, title, creator, original_title?, language?, note?, pick?, release_year? }] }`.
-Items are newest first for prizes, oldest first for classics. `pick: true` means we chose the book (Nobel, Jnanpith), not the prize.
+`{ slug, title, kind: "book" | "film", intro, source: { name, url }, items: [{ year, title, creator, original_title?, language?, note?, pick?, release_year?, circa? }] }`.
+Items are newest first for prizes, oldest first for classics. `pick: true` means we chose the book (Nobel, Jnanpith), not the prize. `circa: true` marks an approximate year (shown as "c. 1290").
+`language` is an ISO 639-1 code (`mr`, `hi`, `en`); where a language has no 639-1 code, the 639-3 one (`kok`, `bry`). A film in several languages gets the first one listed, and English is left out on films. The classics lists use `source: { "name": "Chosen by Granthalaya", "url": "" }`.
 
 Done (researched, checked against official sites):
 - `booker` (1969 to 2025), `international-booker` (2016 to 2026), `pulitzer-fiction` (1960 to 2026), `nobel-literature` (1980 to 2026, one book per laureate).

@@ -11,7 +11,7 @@
     {
       "year": 2026,
       "title": "Fjord",
-      "language": "English, Romanian, Norwegian, Swedish",
+      "language": "en",
       "creator": "Cristian Mungiu",
       "release_year": 2026
     },
@@ -19,7 +19,7 @@
       "year": 2025,
       "title": "It Was Just an Accident",
       "original_title": "یک تصادف ساده",
-      "language": "Persian, Azerbaijani",
+      "language": "fa",
       "creator": "Jafar Panahi",
       "release_year": 2025
     },
@@ -33,7 +33,7 @@
       "year": 2023,
       "title": "Anatomy of a Fall",
       "original_title": "Anatomie d'une chute",
-      "language": "French",
+      "language": "fr",
       "creator": "Justine Triet",
       "release_year": 2023
     },
@@ -46,7 +46,7 @@
     {
       "year": 2021,
       "title": "Titane",
-      "language": "French",
+      "language": "fr",
       "creator": "Julia Ducournau",
       "release_year": 2021
     },
@@ -54,7 +54,7 @@
       "year": 2019,
       "title": "Parasite",
       "original_title": "기생충",
-      "language": "Korean",
+      "language": "ko",
       "creator": "Bong Joon Ho",
       "release_year": 2019
     },
@@ -62,7 +62,7 @@
       "year": 2018,
       "title": "Shoplifters",
       "original_title": "万引き家族",
-      "language": "Japanese",
+      "language": "ja",
       "creator": "Hirokazu Kore-eda",
       "release_year": 2018
     },
@@ -70,14 +70,14 @@
       "year": 2018,
       "title": "The Image Book",
       "original_title": "Le Livre d'image",
-      "language": "French, English, Arabic, German, Italian",
+      "language": "fr",
       "creator": "Jean-Luc Godard",
       "release_year": 2018
     },
     {
       "year": 2017,
       "title": "The Square",
-      "language": "Swedish, Danish, English",
+      "language": "sv",
       "creator": "Ruben Östlund",
       "release_year": 2017
     },
@@ -90,7 +90,7 @@
     {
       "year": 2015,
       "title": "Dheepan",
-      "language": "Tamil, French, English",
+      "language": "ta",
       "creator": "Jacques Audiard",
       "release_year": 2015
     },
@@ -98,7 +98,7 @@
       "year": 2014,
       "title": "Winter Sleep",
       "original_title": "Kış Uykusu",
-      "language": "Turkish, English",
+      "language": "tr",
       "creator": "Nuri Bilge Ceylan",
       "release_year": 2014
     },
@@ -106,14 +106,14 @@
       "year": 2013,
       "title": "Blue Is the Warmest Colour",
       "original_title": "La Vie d'Adèle: Chapitres 1 et 2",
-      "language": "French",
+      "language": "fr",
       "creator": "Abdellatif Kechiche, Léa Seydoux and Adèle Exarchopoulos",
       "release_year": 2013
     },
     {
       "year": 2012,
       "title": "Amour",
-      "language": "French",
+      "language": "fr",
       "creator": "Michael Haneke",
       "release_year": 2012
     },
@@ -127,7 +127,7 @@
       "year": 2010,
       "title": "Uncle Boonmee Who Can Recall His Past Lives",
       "original_title": "ลุงบุญมีระลึกชาติ",
-      "language": "Isan, Thai",
+      "language": "tts",
       "creator": "Apichatpong Weerasethakul",
       "release_year": 2010
     },
@@ -135,7 +135,7 @@
       "year": 2009,
       "title": "The White Ribbon",
       "original_title": "Das weiße Band",
-      "language": "German",
+      "language": "de",
       "creator": "Michael Haneke",
       "release_year": 2009
     },
@@ -143,7 +143,7 @@
       "year": 2008,
       "title": "The Class",
       "original_title": "Entre les murs",
-      "language": "French",
+      "language": "fr",
       "creator": "Laurent Cantet",
       "release_year": 2008
     },
@@ -151,28 +151,28 @@
       "year": 2007,
       "title": "4 Months, 3 Weeks and 2 Days",
       "original_title": "4 luni, 3 săptămâni și 2 zile",
-      "language": "Romanian",
+      "language": "ro",
       "creator": "Cristian Mungiu",
       "release_year": 2007
     },
     {
       "year": 2006,
       "title": "The Wind That Shakes the Barley",
-      "language": "English, Irish, Latin",
+      "language": "en",
       "creator": "Ken Loach",
       "release_year": 2006
     },
     {
       "year": 2005,
       "title": "L'Enfant",
-      "language": "French",
+      "language": "fr",
       "creator": "Jean-Pierre and Luc Dardenne",
       "release_year": 2005
     },
     {
       "year": 2004,
       "title": "Fahrenheit 9/11",
-      "language": "English, Arabic",
+      "language": "en",
       "creator": "Michael Moore",
       "release_year": 2004
     },
@@ -185,7 +185,7 @@
     {
       "year": 2002,
       "title": "The Pianist",
-      "language": "English, German",
+      "language": "en",
       "creator": "Roman Polanski",
       "release_year": 2002
     },
@@ -193,7 +193,7 @@
       "year": 2001,
       "title": "The Son's Room",
       "original_title": "La stanza del figlio",
-      "language": "Italian",
+      "language": "it",
       "creator": "Nanni Moretti",
       "release_year": 2001
     },
@@ -206,7 +206,7 @@
     {
       "year": 1999,
       "title": "Rosetta",
-      "language": "French",
+      "language": "fr",
       "creator": "Jean-Pierre and Luc Dardenne",
       "release_year": 1999
     },
@@ -222,7 +222,7 @@
       "year": 1997,
       "title": "The Eel",
       "original_title": "うなぎ",
-      "language": "Japanese",
+      "language": "ja",
       "creator": "Shōhei Imamura",
       "release_year": 1997
     },
@@ -230,7 +230,7 @@
       "year": 1997,
       "title": "Taste of Cherry",
       "original_title": "طعم گيلاس",
-      "language": "Persian",
+      "language": "fa",
       "creator": "Abbas Kiarostami",
       "release_year": 1997
     },
@@ -244,7 +244,7 @@
       "year": 1995,
       "title": "Underground",
       "original_title": "Подземље",
-      "language": "Serbian, German",
+      "language": "sr",
       "creator": "Emir Kusturica",
       "release_year": 1995
     },
@@ -258,14 +258,14 @@
       "year": 1993,
       "title": "Farewell My Concubine",
       "original_title": "霸王別姬",
-      "language": "Mandarin",
+      "language": "zh",
       "creator": "Chen Kaige",
       "release_year": 1993
     },
     {
       "year": 1993,
       "title": "The Piano",
-      "language": "English, Māori, British Sign Language",
+      "language": "en",
       "creator": "Jane Campion",
       "release_year": 1993
     },
@@ -273,7 +273,7 @@
       "year": 1992,
       "title": "The Best Intentions",
       "original_title": "Den goda viljan",
-      "language": "Swedish",
+      "language": "sv",
       "creator": "Bille August",
       "release_year": 1991
     },
@@ -299,7 +299,7 @@
       "year": 1988,
       "title": "Pelle the Conqueror",
       "original_title": "Pelle Erobreren",
-      "language": "Scanian, Danish, Swedish",
+      "language": "sv",
       "creator": "Bille August",
       "release_year": 1987
     },
@@ -307,7 +307,7 @@
       "year": 1987,
       "title": "Under the Sun of Satan",
       "original_title": "Sous le soleil de Satan",
-      "language": "French",
+      "language": "fr",
       "creator": "Maurice Pialat",
       "release_year": 1987
     },
@@ -321,7 +321,7 @@
       "year": 1985,
       "title": "When Father Was Away on Business",
       "original_title": "Отац на службеном путу",
-      "language": "Serbo-Croatian",
+      "language": "sr",
       "creator": "Emir Kusturica",
       "release_year": 1985
     },
@@ -335,21 +335,21 @@
       "year": 1983,
       "title": "The Ballad of Narayama",
       "original_title": "楢山節考",
-      "language": "Japanese",
+      "language": "ja",
       "creator": "Shōhei Imamura",
       "release_year": 1983
     },
     {
       "year": 1982,
       "title": "Missing",
-      "language": "English, Spanish",
+      "language": "en",
       "creator": "Costa-Gavras",
       "release_year": 1982
     },
     {
       "year": 1982,
       "title": "Yol",
-      "language": "Turkish, Kurdish",
+      "language": "tr",
       "creator": "Yılmaz Güney and Şerif Gören",
       "release_year": 1982
     },
@@ -357,7 +357,7 @@
       "year": 1981,
       "title": "Man of Iron",
       "original_title": "Człowiek z żelaza",
-      "language": "Polish",
+      "language": "pl",
       "creator": "Andrzej Wajda",
       "release_year": 1981
     },
@@ -371,7 +371,7 @@
       "year": 1980,
       "title": "Kagemusha",
       "original_title": "影武者",
-      "language": "Japanese",
+      "language": "ja",
       "creator": "Akira Kurosawa",
       "release_year": 1980
     },
@@ -385,7 +385,7 @@
       "year": 1979,
       "title": "The Tin Drum",
       "original_title": "Die Blechtrommel",
-      "language": "German",
+      "language": "de",
       "creator": "Volker Schlöndorff",
       "release_year": 1979
     },
@@ -393,14 +393,14 @@
       "year": 1978,
       "title": "The Tree of Wooden Clogs",
       "original_title": "L'albero degli zoccoli",
-      "language": "Lombard",
+      "language": "lmo",
       "creator": "Ermanno Olmi",
       "release_year": 1978
     },
     {
       "year": 1977,
       "title": "Padre Padrone",
-      "language": "Italian, Sardinian, Latin",
+      "language": "it",
       "creator": "Paolo and Vittorio Taviani",
       "release_year": 1977
     },
@@ -414,7 +414,7 @@
       "year": 1975,
       "title": "Chronicle of the Years of Fire",
       "original_title": "Chronique des années de braise",
-      "language": "Algerian Arabic, French",
+      "language": "ar",
       "creator": "Mohammed Lakhdar-Hamina",
       "release_year": 1975
     },
@@ -440,7 +440,7 @@
       "year": 1972,
       "title": "The Mattei Affair",
       "original_title": "Il caso Mattei",
-      "language": "Italian",
+      "language": "it",
       "creator": "Francesco Rosi",
       "release_year": 1972
     },
@@ -448,7 +448,7 @@
       "year": 1972,
       "title": "The Working Class Goes to Heaven",
       "original_title": "La classe operaia va in paradiso",
-      "language": "Italian",
+      "language": "it",
       "creator": "Elio Petri",
       "release_year": 1971
     },
@@ -480,7 +480,7 @@
       "year": 1966,
       "title": "The Birds, the Bees and the Italians",
       "original_title": "Signore e signori",
-      "language": "Italian",
+      "language": "it",
       "creator": "Pietro Germi",
       "release_year": 1966
     },
@@ -488,7 +488,7 @@
       "year": 1966,
       "title": "A Man and a Woman",
       "original_title": "Un homme et une femme",
-      "language": "French",
+      "language": "fr",
       "creator": "Claude Lelouch",
       "release_year": 1966
     },
@@ -502,7 +502,7 @@
       "year": 1964,
       "title": "The Umbrellas of Cherbourg",
       "original_title": "Les parapluies de Cherbourg",
-      "language": "French",
+      "language": "fr",
       "creator": "Jacques Demy",
       "release_year": 1964
     },
@@ -510,14 +510,14 @@
       "year": 1963,
       "title": "The Leopard",
       "original_title": "Il gattopardo",
-      "language": "Italian",
+      "language": "it",
       "creator": "Luchino Visconti",
       "release_year": 1963
     },
     {
       "year": 1962,
       "title": "O Pagador de Promessas",
-      "language": "Portuguese",
+      "language": "pt",
       "creator": "Anselmo Duarte",
       "release_year": 1962
     },
@@ -525,21 +525,21 @@
       "year": 1961,
       "title": "The Long Absence",
       "original_title": "Une aussi longue absence",
-      "language": "French",
+      "language": "fr",
       "creator": "Henri Colpi",
       "release_year": 1961
     },
     {
       "year": 1961,
       "title": "Viridiana",
-      "language": "Spanish",
+      "language": "es",
       "creator": "Luis Buñuel",
       "release_year": 1961
     },
     {
       "year": 1960,
       "title": "La dolce vita",
-      "language": "Italian, English, French, German",
+      "language": "it",
       "creator": "Federico Fellini",
       "release_year": 1960
     },
@@ -547,7 +547,7 @@
       "year": 1959,
       "title": "Black Orpheus",
       "original_title": "Orfeu Negro",
-      "language": "Portuguese",
+      "language": "pt",
       "creator": "Marcel Camus",
       "release_year": 1959
     },
@@ -555,7 +555,7 @@
       "year": 1958,
       "title": "The Cranes Are Flying",
       "original_title": "Летят журавли",
-      "language": "Russian",
+      "language": "ru",
       "creator": "Mikhail Kalatozov",
       "release_year": 1957
     },
@@ -569,7 +569,7 @@
       "year": 1956,
       "title": "The Silent World",
       "original_title": "Le monde du silence",
-      "language": "French",
+      "language": "fr",
       "creator": "Jacques Cousteau and Louis Malle",
       "release_year": 1956
     },
