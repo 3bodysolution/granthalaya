@@ -205,7 +205,7 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
     // "Highest rated" needs enough votes to mean something, or this week's releases with a few hundred
     // excited votes come first. Narrower lists (a language, a decade, a genre) get a lower bar.
     'vote_count.gte': f.sort === 'top'
-      ? f.language && f.language !== 'en' ? (tv ? 20 : 40)
+      ? f.language && f.language !== 'en' ? (tv ? 8 : 15) // Marathi films rarely pass 40 votes on TMDB
         : f.year || f.decade || f.genre || f.service ? (tv ? 150 : 300) : (tv ? 800 : 2000)
       : undefined,
   };
