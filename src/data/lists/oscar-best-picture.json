@@ -12,589 +12,785 @@
       "year": 2026,
       "title": "One Battle After Another",
       "creator": "Paul Thomas Anderson",
-      "release_year": 2025
+      "release_year": 2025,
+      "tmdb": 1054867,
+      "cover": "https://image.tmdb.org/t/p/w500/lbBWwxBht4JFP5PsuJ5onpMqugW.jpg"
     },
     {
       "year": 2025,
       "title": "Anora",
       "creator": "Sean Baker",
-      "release_year": 2024
+      "release_year": 2024,
+      "tmdb": 1064213,
+      "cover": "https://image.tmdb.org/t/p/w500/cgXk2tNYhJZLXdBDO5DidAVzQ82.jpg"
     },
     {
       "year": 2024,
       "title": "Oppenheimer",
       "creator": "Christopher Nolan",
-      "release_year": 2023
+      "release_year": 2023,
+      "tmdb": 872585,
+      "cover": "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg"
     },
     {
       "year": 2023,
       "title": "Everything Everywhere All at Once",
       "creator": "Daniel Kwan, Daniel Scheinert",
-      "release_year": 2022
+      "release_year": 2022,
+      "tmdb": 545611,
+      "cover": "https://image.tmdb.org/t/p/w500/u68AjlvlutfEIcpmbYpKcdi09ut.jpg"
     },
     {
       "year": 2022,
       "title": "CODA",
       "creator": "Sian Heder",
-      "release_year": 2021
+      "release_year": 2021,
+      "tmdb": 776503,
+      "cover": "https://image.tmdb.org/t/p/w500/BzVjmm8l23rPsijLiNLUzuQtyd.jpg"
     },
     {
       "year": 2021,
       "title": "Nomadland",
       "creator": "Chloé Zhao",
-      "release_year": 2020
+      "release_year": 2021,
+      "tmdb": 581734,
+      "cover": "https://image.tmdb.org/t/p/w500/8Vc5EOUEIF1EUXuX9eLFf7BvN3P.jpg"
     },
     {
       "year": 2020,
       "title": "Parasite",
       "creator": "Bong Joon Ho",
-      "release_year": 2019
+      "release_year": 2019,
+      "tmdb": 496243,
+      "cover": "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg"
     },
     {
       "year": 2019,
       "title": "Green Book",
       "creator": "Peter Farrelly",
-      "release_year": 2018
+      "release_year": 2018,
+      "tmdb": 490132,
+      "cover": "https://image.tmdb.org/t/p/w500/7BsvSuDQuoqhWmU2fL7W2GOcZHU.jpg"
     },
     {
       "year": 2018,
       "title": "The Shape of Water",
       "creator": "Guillermo del Toro",
-      "release_year": 2017
+      "release_year": 2017,
+      "tmdb": 399055,
+      "cover": "https://image.tmdb.org/t/p/w500/9zfwPffUXpBrEP26yp0q1ckXDcj.jpg"
     },
     {
       "year": 2017,
       "title": "Moonlight",
       "creator": "Barry Jenkins",
-      "release_year": 2016
+      "release_year": 2016,
+      "tmdb": 376867,
+      "cover": "https://image.tmdb.org/t/p/w500/qLnfEmPrDjJfPyyddLJPkXmshkp.jpg"
     },
     {
       "year": 2016,
       "title": "Spotlight",
       "creator": "Tom McCarthy",
-      "release_year": 2015
+      "release_year": 2015,
+      "tmdb": 314365,
+      "cover": "https://image.tmdb.org/t/p/w500/8DPGG400FgaFWaqcv11n8mRd2NG.jpg"
     },
     {
       "year": 2015,
       "title": "Birdman or (The Unexpected Virtue of Ignorance)",
       "creator": "Alejandro G. Iñárritu",
-      "release_year": 2014
+      "release_year": 2014,
+      "tmdb": 194662,
+      "cover": "https://image.tmdb.org/t/p/w500/rHUg2AuIuLSIYMYFgavVwqt1jtc.jpg"
     },
     {
       "year": 2014,
       "title": "12 Years a Slave",
       "creator": "Steve McQueen",
-      "release_year": 2013
+      "release_year": 2013,
+      "tmdb": 76203,
+      "cover": "https://image.tmdb.org/t/p/w500/xdANQijuNrJaw1HA61rDccME4Tm.jpg"
     },
     {
       "year": 2013,
       "title": "Argo",
       "creator": "Ben Affleck",
-      "release_year": 2012
+      "release_year": 2012,
+      "tmdb": 68734,
+      "cover": "https://image.tmdb.org/t/p/w500/m5gPWFZFIp4UJFABgWyLkbXv8GX.jpg"
     },
     {
       "year": 2012,
       "title": "The Artist",
       "creator": "Michel Hazanavicius",
-      "release_year": 2011
+      "release_year": 2011,
+      "tmdb": 74643,
+      "cover": "https://image.tmdb.org/t/p/w500/xYMYV8lMIeQMymuNPBvq3hOnqXw.jpg"
     },
     {
       "year": 2011,
       "title": "The King's Speech",
       "creator": "Tom Hooper",
-      "release_year": 2010
+      "release_year": 2010,
+      "tmdb": 45269,
+      "cover": "https://image.tmdb.org/t/p/w500/pVNKXVQFukBaCz6ML7GH3kiPlQP.jpg"
     },
     {
       "year": 2010,
       "title": "The Hurt Locker",
       "creator": "Kathryn Bigelow",
-      "release_year": 2009
+      "release_year": 2008,
+      "tmdb": 12162,
+      "cover": "https://image.tmdb.org/t/p/w500/io2dfBJhasvGbgkCX9cCGVOiA99.jpg"
     },
     {
       "year": 2009,
       "title": "Slumdog Millionaire",
       "creator": "Danny Boyle",
-      "release_year": 2008
+      "release_year": 2008,
+      "tmdb": 12405,
+      "cover": "https://image.tmdb.org/t/p/w500/5leCCi7ZF0CawAfM5Qo2ECKPprc.jpg"
     },
     {
       "year": 2008,
       "title": "No Country for Old Men",
       "creator": "Joel Coen, Ethan Coen",
-      "release_year": 2007
+      "release_year": 2007,
+      "tmdb": 6977,
+      "cover": "https://image.tmdb.org/t/p/w500/6d5XOczc226jECq0LIX0siKtgHR.jpg"
     },
     {
       "year": 2007,
       "title": "The Departed",
       "creator": "Martin Scorsese",
-      "release_year": 2006
+      "release_year": 2006,
+      "tmdb": 1422,
+      "cover": "https://image.tmdb.org/t/p/w500/nT97ifVT2J1yMQmeq20Qblg61T.jpg"
     },
     {
       "year": 2006,
       "title": "Crash",
       "creator": "Paul Haggis",
-      "release_year": 2005
+      "release_year": 2005,
+      "tmdb": 1640,
+      "cover": "https://image.tmdb.org/t/p/w500/86BdPC6RDX88NC880pLidKn2LCj.jpg"
     },
     {
       "year": 2005,
       "title": "Million Dollar Baby",
       "creator": "Clint Eastwood",
-      "release_year": 2004
+      "release_year": 2004,
+      "tmdb": 70,
+      "cover": "https://image.tmdb.org/t/p/w500/jcfEqKdWF1zeyvECPqp3mkWLct2.jpg"
     },
     {
       "year": 2004,
       "title": "The Lord of the Rings: The Return of the King",
       "creator": "Peter Jackson",
-      "release_year": 2003
+      "release_year": 2003,
+      "tmdb": 122,
+      "cover": "https://image.tmdb.org/t/p/w500/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg"
     },
     {
       "year": 2003,
       "title": "Chicago",
       "creator": "Rob Marshall",
-      "release_year": 2002
+      "release_year": 2002,
+      "tmdb": 1574,
+      "cover": "https://image.tmdb.org/t/p/w500/3ED8cWCXY9zkx77Sd0N5qMbsdDP.jpg"
     },
     {
       "year": 2002,
       "title": "A Beautiful Mind",
       "creator": "Ron Howard",
-      "release_year": 2001
+      "release_year": 2001,
+      "tmdb": 453,
+      "cover": "https://image.tmdb.org/t/p/w500/rEIg5yJdNOt9fmX4P8gU9LeNoTQ.jpg"
     },
     {
       "year": 2001,
       "title": "Gladiator",
       "creator": "Ridley Scott",
-      "release_year": 2000
+      "release_year": 2000,
+      "tmdb": 98,
+      "cover": "https://image.tmdb.org/t/p/w500/aDb548BOkFfI4nFm0kx8A3Ezh7H.jpg"
     },
     {
       "year": 2000,
       "title": "American Beauty",
       "creator": "Sam Mendes",
-      "release_year": 1999
+      "release_year": 1999,
+      "tmdb": 14,
+      "cover": "https://image.tmdb.org/t/p/w500/wby9315QzVKdW9BonAefg8jGTTb.jpg"
     },
     {
       "year": 1999,
       "title": "Shakespeare in Love",
       "creator": "John Madden",
-      "release_year": 1998
+      "release_year": 1998,
+      "tmdb": 1934,
+      "cover": "https://image.tmdb.org/t/p/w500/zdW7jdzPi4J9KZR3TyY2jn3Xh5e.jpg"
     },
     {
       "year": 1998,
       "title": "Titanic",
       "creator": "James Cameron",
-      "release_year": 1997
+      "release_year": 1997,
+      "tmdb": 597,
+      "cover": "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg"
     },
     {
       "year": 1997,
       "title": "The English Patient",
       "creator": "Anthony Minghella",
-      "release_year": 1996
+      "release_year": 1996,
+      "tmdb": 409,
+      "cover": "https://image.tmdb.org/t/p/w500/8eHHqMg8qEYtVw8LQLygsHXSR2q.jpg"
     },
     {
       "year": 1996,
       "title": "Braveheart",
       "creator": "Mel Gibson",
-      "release_year": 1995
+      "release_year": 1995,
+      "tmdb": 197,
+      "cover": "https://image.tmdb.org/t/p/w500/or1gBugydmjToAEq7OZY0owwFk.jpg"
     },
     {
       "year": 1995,
       "title": "Forrest Gump",
       "creator": "Robert Zemeckis",
-      "release_year": 1994
+      "release_year": 1994,
+      "tmdb": 13,
+      "cover": "https://image.tmdb.org/t/p/w500/saHP97rTPS5eLmrLQEcANmKrsFl.jpg"
     },
     {
       "year": 1994,
       "title": "Schindler's List",
       "creator": "Steven Spielberg",
-      "release_year": 1993
+      "release_year": 1993,
+      "tmdb": 424,
+      "cover": "https://image.tmdb.org/t/p/w500/sF1U4EUQS8YHUYjNl3pMGNIQyr0.jpg"
     },
     {
       "year": 1993,
       "title": "Unforgiven",
       "creator": "Clint Eastwood",
-      "release_year": 1992
+      "release_year": 1992,
+      "tmdb": 33,
+      "cover": "https://image.tmdb.org/t/p/w500/54roTwbX9fltg85zjsmrooXAs12.jpg"
     },
     {
       "year": 1992,
       "title": "The Silence of the Lambs",
       "creator": "Jonathan Demme",
-      "release_year": 1991
+      "release_year": 1991,
+      "tmdb": 274,
+      "cover": "https://image.tmdb.org/t/p/w500/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg"
     },
     {
       "year": 1991,
       "title": "Dances With Wolves",
       "creator": "Kevin Costner",
-      "release_year": 1990
+      "release_year": 1990,
+      "tmdb": 581,
+      "cover": "https://image.tmdb.org/t/p/w500/hw0ZEHAaTqTxSXGVwUFX7uvanSA.jpg"
     },
     {
       "year": 1990,
       "title": "Driving Miss Daisy",
       "creator": "Bruce Beresford",
-      "release_year": 1989
+      "release_year": 1989,
+      "tmdb": 403,
+      "cover": "https://image.tmdb.org/t/p/w500/iaCzvcY42HihFxQBTZCTKMpsI0P.jpg"
     },
     {
       "year": 1989,
       "title": "Rain Man",
       "creator": "Barry Levinson",
-      "release_year": 1988
+      "release_year": 1988,
+      "tmdb": 380,
+      "cover": "https://image.tmdb.org/t/p/w500/iTNHwO896WKkaoPtpMMS74d8VNi.jpg"
     },
     {
       "year": 1988,
       "title": "The Last Emperor",
       "creator": "Bernardo Bertolucci",
-      "release_year": 1987
+      "release_year": 1987,
+      "tmdb": 746,
+      "cover": "https://image.tmdb.org/t/p/w500/7TILJhdeJAaEyDiwvJZMo9SQBoe.jpg"
     },
     {
       "year": 1987,
       "title": "Platoon",
       "creator": "Oliver Stone",
-      "release_year": 1986
+      "release_year": 1986,
+      "tmdb": 792,
+      "cover": "https://image.tmdb.org/t/p/w500/m3mmFkPQKvPZq5exmh0bDuXlD9T.jpg"
     },
     {
       "year": 1986,
       "title": "Out of Africa",
       "creator": "Sydney Pollack",
-      "release_year": 1985
+      "release_year": 1985,
+      "tmdb": 606,
+      "cover": "https://image.tmdb.org/t/p/w500/6oMKqh08TfxmvnoFR4mm1wZB67P.jpg"
     },
     {
       "year": 1985,
       "title": "Amadeus",
       "creator": "Miloš Forman",
-      "release_year": 1984
+      "release_year": 1984,
+      "tmdb": 279,
+      "cover": "https://image.tmdb.org/t/p/w500/gQRfiyfGvr1az0quaYyMram3Aqt.jpg"
     },
     {
       "year": 1984,
       "title": "Terms of Endearment",
       "creator": "James L. Brooks",
-      "release_year": 1983
+      "release_year": 1983,
+      "tmdb": 11050,
+      "cover": "https://image.tmdb.org/t/p/w500/l77DRjJuykqKMtD9GTK4YT7qKHW.jpg"
     },
     {
       "year": 1983,
       "title": "Gandhi",
       "creator": "Richard Attenborough",
-      "release_year": 1982
+      "release_year": 1982,
+      "tmdb": 783,
+      "cover": "https://image.tmdb.org/t/p/w500/rOXftt7SluxskrFrvU7qFJa5zeN.jpg"
     },
     {
       "year": 1982,
       "title": "Chariots of Fire",
       "creator": "Hugh Hudson",
-      "release_year": 1981
+      "release_year": 1981,
+      "tmdb": 9443,
+      "cover": "https://image.tmdb.org/t/p/w500/qnRaum8k0HqGRml2i7OawFqUtEb.jpg"
     },
     {
       "year": 1981,
       "title": "Ordinary People",
       "creator": "Robert Redford",
-      "release_year": 1980
+      "release_year": 1980,
+      "tmdb": 16619,
+      "cover": "https://image.tmdb.org/t/p/w500/5gQLGRmBV8XoqWgkxuRFwe3jZV7.jpg"
     },
     {
       "year": 1980,
       "title": "Kramer vs. Kramer",
       "creator": "Robert Benton",
-      "release_year": 1979
+      "release_year": 1979,
+      "tmdb": 12102,
+      "cover": "https://image.tmdb.org/t/p/w500/3CUP5V5SWfHSK4qvkZF7lMNyugY.jpg"
     },
     {
       "year": 1979,
       "title": "The Deer Hunter",
       "creator": "Michael Cimino",
-      "release_year": 1978
+      "release_year": 1978,
+      "tmdb": 11778,
+      "cover": "https://image.tmdb.org/t/p/w500/bbGtogDZOg09bm42KIpCXUXICkh.jpg"
     },
     {
       "year": 1978,
       "title": "Annie Hall",
       "creator": "Woody Allen",
-      "release_year": 1977
+      "release_year": 1977,
+      "tmdb": 703,
+      "cover": "https://image.tmdb.org/t/p/w500/dEtjPywhDbAXYjoFfhBC4U9unU7.jpg"
     },
     {
       "year": 1977,
       "title": "Rocky",
       "creator": "John G. Avildsen",
-      "release_year": 1976
+      "release_year": 1976,
+      "tmdb": 1366,
+      "cover": "https://image.tmdb.org/t/p/w500/xSI0dbKLDETwhiVUy6hGE8KXUln.jpg"
     },
     {
       "year": 1976,
       "title": "One Flew Over the Cuckoo's Nest",
       "creator": "Miloš Forman",
-      "release_year": 1975
+      "release_year": 1975,
+      "tmdb": 510,
+      "cover": "https://image.tmdb.org/t/p/w500/kjWsMh72V6d8KRLV4EOoSJLT1H7.jpg"
     },
     {
       "year": 1975,
       "title": "The Godfather Part II",
       "creator": "Francis Ford Coppola",
-      "release_year": 1974
+      "release_year": 1974,
+      "tmdb": 240,
+      "cover": "https://image.tmdb.org/t/p/w500/8a1lJs7mFyGhGhZZDT1azJUoQiZ.jpg"
     },
     {
       "year": 1974,
       "title": "The Sting",
       "creator": "George Roy Hill",
-      "release_year": 1973
+      "release_year": 1973,
+      "tmdb": 9277,
+      "cover": "https://image.tmdb.org/t/p/w500/ckmYng37zey8INYf6d10cVgIG93.jpg"
     },
     {
       "year": 1973,
       "title": "The Godfather",
       "creator": "Francis Ford Coppola",
-      "release_year": 1972
+      "release_year": 1972,
+      "tmdb": 238,
+      "cover": "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg"
     },
     {
       "year": 1972,
       "title": "The French Connection",
       "creator": "William Friedkin",
-      "release_year": 1971
+      "release_year": 1971,
+      "tmdb": 1051,
+      "cover": "https://image.tmdb.org/t/p/w500/pH4saPwMjhnVGwmSH6RkMaHrt3s.jpg"
     },
     {
       "year": 1971,
       "title": "Patton",
       "creator": "Franklin J. Schaffner",
-      "release_year": 1970
+      "release_year": 1970,
+      "tmdb": 11202,
+      "cover": "https://image.tmdb.org/t/p/w500/rLM7jIEPTjj4CF7F1IrzzNjLUCu.jpg"
     },
     {
       "year": 1970,
       "title": "Midnight Cowboy",
       "creator": "John Schlesinger",
-      "release_year": 1969
+      "release_year": 1969,
+      "tmdb": 3116,
+      "cover": "https://image.tmdb.org/t/p/w500/ckklq45UxUkwgHve9xItXqXr06r.jpg"
     },
     {
       "year": 1969,
       "title": "Oliver!",
       "creator": "Carol Reed",
-      "release_year": 1968
+      "release_year": 1968,
+      "tmdb": 17917,
+      "cover": "https://image.tmdb.org/t/p/w500/1XJgoaOWKrqxkKeBKWLKSigqG8c.jpg"
     },
     {
       "year": 1968,
       "title": "In the Heat of the Night",
       "creator": "Norman Jewison",
-      "release_year": 1967
+      "release_year": 1967,
+      "tmdb": 10633,
+      "cover": "https://image.tmdb.org/t/p/w500/qFpfALhprXmOAbA5upTNupZw8rq.jpg"
     },
     {
       "year": 1967,
       "title": "A Man for All Seasons",
       "creator": "Fred Zinnemann",
-      "release_year": 1966
+      "release_year": 1966,
+      "tmdb": 874,
+      "cover": "https://image.tmdb.org/t/p/w500/kcwcqMitcnRO1SySlX1HKVn7yUV.jpg"
     },
     {
       "year": 1966,
       "title": "The Sound of Music",
       "creator": "Robert Wise",
-      "release_year": 1965
+      "release_year": 1965,
+      "tmdb": 15121,
+      "cover": "https://image.tmdb.org/t/p/w500/c6CrUZypAsBCaRWX0M3RVRDbhNS.jpg"
     },
     {
       "year": 1965,
       "title": "My Fair Lady",
       "creator": "George Cukor",
-      "release_year": 1964
+      "release_year": 1964,
+      "tmdb": 11113,
+      "cover": "https://image.tmdb.org/t/p/w500/bTXVc29lGSNclf94VIZ49W4gGKl.jpg"
     },
     {
       "year": 1964,
       "title": "Tom Jones",
       "creator": "Tony Richardson",
-      "release_year": 1963
+      "release_year": 1963,
+      "tmdb": 5769,
+      "cover": "https://image.tmdb.org/t/p/w500/yKuZKLMhe74PJzaxYLh2s8h4P2P.jpg"
     },
     {
       "year": 1963,
       "title": "Lawrence of Arabia",
       "creator": "David Lean",
-      "release_year": 1962
+      "release_year": 1962,
+      "tmdb": 947,
+      "cover": "https://image.tmdb.org/t/p/w500/AiAm0EtDvyGqNpVoieRw4u65vD1.jpg"
     },
     {
       "year": 1962,
       "title": "West Side Story",
       "creator": "Robert Wise, Jerome Robbins",
-      "release_year": 1961
+      "release_year": 1961,
+      "tmdb": 1725,
+      "cover": "https://image.tmdb.org/t/p/w500/nzCMu6D5q60i2bVrIQ0DxlRSgCZ.jpg"
     },
     {
       "year": 1961,
       "title": "The Apartment",
       "creator": "Billy Wilder",
-      "release_year": 1960
+      "release_year": 1960,
+      "tmdb": 284,
+      "cover": "https://image.tmdb.org/t/p/w500/hhSRt1KKfRT0yEhEtRW3qp31JFU.jpg"
     },
     {
       "year": 1960,
       "title": "Ben-Hur",
       "creator": "William Wyler",
-      "release_year": 1959
+      "release_year": 1959,
+      "tmdb": 665,
+      "cover": "https://image.tmdb.org/t/p/w500/m4WQ1dBIrEIHZNCoAjdpxwSKWyH.jpg"
     },
     {
       "year": 1959,
       "title": "Gigi",
       "creator": "Vincente Minnelli",
-      "release_year": 1958
+      "release_year": 1958,
+      "tmdb": 17281,
+      "cover": "https://image.tmdb.org/t/p/w500/3GSuecnDr4N5ZaqTrwElSzt6eC2.jpg"
     },
     {
       "year": 1958,
       "title": "The Bridge on the River Kwai",
       "creator": "David Lean",
-      "release_year": 1957
+      "release_year": 1957,
+      "tmdb": 826,
+      "cover": "https://image.tmdb.org/t/p/w500/7paXMt2e3Tr5dLmEZOGgFEn2Vo7.jpg"
     },
     {
       "year": 1957,
       "title": "Around the World in 80 Days",
       "creator": "Michael Anderson",
-      "release_year": 1956
+      "release_year": 1956,
+      "tmdb": 2897,
+      "cover": "https://image.tmdb.org/t/p/w500/kk6Rrwh0toMz9tjuUHdS4O3v2Rk.jpg"
     },
     {
       "year": 1956,
       "title": "Marty",
       "creator": "Delbert Mann",
-      "release_year": 1955
+      "release_year": 1955,
+      "tmdb": 15919,
+      "cover": "https://image.tmdb.org/t/p/w500/8tnGO5VoAQII4DbE3hozWKhV4BY.jpg"
     },
     {
       "year": 1955,
       "title": "On the Waterfront",
       "creator": "Elia Kazan",
-      "release_year": 1954
+      "release_year": 1954,
+      "tmdb": 654,
+      "cover": "https://image.tmdb.org/t/p/w500/d4S8LpbCyFJsh1tGgwGQSJdGzKm.jpg"
     },
     {
       "year": 1954,
       "title": "From Here to Eternity",
       "creator": "Fred Zinnemann",
-      "release_year": 1953
+      "release_year": 1953,
+      "tmdb": 11426,
+      "cover": "https://image.tmdb.org/t/p/w500/sP3T6hTkTMCksUXb0wzzOgbXIfk.jpg"
     },
     {
       "year": 1953,
       "title": "The Greatest Show on Earth",
       "creator": "Cecil B. DeMille",
-      "release_year": 1952
+      "release_year": 1952,
+      "tmdb": 27191,
+      "cover": "https://image.tmdb.org/t/p/w500/cKI0yGPRh1IlvRKKJRoMZruior8.jpg"
     },
     {
       "year": 1952,
       "title": "An American in Paris",
       "creator": "Vincente Minnelli",
-      "release_year": 1951
+      "release_year": 1951,
+      "tmdb": 2769,
+      "cover": "https://image.tmdb.org/t/p/w500/lyDXkvG53ldz6Cf7dbjJl7TaoP5.jpg"
     },
     {
       "year": 1951,
       "title": "All About Eve",
       "creator": "Joseph L. Mankiewicz",
-      "release_year": 1950
+      "release_year": 1950,
+      "tmdb": 705,
+      "cover": "https://image.tmdb.org/t/p/w500/blBzZaatPWVuWpXEnPscMA4Xp6m.jpg"
     },
     {
       "year": 1950,
       "title": "All the King's Men",
       "creator": "Robert Rossen",
-      "release_year": 1949
+      "release_year": 1949,
+      "tmdb": 25430,
+      "cover": "https://image.tmdb.org/t/p/w500/7o8nnvFnkekDAlIYznNUWzxQFM6.jpg"
     },
     {
       "year": 1949,
       "title": "Hamlet",
       "creator": "Laurence Olivier",
-      "release_year": 1948
+      "release_year": 1948,
+      "tmdb": 23383,
+      "cover": "https://image.tmdb.org/t/p/w500/woO9SgU2vTRMZeG0YqOLeoIqlzC.jpg"
     },
     {
       "year": 1948,
       "title": "Gentleman's Agreement",
       "creator": "Elia Kazan",
-      "release_year": 1947
+      "release_year": 1947,
+      "tmdb": 33667,
+      "cover": "https://image.tmdb.org/t/p/w500/aCCRbcmigPk00f34hpJuWZuvABo.jpg"
     },
     {
       "year": 1947,
       "title": "The Best Years of Our Lives",
       "creator": "William Wyler",
-      "release_year": 1946
+      "release_year": 1946,
+      "tmdb": 887,
+      "cover": "https://image.tmdb.org/t/p/w500/gd5EoAU4MM57sW3vlWxJ0NMM8cV.jpg"
     },
     {
       "year": 1946,
       "title": "The Lost Weekend",
       "creator": "Billy Wilder",
-      "release_year": 1945
+      "release_year": 1945,
+      "tmdb": 28580,
+      "cover": "https://image.tmdb.org/t/p/w500/yL6EJxPeYIcB9TChm56lHqXKzHC.jpg"
     },
     {
       "year": 1945,
       "title": "Going My Way",
       "creator": "Leo McCarey",
-      "release_year": 1944
+      "release_year": 1944,
+      "tmdb": 17661,
+      "cover": "https://image.tmdb.org/t/p/w500/838yNJnOk6iZj5YK1MoKiN2n1hw.jpg"
     },
     {
       "year": 1944,
       "title": "Casablanca",
       "creator": "Michael Curtiz",
-      "release_year": 1943
+      "release_year": 1943,
+      "tmdb": 289,
+      "cover": "https://image.tmdb.org/t/p/w500/lGCEKlJo2CnWydQj7aamY7s1S7Q.jpg"
     },
     {
       "year": 1943,
       "title": "Mrs. Miniver",
       "creator": "William Wyler",
-      "release_year": 1942
+      "release_year": 1942,
+      "tmdb": 27367,
+      "cover": "https://image.tmdb.org/t/p/w500/fjPjx6FTaoTussbqoLj6OYTtUyi.jpg"
     },
     {
       "year": 1942,
       "title": "How Green Was My Valley",
       "creator": "John Ford",
-      "release_year": 1941
+      "release_year": 1941,
+      "tmdb": 43266,
+      "cover": "https://image.tmdb.org/t/p/w500/8N7OmxBqjRVUrqergUduGgr6exy.jpg"
     },
     {
       "year": 1941,
       "title": "Rebecca",
       "creator": "Alfred Hitchcock",
-      "release_year": 1940
+      "release_year": 1940,
+      "tmdb": 223,
+      "cover": "https://image.tmdb.org/t/p/w500/1qz3qUOHnVy7dL7M7G8jSErxE4b.jpg"
     },
     {
       "year": 1940,
       "title": "Gone with the Wind",
       "creator": "Victor Fleming",
-      "release_year": 1939
+      "release_year": 1939,
+      "tmdb": 770,
+      "cover": "https://image.tmdb.org/t/p/w500/lNz2Ow0wGCAvzckW7EOjE03KcYv.jpg"
     },
     {
       "year": 1939,
       "title": "You Can't Take It with You",
       "creator": "Frank Capra",
-      "release_year": 1938
+      "release_year": 1938,
+      "tmdb": 34106,
+      "cover": "https://image.tmdb.org/t/p/w500/9JltqbDyWstYW6gnvqDO6L5bOrx.jpg"
     },
     {
       "year": 1938,
       "title": "The Life of Emile Zola",
       "creator": "William Dieterle",
-      "release_year": 1937
+      "release_year": 1937,
+      "tmdb": 43278,
+      "cover": "https://image.tmdb.org/t/p/w500/gsEa6ZU1zHhjTYneNNBQApzl8Vu.jpg"
     },
     {
       "year": 1937,
       "title": "The Great Ziegfeld",
       "creator": "Robert Z. Leonard",
-      "release_year": 1936
+      "release_year": 1936,
+      "tmdb": 43277,
+      "cover": "https://image.tmdb.org/t/p/w500/rhF6vYFVCaPCs7CgDqg3n4mNod3.jpg"
     },
     {
       "year": 1936,
       "title": "Mutiny on the Bounty",
       "creator": "Frank Lloyd",
-      "release_year": 1935
+      "release_year": 1935,
+      "tmdb": 12311,
+      "cover": "https://image.tmdb.org/t/p/w500/GD98ozz6F6tSu8BWGulpseEKhv.jpg"
     },
     {
       "year": 1935,
       "title": "It Happened One Night",
       "creator": "Frank Capra",
-      "release_year": 1934
+      "release_year": 1934,
+      "tmdb": 3078,
+      "cover": "https://image.tmdb.org/t/p/w500/2PNUGWAflH6UUumas0POMmokHlc.jpg"
     },
     {
       "year": 1934,
       "title": "Cavalcade",
       "creator": "Frank Lloyd",
-      "release_year": 1932
+      "release_year": 1933,
+      "tmdb": 56164,
+      "cover": "https://image.tmdb.org/t/p/w500/a6yld4HmB49b9CP9wmv3wcwk65K.jpg"
     },
     {
       "year": 1933,
       "title": "Grand Hotel",
       "creator": "Edmund Goulding",
-      "release_year": 1931
+      "release_year": 1932,
+      "tmdb": 33680,
+      "cover": "https://image.tmdb.org/t/p/w500/g8xrpXJWzz91R4jL8ybMKMValB2.jpg"
     },
     {
       "year": 1932,
       "title": "Cimarron",
       "creator": "Wesley Ruggles",
-      "release_year": 1930
+      "release_year": 1931,
+      "tmdb": 42861,
+      "cover": "https://image.tmdb.org/t/p/w500/cqvfhi9s1VsTgXcV1B7vX0Cb1qA.jpg"
     },
     {
       "year": 1931,
       "title": "All Quiet on the Western Front",
       "creator": "Lewis Milestone",
-      "release_year": 1929
+      "release_year": 1930,
+      "tmdb": 143,
+      "cover": "https://image.tmdb.org/t/p/w500/1wZUB08igw8iLUgF1r4T6aJD65b.jpg"
     },
     {
       "year": 1930,
       "title": "The Broadway Melody",
       "creator": "Harry Beaumont",
-      "release_year": 1928
+      "release_year": 1929,
+      "tmdb": 65203,
+      "cover": "https://image.tmdb.org/t/p/w500/giq8GJs8YGMzHxeKxNSuwzAdd1c.jpg"
     },
     {
       "year": 1929,
       "title": "Wings",
       "creator": "William A. Wellman",
-      "release_year": 1927
+      "release_year": 1927,
+      "tmdb": 28966,
+      "cover": "https://image.tmdb.org/t/p/w500/kEl6KCBgdmT1Nex3ka0EIWAOmtm.jpg"
     }
   ]
 }

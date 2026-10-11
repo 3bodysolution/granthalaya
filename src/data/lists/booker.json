@@ -3,67 +3,433 @@
   "title": "Booker Prize winners",
   "kind": "book",
   "intro": "Every winner of the Booker Prize, given each year since 1969 for the best novel written in English and published in the UK and Ireland.",
-  "source": { "name": "The Booker Prizes", "url": "https://thebookerprizes.com/the-booker-library/prize-years" },
+  "source": {
+    "name": "The Booker Prizes",
+    "url": "https://thebookerprizes.com/the-booker-library/prize-years"
+  },
   "items": [
-    { "year": 2025, "title": "Flesh", "creator": "David Szalay" },
-    { "year": 2024, "title": "Orbital", "creator": "Samantha Harvey" },
-    { "year": 2023, "title": "Prophet Song", "creator": "Paul Lynch" },
-    { "year": 2022, "title": "The Seven Moons of Maali Almeida", "creator": "Shehan Karunatilaka" },
-    { "year": 2021, "title": "The Promise", "creator": "Damon Galgut" },
-    { "year": 2020, "title": "Shuggie Bain", "creator": "Douglas Stuart" },
-    { "year": 2019, "title": "The Testaments", "creator": "Margaret Atwood", "note": "Joint winner" },
-    { "year": 2019, "title": "Girl, Woman, Other", "creator": "Bernardine Evaristo", "note": "Joint winner" },
-    { "year": 2018, "title": "Milkman", "creator": "Anna Burns" },
-    { "year": 2017, "title": "Lincoln in the Bardo", "creator": "George Saunders" },
-    { "year": 2016, "title": "The Sellout", "creator": "Paul Beatty" },
-    { "year": 2015, "title": "A Brief History of Seven Killings", "creator": "Marlon James" },
-    { "year": 2014, "title": "The Narrow Road to the Deep North", "creator": "Richard Flanagan" },
-    { "year": 2013, "title": "The Luminaries", "creator": "Eleanor Catton" },
-    { "year": 2012, "title": "Bring Up the Bodies", "creator": "Hilary Mantel" },
-    { "year": 2011, "title": "The Sense of an Ending", "creator": "Julian Barnes" },
-    { "year": 2010, "title": "The Finkler Question", "creator": "Howard Jacobson" },
-    { "year": 2009, "title": "Wolf Hall", "creator": "Hilary Mantel" },
-    { "year": 2008, "title": "The White Tiger", "creator": "Aravind Adiga" },
-    { "year": 2007, "title": "The Gathering", "creator": "Anne Enright" },
-    { "year": 2006, "title": "The Inheritance of Loss", "creator": "Kiran Desai" },
-    { "year": 2005, "title": "The Sea", "creator": "John Banville" },
-    { "year": 2004, "title": "The Line of Beauty", "creator": "Alan Hollinghurst" },
-    { "year": 2003, "title": "Vernon God Little", "creator": "DBC Pierre" },
-    { "year": 2002, "title": "Life of Pi", "creator": "Yann Martel" },
-    { "year": 2001, "title": "True History of the Kelly Gang", "creator": "Peter Carey" },
-    { "year": 2000, "title": "The Blind Assassin", "creator": "Margaret Atwood" },
-    { "year": 1999, "title": "Disgrace", "creator": "J. M. Coetzee" },
-    { "year": 1998, "title": "Amsterdam", "creator": "Ian McEwan" },
-    { "year": 1997, "title": "The God of Small Things", "creator": "Arundhati Roy" },
-    { "year": 1996, "title": "Last Orders", "creator": "Graham Swift" },
-    { "year": 1995, "title": "The Ghost Road", "creator": "Pat Barker" },
-    { "year": 1994, "title": "How Late It Was, How Late", "creator": "James Kelman" },
-    { "year": 1993, "title": "Paddy Clarke Ha Ha Ha", "creator": "Roddy Doyle" },
-    { "year": 1992, "title": "The English Patient", "creator": "Michael Ondaatje", "note": "Joint winner" },
-    { "year": 1992, "title": "Sacred Hunger", "creator": "Barry Unsworth", "note": "Joint winner" },
-    { "year": 1991, "title": "The Famished Road", "creator": "Ben Okri" },
-    { "year": 1990, "title": "Possession", "creator": "A. S. Byatt" },
-    { "year": 1989, "title": "The Remains of the Day", "creator": "Kazuo Ishiguro" },
-    { "year": 1988, "title": "Oscar and Lucinda", "creator": "Peter Carey" },
-    { "year": 1987, "title": "Moon Tiger", "creator": "Penelope Lively" },
-    { "year": 1986, "title": "The Old Devils", "creator": "Kingsley Amis" },
-    { "year": 1985, "title": "The Bone People", "creator": "Keri Hulme" },
-    { "year": 1984, "title": "Hotel du Lac", "creator": "Anita Brookner" },
-    { "year": 1983, "title": "Life & Times of Michael K", "creator": "J. M. Coetzee" },
-    { "year": 1982, "title": "Schindler's Ark", "creator": "Thomas Keneally" },
-    { "year": 1981, "title": "Midnight's Children", "creator": "Salman Rushdie" },
-    { "year": 1980, "title": "Rites of Passage", "creator": "William Golding" },
-    { "year": 1979, "title": "Offshore", "creator": "Penelope Fitzgerald" },
-    { "year": 1978, "title": "The Sea, the Sea", "creator": "Iris Murdoch" },
-    { "year": 1977, "title": "Staying On", "creator": "Paul Scott" },
-    { "year": 1976, "title": "Saville", "creator": "David Storey" },
-    { "year": 1975, "title": "Heat and Dust", "creator": "Ruth Prawer Jhabvala" },
-    { "year": 1974, "title": "The Conservationist", "creator": "Nadine Gordimer", "note": "Joint winner" },
-    { "year": 1974, "title": "Holiday", "creator": "Stanley Middleton", "note": "Joint winner" },
-    { "year": 1973, "title": "The Siege of Krishnapur", "creator": "J. G. Farrell" },
-    { "year": 1972, "title": "G.", "creator": "John Berger" },
-    { "year": 1971, "title": "In a Free State", "creator": "V. S. Naipaul" },
-    { "year": 1970, "title": "The Elected Member", "creator": "Bernice Rubens" },
-    { "year": 1969, "title": "Something to Answer For", "creator": "P. H. Newby" }
+    {
+      "year": 2025,
+      "title": "Flesh",
+      "creator": "David Szalay",
+      "ol": "OL42549900W",
+      "cover": "https://covers.openlibrary.org/b/id/15110590-L.jpg"
+    },
+    {
+      "year": 2024,
+      "title": "Orbital",
+      "creator": "Samantha Harvey",
+      "ol": "OL35708581W",
+      "cover": "https://covers.openlibrary.org/b/id/14541972-L.jpg"
+    },
+    {
+      "year": 2023,
+      "title": "Prophet Song",
+      "creator": "Paul Lynch",
+      "ol": "OL34341539W",
+      "cover": "https://covers.openlibrary.org/b/id/14814200-L.jpg"
+    },
+    {
+      "year": 2022,
+      "title": "The Seven Moons of Maali Almeida",
+      "creator": "Shehan Karunatilaka",
+      "ol": "OL27816355W",
+      "cover": "https://covers.openlibrary.org/b/id/13822859-L.jpg"
+    },
+    {
+      "year": 2021,
+      "title": "The Promise",
+      "creator": "Damon Galgut",
+      "ol": "OL24764083W",
+      "cover": "https://covers.openlibrary.org/b/id/11514543-L.jpg"
+    },
+    {
+      "year": 2020,
+      "title": "Shuggie Bain",
+      "creator": "Douglas Stuart",
+      "ol": "OL20645179W",
+      "cover": "https://covers.openlibrary.org/b/id/9271540-L.jpg"
+    },
+    {
+      "year": 2019,
+      "title": "The Testaments",
+      "creator": "Margaret Atwood",
+      "note": "Joint winner",
+      "ol": "OL20129837W",
+      "cover": "https://covers.openlibrary.org/b/id/12366815-L.jpg"
+    },
+    {
+      "year": 2019,
+      "title": "Girl, Woman, Other",
+      "creator": "Bernardine Evaristo",
+      "note": "Joint winner",
+      "ol": "OL20470196W",
+      "cover": "https://covers.openlibrary.org/b/id/9134982-L.jpg"
+    },
+    {
+      "year": 2018,
+      "title": "Milkman",
+      "creator": "Anna Burns",
+      "ol": "OL19344016W",
+      "cover": "https://covers.openlibrary.org/b/id/13561491-L.jpg"
+    },
+    {
+      "year": 2017,
+      "title": "Lincoln in the Bardo",
+      "creator": "George Saunders",
+      "ol": "OL17635834W",
+      "cover": "https://covers.openlibrary.org/b/id/7909378-L.jpg"
+    },
+    {
+      "year": 2016,
+      "title": "The Sellout",
+      "creator": "Paul Beatty",
+      "ol": "OL17616758W",
+      "cover": "https://covers.openlibrary.org/b/id/7897222-L.jpg"
+    },
+    {
+      "year": 2015,
+      "title": "A Brief History of Seven Killings",
+      "creator": "Marlon James",
+      "ol": "OL17187702W",
+      "cover": "https://covers.openlibrary.org/b/id/7359856-L.jpg"
+    },
+    {
+      "year": 2014,
+      "title": "The Narrow Road to the Deep North",
+      "creator": "Richard Flanagan",
+      "ol": "OL17064845W",
+      "cover": "https://covers.openlibrary.org/b/id/7307756-L.jpg"
+    },
+    {
+      "year": 2013,
+      "title": "The Luminaries",
+      "creator": "Eleanor Catton",
+      "ol": "OL16810597W",
+      "cover": "https://covers.openlibrary.org/b/id/7268574-L.jpg"
+    },
+    {
+      "year": 2012,
+      "title": "Bring Up the Bodies",
+      "creator": "Hilary Mantel",
+      "ol": "OL16547664W",
+      "cover": "https://covers.openlibrary.org/b/id/10236749-L.jpg"
+    },
+    {
+      "year": 2011,
+      "title": "The Sense of an Ending",
+      "creator": "Julian Barnes",
+      "ol": "OL15991772W",
+      "cover": "https://covers.openlibrary.org/b/id/6997514-L.jpg"
+    },
+    {
+      "year": 2010,
+      "title": "The Finkler Question",
+      "creator": "Howard Jacobson",
+      "ol": "OL15899388W",
+      "cover": "https://covers.openlibrary.org/b/id/10387493-L.jpg"
+    },
+    {
+      "year": 2009,
+      "title": "Wolf Hall",
+      "creator": "Hilary Mantel",
+      "ol": "OL464512W",
+      "cover": "https://covers.openlibrary.org/b/id/8345848-L.jpg"
+    },
+    {
+      "year": 2008,
+      "title": "The White Tiger",
+      "creator": "Aravind Adiga",
+      "ol": "OL9740815W",
+      "cover": "https://covers.openlibrary.org/b/id/2787359-L.jpg"
+    },
+    {
+      "year": 2007,
+      "title": "The Gathering",
+      "creator": "Anne Enright",
+      "ol": "OL5869525W",
+      "cover": "https://covers.openlibrary.org/b/id/2762480-L.jpg"
+    },
+    {
+      "year": 2006,
+      "title": "The Inheritance of Loss",
+      "creator": "Kiran Desai",
+      "ol": "OL97945W",
+      "cover": "https://covers.openlibrary.org/b/id/5728169-L.jpg"
+    },
+    {
+      "year": 2005,
+      "title": "The Sea",
+      "creator": "John Banville",
+      "ol": "OL2687259W",
+      "cover": "https://covers.openlibrary.org/b/id/197928-L.jpg"
+    },
+    {
+      "year": 2004,
+      "title": "The Line of Beauty",
+      "creator": "Alan Hollinghurst",
+      "ol": "OL1993508W",
+      "cover": "https://covers.openlibrary.org/b/id/8310475-L.jpg"
+    },
+    {
+      "year": 2003,
+      "title": "Vernon God Little",
+      "creator": "DBC Pierre",
+      "ol": "OL5704311W",
+      "cover": "https://covers.openlibrary.org/b/id/115775-L.jpg"
+    },
+    {
+      "year": 2002,
+      "title": "Life of Pi",
+      "creator": "Yann Martel",
+      "ol": "OL2827199W",
+      "cover": "https://covers.openlibrary.org/b/id/12840573-L.jpg"
+    },
+    {
+      "year": 2001,
+      "title": "True History of the Kelly Gang",
+      "creator": "Peter Carey",
+      "ol": "OL1707638W",
+      "cover": "https://covers.openlibrary.org/b/id/229512-L.jpg"
+    },
+    {
+      "year": 2000,
+      "title": "The Blind Assassin",
+      "creator": "Margaret Atwood",
+      "ol": "OL675698W",
+      "cover": "https://covers.openlibrary.org/b/id/11041760-L.jpg"
+    },
+    {
+      "year": 1999,
+      "title": "Disgrace",
+      "creator": "J. M. Coetzee",
+      "ol": "OL500451W",
+      "cover": "https://covers.openlibrary.org/b/id/11434870-L.jpg"
+    },
+    {
+      "year": 1998,
+      "title": "Amsterdam",
+      "creator": "Ian McEwan",
+      "ol": "OL1855943W",
+      "cover": "https://covers.openlibrary.org/b/id/241742-L.jpg"
+    },
+    {
+      "year": 1997,
+      "title": "The God of Small Things",
+      "creator": "Arundhati Roy",
+      "ol": "OL1052133W",
+      "cover": "https://covers.openlibrary.org/b/id/10513792-L.jpg"
+    },
+    {
+      "year": 1996,
+      "title": "Last Orders",
+      "creator": "Graham Swift",
+      "ol": "OL3260505W",
+      "cover": "https://covers.openlibrary.org/b/id/421413-L.jpg"
+    },
+    {
+      "year": 1995,
+      "title": "The Ghost Road",
+      "creator": "Pat Barker",
+      "ol": "OL11221644W",
+      "cover": "https://covers.openlibrary.org/b/id/6618172-L.jpg"
+    },
+    {
+      "year": 1994,
+      "title": "How Late It Was, How Late",
+      "creator": "James Kelman",
+      "ol": "OL60988W",
+      "cover": "https://covers.openlibrary.org/b/id/239132-L.jpg"
+    },
+    {
+      "year": 1993,
+      "title": "Paddy Clarke Ha Ha Ha",
+      "creator": "Roddy Doyle",
+      "ol": "OL762615W",
+      "cover": "https://covers.openlibrary.org/b/id/8259705-L.jpg"
+    },
+    {
+      "year": 1992,
+      "title": "The English Patient",
+      "creator": "Michael Ondaatje",
+      "note": "Joint winner",
+      "ol": "OL53071W",
+      "cover": "https://covers.openlibrary.org/b/id/417585-L.jpg"
+    },
+    {
+      "year": 1992,
+      "title": "Sacred Hunger",
+      "creator": "Barry Unsworth",
+      "note": "Joint winner",
+      "ol": "OL452766W",
+      "cover": "https://covers.openlibrary.org/b/id/248781-L.jpg"
+    },
+    {
+      "year": 1991,
+      "title": "The Famished Road",
+      "creator": "Ben Okri",
+      "ol": "OL928455W",
+      "cover": "https://covers.openlibrary.org/b/id/13858305-L.jpg"
+    },
+    {
+      "year": 1990,
+      "title": "Possession",
+      "creator": "A. S. Byatt",
+      "ol": "OL115647W",
+      "cover": "https://covers.openlibrary.org/b/id/420243-L.jpg"
+    },
+    {
+      "year": 1989,
+      "title": "The Remains of the Day",
+      "creator": "Kazuo Ishiguro",
+      "ol": "OL59048W",
+      "cover": "https://covers.openlibrary.org/b/id/95742-L.jpg"
+    },
+    {
+      "year": 1988,
+      "title": "Oscar and Lucinda",
+      "creator": "Peter Carey",
+      "ol": "OL1707618W",
+      "cover": "https://covers.openlibrary.org/b/id/421810-L.jpg"
+    },
+    {
+      "year": 1987,
+      "title": "Moon Tiger",
+      "creator": "Penelope Lively",
+      "ol": "OL1983042W",
+      "cover": "https://covers.openlibrary.org/b/id/4139250-L.jpg"
+    },
+    {
+      "year": 1986,
+      "title": "The Old Devils",
+      "creator": "Kingsley Amis",
+      "ol": "OL10425070W",
+      "cover": "https://covers.openlibrary.org/b/id/4171882-L.jpg"
+    },
+    {
+      "year": 1985,
+      "title": "The Bone People",
+      "creator": "Keri Hulme",
+      "ol": "OL3991459W",
+      "cover": "https://covers.openlibrary.org/b/id/3080172-L.jpg"
+    },
+    {
+      "year": 1984,
+      "title": "Hotel du Lac",
+      "creator": "Anita Brookner",
+      "ol": "OL166437W",
+      "cover": "https://covers.openlibrary.org/b/id/4193156-L.jpg"
+    },
+    {
+      "year": 1983,
+      "title": "Life & Times of Michael K",
+      "creator": "J. M. Coetzee",
+      "ol": "OL500448W",
+      "cover": "https://covers.openlibrary.org/b/id/12703026-L.jpg"
+    },
+    {
+      "year": 1982,
+      "title": "Schindler's Ark",
+      "creator": "Thomas Keneally",
+      "ol": "OL10619574W",
+      "cover": "https://covers.openlibrary.org/b/id/6458534-L.jpg"
+    },
+    {
+      "year": 1981,
+      "title": "Midnight's Children",
+      "creator": "Salman Rushdie",
+      "ol": "OL457179W",
+      "cover": "https://covers.openlibrary.org/b/id/8346713-L.jpg"
+    },
+    {
+      "year": 1980,
+      "title": "Rites of Passage",
+      "creator": "William Golding",
+      "ol": "OL43071707W"
+    },
+    {
+      "year": 1979,
+      "title": "Offshore",
+      "creator": "Penelope Fitzgerald",
+      "ol": "OL20790W",
+      "cover": "https://covers.openlibrary.org/b/id/745238-L.jpg"
+    },
+    {
+      "year": 1978,
+      "title": "The Sea, the Sea",
+      "creator": "Iris Murdoch",
+      "ol": "OL1326310W",
+      "cover": "https://covers.openlibrary.org/b/id/5277962-L.jpg"
+    },
+    {
+      "year": 1977,
+      "title": "Staying On",
+      "creator": "Paul Scott",
+      "ol": "OL1829451W",
+      "cover": "https://covers.openlibrary.org/b/id/6888943-L.jpg"
+    },
+    {
+      "year": 1976,
+      "title": "Saville",
+      "creator": "David Storey",
+      "ol": "OL646551W",
+      "cover": "https://covers.openlibrary.org/b/id/5525678-L.jpg"
+    },
+    {
+      "year": 1975,
+      "title": "Heat and Dust",
+      "creator": "Ruth Prawer Jhabvala",
+      "ol": "OL335547W",
+      "cover": "https://covers.openlibrary.org/b/id/845001-L.jpg"
+    },
+    {
+      "year": 1974,
+      "title": "The Conservationist",
+      "creator": "Nadine Gordimer",
+      "note": "Joint winner",
+      "ol": "OL118280W",
+      "cover": "https://covers.openlibrary.org/b/id/138568-L.jpg"
+    },
+    {
+      "year": 1974,
+      "title": "Holiday",
+      "creator": "Stanley Middleton",
+      "note": "Joint winner",
+      "ol": "OL2466701W"
+    },
+    {
+      "year": 1973,
+      "title": "The Siege of Krishnapur",
+      "creator": "J. G. Farrell",
+      "ol": "OL2694535W",
+      "cover": "https://covers.openlibrary.org/b/id/859123-L.jpg"
+    },
+    {
+      "year": 1972,
+      "title": "G.",
+      "creator": "John Berger",
+      "ol": "OL1980236W",
+      "cover": "https://covers.openlibrary.org/b/id/420280-L.jpg"
+    },
+    {
+      "year": 1971,
+      "title": "In a Free State",
+      "creator": "V. S. Naipaul",
+      "ol": "OL103104W",
+      "cover": "https://covers.openlibrary.org/b/id/93425-L.jpg"
+    },
+    {
+      "year": 1970,
+      "title": "The Elected Member",
+      "creator": "Bernice Rubens",
+      "ol": "OL2143620W",
+      "cover": "https://covers.openlibrary.org/b/id/7299296-L.jpg"
+    },
+    {
+      "year": 1969,
+      "title": "Something to Answer For",
+      "creator": "P. H. Newby",
+      "ol": "OL1283495W"
+    }
   ]
 }

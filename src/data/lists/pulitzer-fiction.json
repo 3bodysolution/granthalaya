@@ -3,70 +3,449 @@
   "title": "Pulitzer Prize for Fiction winners",
   "kind": "book",
   "intro": "Every winner of the Pulitzer Prize for Fiction since 1960, given each year for distinguished fiction by an American author.",
-  "source": { "name": "The Pulitzer Prizes", "url": "https://www.pulitzer.org/prize-winners-by-category/219" },
+  "source": {
+    "name": "The Pulitzer Prizes",
+    "url": "https://www.pulitzer.org/prize-winners-by-category/219"
+  },
   "items": [
-    { "year": 2026, "title": "Angel Down", "creator": "Daniel Kraus" },
-    { "year": 2025, "title": "James", "creator": "Percival Everett" },
-    { "year": 2024, "title": "Night Watch", "creator": "Jayne Anne Phillips" },
-    { "year": 2023, "title": "Demon Copperhead", "creator": "Barbara Kingsolver", "note": "Joint winner" },
-    { "year": 2023, "title": "Trust", "creator": "Hernan Diaz", "note": "Joint winner" },
-    { "year": 2022, "title": "The Netanyahus", "creator": "Joshua Cohen" },
-    { "year": 2021, "title": "The Night Watchman", "creator": "Louise Erdrich" },
-    { "year": 2020, "title": "The Nickel Boys", "creator": "Colson Whitehead" },
-    { "year": 2019, "title": "The Overstory", "creator": "Richard Powers" },
-    { "year": 2018, "title": "Less", "creator": "Andrew Sean Greer" },
-    { "year": 2017, "title": "The Underground Railroad", "creator": "Colson Whitehead" },
-    { "year": 2016, "title": "The Sympathizer", "creator": "Viet Thanh Nguyen" },
-    { "year": 2015, "title": "All the Light We Cannot See", "creator": "Anthony Doerr" },
-    { "year": 2014, "title": "The Goldfinch", "creator": "Donna Tartt" },
-    { "year": 2013, "title": "The Orphan Master's Son", "creator": "Adam Johnson" },
-    { "year": 2011, "title": "A Visit from the Goon Squad", "creator": "Jennifer Egan" },
-    { "year": 2010, "title": "Tinkers", "creator": "Paul Harding" },
-    { "year": 2009, "title": "Olive Kitteridge", "creator": "Elizabeth Strout" },
-    { "year": 2008, "title": "The Brief Wondrous Life of Oscar Wao", "creator": "Junot Díaz" },
-    { "year": 2007, "title": "The Road", "creator": "Cormac McCarthy" },
-    { "year": 2006, "title": "March", "creator": "Geraldine Brooks" },
-    { "year": 2005, "title": "Gilead", "creator": "Marilynne Robinson" },
-    { "year": 2004, "title": "The Known World", "creator": "Edward P. Jones" },
-    { "year": 2003, "title": "Middlesex", "creator": "Jeffrey Eugenides" },
-    { "year": 2002, "title": "Empire Falls", "creator": "Richard Russo" },
-    { "year": 2001, "title": "The Amazing Adventures of Kavalier & Clay", "creator": "Michael Chabon" },
-    { "year": 2000, "title": "Interpreter of Maladies", "creator": "Jhumpa Lahiri" },
-    { "year": 1999, "title": "The Hours", "creator": "Michael Cunningham" },
-    { "year": 1998, "title": "American Pastoral", "creator": "Philip Roth" },
-    { "year": 1997, "title": "Martin Dressler: The Tale of an American Dreamer", "creator": "Steven Millhauser" },
-    { "year": 1996, "title": "Independence Day", "creator": "Richard Ford" },
-    { "year": 1995, "title": "The Stone Diaries", "creator": "Carol Shields" },
-    { "year": 1994, "title": "The Shipping News", "creator": "Annie Proulx" },
-    { "year": 1993, "title": "A Good Scent from a Strange Mountain", "creator": "Robert Olen Butler" },
-    { "year": 1992, "title": "A Thousand Acres", "creator": "Jane Smiley" },
-    { "year": 1991, "title": "Rabbit at Rest", "creator": "John Updike" },
-    { "year": 1990, "title": "The Mambo Kings Play Songs of Love", "creator": "Oscar Hijuelos" },
-    { "year": 1989, "title": "Breathing Lessons", "creator": "Anne Tyler" },
-    { "year": 1988, "title": "Beloved", "creator": "Toni Morrison" },
-    { "year": 1987, "title": "A Summons to Memphis", "creator": "Peter Taylor" },
-    { "year": 1986, "title": "Lonesome Dove", "creator": "Larry McMurtry" },
-    { "year": 1985, "title": "Foreign Affairs", "creator": "Alison Lurie" },
-    { "year": 1984, "title": "Ironweed", "creator": "William Kennedy" },
-    { "year": 1983, "title": "The Color Purple", "creator": "Alice Walker" },
-    { "year": 1982, "title": "Rabbit Is Rich", "creator": "John Updike" },
-    { "year": 1981, "title": "A Confederacy of Dunces", "creator": "John Kennedy Toole", "note": "Published after the author's death" },
-    { "year": 1980, "title": "The Executioner's Song", "creator": "Norman Mailer" },
-    { "year": 1979, "title": "The Stories of John Cheever", "creator": "John Cheever" },
-    { "year": 1978, "title": "Elbow Room", "creator": "James Alan McPherson" },
-    { "year": 1976, "title": "Humboldt's Gift", "creator": "Saul Bellow" },
-    { "year": 1975, "title": "The Killer Angels", "creator": "Michael Shaara" },
-    { "year": 1973, "title": "The Optimist's Daughter", "creator": "Eudora Welty" },
-    { "year": 1972, "title": "Angle of Repose", "creator": "Wallace Stegner" },
-    { "year": 1970, "title": "The Collected Stories of Jean Stafford", "creator": "Jean Stafford" },
-    { "year": 1969, "title": "House Made of Dawn", "creator": "N. Scott Momaday" },
-    { "year": 1968, "title": "The Confessions of Nat Turner", "creator": "William Styron" },
-    { "year": 1967, "title": "The Fixer", "creator": "Bernard Malamud" },
-    { "year": 1966, "title": "The Collected Stories of Katherine Anne Porter", "creator": "Katherine Anne Porter" },
-    { "year": 1965, "title": "The Keepers of the House", "creator": "Shirley Ann Grau" },
-    { "year": 1963, "title": "The Reivers", "creator": "William Faulkner" },
-    { "year": 1962, "title": "The Edge of Sadness", "creator": "Edwin O'Connor" },
-    { "year": 1961, "title": "To Kill a Mockingbird", "creator": "Harper Lee" },
-    { "year": 1960, "title": "Advise and Consent", "creator": "Allen Drury" }
+    {
+      "year": 2026,
+      "title": "Angel Down",
+      "creator": "Daniel Kraus",
+      "ol": "OL42432023W",
+      "cover": "https://covers.openlibrary.org/b/id/15110807-L.jpg"
+    },
+    {
+      "year": 2025,
+      "title": "James",
+      "creator": "Percival Everett",
+      "ol": "OL36506504W",
+      "cover": "https://covers.openlibrary.org/b/id/15094964-L.jpg"
+    },
+    {
+      "year": 2024,
+      "title": "Night Watch",
+      "creator": "Jayne Anne Phillips",
+      "ol": "OL36740939W",
+      "cover": "https://covers.openlibrary.org/b/id/14662363-L.jpg"
+    },
+    {
+      "year": 2023,
+      "title": "Demon Copperhead",
+      "creator": "Barbara Kingsolver",
+      "note": "Joint winner",
+      "ol": "OL27052926W",
+      "cover": "https://covers.openlibrary.org/b/id/13141227-L.jpg"
+    },
+    {
+      "year": 2023,
+      "title": "Trust",
+      "creator": "Hernan Diaz",
+      "note": "Joint winner",
+      "ol": "OL25916696W",
+      "cover": "https://covers.openlibrary.org/b/id/12742248-L.jpg"
+    },
+    {
+      "year": 2022,
+      "title": "The Netanyahus",
+      "creator": "Joshua Cohen",
+      "ol": "OL24347925W",
+      "cover": "https://covers.openlibrary.org/b/id/10872251-L.jpg"
+    },
+    {
+      "year": 2021,
+      "title": "The Night Watchman",
+      "creator": "Louise Erdrich",
+      "ol": "OL20649930W",
+      "cover": "https://covers.openlibrary.org/b/id/9286141-L.jpg"
+    },
+    {
+      "year": 2020,
+      "title": "The Nickel Boys",
+      "creator": "Colson Whitehead",
+      "ol": "OL20072032W",
+      "cover": "https://covers.openlibrary.org/b/id/8747820-L.jpg"
+    },
+    {
+      "year": 2019,
+      "title": "The Overstory",
+      "creator": "Richard Powers",
+      "ol": "OL19074847W",
+      "cover": "https://covers.openlibrary.org/b/id/8758252-L.jpg"
+    },
+    {
+      "year": 2018,
+      "title": "Less",
+      "creator": "Andrew Sean Greer",
+      "ol": "OL19710804W",
+      "cover": "https://covers.openlibrary.org/b/id/8596367-L.jpg"
+    },
+    {
+      "year": 2017,
+      "title": "The Underground Railroad",
+      "creator": "Colson Whitehead",
+      "ol": "OL17619932W",
+      "cover": "https://covers.openlibrary.org/b/id/7899016-L.jpg"
+    },
+    {
+      "year": 2016,
+      "title": "The Sympathizer",
+      "creator": "Viet Thanh Nguyen",
+      "ol": "OL17345497W",
+      "cover": "https://covers.openlibrary.org/b/id/7913176-L.jpg"
+    },
+    {
+      "year": 2015,
+      "title": "All the Light We Cannot See",
+      "creator": "Anthony Doerr",
+      "ol": "OL16821606W",
+      "cover": "https://covers.openlibrary.org/b/id/14559680-L.jpg"
+    },
+    {
+      "year": 2014,
+      "title": "The Goldfinch",
+      "creator": "Donna Tartt",
+      "ol": "OL16809803W",
+      "cover": "https://covers.openlibrary.org/b/id/8771366-L.jpg"
+    },
+    {
+      "year": 2013,
+      "title": "The Orphan Master's Son",
+      "creator": "Adam Johnson",
+      "ol": "OL16419990W",
+      "cover": "https://covers.openlibrary.org/b/id/8148374-L.jpg"
+    },
+    {
+      "year": 2011,
+      "title": "A Visit from the Goon Squad",
+      "creator": "Jennifer Egan",
+      "ol": "OL15026613W",
+      "cover": "https://covers.openlibrary.org/b/id/6452334-L.jpg"
+    },
+    {
+      "year": 2010,
+      "title": "Tinkers",
+      "creator": "Paul Harding",
+      "ol": "OL17432130W",
+      "cover": "https://covers.openlibrary.org/b/id/7566593-L.jpg"
+    },
+    {
+      "year": 2009,
+      "title": "Olive Kitteridge",
+      "creator": "Elizabeth Strout",
+      "ol": "OL26963W",
+      "cover": "https://covers.openlibrary.org/b/id/2733808-L.jpg"
+    },
+    {
+      "year": 2008,
+      "title": "The Brief Wondrous Life of Oscar Wao",
+      "creator": "Junot Díaz",
+      "ol": "OL7990014W",
+      "cover": "https://covers.openlibrary.org/b/id/12451659-L.jpg"
+    },
+    {
+      "year": 2007,
+      "title": "The Road",
+      "creator": "Cormac McCarthy",
+      "ol": "OL40873W",
+      "cover": "https://covers.openlibrary.org/b/id/198120-L.jpg"
+    },
+    {
+      "year": 2006,
+      "title": "March",
+      "creator": "Geraldine Brooks",
+      "ol": "OL2011279W",
+      "cover": "https://covers.openlibrary.org/b/id/14355980-L.jpg"
+    },
+    {
+      "year": 2005,
+      "title": "Gilead",
+      "creator": "Marilynne Robinson",
+      "ol": "OL1875009W",
+      "cover": "https://covers.openlibrary.org/b/id/1472533-L.jpg"
+    },
+    {
+      "year": 2004,
+      "title": "The Known World",
+      "creator": "Edward P. Jones",
+      "ol": "OL4112928W",
+      "cover": "https://covers.openlibrary.org/b/id/34376-L.jpg"
+    },
+    {
+      "year": 2003,
+      "title": "Middlesex",
+      "creator": "Jeffrey Eugenides",
+      "ol": "OL3951520W",
+      "cover": "https://covers.openlibrary.org/b/id/12367196-L.jpg"
+    },
+    {
+      "year": 2002,
+      "title": "Empire Falls",
+      "creator": "Richard Russo",
+      "ol": "OL3351636W",
+      "cover": "https://covers.openlibrary.org/b/id/418040-L.jpg"
+    },
+    {
+      "year": 2001,
+      "title": "The Amazing Adventures of Kavalier & Clay",
+      "creator": "Michael Chabon",
+      "ol": "OL119436W",
+      "cover": "https://covers.openlibrary.org/b/id/12745205-L.jpg"
+    },
+    {
+      "year": 2000,
+      "title": "Interpreter of Maladies",
+      "creator": "Jhumpa Lahiri",
+      "ol": "OL2001058W",
+      "cover": "https://covers.openlibrary.org/b/id/4915588-L.jpg"
+    },
+    {
+      "year": 1999,
+      "title": "The Hours",
+      "creator": "Michael Cunningham",
+      "ol": "OL30838W",
+      "cover": "https://covers.openlibrary.org/b/id/223032-L.jpg"
+    },
+    {
+      "year": 1998,
+      "title": "American Pastoral",
+      "creator": "Philip Roth",
+      "ol": "OL74666W",
+      "cover": "https://covers.openlibrary.org/b/id/9322643-L.jpg"
+    },
+    {
+      "year": 1997,
+      "title": "Martin Dressler: The Tale of an American Dreamer",
+      "creator": "Steven Millhauser"
+    },
+    {
+      "year": 1996,
+      "title": "Independence Day",
+      "creator": "Richard Ford",
+      "ol": "OL2465639W",
+      "cover": "https://covers.openlibrary.org/b/id/419341-L.jpg"
+    },
+    {
+      "year": 1995,
+      "title": "The Stone Diaries",
+      "creator": "Carol Shields",
+      "ol": "OL18343W",
+      "cover": "https://covers.openlibrary.org/b/id/8373400-L.jpg"
+    },
+    {
+      "year": 1994,
+      "title": "The Shipping News",
+      "creator": "Annie Proulx",
+      "ol": "OL456089W",
+      "cover": "https://covers.openlibrary.org/b/id/10522593-L.jpg"
+    },
+    {
+      "year": 1993,
+      "title": "A Good Scent from a Strange Mountain",
+      "creator": "Robert Olen Butler",
+      "ol": "OL41954W",
+      "cover": "https://covers.openlibrary.org/b/id/579229-L.jpg"
+    },
+    {
+      "year": 1992,
+      "title": "A Thousand Acres",
+      "creator": "Jane Smiley",
+      "ol": "OL108543W",
+      "cover": "https://covers.openlibrary.org/b/id/744977-L.jpg"
+    },
+    {
+      "year": 1991,
+      "title": "Rabbit at Rest",
+      "creator": "John Updike",
+      "ol": "OL463809W",
+      "cover": "https://covers.openlibrary.org/b/id/291207-L.jpg"
+    },
+    {
+      "year": 1990,
+      "title": "The Mambo Kings Play Songs of Love",
+      "creator": "Oscar Hijuelos",
+      "ol": "OL119224W",
+      "cover": "https://covers.openlibrary.org/b/id/37931-L.jpg"
+    },
+    {
+      "year": 1989,
+      "title": "Breathing Lessons",
+      "creator": "Anne Tyler",
+      "ol": "OL28305W",
+      "cover": "https://covers.openlibrary.org/b/id/4068258-L.jpg"
+    },
+    {
+      "year": 1988,
+      "title": "Beloved",
+      "creator": "Toni Morrison",
+      "ol": "OL50548W",
+      "cover": "https://covers.openlibrary.org/b/id/8261367-L.jpg"
+    },
+    {
+      "year": 1987,
+      "title": "A Summons to Memphis",
+      "creator": "Peter Taylor"
+    },
+    {
+      "year": 1986,
+      "title": "Lonesome Dove",
+      "creator": "Larry McMurtry",
+      "ol": "OL134601W",
+      "cover": "https://covers.openlibrary.org/b/id/8376548-L.jpg"
+    },
+    {
+      "year": 1985,
+      "title": "Foreign Affairs",
+      "creator": "Alison Lurie",
+      "ol": "OL108915W",
+      "cover": "https://covers.openlibrary.org/b/id/490735-L.jpg"
+    },
+    {
+      "year": 1984,
+      "title": "Ironweed",
+      "creator": "William Kennedy",
+      "ol": "OL198734W",
+      "cover": "https://covers.openlibrary.org/b/id/1364597-L.jpg"
+    },
+    {
+      "year": 1983,
+      "title": "The Color Purple",
+      "creator": "Alice Walker",
+      "ol": "OL273644W",
+      "cover": "https://covers.openlibrary.org/b/id/8564628-L.jpg"
+    },
+    {
+      "year": 1982,
+      "title": "Rabbit Is Rich",
+      "creator": "John Updike",
+      "ol": "OL463820W",
+      "cover": "https://covers.openlibrary.org/b/id/291193-L.jpg"
+    },
+    {
+      "year": 1981,
+      "title": "A Confederacy of Dunces",
+      "creator": "John Kennedy Toole",
+      "note": "Published after the author's death",
+      "ol": "OL3501723W",
+      "cover": "https://covers.openlibrary.org/b/id/2195715-L.jpg"
+    },
+    {
+      "year": 1980,
+      "title": "The Executioner's Song",
+      "creator": "Norman Mailer",
+      "ol": "OL10426574W",
+      "cover": "https://covers.openlibrary.org/b/id/6975866-L.jpg"
+    },
+    {
+      "year": 1979,
+      "title": "The Stories of John Cheever",
+      "creator": "John Cheever",
+      "ol": "OL1992157W",
+      "cover": "https://covers.openlibrary.org/b/id/229490-L.jpg"
+    },
+    {
+      "year": 1978,
+      "title": "Elbow Room",
+      "creator": "James Alan McPherson",
+      "ol": "OL504682W",
+      "cover": "https://covers.openlibrary.org/b/id/12180679-L.jpg"
+    },
+    {
+      "year": 1976,
+      "title": "Humboldt's Gift",
+      "creator": "Saul Bellow",
+      "ol": "OL506111W",
+      "cover": "https://covers.openlibrary.org/b/id/5411438-L.jpg"
+    },
+    {
+      "year": 1975,
+      "title": "The Killer Angels",
+      "creator": "Michael Shaara",
+      "ol": "OL82664W",
+      "cover": "https://covers.openlibrary.org/b/id/1921876-L.jpg"
+    },
+    {
+      "year": 1973,
+      "title": "The Optimist's Daughter",
+      "creator": "Eudora Welty",
+      "ol": "OL113982W",
+      "cover": "https://covers.openlibrary.org/b/id/228104-L.jpg"
+    },
+    {
+      "year": 1972,
+      "title": "Angle of Repose",
+      "creator": "Wallace Stegner",
+      "ol": "OL478213W",
+      "cover": "https://covers.openlibrary.org/b/id/96450-L.jpg"
+    },
+    {
+      "year": 1970,
+      "title": "The Collected Stories of Jean Stafford",
+      "creator": "Jean Stafford",
+      "ol": "OL4103776W",
+      "cover": "https://covers.openlibrary.org/b/id/156470-L.jpg"
+    },
+    {
+      "year": 1969,
+      "title": "House Made of Dawn",
+      "creator": "N. Scott Momaday",
+      "ol": "OL25930W",
+      "cover": "https://covers.openlibrary.org/b/id/3854522-L.jpg"
+    },
+    {
+      "year": 1968,
+      "title": "The Confessions of Nat Turner",
+      "creator": "William Styron",
+      "ol": "OL86542W",
+      "cover": "https://covers.openlibrary.org/b/id/12369340-L.jpg"
+    },
+    {
+      "year": 1967,
+      "title": "The Fixer",
+      "creator": "Bernard Malamud",
+      "ol": "OL1937854W",
+      "cover": "https://covers.openlibrary.org/b/id/225215-L.jpg"
+    },
+    {
+      "year": 1966,
+      "title": "The Collected Stories of Katherine Anne Porter",
+      "creator": "Katherine Anne Porter",
+      "ol": "OL43096115W"
+    },
+    {
+      "year": 1965,
+      "title": "The Keepers of the House",
+      "creator": "Shirley Ann Grau",
+      "ol": "OL2949615W",
+      "cover": "https://covers.openlibrary.org/b/id/588696-L.jpg"
+    },
+    {
+      "year": 1963,
+      "title": "The Reivers",
+      "creator": "William Faulkner",
+      "ol": "OL82913W",
+      "cover": "https://covers.openlibrary.org/b/id/8292220-L.jpg"
+    },
+    {
+      "year": 1962,
+      "title": "The Edge of Sadness",
+      "creator": "Edwin O'Connor",
+      "ol": "OL4652269W",
+      "cover": "https://covers.openlibrary.org/b/id/631964-L.jpg"
+    },
+    {
+      "year": 1961,
+      "title": "To Kill a Mockingbird",
+      "creator": "Harper Lee",
+      "ol": "OL3140822W",
+      "cover": "https://covers.openlibrary.org/b/id/14351077-L.jpg"
+    },
+    {
+      "year": 1960,
+      "title": "Advise and Consent",
+      "creator": "Allen Drury",
+      "ol": "OL56537W",
+      "cover": "https://covers.openlibrary.org/b/id/6942940-L.jpg"
+    }
   ]
 }

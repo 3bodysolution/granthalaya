@@ -22,7 +22,9 @@
       "creator": "Vinod Kumar Shukla",
       "original_title": "नौकर की कमीज़",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL10013682W",
+      "cover": "https://covers.openlibrary.org/b/id/15184501-L.jpg"
     },
     {
       "year": 2023,
@@ -38,7 +40,9 @@
       "creator": "Gulzar",
       "language": "ur",
       "pick": true,
-      "check": true
+      "check": true,
+      "ol": "OL11677787W",
+      "cover": "https://covers.openlibrary.org/b/id/13837647-L.jpg"
     },
     {
       "year": 2022,
@@ -46,7 +50,9 @@
       "creator": "Damodar Mauzo",
       "original_title": "कर्मेलीन",
       "language": "kok",
-      "pick": true
+      "pick": true,
+      "ol": "OL9082912W",
+      "cover": "https://covers.openlibrary.org/b/id/4885270-L.jpg"
     },
     {
       "year": 2020,
@@ -70,7 +76,9 @@
       "title": "The Shadow Lines",
       "creator": "Amitav Ghosh",
       "language": "en",
-      "pick": true
+      "pick": true,
+      "ol": "OL1054094W",
+      "cover": "https://covers.openlibrary.org/b/id/3069555-L.jpg"
     },
     {
       "year": 2017,
@@ -78,7 +86,9 @@
       "creator": "Krishna Sobti",
       "original_title": "ज़िन्दगीनामा",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL9095086W",
+      "cover": "https://covers.openlibrary.org/b/id/12749451-L.jpg"
     },
     {
       "year": 2016,
@@ -103,7 +113,9 @@
       "creator": "Bhalchandra Nemade",
       "original_title": "कोसला",
       "language": "mr",
-      "pick": true
+      "pick": true,
+      "ol": "OL22688286W",
+      "cover": "https://covers.openlibrary.org/b/id/10486246-L.jpg"
     },
     {
       "year": 2013,
@@ -127,7 +139,9 @@
       "creator": "Pratibha Ray",
       "original_title": "ଯାଜ୍ଞସେନୀ",
       "language": "or",
-      "pick": true
+      "pick": true,
+      "ol": "OL9082837W",
+      "cover": "https://covers.openlibrary.org/b/id/4889288-L.jpg"
     },
     {
       "year": 2010,
@@ -152,7 +166,8 @@
       "creator": "Shrilal Shukla",
       "original_title": "राग दरबारी",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL29131003W"
     },
     {
       "year": 2008,
@@ -185,7 +200,8 @@
       "creator": "Satya Vrat Shastri",
       "language": "sa",
       "pick": true,
-      "check": true
+      "check": true,
+      "ol": "OL325573W"
     },
     {
       "year": 2005,
@@ -236,7 +252,9 @@
       "creator": "Mamoni Raisom Goswami",
       "original_title": "ছিন্নমস্তাৰ মানুহটো",
       "language": "as",
-      "pick": true
+      "pick": true,
+      "ol": "OL16315522W",
+      "cover": "https://covers.openlibrary.org/b/id/10279632-L.jpg"
     },
     {
       "year": 1999,
@@ -244,7 +262,9 @@
       "creator": "Nirmal Verma",
       "original_title": "वे दिन",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL297003W",
+      "cover": "https://covers.openlibrary.org/b/id/6378191-L.jpg"
     },
     {
       "year": 1999,
@@ -260,7 +280,8 @@
       "creator": "Girish Karnad",
       "original_title": "ಹಯವದನ",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "ol": "OL1048539W"
     },
     {
       "year": 1997,
@@ -268,7 +289,8 @@
       "creator": "Ali Sardar Jafri",
       "language": "ur",
       "pick": true,
-      "check": true
+      "check": true,
+      "ol": "OL11536440W"
     },
     {
       "year": 1996,
@@ -284,7 +306,9 @@
       "creator": "M. T. Vasudevan Nair",
       "original_title": "രണ്ടാമൂഴം",
       "language": "ml",
-      "pick": true
+      "pick": true,
+      "ol": "OL20687333W",
+      "cover": "https://covers.openlibrary.org/b/id/9360354-L.jpg"
     },
     {
       "year": 1994,
@@ -292,7 +316,9 @@
       "creator": "U. R. Ananthamurthy",
       "original_title": "ಸಂಸ್ಕಾರ",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "ol": "OL22706567W",
+      "cover": "https://covers.openlibrary.org/b/id/10489454-L.jpg"
     },
     {
       "year": 1993,
@@ -326,7 +352,9 @@
       "creator": "Vinayaka Krishna Gokak",
       "original_title": "ಭಾರತ ಸಿಂಧೂ ರಶ್ಮಿ",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "ol": "OL360895W",
+      "cover": "https://covers.openlibrary.org/b/id/3928898-L.jpg"
     },
     {
       "year": 1989,
@@ -342,7 +370,8 @@
       "creator": "C. Narayana Reddy",
       "original_title": "విశ్వంభర",
       "language": "te",
-      "pick": true
+      "pick": true,
+      "ol": "OL43211468W"
     },
     {
       "year": 1987,
@@ -375,7 +404,9 @@
       "creator": "Thakazhi Sivasankara Pillai",
       "original_title": "ചെമ്മീൻ",
       "language": "ml",
-      "pick": true
+      "pick": true,
+      "ol": "OL8114771W",
+      "cover": "https://covers.openlibrary.org/b/id/15246165-L.jpg"
     },
     {
       "year": 1983,
@@ -383,14 +414,17 @@
       "creator": "Masti Venkatesha Iyengar",
       "original_title": "ಚಿಕವೀರ ರಾಜೇಂದ್ರ",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "ol": "OL63129W",
+      "cover": "https://covers.openlibrary.org/b/id/3929186-L.jpg"
     },
     {
       "year": 1982,
       "title": "Yama",
       "creator": "Mahadevi Varma",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL11665142W"
     },
     {
       "year": 1981,
@@ -404,14 +438,17 @@
       "title": "Oru Desathinte Katha",
       "creator": "S. K. Pottekkatt",
       "language": "ml",
-      "pick": true
+      "pick": true,
+      "ol": "OL24399260W",
+      "cover": "https://covers.openlibrary.org/b/id/10938369-L.jpg"
     },
     {
       "year": 1979,
       "title": "Mrityunjay",
       "creator": "Birendra Kumar Bhattacharya",
       "language": "as",
-      "pick": true
+      "pick": true,
+      "ol": "OL10498627W"
     },
     {
       "year": 1978,
@@ -446,7 +483,9 @@
       "title": "Yayati",
       "creator": "Vishnu Sakharam Khandekar",
       "language": "mr",
-      "pick": true
+      "pick": true,
+      "ol": "OL24539146W",
+      "cover": "https://covers.openlibrary.org/b/id/11177498-L.jpg"
     },
     {
       "year": 1973,
@@ -467,7 +506,9 @@
       "title": "Urvashi",
       "creator": "Ramdhari Singh Dinkar",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL297586W",
+      "cover": "https://covers.openlibrary.org/b/id/3724422-L.jpg"
     },
     {
       "year": 1971,
@@ -495,7 +536,8 @@
       "title": "Chidambara",
       "creator": "Sumitranandan Pant",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "ol": "OL324473W"
     },
     {
       "year": 1967,
@@ -516,7 +558,8 @@
       "title": "Ganadevata",
       "creator": "Tarasankar Bandyopadhyay",
       "language": "bn",
-      "pick": true
+      "pick": true,
+      "ol": "OL294984W"
     },
     {
       "year": 1965,

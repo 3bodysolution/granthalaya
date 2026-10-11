@@ -13,7 +13,9 @@
       "title": "Fjord",
       "language": "en",
       "creator": "Cristian Mungiu",
-      "release_year": 2026
+      "release_year": 2026,
+      "tmdb": 1401459,
+      "cover": "https://image.tmdb.org/t/p/w500/rhKlzjAJCEKUjxEk1qwr4bgbXlG.jpg"
     },
     {
       "year": 2025,
@@ -21,13 +23,17 @@
       "original_title": "یک تصادف ساده",
       "language": "fa",
       "creator": "Jafar Panahi",
-      "release_year": 2025
+      "release_year": 2025,
+      "tmdb": 1456349,
+      "cover": "https://image.tmdb.org/t/p/w500/eNYGj2DG3n8OrVPTfYunpPW9uas.jpg"
     },
     {
       "year": 2024,
       "title": "Anora",
       "creator": "Sean Baker",
-      "release_year": 2024
+      "release_year": 2024,
+      "tmdb": 1064213,
+      "cover": "https://image.tmdb.org/t/p/w500/cgXk2tNYhJZLXdBDO5DidAVzQ82.jpg"
     },
     {
       "year": 2023,
@@ -35,20 +41,26 @@
       "original_title": "Anatomie d'une chute",
       "language": "fr",
       "creator": "Justine Triet",
-      "release_year": 2023
+      "release_year": 2023,
+      "tmdb": 915935,
+      "cover": "https://image.tmdb.org/t/p/w500/1ho0d4LNZw3Y0voeKmSvPSgJOJ2.jpg"
     },
     {
       "year": 2022,
       "title": "Triangle of Sadness",
       "creator": "Ruben Östlund",
-      "release_year": 2022
+      "release_year": 2022,
+      "tmdb": 497828,
+      "cover": "https://image.tmdb.org/t/p/w500/k9eLozCgCed5FGTSdHu0bBElAV8.jpg"
     },
     {
       "year": 2021,
       "title": "Titane",
       "language": "fr",
       "creator": "Julia Ducournau",
-      "release_year": 2021
+      "release_year": 2021,
+      "tmdb": 630240,
+      "cover": "https://image.tmdb.org/t/p/w500/mBlpouG3gqB8WLdP65LCOXb3jFb.jpg"
     },
     {
       "year": 2019,
@@ -56,7 +68,9 @@
       "original_title": "기생충",
       "language": "ko",
       "creator": "Bong Joon Ho",
-      "release_year": 2019
+      "release_year": 2019,
+      "tmdb": 496243,
+      "cover": "https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg"
     },
     {
       "year": 2018,
@@ -64,7 +78,9 @@
       "original_title": "万引き家族",
       "language": "ja",
       "creator": "Hirokazu Kore-eda",
-      "release_year": 2018
+      "release_year": 2018,
+      "tmdb": 505192,
+      "cover": "https://image.tmdb.org/t/p/w500/4nfRUOv3LX5zLn98WS1WqVBk9E9.jpg"
     },
     {
       "year": 2018,
@@ -72,27 +88,35 @@
       "original_title": "Le Livre d'image",
       "language": "fr",
       "creator": "Jean-Luc Godard",
-      "release_year": 2018
+      "release_year": 2018,
+      "tmdb": 414030,
+      "cover": "https://image.tmdb.org/t/p/w500/5y1mTTYPVvaPeKIVqy3DymE6osv.jpg"
     },
     {
       "year": 2017,
       "title": "The Square",
       "language": "sv",
       "creator": "Ruben Östlund",
-      "release_year": 2017
+      "release_year": 2017,
+      "tmdb": 401246,
+      "cover": "https://image.tmdb.org/t/p/w500/pefcv5VNspSK4Dt8doei5bJmmln.jpg"
     },
     {
       "year": 2016,
       "title": "I, Daniel Blake",
       "creator": "Ken Loach",
-      "release_year": 2016
+      "release_year": 2016,
+      "tmdb": 374473,
+      "cover": "https://image.tmdb.org/t/p/w500/nu3WVABXz2W85N6JXTZOT1aWS3b.jpg"
     },
     {
       "year": 2015,
       "title": "Dheepan",
       "language": "ta",
       "creator": "Jacques Audiard",
-      "release_year": 2015
+      "release_year": 2015,
+      "tmdb": 314402,
+      "cover": "https://image.tmdb.org/t/p/w500/80wJKQZYa9FHrxfaTVxXePmXni7.jpg"
     },
     {
       "year": 2014,
@@ -100,7 +124,9 @@
       "original_title": "Kış Uykusu",
       "language": "tr",
       "creator": "Nuri Bilge Ceylan",
-      "release_year": 2014
+      "release_year": 2014,
+      "tmdb": 265169,
+      "cover": "https://image.tmdb.org/t/p/w500/95j83qOqH3Ivz4RYkaSjGT0VSNr.jpg"
     },
     {
       "year": 2013,
@@ -108,20 +134,26 @@
       "original_title": "La Vie d'Adèle: Chapitres 1 et 2",
       "language": "fr",
       "creator": "Abdellatif Kechiche, Léa Seydoux and Adèle Exarchopoulos",
-      "release_year": 2013
+      "release_year": 2013,
+      "tmdb": 152584,
+      "cover": "https://image.tmdb.org/t/p/w500/kgUk1wti2cvrptIgUz0VTAtSF6w.jpg"
     },
     {
       "year": 2012,
       "title": "Amour",
       "language": "fr",
       "creator": "Michael Haneke",
-      "release_year": 2012
+      "release_year": 2012,
+      "tmdb": 86837,
+      "cover": "https://image.tmdb.org/t/p/w500/19hyCudualHxCD0GrEngqsi0wBF.jpg"
     },
     {
       "year": 2011,
       "title": "The Tree of Life",
       "creator": "Terrence Malick",
-      "release_year": 2011
+      "release_year": 2011,
+      "tmdb": 8967,
+      "cover": "https://image.tmdb.org/t/p/w500/l8cwuB5WJSoj4uMAsnzuHBOMaSJ.jpg"
     },
     {
       "year": 2010,
@@ -129,7 +161,9 @@
       "original_title": "ลุงบุญมีระลึกชาติ",
       "language": "tts",
       "creator": "Apichatpong Weerasethakul",
-      "release_year": 2010
+      "release_year": 2010,
+      "tmdb": 38368,
+      "cover": "https://image.tmdb.org/t/p/w500/kPFkC9EBvllCIuDTR7A0DSEK6gJ.jpg"
     },
     {
       "year": 2009,
@@ -137,7 +171,9 @@
       "original_title": "Das weiße Band",
       "language": "de",
       "creator": "Michael Haneke",
-      "release_year": 2009
+      "release_year": 2009,
+      "tmdb": 37903,
+      "cover": "https://image.tmdb.org/t/p/w500/54dlnGDexrwAFlDb8HWKfmmX4LB.jpg"
     },
     {
       "year": 2008,
@@ -145,7 +181,9 @@
       "original_title": "Entre les murs",
       "language": "fr",
       "creator": "Laurent Cantet",
-      "release_year": 2008
+      "release_year": 2008,
+      "tmdb": 63193,
+      "cover": "https://image.tmdb.org/t/p/w500/w7UolFxzPi7ZA7LkglRotQ84g1g.jpg"
     },
     {
       "year": 2007,
@@ -153,41 +191,53 @@
       "original_title": "4 luni, 3 săptămâni și 2 zile",
       "language": "ro",
       "creator": "Cristian Mungiu",
-      "release_year": 2007
+      "release_year": 2007,
+      "tmdb": 2009,
+      "cover": "https://image.tmdb.org/t/p/w500/acEtvzFPeOQwbzRWncjRLenhnKV.jpg"
     },
     {
       "year": 2006,
       "title": "The Wind That Shakes the Barley",
       "language": "en",
       "creator": "Ken Loach",
-      "release_year": 2006
+      "release_year": 2006,
+      "tmdb": 1116,
+      "cover": "https://image.tmdb.org/t/p/w500/yCb4LweL6U7KTgSda3Wb7vHiA9J.jpg"
     },
     {
       "year": 2005,
       "title": "L'Enfant",
       "language": "fr",
       "creator": "Jean-Pierre and Luc Dardenne",
-      "release_year": 2005
+      "release_year": 2003,
+      "tmdb": 79298,
+      "cover": "https://image.tmdb.org/t/p/w500/8LTgtT2WQ3im8o0pAna1mzGot4N.jpg"
     },
     {
       "year": 2004,
       "title": "Fahrenheit 9/11",
       "language": "en",
       "creator": "Michael Moore",
-      "release_year": 2004
+      "release_year": 2004,
+      "tmdb": 1777,
+      "cover": "https://image.tmdb.org/t/p/w500/cZ7M343iuiMDc36fSeSm699XQFv.jpg"
     },
     {
       "year": 2003,
       "title": "Elephant",
       "creator": "Gus Van Sant",
-      "release_year": 2003
+      "release_year": 2003,
+      "tmdb": 1807,
+      "cover": "https://image.tmdb.org/t/p/w500/1a4VU9z2hxEvugHMK7VsobB9xTX.jpg"
     },
     {
       "year": 2002,
       "title": "The Pianist",
       "language": "en",
       "creator": "Roman Polanski",
-      "release_year": 2002
+      "release_year": 2002,
+      "tmdb": 423,
+      "cover": "https://image.tmdb.org/t/p/w500/2hFvxCCWrTmCYwfy7yum0GKRi3Y.jpg"
     },
     {
       "year": 2001,
@@ -195,20 +245,26 @@
       "original_title": "La stanza del figlio",
       "language": "it",
       "creator": "Nanni Moretti",
-      "release_year": 2001
+      "release_year": 2001,
+      "tmdb": 11447,
+      "cover": "https://image.tmdb.org/t/p/w500/e9s1Hvw9TcVZspbkq2V8Bmvhky1.jpg"
     },
     {
       "year": 2000,
       "title": "Dancer in the Dark",
       "creator": "Lars von Trier",
-      "release_year": 2000
+      "release_year": 2000,
+      "tmdb": 16,
+      "cover": "https://image.tmdb.org/t/p/w500/pWzOfTJRZHPNO1VNrMnNFqRcJwg.jpg"
     },
     {
       "year": 1999,
       "title": "Rosetta",
       "language": "fr",
       "creator": "Jean-Pierre and Luc Dardenne",
-      "release_year": 1999
+      "release_year": 1999,
+      "tmdb": 11489,
+      "cover": "https://image.tmdb.org/t/p/w500/buwLjQPPA9FaATvKzeAppLXiGMB.jpg"
     },
     {
       "year": 1998,
@@ -216,7 +272,9 @@
       "original_title": "Μια αιωνιότητα και μια μέρα",
       "language": "el",
       "creator": "Theo Angelopoulos",
-      "release_year": 1998
+      "release_year": 1998,
+      "tmdb": 24858,
+      "cover": "https://image.tmdb.org/t/p/w500/wH8sfLJCqNjsIw8zkXpvxdSzj60.jpg"
     },
     {
       "year": 1997,
@@ -224,7 +282,9 @@
       "original_title": "うなぎ",
       "language": "ja",
       "creator": "Shōhei Imamura",
-      "release_year": 1997
+      "release_year": 1997,
+      "tmdb": 20506,
+      "cover": "https://image.tmdb.org/t/p/w500/3TEzcwdF3DPeO8uSPmCfBBUhgNp.jpg"
     },
     {
       "year": 1997,
@@ -232,13 +292,17 @@
       "original_title": "طعم گيلاس",
       "language": "fa",
       "creator": "Abbas Kiarostami",
-      "release_year": 1997
+      "release_year": 1997,
+      "tmdb": 30020,
+      "cover": "https://image.tmdb.org/t/p/w500/vgPwjgbSdbYWrS1ty8TIZtmi6Tn.jpg"
     },
     {
       "year": 1996,
       "title": "Secrets & Lies",
       "creator": "Mike Leigh",
-      "release_year": 1996
+      "release_year": 1996,
+      "tmdb": 11159,
+      "cover": "https://image.tmdb.org/t/p/w500/zQBuRQ3hrLhkEsXcxteUxuxLrvs.jpg"
     },
     {
       "year": 1995,
@@ -246,13 +310,17 @@
       "original_title": "Подземље",
       "language": "sr",
       "creator": "Emir Kusturica",
-      "release_year": 1995
+      "release_year": 1994,
+      "tmdb": 90934,
+      "cover": "https://image.tmdb.org/t/p/w500/c0XAcWPlQpF6Y3a9f0klQ5RvG7t.jpg"
     },
     {
       "year": 1994,
       "title": "Pulp Fiction",
       "creator": "Quentin Tarantino",
-      "release_year": 1994
+      "release_year": 1994,
+      "tmdb": 680,
+      "cover": "https://image.tmdb.org/t/p/w500/vQWk5YBFWF4bZaofAbv0tShwBvQ.jpg"
     },
     {
       "year": 1993,
@@ -260,14 +328,18 @@
       "original_title": "霸王別姬",
       "language": "zh",
       "creator": "Chen Kaige",
-      "release_year": 1993
+      "release_year": 1993,
+      "tmdb": 10997,
+      "cover": "https://image.tmdb.org/t/p/w500/f54hNIiHNINw3JiUJB2XaQl5wCN.jpg"
     },
     {
       "year": 1993,
       "title": "The Piano",
       "language": "en",
       "creator": "Jane Campion",
-      "release_year": 1993
+      "release_year": 1993,
+      "tmdb": 713,
+      "cover": "https://image.tmdb.org/t/p/w500/rx8RKXn8OtuS6lqloYsjyrGOUp4.jpg"
     },
     {
       "year": 1992,
@@ -275,25 +347,33 @@
       "original_title": "Den goda viljan",
       "language": "sv",
       "creator": "Bille August",
-      "release_year": 1991
+      "release_year": 1992,
+      "tmdb": 41764,
+      "cover": "https://image.tmdb.org/t/p/w500/kkwKpqYac8zUNNMkRTfAQfbMQWl.jpg"
     },
     {
       "year": 1991,
       "title": "Barton Fink",
       "creator": "Joel Coen",
-      "release_year": 1991
+      "release_year": 1991,
+      "tmdb": 290,
+      "cover": "https://image.tmdb.org/t/p/w500/oDkp5iClJ9WKJGtKHz8BydodHC3.jpg"
     },
     {
       "year": 1990,
       "title": "Wild at Heart",
       "creator": "David Lynch",
-      "release_year": 1990
+      "release_year": 1990,
+      "tmdb": 483,
+      "cover": "https://image.tmdb.org/t/p/w500/uLUFI5sJIfWrBUWB2Y1dEuyvvVy.jpg"
     },
     {
       "year": 1989,
       "title": "Sex, Lies, and Videotape",
       "creator": "Steven Soderbergh",
-      "release_year": 1989
+      "release_year": 1989,
+      "tmdb": 1412,
+      "cover": "https://image.tmdb.org/t/p/w500/dE0u4uB5UPfVIdz258Ye2XEPuuh.jpg"
     },
     {
       "year": 1988,
@@ -301,7 +381,9 @@
       "original_title": "Pelle Erobreren",
       "language": "sv",
       "creator": "Bille August",
-      "release_year": 1987
+      "release_year": 1987,
+      "tmdb": 11174,
+      "cover": "https://image.tmdb.org/t/p/w500/oSsu4khg459yTR1sw4qjEC4LO5J.jpg"
     },
     {
       "year": 1987,
@@ -309,13 +391,17 @@
       "original_title": "Sous le soleil de Satan",
       "language": "fr",
       "creator": "Maurice Pialat",
-      "release_year": 1987
+      "release_year": 1987,
+      "tmdb": 31300,
+      "cover": "https://image.tmdb.org/t/p/w500/mWqd19oWODYyHK6RHGsAdW8wtL5.jpg"
     },
     {
       "year": 1986,
       "title": "The Mission",
       "creator": "Roland Joffé",
-      "release_year": 1986
+      "release_year": 1986,
+      "tmdb": 11416,
+      "cover": "https://image.tmdb.org/t/p/w500/6K9cG6LOOtySZF4D4xBu1MApC1N.jpg"
     },
     {
       "year": 1985,
@@ -323,13 +409,17 @@
       "original_title": "Отац на службеном путу",
       "language": "sr",
       "creator": "Emir Kusturica",
-      "release_year": 1985
+      "release_year": 1985,
+      "tmdb": 21042,
+      "cover": "https://image.tmdb.org/t/p/w500/jhTu6UwP32jPwiBccGAkZq0yqvV.jpg"
     },
     {
       "year": 1984,
       "title": "Paris, Texas",
       "creator": "Wim Wenders",
-      "release_year": 1984
+      "release_year": 1984,
+      "tmdb": 655,
+      "cover": "https://image.tmdb.org/t/p/w500/sP27Qm4THyRZyHjHYMfIDtJP6YE.jpg"
     },
     {
       "year": 1983,
@@ -337,21 +427,27 @@
       "original_title": "楢山節考",
       "language": "ja",
       "creator": "Shōhei Imamura",
-      "release_year": 1983
+      "release_year": 1983,
+      "tmdb": 42113,
+      "cover": "https://image.tmdb.org/t/p/w500/h3iNimtw6HsFTtAvEDF3XYZ4Y5T.jpg"
     },
     {
       "year": 1982,
       "title": "Missing",
       "language": "en",
       "creator": "Costa-Gavras",
-      "release_year": 1982
+      "release_year": 1984,
+      "tmdb": 15379,
+      "cover": "https://image.tmdb.org/t/p/w500/nBrDcnNQca88ed1gRwZ1Q5cjNxE.jpg"
     },
     {
       "year": 1982,
       "title": "Yol",
       "language": "tr",
       "creator": "Yılmaz Güney and Şerif Gören",
-      "release_year": 1982
+      "release_year": 1982,
+      "tmdb": 52556,
+      "cover": "https://image.tmdb.org/t/p/w500/oblv2iaKFvrleCqBMLNHzcOCufR.jpg"
     },
     {
       "year": 1981,
@@ -359,13 +455,17 @@
       "original_title": "Człowiek z żelaza",
       "language": "pl",
       "creator": "Andrzej Wajda",
-      "release_year": 1981
+      "release_year": 1981,
+      "tmdb": 225,
+      "cover": "https://image.tmdb.org/t/p/w500/22wNUqKyz2m6wzAt31f26H8Y433.jpg"
     },
     {
       "year": 1980,
       "title": "All That Jazz",
       "creator": "Bob Fosse",
-      "release_year": 1979
+      "release_year": 1979,
+      "tmdb": 16858,
+      "cover": "https://image.tmdb.org/t/p/w500/culCEdj4srLljefgn4XKd6k3C5t.jpg"
     },
     {
       "year": 1980,
@@ -373,13 +473,17 @@
       "original_title": "影武者",
       "language": "ja",
       "creator": "Akira Kurosawa",
-      "release_year": 1980
+      "release_year": 1980,
+      "tmdb": 11953,
+      "cover": "https://image.tmdb.org/t/p/w500/fJgqj9s8HNZz9zwX6femVJn8HEB.jpg"
     },
     {
       "year": 1979,
       "title": "Apocalypse Now",
       "creator": "Francis Ford Coppola",
-      "release_year": 1979
+      "release_year": 1979,
+      "tmdb": 28,
+      "cover": "https://image.tmdb.org/t/p/w500/gQB8Y5RCMkv2zwzFHbUJX3kAhvA.jpg"
     },
     {
       "year": 1979,
@@ -387,7 +491,9 @@
       "original_title": "Die Blechtrommel",
       "language": "de",
       "creator": "Volker Schlöndorff",
-      "release_year": 1979
+      "release_year": 1979,
+      "tmdb": 659,
+      "cover": "https://image.tmdb.org/t/p/w500/z4QsBWJbbBxct2zU7LnYSOw8UFz.jpg"
     },
     {
       "year": 1978,
@@ -395,20 +501,26 @@
       "original_title": "L'albero degli zoccoli",
       "language": "lmo",
       "creator": "Ermanno Olmi",
-      "release_year": 1978
+      "release_year": 1978,
+      "tmdb": 31542,
+      "cover": "https://image.tmdb.org/t/p/w500/ld4l2XWuECX6c6lWd2BWv1olg2N.jpg"
     },
     {
       "year": 1977,
       "title": "Padre Padrone",
       "language": "it",
       "creator": "Paolo and Vittorio Taviani",
-      "release_year": 1977
+      "release_year": 1977,
+      "tmdb": 42225,
+      "cover": "https://image.tmdb.org/t/p/w500/6kGarhZIsbpFNcEHftRzNeuz6Sb.jpg"
     },
     {
       "year": 1976,
       "title": "Taxi Driver",
       "creator": "Martin Scorsese",
-      "release_year": 1976
+      "release_year": 1976,
+      "tmdb": 103,
+      "cover": "https://image.tmdb.org/t/p/w500/ekstpH614fwDX8DUln1a2Opz0N8.jpg"
     },
     {
       "year": 1975,
@@ -416,25 +528,33 @@
       "original_title": "Chronique des années de braise",
       "language": "ar",
       "creator": "Mohammed Lakhdar-Hamina",
-      "release_year": 1975
+      "release_year": 1975,
+      "tmdb": 52555,
+      "cover": "https://image.tmdb.org/t/p/w500/wtx3qqdwwp3sNANYfAFXl5tKZE6.jpg"
     },
     {
       "year": 1974,
       "title": "The Conversation",
       "creator": "Francis Ford Coppola",
-      "release_year": 1974
+      "release_year": 1974,
+      "tmdb": 592,
+      "cover": "https://image.tmdb.org/t/p/w500/dHqVBwcv1SGymOpUueRoKzcmdes.jpg"
     },
     {
       "year": 1973,
       "title": "The Hireling",
       "creator": "Alan Bridges",
-      "release_year": 1973
+      "release_year": 1973,
+      "tmdb": 80382,
+      "cover": "https://image.tmdb.org/t/p/w500/xlhaEmOMWFFmCx4O8oPUMlPqEpo.jpg"
     },
     {
       "year": 1973,
       "title": "Scarecrow",
       "creator": "Jerry Schatzberg",
-      "release_year": 1973
+      "release_year": 1973,
+      "tmdb": 31587,
+      "cover": "https://image.tmdb.org/t/p/w500/jK0e8jLl0pp59yX6AYMyyJPnMVJ.jpg"
     },
     {
       "year": 1972,
@@ -442,7 +562,9 @@
       "original_title": "Il caso Mattei",
       "language": "it",
       "creator": "Francesco Rosi",
-      "release_year": 1972
+      "release_year": 1972,
+      "tmdb": 62382,
+      "cover": "https://image.tmdb.org/t/p/w500/p4EHDfdbgjNXmQb7WB9fYmom0s1.jpg"
     },
     {
       "year": 1972,
@@ -450,25 +572,33 @@
       "original_title": "La classe operaia va in paradiso",
       "language": "it",
       "creator": "Elio Petri",
-      "release_year": 1971
+      "release_year": 1971,
+      "tmdb": 56231,
+      "cover": "https://image.tmdb.org/t/p/w500/2RMjWY4CknXmLRI5qJpsTA6sKy3.jpg"
     },
     {
       "year": 1971,
       "title": "The Go-Between",
       "creator": "Joseph Losey",
-      "release_year": 1971
+      "release_year": 1971,
+      "tmdb": 36194,
+      "cover": "https://image.tmdb.org/t/p/w500/61dXOIpDaiWCp7aIjBYkd6ujdXZ.jpg"
     },
     {
       "year": 1970,
       "title": "M*A*S*H",
       "creator": "Robert Altman",
-      "release_year": 1970
+      "release_year": 1970,
+      "tmdb": 651,
+      "cover": "https://image.tmdb.org/t/p/w500/on8Q9LhtHYNhmITjUMpgOUkIG8o.jpg"
     },
     {
       "year": 1969,
       "title": "If....",
       "creator": "Lindsay Anderson",
-      "release_year": 1968
+      "release_year": 1968,
+      "tmdb": 14794,
+      "cover": "https://image.tmdb.org/t/p/w500/oqlpAGq4aXhc6ODtxBcGM1SEoIp.jpg"
     },
     {
       "year": 1967,
@@ -482,7 +612,9 @@
       "original_title": "Signore e signori",
       "language": "it",
       "creator": "Pietro Germi",
-      "release_year": 1966
+      "release_year": 1966,
+      "tmdb": 17974,
+      "cover": "https://image.tmdb.org/t/p/w500/9q3b1tVa4LO2Xx3JUcjThdV3b12.jpg"
     },
     {
       "year": 1966,
@@ -490,13 +622,17 @@
       "original_title": "Un homme et une femme",
       "language": "fr",
       "creator": "Claude Lelouch",
-      "release_year": 1966
+      "release_year": 1966,
+      "tmdb": 42726,
+      "cover": "https://image.tmdb.org/t/p/w500/boDZQiubhyhksN8fcgM4sXZ2btW.jpg"
     },
     {
       "year": 1965,
       "title": "The Knack ...and How to Get It",
       "creator": "Richard Lester",
-      "release_year": 1965
+      "release_year": 1965,
+      "tmdb": 42744,
+      "cover": "https://image.tmdb.org/t/p/w500/xO2dJcCISY6lujaU4Qew3RzSErJ.jpg"
     },
     {
       "year": 1964,
@@ -504,7 +640,9 @@
       "original_title": "Les parapluies de Cherbourg",
       "language": "fr",
       "creator": "Jacques Demy",
-      "release_year": 1964
+      "release_year": 1964,
+      "tmdb": 5967,
+      "cover": "https://image.tmdb.org/t/p/w500/tAgTf64XKK5ir7w5C7dnB53jWWG.jpg"
     },
     {
       "year": 1963,
@@ -512,14 +650,18 @@
       "original_title": "Il gattopardo",
       "language": "it",
       "creator": "Luchino Visconti",
-      "release_year": 1963
+      "release_year": 1963,
+      "tmdb": 1040,
+      "cover": "https://image.tmdb.org/t/p/w500/riSUxwoK3xjkOgy6YJSvPhi7cO6.jpg"
     },
     {
       "year": 1962,
       "title": "O Pagador de Promessas",
       "language": "pt",
       "creator": "Anselmo Duarte",
-      "release_year": 1962
+      "release_year": 1962,
+      "tmdb": 59990,
+      "cover": "https://image.tmdb.org/t/p/w500/wjNydK6CnoJFEp69OzAcSsAaIME.jpg"
     },
     {
       "year": 1961,
@@ -527,21 +669,27 @@
       "original_title": "Une aussi longue absence",
       "language": "fr",
       "creator": "Henri Colpi",
-      "release_year": 1961
+      "release_year": 1961,
+      "tmdb": 131836,
+      "cover": "https://image.tmdb.org/t/p/w500/tPs6Lnp0vfiQDzZELxd4uI09AYa.jpg"
     },
     {
       "year": 1961,
       "title": "Viridiana",
       "language": "es",
       "creator": "Luis Buñuel",
-      "release_year": 1961
+      "release_year": 1962,
+      "tmdb": 4497,
+      "cover": "https://image.tmdb.org/t/p/w500/mYPuSx5JwL8AdTwS1iQW4Un1cYP.jpg"
     },
     {
       "year": 1960,
       "title": "La dolce vita",
       "language": "it",
       "creator": "Federico Fellini",
-      "release_year": 1960
+      "release_year": 1960,
+      "tmdb": 439,
+      "cover": "https://image.tmdb.org/t/p/w500/dZ2v0DAX4aCZartCzZdg4ZinSW2.jpg"
     },
     {
       "year": 1959,
@@ -549,7 +697,9 @@
       "original_title": "Orfeu Negro",
       "language": "pt",
       "creator": "Marcel Camus",
-      "release_year": 1959
+      "release_year": 1959,
+      "tmdb": 40423,
+      "cover": "https://image.tmdb.org/t/p/w500/fJWzdNRnfjcJuaZiKqaSURFV6Lg.jpg"
     },
     {
       "year": 1958,
@@ -557,13 +707,17 @@
       "original_title": "Летят журавли",
       "language": "ru",
       "creator": "Mikhail Kalatozov",
-      "release_year": 1957
+      "release_year": 1957,
+      "tmdb": 38360,
+      "cover": "https://image.tmdb.org/t/p/w500/foXYOdXEJ0rvtTDo4LLnsUnvPLB.jpg"
     },
     {
       "year": 1957,
       "title": "Friendly Persuasion",
       "creator": "William Wyler",
-      "release_year": 1956
+      "release_year": 1956,
+      "tmdb": 43258,
+      "cover": "https://image.tmdb.org/t/p/w500/mhsdObvFHoOfgaKAVJUOeK3LiOP.jpg"
     },
     {
       "year": 1956,
@@ -571,13 +725,17 @@
       "original_title": "Le monde du silence",
       "language": "fr",
       "creator": "Jacques Cousteau and Louis Malle",
-      "release_year": 1956
+      "release_year": 1956,
+      "tmdb": 60234,
+      "cover": "https://image.tmdb.org/t/p/w500/ys1AiQJbQPNimud1kZQ91FgOJLR.jpg"
     },
     {
       "year": 1955,
       "title": "Marty",
       "creator": "Delbert Mann",
-      "release_year": 1955
+      "release_year": 1955,
+      "tmdb": 15919,
+      "cover": "https://image.tmdb.org/t/p/w500/8tnGO5VoAQII4DbE3hozWKhV4BY.jpg"
     }
   ]
 }

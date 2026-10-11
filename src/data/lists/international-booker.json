@@ -3,18 +3,109 @@
   "title": "International Booker Prize winners",
   "kind": "book",
   "intro": "Every winner of the International Booker Prize since 2016, when it became a yearly prize for one work of fiction translated into English and published in the UK or Ireland, shared equally by author and translator.",
-  "source": { "name": "The Booker Prizes", "url": "https://thebookerprizes.com/the-booker-library/features/full-list-of-international-booker-prize-winners-shortlisted-authors-and-their-books" },
+  "source": {
+    "name": "The Booker Prizes",
+    "url": "https://thebookerprizes.com/the-booker-library/features/full-list-of-international-booker-prize-winners-shortlisted-authors-and-their-books"
+  },
   "items": [
-    { "year": 2026, "title": "Taiwan Travelogue", "creator": "Yang Shuang-zi", "original_title": "臺灣漫遊錄", "language": "zh", "note": "Translated by Lin King" },
-    { "year": 2025, "title": "Heart Lamp", "creator": "Banu Mushtaq", "language": "kn", "note": "Translated by Deepa Bhasthi" },
-    { "year": 2024, "title": "Kairos", "creator": "Jenny Erpenbeck", "original_title": "Kairos", "language": "de", "note": "Translated by Michael Hofmann" },
-    { "year": 2023, "title": "Time Shelter", "creator": "Georgi Gospodinov", "original_title": "Времеубежище", "language": "bg", "note": "Translated by Angela Rodel" },
-    { "year": 2022, "title": "Tomb of Sand", "creator": "Geetanjali Shree", "original_title": "रेत समाधि", "language": "hi", "note": "Translated by Daisy Rockwell" },
-    { "year": 2021, "title": "At Night All Blood Is Black", "creator": "David Diop", "original_title": "Frère d'âme", "language": "fr", "note": "Translated by Anna Moschovakis" },
-    { "year": 2020, "title": "The Discomfort of Evening", "creator": "Lucas Rijneveld", "original_title": "De avond is ongemak", "language": "nl", "note": "Translated by Michele Hutchison" },
-    { "year": 2019, "title": "Celestial Bodies", "creator": "Jokha Alharthi", "original_title": "سيدات القمر", "language": "ar", "note": "Translated by Marilyn Booth" },
-    { "year": 2018, "title": "Flights", "creator": "Olga Tokarczuk", "original_title": "Bieguni", "language": "pl", "note": "Translated by Jennifer Croft" },
-    { "year": 2017, "title": "A Horse Walks into a Bar", "creator": "David Grossman", "original_title": "סוס אחד נכנס לבר", "language": "he", "note": "Translated by Jessica Cohen" },
-    { "year": 2016, "title": "The Vegetarian", "creator": "Han Kang", "original_title": "채식주의자", "language": "ko", "note": "Translated by Deborah Smith" }
+    {
+      "year": 2026,
+      "title": "Taiwan Travelogue",
+      "creator": "Yang Shuang-zi",
+      "original_title": "臺灣漫遊錄",
+      "language": "zh",
+      "note": "Translated by Lin King",
+      "ol": "OL37871931W",
+      "cover": "https://covers.openlibrary.org/b/id/14839786-L.jpg"
+    },
+    {
+      "year": 2025,
+      "title": "Heart Lamp",
+      "creator": "Banu Mushtaq",
+      "language": "kn",
+      "note": "Translated by Deepa Bhasthi",
+      "ol": "OL42418897W",
+      "cover": "https://covers.openlibrary.org/b/id/15179944-L.jpg"
+    },
+    {
+      "year": 2024,
+      "title": "Kairos",
+      "creator": "Jenny Erpenbeck",
+      "original_title": "Kairos",
+      "language": "de",
+      "note": "Translated by Michael Hofmann",
+      "ol": "OL29330702W",
+      "cover": "https://covers.openlibrary.org/b/id/13913814-L.jpg"
+    },
+    {
+      "year": 2023,
+      "title": "Time Shelter",
+      "creator": "Georgi Gospodinov",
+      "original_title": "Времеубежище",
+      "language": "bg",
+      "note": "Translated by Angela Rodel",
+      "ol": "OL26340341W",
+      "cover": "https://covers.openlibrary.org/b/id/13125096-L.jpg"
+    },
+    {
+      "year": 2022,
+      "title": "Tomb of Sand",
+      "creator": "Geetanjali Shree",
+      "original_title": "रेत समाधि",
+      "language": "hi",
+      "note": "Translated by Daisy Rockwell"
+    },
+    {
+      "year": 2021,
+      "title": "At Night All Blood Is Black",
+      "creator": "David Diop",
+      "original_title": "Frère d'âme",
+      "language": "fr",
+      "note": "Translated by Anna Moschovakis",
+      "ol": "OL20812009W",
+      "cover": "https://covers.openlibrary.org/b/id/10112533-L.jpg"
+    },
+    {
+      "year": 2020,
+      "title": "The Discomfort of Evening",
+      "creator": "Lucas Rijneveld",
+      "original_title": "De avond is ongemak",
+      "language": "nl",
+      "note": "Translated by Michele Hutchison"
+    },
+    {
+      "year": 2019,
+      "title": "Celestial Bodies",
+      "creator": "Jokha Alharthi",
+      "original_title": "سيدات القمر",
+      "language": "ar",
+      "note": "Translated by Marilyn Booth",
+      "ol": "OL20544257W",
+      "cover": "https://covers.openlibrary.org/b/id/9189905-L.jpg"
+    },
+    {
+      "year": 2018,
+      "title": "Flights",
+      "creator": "Olga Tokarczuk",
+      "original_title": "Bieguni",
+      "language": "pl",
+      "note": "Translated by Jennifer Croft"
+    },
+    {
+      "year": 2017,
+      "title": "A Horse Walks into a Bar",
+      "creator": "David Grossman",
+      "original_title": "סוס אחד נכנס לבר",
+      "language": "he",
+      "note": "Translated by Jessica Cohen"
+    },
+    {
+      "year": 2016,
+      "title": "The Vegetarian",
+      "creator": "Han Kang",
+      "original_title": "채식주의자",
+      "language": "ko",
+      "note": "Translated by Deborah Smith"
+    }
   ]
 }

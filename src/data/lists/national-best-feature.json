@@ -13,22 +13,28 @@
       "title": "Article 370",
       "creator": "Aditya Suhas Jambhale",
       "language": "hi",
-      "release_year": 2024
+      "release_year": 2024,
+      "tmdb": 1233531,
+      "cover": "https://image.tmdb.org/t/p/w500/9VTemjHMpyxzfC3JsG2aFy8Bf9Y.jpg"
     },
     {
       "year": 2023,
       "title": "12th Fail",
       "creator": "Vidhu Vinod Chopra",
       "language": "hi",
-      "release_year": 2023
+      "release_year": 2023,
+      "tmdb": 1163258,
+      "cover": "https://image.tmdb.org/t/p/w500/eebUPRI4Z5e1Z7Hev4JZAwMIFkX.jpg"
     },
     {
       "year": 2022,
       "title": "Aattam",
       "creator": "Anand Ekarshi",
       "language": "ml",
-      "release_year": 2023,
-      "check": true
+      "release_year": 2024,
+      "check": true,
+      "tmdb": 957926,
+      "cover": "https://image.tmdb.org/t/p/w500/gjptPp7YlX1oy9yCjEpOdlrRisL.jpg"
     },
     {
       "year": 2021,
@@ -36,14 +42,18 @@
       "creator": "R. Madhavan",
       "language": "hi",
       "release_year": 2022,
-      "check": true
+      "check": true,
+      "tmdb": 607145,
+      "cover": "https://image.tmdb.org/t/p/w500/o7A1agEoXvwyyOmIbHnUhfnC34j.jpg"
     },
     {
       "year": 2020,
       "title": "Soorarai Pottru",
       "creator": "Sudha Kongara",
       "language": "ta",
-      "release_year": 2020
+      "release_year": 2020,
+      "tmdb": 595228,
+      "cover": "https://image.tmdb.org/t/p/w500/5uimlxPCgAei8JfQUDFEUQLoyyh.jpg"
     },
     {
       "year": 2019,
@@ -51,7 +61,9 @@
       "creator": "Priyadarshan",
       "language": "ml",
       "release_year": 2021,
-      "check": true
+      "check": true,
+      "tmdb": 617405,
+      "cover": "https://image.tmdb.org/t/p/w500/dKylmkXLLgPYER5wq9ChsFFCSbG.jpg"
     },
     {
       "year": 2018,
@@ -59,21 +71,27 @@
       "creator": "Abhishek Shah",
       "language": "gu",
       "release_year": 2019,
-      "check": true
+      "check": true,
+      "tmdb": 629278,
+      "cover": "https://image.tmdb.org/t/p/w500/b1rnAdQe2wxnBMqYhhvC34O3lLC.jpg"
     },
     {
       "year": 2017,
       "title": "Village Rockstars",
       "creator": "Rima Das",
       "language": "as",
-      "release_year": 2017
+      "release_year": 2018,
+      "tmdb": 473320,
+      "cover": "https://image.tmdb.org/t/p/w500/kUMHHbNTBTvB7twXTibDlwPWE9F.jpg"
     },
     {
       "year": 2016,
       "title": "Kaasav",
       "creator": "Sumitra Bhave and Sunil Sukthankar",
       "language": "mr",
-      "release_year": 2016
+      "release_year": 2016,
+      "tmdb": 459332,
+      "cover": "https://image.tmdb.org/t/p/w500/xpAGFrEAvAoVV1MekoQqrAibHp4.jpg"
     },
     {
       "year": 2015,
@@ -87,36 +105,45 @@
       "title": "Court",
       "creator": "Chaitanya Tamhane",
       "language": "mr",
-      "release_year": 2014
+      "release_year": 2015,
+      "tmdb": 290815,
+      "cover": "https://image.tmdb.org/t/p/w500/ve1UFCZYu8WHmeGRH4ToEcGnj6e.jpg"
     },
     {
       "year": 2013,
       "title": "Ship of Theseus",
       "creator": "Anand Gandhi",
       "language": "en",
-      "release_year": 2012
+      "release_year": 2012,
+      "tmdb": 128207,
+      "cover": "https://image.tmdb.org/t/p/w500/t75n1cm3uZXl4WQj8U9UcfBRmWC.jpg"
     },
     {
       "year": 2012,
       "title": "Paan Singh Tomar",
       "creator": "Tigmanshu Dhulia",
       "language": "hi",
-      "release_year": 2010,
-      "check": true
+      "release_year": 2012,
+      "check": true,
+      "tmdb": 96398,
+      "cover": "https://image.tmdb.org/t/p/w500/ii2KMVvGmcmJrqwYcT5nKn92bD5.jpg"
     },
     {
       "year": 2011,
       "title": "Deool",
       "creator": "Umesh Vinayak Kulkarni",
       "language": "mr",
-      "release_year": 2011
+      "release_year": 2011,
+      "tmdb": 94935,
+      "cover": "https://image.tmdb.org/t/p/w500/gR3gt5KUOmebsyrgqX6BPvXDswT.jpg"
     },
     {
       "year": 2011,
       "title": "Byari",
       "creator": "K. P. Suveeran",
       "language": "bry",
-      "release_year": 2011
+      "release_year": 2011,
+      "tmdb": 327562
     },
     {
       "year": 2010,
@@ -124,7 +151,9 @@
       "creator": "Salim Ahamed",
       "language": "ml",
       "release_year": 2011,
-      "check": true
+      "check": true,
+      "tmdb": 132189,
+      "cover": "https://image.tmdb.org/t/p/w500/pHDJNc798sdonF78TanRxHfWneC.jpg"
     },
     {
       "year": 2009,
@@ -132,7 +161,9 @@
       "creator": "Shaji N. Karun",
       "language": "ml",
       "release_year": 2010,
-      "check": true
+      "check": true,
+      "tmdb": 76364,
+      "cover": "https://image.tmdb.org/t/p/w500/eWemyElGtkP9PhYDXR6aWb0Ow3W.jpg"
     },
     {
       "year": 2008,
@@ -140,7 +171,9 @@
       "creator": "Aniruddha Roy Chowdhury",
       "language": "bn",
       "release_year": 2009,
-      "check": true
+      "check": true,
+      "tmdb": 115888,
+      "cover": "https://image.tmdb.org/t/p/w500/oEOkpURjBN3i6iB17JNsNgC5cV2.jpg"
     },
     {
       "year": 2007,
@@ -148,21 +181,26 @@
       "creator": "Priyadarshan",
       "language": "ta",
       "release_year": 2008,
-      "check": true
+      "check": true,
+      "tmdb": 152967,
+      "cover": "https://image.tmdb.org/t/p/w500/Ex116BvfefLbXRkJzWWZoeG5sq.jpg"
     },
     {
       "year": 2006,
       "title": "Pulijanmam",
       "creator": "Priyanandanan",
       "language": "ml",
-      "release_year": 2006
+      "release_year": 2006,
+      "tmdb": 327560
     },
     {
       "year": 2005,
       "title": "Kaalpurush",
       "creator": "Buddhadeb Dasgupta",
       "language": "bn",
-      "release_year": 2005
+      "release_year": 2005,
+      "tmdb": 165195,
+      "cover": "https://image.tmdb.org/t/p/w500/hd0wnyIaqCCmn7DWHneOWktlvoh.jpg"
     },
     {
       "year": 2004,
@@ -170,7 +208,9 @@
       "creator": "Madhur Bhandarkar",
       "language": "hi",
       "release_year": 2005,
-      "check": true
+      "check": true,
+      "tmdb": 20623,
+      "cover": "https://image.tmdb.org/t/p/w500/wQnQ8BOiJpLze6wC01ujoQcjyeU.jpg"
     },
     {
       "year": 2003,
@@ -178,14 +218,18 @@
       "creator": "Sandeep Sawant",
       "language": "mr",
       "release_year": 2004,
-      "check": true
+      "check": true,
+      "tmdb": 116753,
+      "cover": "https://image.tmdb.org/t/p/w500/6FgJ3PDXE955djB25zKz23fyko9.jpg"
     },
     {
       "year": 2002,
       "title": "Mondo Meyer Upakhyan",
       "creator": "Buddhadeb Dasgupta",
       "language": "bn",
-      "release_year": 2002
+      "release_year": 2002,
+      "tmdb": 209312,
+      "cover": "https://image.tmdb.org/t/p/w500/fsq6pEfO5UNcjfx1u38oIpRWiyJ.jpg"
     },
     {
       "year": 2001,
@@ -193,7 +237,9 @@
       "creator": "Girish Kasaravalli",
       "language": "kn",
       "release_year": 2002,
-      "check": true
+      "check": true,
+      "tmdb": 265663,
+      "cover": "https://image.tmdb.org/t/p/w500/9lBdQ3OGSmlYv0o366SsVlrhh7b.jpg"
     },
     {
       "year": 2000,
@@ -201,14 +247,18 @@
       "creator": "Jayaraj",
       "language": "ml",
       "release_year": 2001,
-      "check": true
+      "check": true,
+      "tmdb": 327557,
+      "cover": "https://image.tmdb.org/t/p/w500/enTZIDEResp9YAP0khqXSoxCYt7.jpg"
     },
     {
       "year": 1999,
       "title": "Vanaprastham",
       "creator": "Shaji N. Karun",
       "language": "ml",
-      "release_year": 1999
+      "release_year": 1999,
+      "tmdb": 207649,
+      "cover": "https://image.tmdb.org/t/p/w500/mj9PWZDB3fhyRfeckdAatYwnQ7P.jpg"
     },
     {
       "year": 1998,
@@ -216,7 +266,8 @@
       "creator": "Shyam Benegal",
       "language": "hi",
       "release_year": 1999,
-      "check": true
+      "check": true,
+      "tmdb": 327556
     },
     {
       "year": 1997,
@@ -245,7 +296,9 @@
       "title": "Unishe April",
       "creator": "Rituparno Ghosh",
       "language": "bn",
-      "release_year": 1994
+      "release_year": 1994,
+      "tmdb": 197835,
+      "cover": "https://image.tmdb.org/t/p/w500/iOZZ3M6QHONSJJA2iTm99bAKB6f.jpg"
     },
     {
       "year": 1993,
@@ -260,37 +313,47 @@
       "creator": "G. V. Iyer",
       "language": "sa",
       "release_year": 1993,
-      "check": true
+      "check": true,
+      "tmdb": 327552,
+      "cover": "https://image.tmdb.org/t/p/w500/us32npUgSkkzEBeK99VFAUmfAne.jpg"
     },
     {
       "year": 1991,
       "title": "Agantuk",
       "creator": "Satyajit Ray",
       "language": "bn",
-      "release_year": 1991
+      "release_year": 2024,
+      "tmdb": 719968,
+      "cover": "https://image.tmdb.org/t/p/w500/wyuDjHuAI2rqOyCWRyL3TSM8MD.jpg"
     },
     {
       "year": 1990,
       "title": "Marupakkam",
       "creator": "K. S. Sethumadhavan",
       "language": "ta",
-      "release_year": 1992,
-      "check": true
+      "release_year": 1990,
+      "check": true,
+      "tmdb": 327517,
+      "cover": "https://image.tmdb.org/t/p/w500/8RqkNr8qHD7QEP7cifKEzJVKzh7.jpg"
     },
     {
       "year": 1989,
       "title": "Bagh Bahadur",
       "creator": "Buddhadeb Dasgupta",
       "language": "bn",
-      "release_year": 1989
+      "release_year": 1989,
+      "tmdb": 270912,
+      "cover": "https://image.tmdb.org/t/p/w500/gh3z7rdilJWsM7uWBSIJW9NSKto.jpg"
     },
     {
       "year": 1988,
       "title": "Piravi",
       "creator": "Shaji N. Karun",
       "language": "ml",
-      "release_year": 1989,
-      "check": true
+      "release_year": 1990,
+      "check": true,
+      "tmdb": 66256,
+      "cover": "https://image.tmdb.org/t/p/w500/4URplSfCzCM4FIGHeAw8eIB4VAq.jpg"
     },
     {
       "year": 1987,
@@ -304,43 +367,55 @@
       "title": "Tabarana Kathe",
       "creator": "Girish Kasaravalli",
       "language": "kn",
-      "release_year": 1987,
-      "check": true
+      "release_year": 1986,
+      "check": true,
+      "tmdb": 265664,
+      "cover": "https://image.tmdb.org/t/p/w500/kkwHkvBbgXo4b60TMoaA7sOowwv.jpg"
     },
     {
       "year": 1985,
       "title": "Chidambaram",
       "creator": "G. Aravindan",
       "language": "ml",
-      "release_year": 1985
+      "release_year": 1985,
+      "tmdb": 264323,
+      "cover": "https://image.tmdb.org/t/p/w500/6h5euh7dTlRV3bbqdDlvBbv5Y6D.jpg"
     },
     {
       "year": 1984,
       "title": "Damul",
       "creator": "Prakash Jha",
       "language": "hi",
-      "release_year": 1984
+      "release_year": 1985,
+      "tmdb": 265652,
+      "cover": "https://image.tmdb.org/t/p/w500/pd77KFof5RtoAXYc4sBhw2qFDmm.jpg"
     },
     {
       "year": 1983,
       "title": "Adi Shankaracharya",
       "creator": "G. V. Iyer",
       "language": "sa",
-      "release_year": 1983
+      "release_year": 1983,
+      "tmdb": 312800,
+      "cover": "https://image.tmdb.org/t/p/w500/6xvcmYusXqfP01WyJcxhP4NCMwZ.jpg"
     },
     {
       "year": 1982,
       "title": "Chokh",
       "creator": "Utpalendu Chakrabarty",
       "language": "bn",
-      "release_year": 1982
+      "release_year": 1983,
+      "tmdb": 327512,
+      "cover": "https://image.tmdb.org/t/p/w500/oPMehYoFwt8ByXzLO55slx7U28W.jpg"
     },
     {
       "year": 1981,
       "title": "Dakhal",
       "creator": "Goutam Ghose",
       "language": "bn",
-      "release_year": 1981
+      "release_year": 1982,
+      "tmdb": 327510,
+      "cover": "https://image.tmdb.org/t/p/w500/me5Gz1DKK5zKj2SIs71p0xlytmr.jpg"
     },
     {
       "year": 1980,
@@ -355,14 +430,17 @@
       "title": "Shodh",
       "creator": "Biplab Roy Chowdhury",
       "language": "hi",
-      "release_year": 1979
+      "release_year": 1981,
+      "tmdb": 327509
     },
     {
       "year": 1977,
       "title": "Ghatashraddha",
       "creator": "Girish Kasaravalli",
       "language": "kn",
-      "release_year": 1977
+      "release_year": 1977,
+      "tmdb": 258535,
+      "cover": "https://image.tmdb.org/t/p/w500/aDvvuDeaZGRG2y4sQFN3wx5pzjO.jpg"
     },
     {
       "year": 1976,
@@ -376,28 +454,36 @@
       "title": "Chomana Dudi",
       "creator": "B. V. Karanth",
       "language": "kn",
-      "release_year": 1975
+      "release_year": 1975,
+      "tmdb": 315898,
+      "cover": "https://image.tmdb.org/t/p/w500/pXHxbM1KJbksnT7iW2xX9lIjgSA.jpg"
     },
     {
       "year": 1974,
       "title": "Chorus",
       "creator": "Mrinal Sen",
       "language": "bn",
-      "release_year": 1974
+      "release_year": 1974,
+      "tmdb": 151217,
+      "cover": "https://image.tmdb.org/t/p/w500/kV8c2hgMt2wvImiX4wQMdn59zxL.jpg"
     },
     {
       "year": 1973,
       "title": "Nirmalyam",
       "creator": "M. T. Vasudevan Nair",
       "language": "ml",
-      "release_year": 1973
+      "release_year": 1973,
+      "tmdb": 315895,
+      "cover": "https://image.tmdb.org/t/p/w500/pOhLGCQHfaOMxcK2E1kBjvYRNth.jpg"
     },
     {
       "year": 1972,
       "title": "Swayamvaram",
       "creator": "Adoor Gopalakrishnan",
       "language": "ml",
-      "release_year": 1972
+      "release_year": 1972,
+      "tmdb": 169364,
+      "cover": "https://image.tmdb.org/t/p/w500/kQCRLo2MhI6kcUnuOZsu3SYFHdt.jpg"
     },
     {
       "year": 1971,
@@ -411,14 +497,18 @@
       "title": "Samskara",
       "creator": "Tikkavarapu Pattabhirama Reddy",
       "language": "kn",
-      "release_year": 1970
+      "release_year": 1970,
+      "tmdb": 326800,
+      "cover": "https://image.tmdb.org/t/p/w500/jJRm0mqPGevt74aoF70upyGZshn.jpg"
     },
     {
       "year": 1969,
       "title": "Bhuvan Shome",
       "creator": "Mrinal Sen",
       "language": "hi",
-      "release_year": 1969
+      "release_year": 1969,
+      "tmdb": 210923,
+      "cover": "https://image.tmdb.org/t/p/w500/5AVlOL89rwGu7NxghSFoefNto0X.jpg"
     },
     {
       "year": 1968,
@@ -426,50 +516,63 @@
       "creator": "Satyajit Ray",
       "language": "bn",
       "release_year": 1969,
-      "check": true
+      "check": true,
+      "tmdb": 135092,
+      "cover": "https://image.tmdb.org/t/p/w500/7CtaNb9v7UAkx8eZ1tC1ODKbVse.jpg"
     },
     {
       "year": 1967,
       "title": "Hatey Bazarey",
       "creator": "Tapan Sinha",
       "language": "bn",
-      "release_year": 1967
+      "release_year": 1967,
+      "tmdb": 284914,
+      "cover": "https://image.tmdb.org/t/p/w500/dsjio9LljptDwjHzCjd33ezgCLV.jpg"
     },
     {
       "year": 1966,
       "title": "Teesri Kasam",
       "creator": "Basu Bhattacharya",
       "language": "hi",
-      "release_year": 1966
+      "release_year": 1966,
+      "tmdb": 257284,
+      "cover": "https://image.tmdb.org/t/p/w500/rGWUf9jGzYZPTd2lnqXSXcJd2dK.jpg"
     },
     {
       "year": 1965,
       "title": "Chemmeen",
       "creator": "Ramu Kariat",
       "language": "ml",
-      "release_year": 1966,
-      "check": true
+      "release_year": 1965,
+      "check": true,
+      "tmdb": 265070,
+      "cover": "https://image.tmdb.org/t/p/w500/jOAjmEQD4LUYFVgR41fAEutaVQb.jpg"
     },
     {
       "year": 1964,
       "title": "Charulata",
       "creator": "Satyajit Ray",
       "language": "bn",
-      "release_year": 1964
+      "release_year": 1964,
+      "tmdb": 35790,
+      "cover": "https://image.tmdb.org/t/p/w500/ei2YaCcnUBudyc6BQSc6mpCSJTx.jpg"
     },
     {
       "year": 1963,
       "title": "Shehar Aur Sapna",
       "creator": "Khwaja Ahmad Abbas",
       "language": "hi",
-      "release_year": 1963
+      "release_year": 1961,
+      "tmdb": 327508,
+      "cover": "https://image.tmdb.org/t/p/w500/qutwU1kl5VYi37Wa9tXsKlpwEMx.jpg"
     },
     {
       "year": 1962,
       "title": "Dada Thakur",
       "creator": "Sudhir Mukherjee",
       "language": "bn",
-      "release_year": 1962
+      "release_year": 1962,
+      "tmdb": 327506
     },
     {
       "year": 1961,
@@ -477,14 +580,17 @@
       "creator": "Bijoy Bose",
       "language": "bn",
       "release_year": 1962,
-      "check": true
+      "check": true,
+      "tmdb": 327505
     },
     {
       "year": 1960,
       "title": "Anuradha",
       "creator": "Hrishikesh Mukherjee",
       "language": "hi",
-      "release_year": 1960
+      "release_year": 1960,
+      "tmdb": 82119,
+      "cover": "https://image.tmdb.org/t/p/w500/mb9eR69FcQCOZ8ECYetZeXafuaY.jpg"
     },
     {
       "year": 1959,
@@ -499,7 +605,9 @@
       "creator": "Debaki Bose",
       "language": "bn",
       "release_year": 1959,
-      "check": true
+      "check": true,
+      "tmdb": 269221,
+      "cover": "https://image.tmdb.org/t/p/w500/6xXIN4ZdnMg255JYnQ12I5isELh.jpg"
     },
     {
       "year": 1957,
@@ -514,28 +622,36 @@
       "creator": "Tapan Sinha",
       "language": "bn",
       "release_year": 1957,
-      "check": true
+      "check": true,
+      "tmdb": 265630,
+      "cover": "https://image.tmdb.org/t/p/w500/9EIaDqF5WfWVxPjxDIdebe6t26F.jpg"
     },
     {
       "year": 1955,
       "title": "Pather Panchali",
       "creator": "Satyajit Ray",
       "language": "bn",
-      "release_year": 1955
+      "release_year": 1955,
+      "tmdb": 5801,
+      "cover": "https://image.tmdb.org/t/p/w500/frZj5djlU9hFEjMcL21RJZVuG5O.jpg"
     },
     {
       "year": 1954,
       "title": "Mirza Ghalib",
       "creator": "Sohrab Modi",
       "language": "hi",
-      "release_year": 1954
+      "release_year": 1954,
+      "tmdb": 307578,
+      "cover": "https://image.tmdb.org/t/p/w500/uHKYSGiPcO503kWeNDCHrRZuR1B.jpg"
     },
     {
       "year": 1953,
       "title": "Shyamchi Aai",
       "creator": "Pralhad Keshav Atre",
       "language": "mr",
-      "release_year": 1953
+      "release_year": 1953,
+      "tmdb": 308155,
+      "cover": "https://image.tmdb.org/t/p/w500/paqeIomAc9ckSg2y15EWbqB9J6l.jpg"
     }
   ]
 }

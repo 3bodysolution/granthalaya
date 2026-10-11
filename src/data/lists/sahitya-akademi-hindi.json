@@ -34,7 +34,9 @@
       "title": "Tumadi Ke Shabd",
       "creator": "Badri Narayan",
       "language": "hi",
-      "check": true
+      "check": true,
+      "ol": "OL27035810W",
+      "cover": "https://covers.openlibrary.org/b/id/12543712-L.jpg"
     },
     {
       "year": 2021,
@@ -62,7 +64,8 @@
       "title": "Post Box No. 203 - Nala Sopara",
       "creator": "Chitra Mudgal",
       "language": "hi",
-      "check": true
+      "check": true,
+      "ol": "OL37866138W"
     },
     {
       "year": 2017,
@@ -168,7 +171,8 @@
       "title": "Kitne Pakistan",
       "creator": "Kamleshwar",
       "language": "hi",
-      "original_title": "कितने पाकिस्तान"
+      "original_title": "कितने पाकिस्तान",
+      "ol": "OL10629691W"
     },
     {
       "year": 2002,
@@ -240,14 +244,16 @@
       "title": "Ardhanarishwar",
       "creator": "Vishnu Prabhakar",
       "language": "hi",
-      "original_title": "अर्द्धनारीश्वर"
+      "original_title": "अर्द्धनारीश्वर",
+      "ol": "OL32451874W"
     },
     {
       "year": 1992,
       "title": "Dhai Ghar",
       "creator": "Giriraj Kishore",
       "language": "hi",
-      "original_title": "ढाई घर"
+      "original_title": "ढाई घर",
+      "ol": "OL13290583W"
     },
     {
       "year": 1991,
@@ -282,21 +288,24 @@
       "title": "Magadh",
       "creator": "Shrikant Verma",
       "language": "hi",
-      "original_title": "मगध (काव्य)"
+      "original_title": "मगध (काव्य)",
+      "ol": "OL42413008W"
     },
     {
       "year": 1986,
       "title": "Apurva",
       "creator": "Kedarnath Agarwal",
       "language": "hi",
-      "check": true
+      "check": true,
+      "ol": "OL336922W"
     },
     {
       "year": 1985,
       "title": "Kavve Aur Kala Pani",
       "creator": "Nirmal Verma",
       "language": "hi",
-      "original_title": "कव्वे और काला पानी"
+      "original_title": "कव्वे और काला पानी",
+      "ol": "OL12838306W"
     },
     {
       "year": 1984,
@@ -366,7 +375,9 @@
       "title": "Tamas",
       "creator": "Bhisham Sahni",
       "language": "hi",
-      "original_title": "तमस"
+      "original_title": "तमस",
+      "ol": "OL351348W",
+      "cover": "https://covers.openlibrary.org/b/id/4962050-L.jpg"
     },
     {
       "year": 1974,
@@ -401,14 +412,16 @@
       "title": "Nirala Ki Sahitya Sadhana",
       "creator": "Ram Vilas Sharma",
       "language": "hi",
-      "original_title": "निराला की साहित्य साधना"
+      "original_title": "निराला की साहित्य साधना",
+      "ol": "OL12109528W"
     },
     {
       "year": 1969,
       "title": "Raag Darbari",
       "creator": "Shrilal Shukla",
       "language": "hi",
-      "original_title": "रागदरबारी"
+      "original_title": "रागदरबारी",
+      "ol": "OL29131003W"
     },
     {
       "year": 1968,
@@ -422,7 +435,8 @@
       "title": "Amrit Aur Vish",
       "creator": "Amritlal Nagar",
       "language": "hi",
-      "original_title": "अमृत और विष"
+      "original_title": "अमृत और विष",
+      "ol": "OL11531196W"
     },
     {
       "year": 1966,
@@ -436,7 +450,8 @@
       "title": "Rasa Siddhanta",
       "creator": "Nagendra",
       "language": "hi",
-      "original_title": "रस सिद्धांत"
+      "original_title": "रस सिद्धांत",
+      "ol": "OL314098W"
     },
     {
       "year": 1964,
@@ -457,7 +472,9 @@
       "title": "Bhoole Bisre Chitra",
       "creator": "Bhagwati Charan Verma",
       "language": "hi",
-      "original_title": "भूले बिसरे चित्र"
+      "original_title": "भूले बिसरे चित्र",
+      "ol": "OL25304749W",
+      "cover": "https://covers.openlibrary.org/b/id/12000389-L.jpg"
     },
     {
       "year": 1960,

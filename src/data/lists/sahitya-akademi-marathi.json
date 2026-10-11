@@ -48,7 +48,8 @@
       "title": "Udya",
       "creator": "Nanda Khare",
       "language": "mr",
-      "check": true
+      "check": true,
+      "ol": "OL22325084W"
     },
     {
       "year": 2019,
@@ -154,7 +155,8 @@
       "title": "Bhijaki Vahi",
       "creator": "Arun Kolatkar",
       "language": "mr",
-      "original_title": "भिजकी वही"
+      "original_title": "भिजकी वही",
+      "ol": "OL5760691W"
     },
     {
       "year": 2004,
@@ -203,7 +205,9 @@
       "title": "Tukaram Darshan",
       "creator": "Sadanand More",
       "language": "mr",
-      "original_title": "तुकाराम दर्शन"
+      "original_title": "तुकाराम दर्शन",
+      "ol": "OL27035361W",
+      "cover": "https://covers.openlibrary.org/b/id/12543257-L.jpg"
     },
     {
       "year": 1997,
@@ -261,7 +265,9 @@
       "title": "Zombi",
       "creator": "Anand Yadav",
       "language": "mr",
-      "original_title": "झोंबी"
+      "original_title": "झोंबी",
+      "ol": "OL21412960W",
+      "cover": "https://covers.openlibrary.org/b/id/10370237-L.jpg"
     },
     {
       "year": 1989,
@@ -275,7 +281,9 @@
       "title": "Uchalya",
       "creator": "Laxman Gaikwad",
       "language": "mr",
-      "original_title": "उचल्या"
+      "original_title": "उचल्या",
+      "ol": "OL9082880W",
+      "cover": "https://covers.openlibrary.org/b/id/4884953-L.jpg"
     },
     {
       "year": 1987,
@@ -324,7 +332,8 @@
       "title": "Upara",
       "creator": "Laxman Mane",
       "language": "mr",
-      "original_title": "उपरा"
+      "original_title": "उपरा",
+      "ol": "OL11183760W"
     },
     {
       "year": 1980,
@@ -416,7 +425,8 @@
       "title": "Yugant",
       "creator": "Irawati Karve",
       "language": "mr",
-      "original_title": "युगान्त"
+      "original_title": "युगान्त",
+      "ol": "OL10700719W"
     },
     {
       "year": 1967,
@@ -437,7 +447,9 @@
       "title": "Vyakti Ani Valli",
       "creator": "Purushottam Laxman Deshpande",
       "language": "mr",
-      "original_title": "व्यक्ति आणि वल्ली"
+      "original_title": "व्यक्ति आणि वल्ली",
+      "ol": "OL21412868W",
+      "cover": "https://covers.openlibrary.org/b/id/10370190-L.jpg"
     },
     {
       "year": 1964,
@@ -472,7 +484,9 @@
       "title": "Yayati",
       "creator": "Vishnu Sakharam Khandekar",
       "language": "mr",
-      "original_title": "ययाति (कादंबरी)"
+      "original_title": "ययाति (कादंबरी)",
+      "ol": "OL24539146W",
+      "cover": "https://covers.openlibrary.org/b/id/11177498-L.jpg"
     },
     {
       "year": 1959,

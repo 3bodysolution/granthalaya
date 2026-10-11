@@ -21,7 +21,9 @@
       "title": "Shyamchi Aai",
       "creator": "Sujay Dahake",
       "language": "mr",
-      "release_year": 2023
+      "release_year": 1953,
+      "tmdb": 308155,
+      "cover": "https://image.tmdb.org/t/p/w500/paqeIomAc9ckSg2y15EWbqB9J6l.jpg"
     },
     {
       "year": 2022,
@@ -29,7 +31,9 @@
       "creator": "Paresh Mokashi",
       "language": "mr",
       "release_year": 2023,
-      "check": true
+      "check": true,
+      "tmdb": 1073486,
+      "cover": "https://image.tmdb.org/t/p/w500/32b2fSnrmDO9VfKFw1YHgSeICqR.jpg"
     },
     {
       "year": 2021,
@@ -37,7 +41,9 @@
       "creator": "Saleel Kulkarni",
       "language": "mr",
       "release_year": 2022,
-      "check": true
+      "check": true,
+      "tmdb": 1015479,
+      "cover": "https://image.tmdb.org/t/p/w500/uFkZTh0BZ5FUNynbQCRa3FtxRzC.jpg"
     },
     {
       "year": 2020,
@@ -45,15 +51,19 @@
       "creator": "Shantanu Ganesh Rode",
       "language": "mr",
       "release_year": 2022,
-      "check": true
+      "check": true,
+      "tmdb": 1016253,
+      "cover": "https://image.tmdb.org/t/p/w500/A4reAZ6L5umHalIVeutXzdS6j2u.jpg"
     },
     {
       "year": 2019,
       "title": "Bardo",
       "creator": "Bhimrao Mude",
       "language": "mr",
-      "release_year": 2021,
-      "check": true
+      "release_year": 2022,
+      "check": true,
+      "tmdb": 685691,
+      "cover": "https://image.tmdb.org/t/p/w500/3e6RA0CzFDC0pz5TqiRlbHcsc2n.jpg"
     },
     {
       "year": 2018,
@@ -76,42 +86,52 @@
       "creator": "Sandeep Bhalachandra Patil",
       "language": "mr",
       "release_year": 2017,
-      "check": true
+      "check": true,
+      "tmdb": 615342,
+      "cover": "https://image.tmdb.org/t/p/w500/d0Jmz9yTkPmQGuuq3CiRPdNLmd0.jpg"
     },
     {
       "year": 2015,
       "title": "Ringan",
       "creator": "Makarand Mane",
       "language": "mr",
-      "release_year": 2015
+      "release_year": 2017,
+      "tmdb": 372838,
+      "cover": "https://image.tmdb.org/t/p/w500/551hlsKNmZv0TDXHYhsVyC3ylsq.jpg"
     },
     {
       "year": 2014,
       "title": "Killa",
       "creator": "Avinash Arun",
       "language": "mr",
-      "release_year": 2014
+      "release_year": 2014,
+      "tmdb": 284729,
+      "cover": "https://image.tmdb.org/t/p/w500/9iVHqmYP2h8d4gDPW3r6bUjJEDS.jpg"
     },
     {
       "year": 2013,
       "title": "Aajcha Divas Majha",
       "creator": "Chandrakant Kulkarni",
       "language": "mr",
-      "release_year": 2013
+      "release_year": 2013,
+      "tmdb": 200342
     },
     {
       "year": 2012,
       "title": "Investment",
       "creator": "Ratnakar Matkari",
       "language": "mr",
-      "release_year": 2012
+      "release_year": 2013,
+      "tmdb": 223258
     },
     {
       "year": 2011,
       "title": "Shala",
       "creator": "Sujay Dahake",
       "language": "mr",
-      "release_year": 2011
+      "release_year": 2011,
+      "tmdb": 90532,
+      "cover": "https://image.tmdb.org/t/p/w500/5OeDB3LhNuFPmxewBMphNd9EoIZ.jpg"
     },
     {
       "year": 2010,
@@ -135,42 +155,54 @@
       "creator": "Paresh Mokashi",
       "language": "mr",
       "release_year": 2009,
-      "check": true
+      "check": true,
+      "tmdb": 35572,
+      "cover": "https://image.tmdb.org/t/p/w500/uRC3yCRlsETdnCvZiyXilLtMrdE.jpg"
     },
     {
       "year": 2007,
       "title": "Nirop",
       "creator": "Sachin Kundalkar",
       "language": "mr",
-      "release_year": 2007
+      "release_year": 2007,
+      "tmdb": 723908,
+      "cover": "https://image.tmdb.org/t/p/w500/s9QkACzrN4Q3JnwfBy1etF4ejQW.jpg"
     },
     {
       "year": 2006,
       "title": "Shevri",
       "creator": "Gajendra Ahire",
       "language": "mr",
-      "release_year": 2006
+      "release_year": 2006,
+      "tmdb": 493989,
+      "cover": "https://image.tmdb.org/t/p/w500/xUZWjmbuGXBlM33xs9LgDVk4Bwj.jpg"
     },
     {
       "year": 2005,
       "title": "Dombivali Fast",
       "creator": "Nishikant Kamat",
       "language": "mr",
-      "release_year": 2005
+      "release_year": 2005,
+      "tmdb": 227600,
+      "cover": "https://image.tmdb.org/t/p/w500/7xiMtkgw69HnWDsQ9vCwz2nEmvb.jpg"
     },
     {
       "year": 2004,
       "title": "Uttarayan",
       "creator": "Bipin Nadkarni",
       "language": "mr",
-      "release_year": 2004
+      "release_year": 2004,
+      "tmdb": 276094,
+      "cover": "https://image.tmdb.org/t/p/w500/c49AvJC759OqSlfA1LSCWplCB0g.jpg"
     },
     {
       "year": 2003,
       "title": "Not Only Mrs. Raut",
       "creator": "Gajendra Ahire",
       "language": "mr",
-      "release_year": 2003
+      "release_year": 2003,
+      "tmdb": 315418,
+      "cover": "https://image.tmdb.org/t/p/w500/mk3ncYAWXvmOzT8Nj34Fy0ifUT8.jpg"
     },
     {
       "year": 2002,
@@ -184,21 +216,25 @@
       "title": "Astitva",
       "creator": "Mahesh Manjrekar",
       "language": "mr",
-      "release_year": 2000
+      "release_year": 2000,
+      "tmdb": 97356,
+      "cover": "https://image.tmdb.org/t/p/w500/uGAGCthCBGMuRuoKvRpw0EK0Ro0.jpg"
     },
     {
       "year": 1999,
       "title": "Gharabaher",
       "creator": "Sanjay Surkar",
       "language": "mr",
-      "release_year": 1999
+      "release_year": 1999,
+      "tmdb": 1631037
     },
     {
       "year": 1998,
       "title": "Tu Tithe Mee",
       "creator": "Sanjay Surkar",
       "language": "mr",
-      "release_year": 1998
+      "release_year": 1998,
+      "tmdb": 1631038
     },
     {
       "year": 1996,
@@ -207,21 +243,25 @@
       "language": "hi",
       "note": "Hindi film",
       "release_year": 1985,
-      "check": true
+      "check": true,
+      "tmdb": 674834,
+      "cover": "https://image.tmdb.org/t/p/w500/qWIn7DzpIhdtDVWviFqZt57zua1.jpg"
     },
     {
       "year": 1995,
       "title": "Bangarwadi",
       "creator": "Amol Palekar",
       "language": "mr",
-      "release_year": 1995
+      "release_year": 1995,
+      "tmdb": 334449
     },
     {
       "year": 1993,
       "title": "Lapandav",
       "creator": "Shravani Devdhar",
       "language": "mr",
-      "release_year": 1993
+      "release_year": 1993,
+      "tmdb": 1479893
     },
     {
       "year": 1992,
@@ -235,14 +275,18 @@
       "title": "Kalat Nakalat",
       "creator": "Kanchan Nayak",
       "language": "mr",
-      "release_year": 1989
+      "release_year": 1990,
+      "tmdb": 800822,
+      "cover": "https://image.tmdb.org/t/p/w500/qjVVAEOZwUpnPAhqm9cSmtT3cWu.jpg"
     },
     {
       "year": 1987,
       "title": "Sarja",
       "creator": "Rajdutt",
       "language": "mr",
-      "release_year": 1987
+      "release_year": 1987,
+      "tmdb": 700944,
+      "cover": "https://image.tmdb.org/t/p/w500/zPzj0YNYtYrbKmB1t85ctYOjqa6.jpg"
     },
     {
       "year": 1985,
@@ -266,7 +310,9 @@
       "creator": "Vijaya Mehta",
       "language": "mr",
       "release_year": 1982,
-      "check": true
+      "check": true,
+      "tmdb": 674833,
+      "cover": "https://image.tmdb.org/t/p/w500/tpdkL7yal2vCvrf8dmNzqrES4eS.jpg"
     },
     {
       "year": 1982,
@@ -281,21 +327,27 @@
       "creator": "Jabbar Patel",
       "language": "mr",
       "release_year": 1982,
-      "check": true
+      "check": true,
+      "tmdb": 208632,
+      "cover": "https://image.tmdb.org/t/p/w500/aXPLUdFp5AKP7iO98h8S7NuyU3M.jpg"
     },
     {
       "year": 1979,
       "title": "Sinhasan",
       "creator": "Jabbar Patel",
       "language": "mr",
-      "release_year": 1979
+      "release_year": 1979,
+      "tmdb": 310745,
+      "cover": "https://image.tmdb.org/t/p/w500/pd7lbXLdqWSstsTf9l3xTSp4CZ0.jpg"
     },
     {
       "year": 1977,
       "title": "Jait Re Jait",
       "creator": "Jabbar Patel",
       "language": "mr",
-      "release_year": 1977
+      "release_year": 1977,
+      "tmdb": 209506,
+      "cover": "https://image.tmdb.org/t/p/w500/8V05oR4NxyruSHaa1sg8jA53FuD.jpg"
     },
     {
       "year": 1975,
@@ -309,22 +361,28 @@
       "title": "Pinjra",
       "creator": "V. Shantaram",
       "language": "mr",
-      "release_year": 1972
+      "release_year": 1972,
+      "tmdb": 300920,
+      "cover": "https://image.tmdb.org/t/p/w500/2v8tAvIgmcIb1PY1irSsg1GPtln.jpg"
     },
     {
       "year": 1971,
       "title": "Shantata! Court Chalu Aahe",
       "creator": "Arvind Deshpande",
       "language": "mr",
-      "release_year": 1970,
-      "check": true
+      "release_year": 1971,
+      "check": true,
+      "tmdb": 445674,
+      "cover": "https://image.tmdb.org/t/p/w500/wfj1eZ1RLRn7JO7bOz6KR1FSrYK.jpg"
     },
     {
       "year": 1970,
       "title": "Mumbaicha Jawai",
       "creator": "Raja Thakur",
       "language": "mr",
-      "release_year": 1970
+      "release_year": 1970,
+      "tmdb": 1106454,
+      "cover": "https://image.tmdb.org/t/p/w500/tdzy22jDuwvHCvaeHNw62Q40onl.jpg"
     },
     {
       "year": 1969,
@@ -387,7 +445,8 @@
       "title": "Pathlaag",
       "creator": "Raja Paranjape",
       "language": "mr",
-      "release_year": 1964
+      "release_year": 1964,
+      "tmdb": 1218993
     },
     {
       "year": 1964,
@@ -402,7 +461,9 @@
       "title": "Sawaal Majha Aika!",
       "creator": "Anant Mane",
       "language": "mr",
-      "release_year": 1964
+      "release_year": 1964,
+      "tmdb": 493949,
+      "cover": "https://image.tmdb.org/t/p/w500/8BFx6Kq1XNa2QPRum2TvrnYVAEs.jpg"
     },
     {
       "year": 1963,
@@ -425,7 +486,9 @@
       "title": "Rangalya Ratri Asha",
       "creator": "Raja Thakur",
       "language": "mr",
-      "release_year": 1962
+      "release_year": 1962,
+      "tmdb": 719780,
+      "cover": "https://image.tmdb.org/t/p/w500/cVpDthEhcAxmseLy7TliKbWj8f2.jpg"
     },
     {
       "year": 1962,
@@ -448,15 +511,17 @@
       "title": "Manini",
       "creator": "Anant Mane",
       "language": "mr",
-      "release_year": 1961
+      "release_year": 1961,
+      "tmdb": 307879
     },
     {
       "year": 1961,
       "title": "Vaijayanta",
       "creator": "Gajanan Jagirdar",
       "language": "mr",
-      "release_year": 1960,
-      "check": true
+      "release_year": 1961,
+      "check": true,
+      "tmdb": 1218532
     },
     {
       "year": 1961,
@@ -471,15 +536,19 @@
       "title": "Kanyadaan",
       "creator": "Madhav Shinde",
       "language": "mr",
-      "release_year": 1960
+      "release_year": 1960,
+      "tmdb": 822354,
+      "cover": "https://image.tmdb.org/t/p/w500/wfKkoJafziXZAjy0HpOsUtfzf1W.jpg"
     },
     {
       "year": 1960,
       "title": "Umaj Padel Tar",
       "creator": "Dinkar D. Patil",
       "language": "mr",
-      "release_year": 1959,
-      "check": true
+      "release_year": 1960,
+      "check": true,
+      "tmdb": 790749,
+      "cover": "https://image.tmdb.org/t/p/w500/loVjX7oaGgStyrZeRioS8JpLDd8.jpg"
     },
     {
       "year": 1958,
@@ -517,7 +586,9 @@
       "title": "Mahatma Phule",
       "creator": "Pralhad Keshav Atre",
       "language": "mr",
-      "release_year": 1954
+      "release_year": 1954,
+      "tmdb": 422750,
+      "cover": "https://image.tmdb.org/t/p/w500/jdsLdEnn9EEFu4lsMgXFNxv8G07.jpg"
     }
   ]
 }
