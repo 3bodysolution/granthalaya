@@ -198,9 +198,15 @@ export async function searchBooks(text: string): Promise<{ books: BookCard[]; au
   if (books.length < 3) {
     // Open Library is thin on Indian-language books: ask Google Books too
     const g = await getJSON(gbUrl('/volumes', { q: t, maxResults: '8', printType: 'books' }), { ttl: 600 });
+    // Google Books pads thin answers with loosely related books, so keep only those whose title or author
+    // shares a word with what was typed
+    const fold = (x: string) => x.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const words = fold(t).split(/[^\p{L}\p{M}\p{N}]+/u).filter((w) => w.length >= 3);
     const extra = (g?.items ?? []).map((v: any): BookCard | null => {
       const i = v.volumeInfo;
       if (!i?.title || !v.id) return null;
+      const hay = fold(`${i.title} ${i.subtitle ?? ''} ${(i.authors ?? []).join(' ')}`);
+      if (words.length && !words.some((w) => hay.includes(w))) return null;
       return { kind: 'book', key: `gb-${v.id}`, title: i.title, author: i.authors?.[0], year: yearOf(i.publishedDate), cover: gbCover(i.imageLinks), href: bookHref(`gb-${v.id}`) };
     }).filter(Boolean) as BookCard[];
     const have = new Set(books.map((b) => slug(b.title)));
