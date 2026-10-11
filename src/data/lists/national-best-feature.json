@@ -1,0 +1,541 @@
+{
+  "slug": "national-best-feature",
+  "title": "National Film Award for Best Feature Film",
+  "kind": "film",
+  "intro": "Every winner of India's National Film Award for Best Feature Film, the country's top prize for cinema, from its first year in 1953.",
+  "source": {
+    "name": "Wikipedia: National Film Award for Best Feature Film",
+    "url": "https://en.wikipedia.org/wiki/National_Film_Award_for_Best_Feature_Film"
+  },
+  "items": [
+    {
+      "year": 2024,
+      "title": "Article 370",
+      "creator": "Aditya Suhas Jambhale",
+      "language": "Hindi",
+      "release_year": 2024
+    },
+    {
+      "year": 2023,
+      "title": "12th Fail",
+      "creator": "Vidhu Vinod Chopra",
+      "language": "Hindi",
+      "release_year": 2023
+    },
+    {
+      "year": 2022,
+      "title": "Aattam",
+      "creator": "Anand Ekarshi",
+      "language": "Malayalam",
+      "release_year": 2023,
+      "check": true
+    },
+    {
+      "year": 2021,
+      "title": "Rocketry: The Nambi Effect",
+      "creator": "R. Madhavan",
+      "language": "Hindi",
+      "release_year": 2022,
+      "check": true
+    },
+    {
+      "year": 2020,
+      "title": "Soorarai Pottru",
+      "creator": "Sudha Kongara",
+      "language": "Tamil",
+      "release_year": 2020
+    },
+    {
+      "year": 2019,
+      "title": "Marakkar: Lion of the Arabian Sea",
+      "creator": "Priyadarshan",
+      "language": "Malayalam",
+      "release_year": 2021,
+      "check": true
+    },
+    {
+      "year": 2018,
+      "title": "Hellaro",
+      "creator": "Abhishek Shah",
+      "language": "Gujarati",
+      "release_year": 2019,
+      "check": true
+    },
+    {
+      "year": 2017,
+      "title": "Village Rockstars",
+      "creator": "Rima Das",
+      "language": "Assamese",
+      "release_year": 2017
+    },
+    {
+      "year": 2016,
+      "title": "Kaasav",
+      "creator": "Sumitra Bhave and Sunil Sukthankar",
+      "language": "Marathi",
+      "release_year": 2016
+    },
+    {
+      "year": 2015,
+      "title": "Baahubali: The Beginning",
+      "creator": "S. S. Rajamouli",
+      "language": "Telugu",
+      "release_year": 2015
+    },
+    {
+      "year": 2014,
+      "title": "Court",
+      "creator": "Chaitanya Tamhane",
+      "language": "Marathi",
+      "release_year": 2014
+    },
+    {
+      "year": 2013,
+      "title": "Ship of Theseus",
+      "creator": "Anand Gandhi",
+      "language": "English",
+      "release_year": 2012
+    },
+    {
+      "year": 2012,
+      "title": "Paan Singh Tomar",
+      "creator": "Tigmanshu Dhulia",
+      "language": "Hindi",
+      "release_year": 2010,
+      "check": true
+    },
+    {
+      "year": 2011,
+      "title": "Deool",
+      "creator": "Umesh Vinayak Kulkarni",
+      "language": "Marathi",
+      "release_year": 2011
+    },
+    {
+      "year": 2011,
+      "title": "Byari",
+      "creator": "K. P. Suveeran",
+      "language": "Beary",
+      "release_year": 2011
+    },
+    {
+      "year": 2010,
+      "title": "Adaminte Makan Abu",
+      "creator": "Salim Ahamed",
+      "language": "Malayalam",
+      "release_year": 2011,
+      "check": true
+    },
+    {
+      "year": 2009,
+      "title": "Kutty Srank",
+      "creator": "Shaji N. Karun",
+      "language": "Malayalam",
+      "release_year": 2010,
+      "check": true
+    },
+    {
+      "year": 2008,
+      "title": "Antaheen",
+      "creator": "Aniruddha Roy Chowdhury",
+      "language": "Bengali",
+      "release_year": 2009,
+      "check": true
+    },
+    {
+      "year": 2007,
+      "title": "Kanchivaram",
+      "creator": "Priyadarshan",
+      "language": "Tamil",
+      "release_year": 2008,
+      "check": true
+    },
+    {
+      "year": 2006,
+      "title": "Pulijanmam",
+      "creator": "Priyanandanan",
+      "language": "Malayalam",
+      "release_year": 2006
+    },
+    {
+      "year": 2005,
+      "title": "Kaalpurush",
+      "creator": "Buddhadeb Dasgupta",
+      "language": "Bengali",
+      "release_year": 2005
+    },
+    {
+      "year": 2004,
+      "title": "Page 3",
+      "creator": "Madhur Bhandarkar",
+      "language": "Hindi",
+      "release_year": 2005,
+      "check": true
+    },
+    {
+      "year": 2003,
+      "title": "Shwaas",
+      "creator": "Sandeep Sawant",
+      "language": "Marathi",
+      "release_year": 2004,
+      "check": true
+    },
+    {
+      "year": 2002,
+      "title": "Mondo Meyer Upakhyan",
+      "creator": "Buddhadeb Dasgupta",
+      "language": "Bengali",
+      "release_year": 2002
+    },
+    {
+      "year": 2001,
+      "title": "Dweepa",
+      "creator": "Girish Kasaravalli",
+      "language": "Kannada",
+      "release_year": 2002,
+      "check": true
+    },
+    {
+      "year": 2000,
+      "title": "Shantham",
+      "creator": "Jayaraj",
+      "language": "Malayalam",
+      "release_year": 2001,
+      "check": true
+    },
+    {
+      "year": 1999,
+      "title": "Vanaprastham",
+      "creator": "Shaji N. Karun",
+      "language": "Malayalam",
+      "release_year": 1999
+    },
+    {
+      "year": 1998,
+      "title": "Samar",
+      "creator": "Shyam Benegal",
+      "language": "Hindi",
+      "release_year": 1999,
+      "check": true
+    },
+    {
+      "year": 1997,
+      "title": "Thaayi Saheba",
+      "creator": "Girish Kasaravalli",
+      "language": "Kannada",
+      "release_year": 1997
+    },
+    {
+      "year": 1996,
+      "title": "Lal Darja",
+      "creator": "Buddhadeb Dasgupta",
+      "language": "Bengali",
+      "release_year": 1997,
+      "check": true
+    },
+    {
+      "year": 1995,
+      "title": "Kathapurushan",
+      "creator": "Adoor Gopalakrishnan",
+      "language": "Malayalam",
+      "release_year": 1995
+    },
+    {
+      "year": 1994,
+      "title": "Unishe April",
+      "creator": "Rituparno Ghosh",
+      "language": "Bengali",
+      "release_year": 1994
+    },
+    {
+      "year": 1993,
+      "title": "Charachar",
+      "creator": "Buddhadeb Dasgupta",
+      "language": "Bengali",
+      "release_year": 1993
+    },
+    {
+      "year": 1992,
+      "title": "Bhagavad Gita",
+      "creator": "G. V. Iyer",
+      "language": "Sanskrit",
+      "release_year": 1993,
+      "check": true
+    },
+    {
+      "year": 1991,
+      "title": "Agantuk",
+      "creator": "Satyajit Ray",
+      "language": "Bengali",
+      "release_year": 1991
+    },
+    {
+      "year": 1990,
+      "title": "Marupakkam",
+      "creator": "K. S. Sethumadhavan",
+      "language": "Tamil",
+      "release_year": 1992,
+      "check": true
+    },
+    {
+      "year": 1989,
+      "title": "Bagh Bahadur",
+      "creator": "Buddhadeb Dasgupta",
+      "language": "Bengali",
+      "release_year": 1989
+    },
+    {
+      "year": 1988,
+      "title": "Piravi",
+      "creator": "Shaji N. Karun",
+      "language": "Malayalam",
+      "release_year": 1989,
+      "check": true
+    },
+    {
+      "year": 1987,
+      "title": "Halodhia Choraye Baodhan Khai",
+      "creator": "Jahnu Barua",
+      "language": "Assamese",
+      "release_year": 1987
+    },
+    {
+      "year": 1986,
+      "title": "Tabarana Kathe",
+      "creator": "Girish Kasaravalli",
+      "language": "Kannada",
+      "release_year": 1987,
+      "check": true
+    },
+    {
+      "year": 1985,
+      "title": "Chidambaram",
+      "creator": "G. Aravindan",
+      "language": "Malayalam",
+      "release_year": 1985
+    },
+    {
+      "year": 1984,
+      "title": "Damul",
+      "creator": "Prakash Jha",
+      "language": "Hindi",
+      "release_year": 1984
+    },
+    {
+      "year": 1983,
+      "title": "Adi Shankaracharya",
+      "creator": "G. V. Iyer",
+      "language": "Sanskrit",
+      "release_year": 1983
+    },
+    {
+      "year": 1982,
+      "title": "Chokh",
+      "creator": "Utpalendu Chakrabarty",
+      "language": "Bengali",
+      "release_year": 1982
+    },
+    {
+      "year": 1981,
+      "title": "Dakhal",
+      "creator": "Goutam Ghose",
+      "language": "Bengali",
+      "release_year": 1981
+    },
+    {
+      "year": 1980,
+      "title": "Akaler Shandhaney",
+      "creator": "Mrinal Sen",
+      "language": "Bengali",
+      "release_year": 1982,
+      "check": true
+    },
+    {
+      "year": 1979,
+      "title": "Shodh",
+      "creator": "Biplab Roy Chowdhury",
+      "language": "Hindi",
+      "release_year": 1979
+    },
+    {
+      "year": 1977,
+      "title": "Ghatashraddha",
+      "creator": "Girish Kasaravalli",
+      "language": "Kannada",
+      "release_year": 1977
+    },
+    {
+      "year": 1976,
+      "title": "Mrigayaa",
+      "creator": "Mrinal Sen",
+      "language": "Hindi",
+      "release_year": 1976
+    },
+    {
+      "year": 1975,
+      "title": "Chomana Dudi",
+      "creator": "B. V. Karanth",
+      "language": "Kannada",
+      "release_year": 1975
+    },
+    {
+      "year": 1974,
+      "title": "Chorus",
+      "creator": "Mrinal Sen",
+      "language": "Bengali",
+      "release_year": 1974
+    },
+    {
+      "year": 1973,
+      "title": "Nirmalyam",
+      "creator": "M. T. Vasudevan Nair",
+      "language": "Malayalam",
+      "release_year": 1973
+    },
+    {
+      "year": 1972,
+      "title": "Swayamvaram",
+      "creator": "Adoor Gopalakrishnan",
+      "language": "Malayalam",
+      "release_year": 1972
+    },
+    {
+      "year": 1971,
+      "title": "Seemabaddha",
+      "creator": "Satyajit Ray",
+      "language": "Bengali",
+      "release_year": 1971
+    },
+    {
+      "year": 1970,
+      "title": "Samskara",
+      "creator": "Tikkavarapu Pattabhirama Reddy",
+      "language": "Kannada",
+      "release_year": 1970
+    },
+    {
+      "year": 1969,
+      "title": "Bhuvan Shome",
+      "creator": "Mrinal Sen",
+      "language": "Hindi",
+      "release_year": 1969
+    },
+    {
+      "year": 1968,
+      "title": "Goopy Gyne Bagha Byne",
+      "creator": "Satyajit Ray",
+      "language": "Bengali",
+      "release_year": 1969,
+      "check": true
+    },
+    {
+      "year": 1967,
+      "title": "Hatey Bazarey",
+      "creator": "Tapan Sinha",
+      "language": "Bengali",
+      "release_year": 1967
+    },
+    {
+      "year": 1966,
+      "title": "Teesri Kasam",
+      "creator": "Basu Bhattacharya",
+      "language": "Hindi",
+      "release_year": 1966
+    },
+    {
+      "year": 1965,
+      "title": "Chemmeen",
+      "creator": "Ramu Kariat",
+      "language": "Malayalam",
+      "release_year": 1966,
+      "check": true
+    },
+    {
+      "year": 1964,
+      "title": "Charulata",
+      "creator": "Satyajit Ray",
+      "language": "Bengali",
+      "release_year": 1964
+    },
+    {
+      "year": 1963,
+      "title": "Shehar Aur Sapna",
+      "creator": "Khwaja Ahmad Abbas",
+      "language": "Hindi",
+      "release_year": 1963
+    },
+    {
+      "year": 1962,
+      "title": "Dada Thakur",
+      "creator": "Sudhir Mukherjee",
+      "language": "Bengali",
+      "release_year": 1962
+    },
+    {
+      "year": 1961,
+      "title": "Bhagini Nivedita",
+      "creator": "Bijoy Bose",
+      "language": "Bengali",
+      "release_year": 1962,
+      "check": true
+    },
+    {
+      "year": 1960,
+      "title": "Anuradha",
+      "creator": "Hrishikesh Mukherjee",
+      "language": "Hindi",
+      "release_year": 1960
+    },
+    {
+      "year": 1959,
+      "title": "Apur Sansar",
+      "creator": "Satyajit Ray",
+      "language": "Bengali",
+      "release_year": 1959
+    },
+    {
+      "year": 1958,
+      "title": "Sagar Sangamey",
+      "creator": "Debaki Bose",
+      "language": "Bengali",
+      "release_year": 1959,
+      "check": true
+    },
+    {
+      "year": 1957,
+      "title": "Do Aankhen Barah Haath",
+      "creator": "V. Shantaram",
+      "language": "Hindi",
+      "release_year": 1957
+    },
+    {
+      "year": 1956,
+      "title": "Kabuliwala",
+      "creator": "Tapan Sinha",
+      "language": "Bengali",
+      "release_year": 1957,
+      "check": true
+    },
+    {
+      "year": 1955,
+      "title": "Pather Panchali",
+      "creator": "Satyajit Ray",
+      "language": "Bengali",
+      "release_year": 1955
+    },
+    {
+      "year": 1954,
+      "title": "Mirza Ghalib",
+      "creator": "Sohrab Modi",
+      "language": "Hindi",
+      "release_year": 1954
+    },
+    {
+      "year": 1953,
+      "title": "Shyamchi Aai",
+      "creator": "Pralhad Keshav Atre",
+      "language": "Marathi",
+      "release_year": 1953
+    }
+  ]
+}
