@@ -29,6 +29,15 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - `astro.config.mjs` → `security.allowedDomains` lists the site's addresses (the main one and `*.vercel.app` previews). Astro only trusts the address Vercel passes on for these, so a custom domain must be added there too, or sign-in and saving break on it (Astro would think the page is at `https://localhost`).
 - `vercel.json`: functions in `bom1` (next to the database in Mumbai) and a daily cron to `/api/keepalive` so the free database never pauses.
 
+## How we work (and keep token use low)
+
+- **Claude Code in this folder is where the building happens:** plan, edit, `npm run build`, commit. Push `phase-1` only when Sarthak says so. Where we are and what's next is in `docs/plan.md`; read it at the start of a session and update it at the end of each part.
+- **Models:** Sonnet is the default (`.claude/settings.json`). Switch with `/model` to Opus only to plan a new part or for a bug Sonnet can't crack, then switch back.
+- **Bulk reading never goes in the main conversation.** Anything that means reading many web pages or long API answers goes to the `fetcher` agent (Haiku, `.claude/agents/`) or a script in `scripts/`; only a short summary comes back. Checking pages after a change goes to the `checker` agent.
+- **Test with real data locally:** `npm run dev` on this computer reaches TMDB, Open Library and Google Books with the keys in `.env`. Check the preview on Vercel only when something depends on Vercel itself.
+- One part of the plan per session; `/clear` between parts; small, specific requests.
+- Commits are Sarthak's: no "Co-Authored-By" lines (`includeCoAuthoredBy` is off in `.claude/settings.json`). Never open or print `.env`.
+
 ## Rules Sarthak cares about
 
 - **Never change the colours or quality of the paintings.** No filters, glows or overlays that tint them. Text goes in the quiet parts of a painting (sky, empty wall), never on a box over it.
