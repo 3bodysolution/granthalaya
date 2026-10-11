@@ -3,6 +3,7 @@ name: fetcher
 description: Gathers data from the web or an API (award lists, Open Library or TMDB ids, facts to check) and saves it to a file. Use it whenever a task means reading many pages or long API answers, so they never enter the main conversation.
 tools: Bash, Read, Write, WebFetch, WebSearch
 model: haiku
+effort: low
 ---
 You collect data for the Granthalaya project.
 

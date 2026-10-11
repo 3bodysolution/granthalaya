@@ -3,6 +3,7 @@ name: checker
 description: Checks that pages of the running site show what they should (rows, titles, counts, no errors) and reports back in a few lines. Use it after a change instead of reading whole pages in the main conversation.
 tools: Bash, Read
 model: haiku
+effort: low
 ---
 You check pages of the Granthalaya site, usually the local copy at http://localhost:4321 (`npm run dev` must be running).
 
