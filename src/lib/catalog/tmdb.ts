@@ -192,7 +192,23 @@ export async function personPage(id: number): Promise<PersonPage | null> {
 }
 
 /* ——— lists: by genre, year, language or service ——— */
-export interface Filters { kind: 'film' | 'tv'; genre?: number; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number }
+/** a film or show from a TMDB list as a poster card */
+function toCard(kind: 'film' | 'tv', m: any): Card {
+  const tv = kind === 'tv';
+  const title = tv ? m.name : m.title;
+  return { kind, id: m.id, title, year: yearOf(tv ? m.first_air_date : m.release_date), poster: img(m.poster_path, 'w342'), href: tv ? showHref(m.id, title) : filmHref(m.id, title) };
+}
+
+/** what people are watching this week, worldwide (TMDB's trending list) */
+export async function trending(kind: 'film' | 'tv'): Promise<Card[]> {
+  if (!key()) return [];
+  const j = await getJSON(q(`/trending/${kind === 'tv' ? 'tv' : 'movie'}/week`), { ttl: 3600 });
+  return (j?.results ?? []).filter((m: any) => m.poster_path && !m.adult).map((m: any) => toCard(kind, m));
+}
+
+/** `language` may list several with "|" ("ml|ta|te"); `since` keeps titles released after a date;
+    `streaming` keeps titles on any subscription service in India */
+export interface Filters { kind: 'film' | 'tv'; genre?: number; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean }
 export async function discover(f: Filters): Promise<{ items: Card[]; pages: number; total: number }> {
   if (!key()) return { items: [], pages: 0, total: 0 };
   const tv = f.kind === 'tv';
@@ -212,12 +228,11 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   if (f.year) params[tv ? 'first_air_date_year' : 'primary_release_year'] = f.year;
   else if (f.decade) { params[`${date}.gte`] = `${f.decade}-01-01`; params[`${date}.lte`] = `${f.decade + 9}-12-31`; }
   if ((f.sort === 'new' || f.sort === 'top') && !params[`${date}.lte`]) params[`${date}.lte`] = today;
+  if (f.since && !params[`${date}.gte`]) { params[`${date}.gte`] = f.since; params[`${date}.lte`] ??= today; }
   if (f.service) { params.watch_region = REGION; params.with_watch_providers = f.service; params.with_watch_monetization_types = 'flatrate|free|ads'; }
+  else if (f.streaming) { params.watch_region = REGION; params.with_watch_monetization_types = 'flatrate'; }
   const j = await getJSON(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600 });
-  const items = (j?.results ?? []).map((m: any): Card => {
-    const title = tv ? m.name : m.title;
-    return { kind: f.kind, id: m.id, title, year: yearOf(tv ? m.first_air_date : m.release_date), poster: img(m.poster_path, 'w342'), href: tv ? showHref(m.id, title) : filmHref(m.id, title) };
-  });
+  const items = (j?.results ?? []).map((m: any) => toCard(f.kind, m));
   return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0 };
 }
 

@@ -163,6 +163,18 @@ function card(d: any): BookCard {
   const key = String(d.key ?? '').replace('/works/', '');
   return { kind: 'book', key, title: d.title, author: d.author_name?.[0], year: d.first_publish_year, cover: cover(d.cover_i, 'L'), href: bookHref(key, d.title) };
 }
+/** what Open Library readers are opening this week: only books with a cover, each title once */
+export async function trendingBooks(window: 'daily' | 'weekly' | 'monthly' = 'weekly'): Promise<BookCard[]> {
+  const j = await getJSON(ol(`/trending/${window}.json?limit=40`), { ttl: 10800, ms: 8000 });
+  const seen = new Set<string>();
+  return (j?.works ?? []).map(card).filter((b: BookCard) => {
+    const k = slug(b.title);
+    if (!b.key || !b.cover || !k || seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
 export interface BookFilters { subject?: string; language?: string; year?: number; decade?: number; sort?: 'popular' | 'top' | 'new'; page?: number }
 /* Open Library merges the subjects of every edition into the work, so a famous novel with thousands of editions
    is tagged with almost everything (Robinson Crusoe is "poetry"). Three things keep the lists honest:

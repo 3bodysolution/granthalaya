@@ -23,6 +23,12 @@ const { fields, keep = {} } = Astro.props;
   .fl.on select { border-color: var(--lat); color: var(--lat); }
   .clear { font-size: 13px; font-weight: 600; color: var(--muted); padding: 0 6px; }
   .clear:hover { color: var(--lat); }
+  /* on a phone the choices sit in one line that scrolls sideways, so the list starts sooner */
+  @media (max-width: 780px) {
+    .filters { position: relative; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gut, 20px) * -1); padding: 2px var(--gut, 20px); width: calc(100% + var(--gut, 20px) * 2); }
+    .filters::-webkit-scrollbar { display: none; }
+    .fl, .clear { flex: none; }
+  }
 </style>
 <script>
   // drop empty choices from the address, so it stays short

@@ -1,10 +1,13 @@
 ---
-// Books by subject, original language and decade, from Open Library. The target of every linked year,
-// subject and language on a book page.
+// Books. With no filters it's a front page: rows of popular books, then ways to browse. With filters
+// (subject, original language, decade, order) it's a grid from Open Library. Every linked year, subject and
+// language on a book page comes here.
 import Base from '../../layouts/Base.astro';
 import PosterTile from '../../components/title/PosterTile.astro';
 import Filters from '../../components/title/Filters.astro';
 import Pager from '../../components/title/Pager.astro';
+import PosterRow from '../../components/title/PosterRow.astro';
+import { bookRows, markRows, type Row } from '../../lib/catalog/rows';
 import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import { myMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
@@ -25,9 +28,16 @@ const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && 
 const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort')) ?? 'popular';
 const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
 
-const list = await browseBooks({ subject, language, year, decade, sort, page });
+const front = [...q.keys()].length === 0;
+const [list, rowsRaw] = await Promise.all([
+  front ? Promise.resolve({ items: [], total: 0, pages: 0 }) : browseBooks({ subject, language, year, decade, sort, page }),
+  front ? bookRows() : Promise.resolve([] as Row[]),
+]);
 const sb = Astro.locals.supabase;
-const marks = sb ? await myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
+const [marks, rows] = await Promise.all([
+  sb && !front ? myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : Promise.resolve(new Map<string, string>()),
+  markRows(sb, Astro.locals.me, rowsRaw),
+]);
 
 const known = SUBJECTS.find(([s]) => s === subject)?.[1];
 const subjectName = subject ? known ?? subject.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()) : '';
@@ -39,6 +49,9 @@ title = title.replace(/^./, (c) => c.toUpperCase());
 const now = new Date().getUTCFullYear();
 const decades: [string, string][] = Array.from({ length: Math.floor((now - 1850) / 10) + 1 }, (_, i) => { const d = Math.floor(now / 10) * 10 - i * 10; return [String(d), `${d}s`]; });
 const subjects: [string, string][] = [['', 'Any subject'], ...(subject && !known ? [[subject, subjectName]] as [string, string][] : []), ...SUBJECTS];
+const subjectLinks = SUBJECTS.map(([k, n]) => [`/books/?subject=${k}`, n]);
+const langLinks = BOOK_LANGUAGES.slice(0, 14).map(([c, n]) => [`/books/?language=${c}`, n]);
+const decadeLinks = decades.slice(0, 10).map(([d, n]) => [`/books/?decade=${d}`, n]);
 const fields = [
   { name: 'subject', label: 'Subject', value: subject ?? '', options: subjects },
   { name: 'language', label: 'Language', value: language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][] },
@@ -50,10 +63,21 @@ const fields = [
 ---
 <Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`}>
   <section class="pad head">
-    <p class="eyebrow" style="color: var(--book)">Books</p>
+    {!front && <p class="eyebrow" style="color: var(--book)">Books</p>}
     <h1 class="title">{title}</h1>
     <Filters fields={fields} />
   </section>
+  {front ? (
+    <section class="pad rows">
+      {rows.map((r) => <PosterRow {...r} />)}
+      <div class="browse">
+        <div class="bset"><h2 class="eyebrow">By subject</h2><div class="chips">{subjectLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
+        <div class="bset"><h2 class="eyebrow">By original language</h2><div class="chips">{langLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
+        <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
+      </div>
+      <p class="credit-line">Book data from Open Library.</p>
+    </section>
+  ) : (
   <section class="pad">
     {list.items.length === 0 ? (
       <div class="empty">
@@ -68,6 +92,7 @@ const fields = [
     <Pager page={page} pages={list.pages} />
     <p class="credit-line">Book data from Open Library.</p>
   </section>
+  )}
 </Base>
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -75,5 +100,13 @@ const fields = [
   .empty { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; font-size: 16px; }
   .empty p { margin: 0; }
   .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }
+  .rows { display: flex; flex-direction: column; gap: 48px; padding-bottom: 8px; }
+  .browse { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; padding-top: 8px; }
+  .bset { display: flex; flex-direction: column; gap: 12px; }
+  .bset:first-child { grid-column: 1 / -1; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips .gchip:hover { color: var(--ink); }
+  .rows .credit-line { margin-top: -16px; }
+  @media (max-width: 780px) { .browse { grid-template-columns: 1fr; } .rows { gap: 36px; } }
   @media (max-width: 780px) { .head { padding-top: 28px; } .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; } }
 </style>

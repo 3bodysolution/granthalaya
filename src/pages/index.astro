@@ -8,11 +8,15 @@ import StatusTag from '../components/ui/StatusTag.astro';
 import { loadShelf, loadFeatured, loadProfile, href, short, fullTitle, profileHref, linesHref, pickLine } from '../lib/data';
 import { statusLabel } from '../lib/kinds';
 import { supabaseReady } from '../lib/supabase';
+import PosterRow from '../components/title/PosterRow.astro';
+import { homeRows, markRows } from '../lib/catalog/rows';
 export const prerender = false;
 
 const me = Astro.locals.me;
 const sb = Astro.locals.supabase;
 let featured: Awaited<ReturnType<typeof loadFeatured>> = [];
+// what's popular this week, for everyone (the rows load alongside the visitor's own shelf)
+const rowsP = homeRows();
 try { if (sb) featured = await loadFeatured(sb, 6); } catch {}
 
 // signed in: your own home
@@ -23,6 +27,7 @@ if (me && sb) {
   shelf = s;
   if (p && !('redirect' in p)) details = p.details;
 }
+const rows = await markRows(sb, me, await rowsP);
 const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
 const wants = shelf.filter((e) => e.data.status === 'want');
 // what you're in the middle of; if nothing, what you saved for next
@@ -52,6 +57,10 @@ const features = [
     <section class="pad start rise d3">
       {supabaseReady() && <div class="cta"><GoogleButton next="/" /></div>}
       <span class="small muted">Free. No ads. Takes a minute.</span>
+    </section>
+
+    <section class="pad rows rise d4">
+      {rows.map((r) => <PosterRow {...r} />)}
     </section>
 
     <section class="pad feats rise d4">
@@ -138,6 +147,10 @@ const features = [
       </>
     )}
 
+    <section class="pad rows block rise d6">
+      {rows.map((r) => <PosterRow {...r} />)}
+    </section>
+
     {others.length > 0 && (
       <section class="pad block rise d6">
         <div class="rule"><h2 class="eyebrow">Shelves to visit</h2></div>
@@ -156,7 +169,7 @@ const features = [
 
 <style>
   /* the painting fills the width; the words sit in its sky */
-  .hero { position: relative; aspect-ratio: 2172 / 724; min-height: 460px; max-height: 760px; }
+  .hero { position: relative; aspect-ratio: 2172 / 724; min-height: 460px; max-height: 760px; overflow-x: clip; }
   .hero.mine { min-height: 460px; }
   .hero .bg { position: absolute; inset: 0; background-position: center bottom; }
   .words { position: relative; padding-top: clamp(40px, 5.5vw, 84px); display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; }
@@ -170,7 +183,9 @@ const features = [
   :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
   :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
   :global(html[data-theme="dark"]) .sub, :global(html[data-theme="dark"]) .words .small { color: #E4DCCB; text-shadow: 0 2px 12px rgba(8, 14, 32, .7); }
-  .feats { padding-top: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
+  .rows { display: flex; flex-direction: column; gap: 48px; padding-top: 12px; padding-bottom: 12px; }
+  .rows.block { padding-top: 60px; gap: 48px; }
+  .feats { padding-top: 56px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
   .feat { display: flex; flex-direction: column; gap: 6px; }
   .feat b { font-size: 15px; font-weight: 600; }
   .feat span { font-size: 14px; line-height: 1.5; color: var(--muted); }
@@ -184,7 +199,7 @@ const features = [
   .addcard { align-items: center; border-style: dashed; box-shadow: none; background: transparent; }
   .plus { width: 84px; height: 126px; flex-shrink: 0; border-radius: 6px; border: 1.5px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 34px; color: var(--muted); }
   .shelves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-  .shelfcard { padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+  .shelfcard { padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
   .shelfcard:hover { color: inherit; border-color: var(--lat); }
   .shelfcard.dashed { border: 1px dashed var(--line); border-radius: 14px; background: transparent; justify-content: center; gap: 8px; }
   .who { display: flex; align-items: center; gap: 12px; }
@@ -201,6 +216,8 @@ const features = [
     .hero.mine { min-height: 420px; }
     .hero .bg { background-position: 6% bottom; }
     .block { padding-top: 44px; }
+    .rows { gap: 36px; }
+    .rows.block { padding-top: 44px; }
     .now, .shelves, .feats { grid-template-columns: 1fr; }
     .rule .otd { display: none; }
   }

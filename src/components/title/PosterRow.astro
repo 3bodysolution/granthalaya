@@ -1,0 +1,80 @@
+---
+// A row of posters that scrolls sideways: a heading, an optional "See all" link, and arrows on screens with a mouse.
+// Used on the home page and the Films and Books front pages. Rows with nothing in them are left out.
+import PosterTile from './PosterTile.astro';
+import type { RowItem } from '../../lib/catalog/rows';
+interface Props { title: string; items: RowItem[]; href?: string; all?: string; tone?: 'film' | 'book' | 'essay'; id?: string }
+const { title, items, href, all = 'See all', tone, id = 'row-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-') } = Astro.props;
+---
+{items.length > 0 && (
+  <section class="prow" aria-labelledby={id}>
+    <div class="prow-head">
+      <h2 class="prow-t" id={id} data-tone={tone}>{title}</h2>
+      {href && <a class="prow-all" href={href}>{all} <span aria-hidden="true">→</span></a>}
+      <div class="prow-nav" aria-hidden="true">
+        <button type="button" class="prow-btn" data-row="-1" tabindex="-1" disabled>
+          <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
+        </button>
+        <button type="button" class="prow-btn" data-row="1" tabindex="-1">
+          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+        </button>
+      </div>
+    </div>
+    <ul class="prow-list" data-row-list>
+      {items.map((i) => <li><PosterTile {...i} /></li>)}
+    </ul>
+  </section>
+)}
+
+<style>
+  .prow { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .prow-head { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 10px; }
+  .prow-t { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+  .prow-t[data-tone="film"] { color: var(--sky); }
+  .prow-t[data-tone="book"] { color: var(--book); }
+  .prow-t[data-tone="essay"] { color: var(--moss); }
+  .prow-all { font-size: 13px; font-weight: 600; color: var(--muted); white-space: nowrap; transition: color .2s ease; }
+  .prow-all:hover { color: var(--lat); }
+  .prow-all span { display: inline-block; margin-left: 3px; transition: transform .2s var(--spring); }
+  .prow-all:hover span { transform: translateX(2px); }
+  .prow-nav { margin-left: auto; display: flex; gap: 6px; }
+  .prow-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: border-color .2s ease, color .2s ease, opacity .2s ease, transform .2s var(--spring); }
+  .prow-btn:hover:not(:disabled) { border-color: var(--lat); color: var(--lat); }
+  .prow-btn:active:not(:disabled) { transform: scale(.94); }
+  .prow-btn:disabled { opacity: .35; cursor: default; }
+  .prow-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  /* room above and below so a poster can lift on hover without being cut off */
+  .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px 2px 14px; display: grid; grid-auto-flow: column; grid-auto-columns: 152px; gap: 20px;
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px; scrollbar-width: none; }
+  .prow-list::-webkit-scrollbar { display: none; }
+  .prow-list > li { scroll-snap-align: start; min-width: 0; }
+  @media (hover: none), (max-width: 780px) { .prow-nav { display: none; } }
+  @media (max-width: 780px) {
+    /* on a phone the row runs to the screen edge, so it's clear there's more to swipe */
+    .prow-list { grid-auto-columns: 34%; gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
+  }
+</style>
+
+<script>
+  // arrows scroll one screen of posters; each arrow switches off at its end of the row
+  const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function sync(list: Element) {
+    const row = list.closest('.prow');
+    if (!row) return;
+    const [back, fwd] = row.querySelectorAll<HTMLButtonElement>('[data-row]');
+    const el = list as HTMLElement;
+    if (back) back.disabled = el.scrollLeft <= 4;
+    if (fwd) fwd.disabled = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
+  }
+  document.addEventListener('click', (ev) => {
+    const btn = (ev.target as Element).closest<HTMLButtonElement>('[data-row]');
+    if (!btn) return;
+    const list = btn.closest('.prow')?.querySelector<HTMLElement>('[data-row-list]');
+    if (!list) return;
+    list.scrollBy({ left: Number(btn.dataset.row) * list.clientWidth * 0.9, behavior: reduce() ? 'auto' : 'smooth' });
+  });
+  document.addEventListener('scroll', (ev) => { const t = ev.target as Element; if (t instanceof Element && t.matches('[data-row-list]')) sync(t); }, true);
+  const all = () => document.querySelectorAll('[data-row-list]').forEach(sync);
+  document.addEventListener('astro:page-load', all);
+  window.addEventListener('resize', all);
+</script>
