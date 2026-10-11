@@ -65,36 +65,38 @@ const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${
     {f.tagline && <p class="tagline">{f.tagline}</p>}
     {f.overview && <p class="overview">{f.overview}</p>}
 
-    <Tabs id="film" tabs={tabs}>
-      {f.cast.length > 0 && <div role="tabpanel" id="film-p-cast" aria-labelledby="film-t-cast" class="tp" hidden={first !== 'cast'}><PeopleGrid people={f.cast} /></div>}
-      {f.crew.length > 0 && (
-        <div role="tabpanel" id="film-p-crew" aria-labelledby="film-t-crew" class="tp" hidden={first !== 'crew'}>
-          <dl class="facts">{f.crew.map((g) => <><dt>{g.job}</dt><dd>{g.people.map((p, i) => <>{i > 0 && ', '}<a href={p.href} class="ul">{p.name}</a></>)}</dd></>)}</dl>
+    <Fragment slot="more">
+      <Tabs id="film" tabs={tabs}>
+        {f.cast.length > 0 && <div role="tabpanel" id="film-p-cast" aria-labelledby="film-t-cast" class="tp" hidden={first !== 'cast'}><PeopleGrid people={f.cast} /></div>}
+        {f.crew.length > 0 && (
+          <div role="tabpanel" id="film-p-crew" aria-labelledby="film-t-crew" class="tp" hidden={first !== 'crew'}>
+            <dl class="facts">{f.crew.map((g) => <><dt>{g.job}</dt><dd>{g.people.map((p, i) => <>{i > 0 && ', '}<a href={p.href} class="ul">{p.name}</a></>)}</dd></>)}</dl>
+          </div>
+        )}
+        <div role="tabpanel" id="film-p-details" aria-labelledby="film-t-details" class="tp" hidden={first !== 'details'}>
+          <dl class="facts">
+            {f.runtime && <><dt>Runtime</dt><dd>{duration(f.runtime, 'words')}</dd></>}
+            {f.language && <><dt>Language</dt><dd><a href={`/films/?language=${f.language.code}`} class="ul">{f.language.name}</a></dd></>}
+            {f.countries.length > 0 && <><dt>{f.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{f.countries.map((c) => c.name).join(', ')}</dd></>}
+            {released && <><dt>Released</dt><dd>{released}</dd></>}
+            {f.original && f.original !== f.title && <><dt>Original title</dt><dd>{f.original}</dd></>}
+            {f.studios.length > 0 && <><dt>Studios</dt><dd>{f.studios.join(', ')}</dd></>}
+          </dl>
         </div>
-      )}
-      <div role="tabpanel" id="film-p-details" aria-labelledby="film-t-details" class="tp" hidden={first !== 'details'}>
-        <dl class="facts">
-          {f.runtime && <><dt>Runtime</dt><dd>{duration(f.runtime, 'words')}</dd></>}
-          {f.language && <><dt>Language</dt><dd><a href={`/films/?language=${f.language.code}`} class="ul">{f.language.name}</a></dd></>}
-          {f.countries.length > 0 && <><dt>{f.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{f.countries.map((c) => c.name).join(', ')}</dd></>}
-          {released && <><dt>Released</dt><dd>{released}</dd></>}
-          {f.original && f.original !== f.title && <><dt>Original title</dt><dd>{f.original}</dd></>}
-          {f.studios.length > 0 && <><dt>Studios</dt><dd>{f.studios.join(', ')}</dd></>}
-        </dl>
-      </div>
-      {f.genres.length > 0 && (
-        <div role="tabpanel" id="film-p-genres" aria-labelledby="film-t-genres" class="tp" hidden>
-          <div class="chips">{f.genres.map((g) => <a href={`/films/?genre=${g.slug}`} class="gchip">{g.name}</a>)}</div>
-        </div>
-      )}
-    </Tabs>
+        {f.genres.length > 0 && (
+          <div role="tabpanel" id="film-p-genres" aria-labelledby="film-t-genres" class="tp" hidden>
+            <div class="chips">{f.genres.map((g) => <a href={`/films/?genre=${g.slug}`} class="gchip">{g.name}</a>)}</div>
+          </div>
+        )}
+      </Tabs>
 
-    <p class="more-at">
-      {f.runtime && <span class="num">{duration(f.runtime)}</span>}
-      {f.trailer && <a href={f.trailer} target="_blank" rel="noopener" class="ext">Trailer ↗</a>}
-      {f.imdb && <a href={`https://www.imdb.com/title/${f.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
-      {onTmdb && <a href={`https://www.themoviedb.org/movie/${f.id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>}
-    </p>
+      <p class="more-at">
+        {f.runtime && <span class="num">{duration(f.runtime)}</span>}
+        {f.trailer && <a href={f.trailer} target="_blank" rel="noopener" class="ext">Trailer ↗</a>}
+        {f.imdb && <a href={`https://www.imdb.com/title/${f.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
+        {onTmdb && <a href={`https://www.themoviedb.org/movie/${f.id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>}
+      </p>
+    </Fragment>
 
     <Fragment slot="panel">
       <LogPanel kind="film" parts={[{ key: 'film', hit, titleId: row?.id, mine: site.mine[0] }]} share={share} what={f.title} />

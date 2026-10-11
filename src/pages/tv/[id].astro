@@ -59,35 +59,37 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
     {t.tagline && <p class="tagline">{t.tagline}</p>}
     {t.overview && <p class="overview">{t.overview}</p>}
 
-    <Tabs id="show" tabs={tabs}>
-      {t.cast.length > 0 && <div role="tabpanel" id="show-p-cast" aria-labelledby="show-t-cast" class="tp" hidden={first !== 'cast'}><PeopleGrid people={t.cast} /></div>}
-      {t.crew.length > 0 && (
-        <div role="tabpanel" id="show-p-crew" aria-labelledby="show-t-crew" class="tp" hidden={first !== 'crew'}>
-          <dl class="facts">{t.crew.map((g) => <><dt>{g.job}</dt><dd>{g.people.map((p, i) => <>{i > 0 && ', '}<a href={p.href} class="ul">{p.name}</a></>)}</dd></>)}</dl>
+    <Fragment slot="more">
+      <Tabs id="show" tabs={tabs}>
+        {t.cast.length > 0 && <div role="tabpanel" id="show-p-cast" aria-labelledby="show-t-cast" class="tp" hidden={first !== 'cast'}><PeopleGrid people={t.cast} /></div>}
+        {t.crew.length > 0 && (
+          <div role="tabpanel" id="show-p-crew" aria-labelledby="show-t-crew" class="tp" hidden={first !== 'crew'}>
+            <dl class="facts">{t.crew.map((g) => <><dt>{g.job}</dt><dd>{g.people.map((p, i) => <>{i > 0 && ', '}<a href={p.href} class="ul">{p.name}</a></>)}</dd></>)}</dl>
+          </div>
+        )}
+        <div role="tabpanel" id="show-p-details" aria-labelledby="show-t-details" class="tp" hidden={first !== 'details'}>
+          <dl class="facts">
+            {t.episodeRuntime && <><dt>Episodes</dt><dd>About {t.episodeRuntime} minutes each</dd></>}
+            {t.language && <><dt>Language</dt><dd><a href={`/films/?kind=tv&language=${t.language.code}`} class="ul">{t.language.name}</a></dd></>}
+            {t.countries.length > 0 && <><dt>{t.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{t.countries.map((c) => c.name).join(', ')}</dd></>}
+            {t.networks.length > 0 && <><dt>Shown on</dt><dd>{t.networks.join(', ')}</dd></>}
+            {t.status && <><dt>Status</dt><dd>{t.status === 'Returning Series' ? 'More seasons coming' : t.status}</dd></>}
+            {t.original && t.original !== t.title && <><dt>Original title</dt><dd>{t.original}</dd></>}
+          </dl>
         </div>
-      )}
-      <div role="tabpanel" id="show-p-details" aria-labelledby="show-t-details" class="tp" hidden={first !== 'details'}>
-        <dl class="facts">
-          {t.episodeRuntime && <><dt>Episodes</dt><dd>About {t.episodeRuntime} minutes each</dd></>}
-          {t.language && <><dt>Language</dt><dd><a href={`/films/?kind=tv&language=${t.language.code}`} class="ul">{t.language.name}</a></dd></>}
-          {t.countries.length > 0 && <><dt>{t.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{t.countries.map((c) => c.name).join(', ')}</dd></>}
-          {t.networks.length > 0 && <><dt>Shown on</dt><dd>{t.networks.join(', ')}</dd></>}
-          {t.status && <><dt>Status</dt><dd>{t.status === 'Returning Series' ? 'More seasons coming' : t.status}</dd></>}
-          {t.original && t.original !== t.title && <><dt>Original title</dt><dd>{t.original}</dd></>}
-        </dl>
-      </div>
-      {t.genres.length > 0 && (
-        <div role="tabpanel" id="show-p-genres" aria-labelledby="show-t-genres" class="tp" hidden={first !== 'genres'}>
-          <div class="chips">{t.genres.map((g) => <a href={`/films/?kind=tv&genre=${g.slug}`} class="gchip">{g.name}</a>)}</div>
-        </div>
-      )}
-    </Tabs>
+        {t.genres.length > 0 && (
+          <div role="tabpanel" id="show-p-genres" aria-labelledby="show-t-genres" class="tp" hidden={first !== 'genres'}>
+            <div class="chips">{t.genres.map((g) => <a href={`/films/?kind=tv&genre=${g.slug}`} class="gchip">{g.name}</a>)}</div>
+          </div>
+        )}
+      </Tabs>
 
-    <p class="more-at">
-      {t.trailer && <a href={t.trailer} target="_blank" rel="noopener" class="ext">Trailer ↗</a>}
-      {t.imdb && <a href={`https://www.imdb.com/title/${t.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
-      <a href={`https://www.themoviedb.org/tv/${id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>
-    </p>
+      <p class="more-at">
+        {t.trailer && <a href={t.trailer} target="_blank" rel="noopener" class="ext">Trailer ↗</a>}
+        {t.imdb && <a href={`https://www.imdb.com/title/${t.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
+        <a href={`https://www.themoviedb.org/tv/${id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>
+      </p>
+    </Fragment>
 
     <Fragment slot="panel">
       {parts.length > 0 ? <LogPanel kind="tv" parts={parts} selected={pick} share={share} what={t.title} /> : <p class="muted">No seasons listed yet.</p>}

@@ -66,6 +66,20 @@ function subjects(list: string[] | undefined) {
   return out;
 }
 
+/** publisher names worth showing: Open Library has placeholders like "None", "[s.n.]" and stray letters */
+function publishers(list: unknown): string[] {
+  const out: string[] = [];
+  for (const raw of Array.isArray(list) ? list : []) {
+    const p = String(raw).trim().replace(/^\[|\]$/g, '');
+    if (p.length < 3 || !/[aeiouy]/i.test(p) || /^(none|unknown|n\.?\s?a\.?|s\.\s?n\.?|publisher not identified|self|various)$/i.test(p)) continue;
+    if (!out.some((x) => x.toLowerCase() === p.toLowerCase())) out.push(p);
+    if (out.length >= 3) break;
+  }
+  return out;
+}
+/** a birth or death date only if it has a year in it ("1940", "22 January 1953"), not ".·" */
+const lifeDate = (v: unknown) => (typeof v === 'string' && /\d{3,4}/.test(v) ? v.trim().replace(/[\s.,·-]+$/, '') : undefined);
+
 const SEARCH_FIELDS = 'key,title,subtitle,author_name,author_key,first_publish_year,number_of_pages_median,language,subject,cover_i,edition_count,ebook_access,publisher,isbn';
 const ol = (path: string) => base.ol() + path;
 
@@ -91,7 +105,7 @@ export async function olBook(olid: string): Promise<BookPage | null> {
     languages: langs.map((c) => ({ code: c, name: bookLanguageName(c)! })),
     subjects: subjects([...(w.subjects ?? []), ...(d.subject ?? [])]),
     description: plain(w.description, 2000), cover: cover(d.cover_i ?? w.covers?.find((c: number) => c > 0)),
-    publishers: (d.publisher ?? []).slice(0, 3), editions: d.edition_count || undefined,
+    publishers: publishers(d.publisher), editions: d.edition_count || undefined,
     readOnline: d.ebook_access === 'public' || d.ebook_access === 'borrowable' ? `https://openlibrary.org/works/${olid}` : undefined,
     source: 'Open Library', sourceLink: `https://openlibrary.org/works/${olid}`, isbn: d.isbn?.[0],
   };
@@ -138,7 +152,7 @@ export async function author(olid: string): Promise<AuthorPage | null> {
   });
   const wiki = typeof a.wikipedia === 'string' ? a.wikipedia : (a.links ?? []).find((l: any) => /wikipedia\.org/.test(l.url ?? ''))?.url;
   return {
-    key: olid, name: a.name, bio: plain(a.bio, 1600), born: a.birth_date || undefined, died: a.death_date || undefined,
+    key: olid, name: a.name, bio: plain(a.bio, 1600), born: lifeDate(a.birth_date), died: lifeDate(a.death_date),
     photo: a.photos?.find((p: number) => p > 0) ? `https://covers.openlibrary.org/a/id/${a.photos.find((p: number) => p > 0)}-L.jpg` : undefined,
     wikipedia: wiki && /^https:\/\/[a-z-]+\.wikipedia\.org\//.test(wiki) ? wiki : undefined, books,
   };
@@ -153,15 +167,24 @@ export interface BookFilters { subject?: string; language?: string; year?: numbe
 export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; total: number; pages: number }> {
   const parts: string[] = [];
   if (f.subject) parts.push(`subject:"${f.subject.replace(/-/g, ' ').replace(/"/g, '')}"`);
-  if (f.language) parts.push(`language:${f.language.replace(/[^a-z]/g, '')}`);
+  if (f.language) {
+    // Open Library lists a work under every language it has been translated into, so "Marathi" alone brings back
+    // Harry Potter. Asking for the language's own literature subjects as well keeps it to books written in it.
+    const code = f.language.replace(/[^a-z]/g, '');
+    const name = BOOK_LANGUAGES.find(([c]) => c === code)?.[1];
+    parts.push(`language:${code}`);
+    if (name && code !== 'eng') parts.push(`(${['fiction', 'literature', 'poetry', 'drama', 'essays', 'short stories'].map((k) => `subject:"${name} ${k}"`).join(' OR ')})`);
+  }
   if (f.year) parts.push(`first_publish_year:${f.year}`);
   else if (f.decade) parts.push(`first_publish_year:[${f.decade} TO ${f.decade + 9}]`);
   if (!parts.length) parts.push('subject:fiction');
   const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : 'editions';
   const page = Math.min(Math.max(f.page ?? 1, 1), 100);
-  const j = await getJSON(ol(`/search.json?q=${encodeURIComponent(parts.join(' '))}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=36&page=${page}`), { ttl: 3600, ms: 8000 });
+  const j = await getJSON(ol(`/search.json?q=${encodeURIComponent(parts.join(' '))}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=36&page=${page}`), { ttl: 21600, ms: 9000 });
   const total = j?.numFound ?? 0;
-  return { items: (j?.docs ?? []).map(card).filter((b: BookCard) => b.key), total, pages: Math.ceil(Math.min(total, 3600) / 36) };
+  // books with a cover first, keeping Open Library's order within each group
+  const items: BookCard[] = (j?.docs ?? []).map(card).filter((b: BookCard) => b.key);
+  return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 36) };
 }
 
 export async function searchBooks(text: string): Promise<{ books: BookCard[]; authors: { key: string; name: string; href: string; works?: number }[] }> {

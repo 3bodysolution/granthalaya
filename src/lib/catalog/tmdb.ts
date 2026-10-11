@@ -218,8 +218,12 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
 export async function services(): Promise<Provider[]> {
   if (!key()) return [];
   const j = await getJSON(q('/watch/providers/movie', { watch_region: REGION }), { ttl: 86400 });
+  // leave out stores, add-on channels and kids or ad-supported copies of a service already listed
+  const skip = /justwatch|kids|store|play movies|youtube|guidedoc|tubi|pluto|plex|channel|with ads/i;
   return (j?.results ?? [])
+    .filter((p: any) => p.provider_name && !skip.test(p.provider_name))
     .sort((a: any, b: any) => (a.display_priorities?.[REGION] ?? 999) - (b.display_priorities?.[REGION] ?? 999))
+    .slice(0, 16)
     .map((p: any) => ({ id: p.provider_id, name: p.provider_name, logo: img(p.logo_path, 'w92') }));
 }
 

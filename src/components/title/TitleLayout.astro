@@ -1,6 +1,7 @@
 ---
 // The frame shared by film, TV and book pages: a still from the film (or one of our paintings) across the top,
 // the poster on the left, the facts in the middle, your log on the right, and fuller sections below.
+// On a phone the order is: poster, title and summary, your log, where to watch (or find it), then cast and details.
 interface Props { backdrop?: string; painting?: 'library' | 'home' }
 const { backdrop, painting = 'library' } = Astro.props;
 ---
@@ -10,8 +11,8 @@ const { backdrop, painting = 'library' } = Astro.props;
   <div class="art melt settle banner bleed" style={`--day: url(/art/${painting}-day.webp); --night: url(/art/${painting}-night.webp)`} aria-hidden="true"></div>
 )}
 <section class:list={['pad top', backdrop ? 'over-still' : 'over-art']}>
-  <div class="side"><slot name="poster" /><slot name="side" /></div>
-  <div class="main"><slot /></div>
+  <div class="side"><div class="tl-pz"><slot name="poster" /></div><div class="tl-sd"><slot name="side" /></div></div>
+  <div class="main"><div class="tl-lead"><slot /></div><div class="tl-more"><slot name="more" /></div></div>
   <div class="panel"><slot name="panel" /></div>
 </section>
 <slot name="below" />
@@ -29,18 +30,25 @@ const { backdrop, painting = 'library' } = Astro.props;
   .top { position: relative; display: grid; grid-template-columns: 240px minmax(0, 1fr) 270px; gap: 44px; align-items: start; }
   .over-still { margin-top: clamp(-200px, -14vw, -110px); }
   .over-art { margin-top: -150px; }
-  .side { display: flex; flex-direction: column; gap: 16px; }
+  .side, .tl-sd { display: flex; flex-direction: column; gap: 16px; }
   .main { min-width: 0; display: flex; flex-direction: column; gap: 18px; padding-top: clamp(110px, 12vw, 190px); }
+  .tl-lead, .tl-more { min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+  .tl-sd:empty, .tl-more:empty { display: none; }
   .panel { padding-top: clamp(110px, 12vw, 190px); display: flex; flex-direction: column; gap: 16px; }
   @media (max-width: 1100px) {
     .top { grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
     .panel { grid-column: 1 / -1; padding-top: 0; max-width: 520px; }
   }
   @media (max-width: 780px) {
-    .top { display: flex; flex-direction: column; gap: 24px; }
+    .top { display: flex; flex-direction: column; align-items: stretch; gap: 24px; }
     .over-still { margin-top: -120px; }
     .over-art { margin-top: -140px; }
-    .side { width: 100%; align-items: center; }
-    .main, .panel { padding-top: 0; width: 100%; max-width: none; }
+    .side, .main { display: contents; }
+    .tl-pz { order: 0; align-self: center; }
+    .tl-lead { order: 1; }
+    .panel { order: 2; }
+    .tl-sd { order: 3; }
+    .tl-more { order: 4; }
+    .panel { padding-top: 0; width: 100%; max-width: none; }
   }
 </style>

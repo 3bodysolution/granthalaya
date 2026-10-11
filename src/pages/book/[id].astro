@@ -81,23 +81,25 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
     </p>
     {paras.length > 0 && <div class="desc">{paras.map((p) => <p>{p}</p>)}</div>}
 
-    <Tabs id="book" tabs={tabs}>
-      <div role="tabpanel" id="book-p-details" aria-labelledby="book-t-details" class="tp">
-        <dl class="facts">
-          {b.year && <><dt>First published</dt><dd><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></dd></>}
-          {b.pages && <><dt>Length</dt><dd>{b.pages} pages{reading ? `, ${reading} to read` : ''}</dd></>}
-          {b.languages.length > 0 && <><dt>Editions in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}
-          {b.publishers.length > 0 && <><dt>Publishers</dt><dd>{b.publishers.join(', ')}</dd></>}
-          {manyEditions && <><dt>Editions</dt><dd>{b.editions}</dd></>}
-          {b.isbn && <><dt>ISBN</dt><dd class="num">{b.isbn}</dd></>}
-        </dl>
-      </div>
-      {b.subjects.length > 0 && (
-        <div role="tabpanel" id="book-p-subjects" aria-labelledby="book-t-subjects" class="tp" hidden>
-          <div class="chips">{b.subjects.map((s) => <a href={`/books/?subject=${s.slug}`} class="gchip">{s.name}</a>)}</div>
+    <Fragment slot="more">
+      <Tabs id="book" tabs={tabs}>
+        <div role="tabpanel" id="book-p-details" aria-labelledby="book-t-details" class="tp">
+          <dl class="facts">
+            {b.year && <><dt>First published</dt><dd><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></dd></>}
+            {b.pages && <><dt>Length</dt><dd>{b.pages} pages{reading ? `, ${reading} to read` : ''}</dd></>}
+            {b.languages.length > 0 && <><dt>Editions in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}
+            {b.publishers.length > 0 && <><dt>Publishers</dt><dd>{b.publishers.join(', ')}</dd></>}
+            {manyEditions && <><dt>Editions</dt><dd>{b.editions}</dd></>}
+            {b.isbn && <><dt>ISBN</dt><dd class="num">{b.isbn}</dd></>}
+          </dl>
         </div>
-      )}
-    </Tabs>
+        {b.subjects.length > 0 && (
+          <div role="tabpanel" id="book-p-subjects" aria-labelledby="book-t-subjects" class="tp" hidden>
+            <div class="chips">{b.subjects.map((s) => <a href={`/books/?subject=${s.slug}`} class="gchip">{s.name}</a>)}</div>
+          </div>
+        )}
+      </Tabs>
+    </Fragment>
 
     <Fragment slot="panel">
       <LogPanel kind="book" parts={[{ key: 'book', hit, titleId: row?.id, mine: site.mine[0] }]} share={share} what={b.title} />
