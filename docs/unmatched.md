@@ -401,91 +401,10 @@ Made by `scripts/lists/match.mjs`. "Check" means a match was saved but may be th
 
 Run with `--second` on items that had no match. Notes above may be out of date for items matched here.
 
-## Hindi classics (hindi-classics)
-
-- **No match:** 1550 · Sursagar (Surdas). still nothing.
-- **No match:** 1881 · Andher Nagari (Bharatendu Harishchandra). still nothing.
-- **No match:** 1930 · Parimal (Suryakant Tripathi Nirala). still nothing.
-- **Check:** 1941 · Shekhar: Ek Jivani (Agyeya). closest title "Shekhar" by A. Agyeya.
-- **No cover:** 1941 · Shekhar: Ek Jivani (Agyeya).
-- **No match:** 1946 · Banbhatt ki Aatmakatha (Hazari Prasad Dwivedi). still nothing.
-- **No match:** 1952 · Rashmirathi (Ramdhari Singh Dinkar). still nothing.
-- **No cover:** 1958 · Ashadh Ka Ek Din (Mohan Rakesh).
-- **No match:** 1958 · Jhootha Sach (Yashpal). still nothing.
-- **No match:** 1964 · Andhere Mein (Gajanan Madhav Muktibodh). still nothing.
-- **No match:** 1966 · Aadha Gaon (Rahi Masoom Raza). still nothing.
-- **Check:** 1971 · Aapka Bunty (Mannu Bhandari). closest title "Bunty" by Mannu Bhandari.
-- **No cover:** 1971 · Aapka Bunty (Mannu Bhandari).
-- **No match:** 1975 · Saaye Mein Dhoop (Dushyant Kumar). still nothing.
-- **No match:** 1980 · Kuru Kuru Swaha (Manohar Shyam Joshi). still nothing.
-- **No match:** 2004 · Kashi Ka Assi (Kashinath Singh). still nothing.
-
 ## International Booker Prize winners (international-booker)
 
 - **No match:** 2022 · Tomb of Sand (Geetanjali Shree). still nothing.
 - **No match:** 2017 · A Horse Walks into a Bar (David Grossman). still nothing.
-
-## Jnanpith Award winners (jnanpith)
-
-- **No match:** 2025 · Kallikattu Ithihasam (Vairamuthu). still nothing.
-- **No match:** 2023 · Sribhargavaraghaviyam (Rambhadracharya). still nothing.
-- **No match:** 2020 · Surya Henu Nami Ase Ei Nodiyedi (Nilamani Phookan). still nothing.
-- **No match:** 2019 · Irupatham Noottandinte Ithihasam (Akkitham Achuthan Namboothiri). still nothing.
-- **No match:** 2016 · Babarer Prarthana (Shankha Ghosh). still nothing.
-- **No match:** 2015 · Amrita (Raghuveer Chaudhari). still nothing.
-- **No match:** 2013 · Akal Mein Saras (Kedarnath Singh). still nothing.
-- **No match:** 2012 · Paakudu Raallu (Ravuri Bharadhwaja). still nothing.
-- **No match:** 2009 · Inhin Hathiyaron Se (Amarkant). still nothing.
-- **No match:** 2008 · Khwab Ka Dar Band Hai (Akhlaq Mohammed Khan). still nothing.
-- **No match:** 2007 · Bhoomikkoru Charamageetham (O. N. V. Kurup). still nothing.
-- **No match:** 2006 · Himalayant (Ravindra Kelekar). still nothing.
-- **No match:** 2005 · Atmajayee (Kunwar Narayan). still nothing.
-- **No match:** 2004 · Nawroz-e-Saba (Rehman Rahi). still nothing.
-- **No match:** 2003 · Sparshachi Palvi (Vinda Karandikar). still nothing.
-- **No match:** 2001 · Dhwani (Rajendra Shah). still nothing.
-- **Check:** 1999 · Marhi Da Deewa (Gurdial Singh). closest title "Marhi da deeva" by Gurdial Singh..
-- **No cover:** 1999 · Marhi Da Deewa (Gurdial Singh).
-- **No match:** 1996 · Hajar Churashir Maa (Mahasweta Devi). still nothing.
-- **No match:** 1993 · Sabdar Akash (Sitakant Mahapatra). still nothing.
-- **No match:** 1992 · Aranya (Naresh Mehta). still nothing.
-- **No match:** 1991 · Padatik (Subhash Mukhopadhyay). still nothing.
-- **No match:** 1989 · Aag Ka Dariya (Qurratulain Hyder). still nothing.
-- **No match:** 1987 · Vishakha (Kusumagraj). still nothing.
-- **No match:** 1986 · Pandulipi (Sachidananda Routray). still nothing.
-- **Check:** 1985 · Manvini Bhavai (Pannalal Patel). closest title "Manavini bhavai" by Patel, Pannalal Nanalal.
-- **No cover:** 1985 · Manvini Bhavai (Pannalal Patel).
-- **No match:** 1981 · Kagaj te Canvas (Amrita Pritam). still nothing.
-- **No match:** 1978 · Kitni Navon Men Kitni Bar (Sachchidananda Vatsyayan 'Agyeya'). still nothing.
-- **No match:** 1977 · Mookajjiya Kanasugalu (K. Shivaram Karanth). still nothing.
-- **No match:** 1976 · Prothom Protishruti (Ashapoorna Devi). still nothing.
-- **No match:** 1975 · Chitrai Pavai (Akilan). still nothing.
-- **No match:** 1973 · Naaku Tanti (D. R. Bendre). still nothing.
-- **No match:** 1973 · Mati Matala (Gopinath Mohanty). still nothing.
-- **No match:** 1971 · Smriti Satta Bhabishyat (Bishnu Dey). still nothing.
-- **No match:** 1970 · Ramayana Kalpavruksham (Viswanatha Satyanarayana). still nothing.
-- **No match:** 1969 · Gul-e-Naghma (Firaq Gorakhpuri). still nothing.
-- **No match:** 1967 · Nishita (Umashankar Joshi). still nothing.
-- **Check:** 1967 · Sri Ramayana Darshanam (Kuvempu). closest title "Shri Ramayana Darshanam" by Kuvempu.
-- **No cover:** 1967 · Sri Ramayana Darshanam (Kuvempu).
-- **No match:** 1965 · Odakkuzhal (G. Sankara Kurup). still nothing.
-
-## Marathi classics (marathi-classics)
-
-- **No match:** 1650 · Tukaram Gatha (Tukaram). still nothing.
-- **No match:** 1890 · Pan Lakshat Kon Gheto (Hari Narayan Apte). still nothing.
-- **No match:** 1899 · Sangeet Sharada (Govind Ballal Deval). still nothing.
-- **No match:** 1907 · Majha Pravas (Vishnubhat Godse). still nothing.
-- **No match:** 1915 · Gitarahasya (Bal Gangadhar Tilak). still nothing.
-- **No match:** 1927 · Majhi Janmathep (V. D. Savarkar). still nothing.
-- **No match:** 1936 · Amrutvel (V. S. Khandekar). still nothing.
-- **No match:** 1942 · Vishakha (Kusumagraj). still nothing.
-- **No match:** 1955 · Banagarwadi (Vyankatesh Madgulkar). still nothing.
-- **No match:** 1958 · Batatyachi Chal (P. L. Deshpande). still nothing.
-- **No match:** 1962 · Swami (Ranjit Desai). still nothing.
-- **No match:** 1964 · Asa Mi Asami (P. L. Deshpande). still nothing.
-- **No match:** 1967 · Shantata! Court Chalu Aahe (Vijay Tendulkar). still nothing.
-- **No match:** 1970 · Natsamrat (V. V. Shirwadkar). still nothing.
-- **No match:** 1979 · Chhava (Shivaji Sawant). still nothing.
 
 ## National Film Award for Best Feature Film (national-best-feature)
 
@@ -513,6 +432,78 @@ Run with `--second` on items that had no match. Notes above may be out of date f
 
 - **No match:** 1997 · Martin Dressler: The Tale of an American Dreamer (Steven Millhauser). still nothing.
 
+## World classics (world-classics)
+
+- **No match:** 1869 · War and Peace (Leo Tolstoy). still nothing.
+- **No match:** 1948 · Snow Country (Yasunari Kawabata). still nothing.
+- **No match:** 1967 · The Master and Margarita (Mikhail Bulgakov). still nothing.
+
+## Hindi classics (hindi-classics)
+
+- **No match:** 1550 · Sursagar (Surdas). still nothing.
+- **No match:** 1881 · Andher Nagari (Bharatendu Harishchandra). still nothing.
+- **No match:** 1958 · Jhootha Sach (Yashpal). still nothing.
+- **No match:** 1964 · Andhere Mein (Gajanan Madhav Muktibodh). still nothing.
+- **No match:** 1966 · Aadha Gaon (Rahi Masoom Raza). still nothing.
+- **No match:** 1975 · Saaye Mein Dhoop (Dushyant Kumar). still nothing.
+- **No match:** 2004 · Kashi Ka Assi (Kashinath Singh). still nothing.
+
+## Jnanpith Award winners (jnanpith)
+
+- **No match:** 2025 · Kallikattu Ithihasam (Vairamuthu). still nothing.
+- **No match:** 2023 · Sribhargavaraghaviyam (Rambhadracharya). still nothing.
+- **No match:** 2020 · Surya Henu Nami Ase Ei Nodiyedi (Nilamani Phookan). still nothing.
+- **No match:** 2019 · Irupatham Noottandinte Ithihasam (Akkitham Achuthan Namboothiri). still nothing.
+- **No match:** 2016 · Babarer Prarthana (Shankha Ghosh). still nothing.
+- **No match:** 2015 · Amrita (Raghuveer Chaudhari). still nothing.
+- **No match:** 2013 · Akal Mein Saras (Kedarnath Singh). still nothing.
+- **No match:** 2012 · Paakudu Raallu (Ravuri Bharadhwaja). still nothing.
+- **No match:** 2009 · Inhin Hathiyaron Se (Amarkant). still nothing.
+- **No match:** 2008 · Khwab Ka Dar Band Hai (Akhlaq Mohammed Khan). still nothing.
+- **No match:** 2007 · Bhoomikkoru Charamageetham (O. N. V. Kurup). still nothing.
+- **No match:** 2006 · Himalayant (Ravindra Kelekar). still nothing.
+- **No match:** 2005 · Atmajayee (Kunwar Narayan). still nothing.
+- **No match:** 2004 · Nawroz-e-Saba (Rehman Rahi). still nothing.
+- **No match:** 2003 · Sparshachi Palvi (Vinda Karandikar). still nothing.
+- **No match:** 2001 · Dhwani (Rajendra Shah). still nothing.
+- **No match:** 1996 · Hajar Churashir Maa (Mahasweta Devi). still nothing.
+- **No match:** 1993 · Sabdar Akash (Sitakant Mahapatra). still nothing.
+- **No match:** 1992 · Aranya (Naresh Mehta). still nothing.
+- **No match:** 1991 · Padatik (Subhash Mukhopadhyay). still nothing.
+- **No cover:** 1989 · Aag Ka Dariya (Qurratulain Hyder).
+- **No match:** 1987 · Vishakha (Kusumagraj). still nothing.
+- **No match:** 1986 · Pandulipi (Sachidananda Routray). still nothing.
+- **No match:** 1981 · Kagaj te Canvas (Amrita Pritam). still nothing.
+- **No match:** 1978 · Kitni Navon Men Kitni Bar (Sachchidananda Vatsyayan 'Agyeya'). still nothing.
+- **No match:** 1977 · Mookajjiya Kanasugalu (K. Shivaram Karanth). still nothing.
+- **No match:** 1976 · Prothom Protishruti (Ashapoorna Devi). still nothing.
+- **No match:** 1975 · Chitrai Pavai (Akilan). still nothing.
+- **No match:** 1973 · Naaku Tanti (D. R. Bendre). still nothing.
+- **No match:** 1973 · Mati Matala (Gopinath Mohanty). still nothing.
+- **No match:** 1971 · Smriti Satta Bhabishyat (Bishnu Dey). still nothing.
+- **No match:** 1970 · Ramayana Kalpavruksham (Viswanatha Satyanarayana). still nothing.
+- **No match:** 1969 · Gul-e-Naghma (Firaq Gorakhpuri). still nothing.
+- **No match:** 1967 · Nishita (Umashankar Joshi). still nothing.
+- **No match:** 1965 · Odakkuzhal (G. Sankara Kurup). still nothing.
+
+## Marathi classics (marathi-classics)
+
+- **No match:** 1650 · Tukaram Gatha (Tukaram). still nothing.
+- **No match:** 1890 · Pan Lakshat Kon Gheto (Hari Narayan Apte). still nothing.
+- **No match:** 1899 · Sangeet Sharada (Govind Ballal Deval). still nothing.
+- **No match:** 1907 · Majha Pravas (Vishnubhat Godse). still nothing.
+- **No match:** 1915 · Gitarahasya (Bal Gangadhar Tilak). still nothing.
+- **No match:** 1927 · Majhi Janmathep (V. D. Savarkar). still nothing.
+- **No match:** 1936 · Amrutvel (V. S. Khandekar). still nothing.
+- **No match:** 1942 · Vishakha (Kusumagraj). still nothing.
+- **No match:** 1955 · Banagarwadi (Vyankatesh Madgulkar). still nothing.
+- **No match:** 1958 · Batatyachi Chal (P. L. Deshpande). still nothing.
+- **No match:** 1962 · Swami (Ranjit Desai). still nothing.
+- **No match:** 1964 · Asa Mi Asami (P. L. Deshpande). still nothing.
+- **No match:** 1967 · Shantata! Court Chalu Aahe (Vijay Tendulkar). still nothing.
+- **No match:** 1970 · Natsamrat (V. V. Shirwadkar). still nothing.
+- **No match:** 1979 · Chhava (Shivaji Sawant). still nothing.
+
 ## Sahitya Akademi Award winners in Hindi (sahitya-akademi-hindi)
 
 - **No match:** 2025 · Jeete Jee Allahabad (Mamta Kalia). still nothing.
@@ -536,14 +527,12 @@ Run with `--second` on items that had no match. Notes above may be out of date f
 - **No match:** 2005 · Kyap (Manohar Shyam Joshi). still nothing.
 - **No match:** 2004 · Dushchakra Mein Srista (Viren Dangwal). still nothing.
 - **No match:** 2002 · Do Panktiyon Ke Beech (Rajesh Joshi). still nothing.
-- **Check:** 2001 · Kali-Katha : Via Bypass (Alka Saraogi). closest title "Kali-katha" by Alka Saraogi, Anne Montaut.
 - **No match:** 2000 · Hum Jo Dekhte Hain (Manglesh Dabral). still nothing.
 - **No match:** 1999 · Deewar Main Ek Khirkee Rahathi Thi (Vinod Kumar Shukla). still nothing.
 - **No match:** 1998 · Naye Ilake Mein (Arun Kamal). still nothing.
 - **No match:** 1997 · Anubhav Ke Aakash Mein Chand (Leeladhar Jagudi). still nothing.
-- **No match:** 1996 · Mujhe Chand Chahiye (Surendra Verma). still nothing.
 - **No match:** 1995 · Koi Doosra Nahin (Kunwar Narayan). still nothing.
-- **No match:** 1994 · Kahin Nahin Wahin (Ashok Vajpeyi). still nothing.
+- **Check:** 1994 · Kahin Nahin Wahin (Ashok Vajpeyi). closest title "Kahin Nahin Vahin" by Ashok Vajpeyi.
 - **No match:** 1991 · Main Vaqt Ke Hun Samne (Girija Kumar Mathur). still nothing.
 - **No match:** 1990 · Neela Chand (Shiv Prasaad Singh). still nothing.
 - **No match:** 1989 · Akaal Mein Saras (Kedarnath Singh). still nothing.
@@ -553,16 +542,13 @@ Run with `--second` on items that had no match. Notes above may be out of date f
 - **No match:** 1982 · Viklang Shraddha Ka Daur (Harishankar Parsai). still nothing.
 - **No match:** 1981 · Tap Ke Taye Hue Din (Trilochan Shastri). still nothing.
 - **No match:** 1980 · Zindaginama - Zinda Rukh (Krishna Sobti). still nothing.
-- **No match:** 1979 · Kal Sunana Mujhe (Sudama Panday 'Dhoomil'). still nothing.
+- **Check:** 1979 · Kal Sunana Mujhe (Sudama Panday 'Dhoomil'). closest title "कल सुनना मुझे I Kal Sunna Mujhe" by Dhoomil.
 - **No match:** 1978 · Utna Vah Suraj Hai (Bharat Bhushan Agarwal). still nothing.
 - **No match:** 1977 · Chuka Bhi Hun Nahin Main (Shamsher Bahadur Singh). still nothing.
 - **No match:** 1976 · Meri Teri Uski Baat (Yashpal). still nothing.
 - **No match:** 1974 · Mitti Ki Baraat (Shivmangal Singh 'Suman'). still nothing.
-- **No match:** 1973 · Alok Parva (Hazari Prasad Dwivedi). still nothing.
+- **No cover:** 1973 · Alok Parva (Hazari Prasad Dwivedi).
 - **No match:** 1972 · Buni Huyi Rassi (Bhawani Prasad Mishra). still nothing.
-- **Check:** 1971 · Kavita Ke Naye Pratiman (Namwar Singh). closest title "Kavitā ke naye pratimāna" by Namwar Singh.
-- **No cover:** 1971 · Kavita Ke Naye Pratiman (Namwar Singh).
-- **Check:** 1968 · Do Chattanen (Harivansh Rai Bachchan). closest title "Do Chattanein" by Harivansh Rai Bachchan.
 - **No match:** 1966 · Muktibodh (Jainendra Kumar). still nothing.
 - **No match:** 1964 · Angan Ke Par Dwar (Agyeya). still nothing.
 - **No match:** 1963 · Premchand: Kalam Ka Sipahi (Amrit Rai). still nothing.
@@ -600,7 +586,6 @@ Run with `--second` on items that had no match. Notes above may be out of date f
 - **No match:** 2001 · Tanakat (Rajan Gavas). still nothing.
 - **No match:** 2000 · Panzad (Namdeo Dhondo Mahanor). still nothing.
 - **No match:** 1999 · Tamrapat (Ranganath Pathare). still nothing.
-- **No cover:** 1997 · Dnyaneshwaritil Laukik Srushti (Madhukar Vasudev Dhond).
 - **No match:** 1996 · Eka Mungiche Mahabharat (Gangadhar Gopal Gadgil). still nothing.
 - **No match:** 1995 · Raghawa-Wel (Namdeo Kamble). still nothing.
 - **No match:** 1994 · Ekun Kavita - 1 (Dilip Chitre). still nothing.
@@ -637,8 +622,3 @@ Run with `--second` on items that had no match. Notes above may be out of date f
 - **No match:** 1956 · Saundarya Ani Sahitya (B. S. Mardhekar). still nothing.
 - **No match:** 1955 · Vaidik Sanskruticha Vikas (Lakshman Shastri Joshi). still nothing.
 
-## World classics (world-classics)
-
-- **No match:** 1869 · War and Peace (Leo Tolstoy). still nothing.
-- **No match:** 1948 · Snow Country (Yasunari Kawabata). still nothing.
-- **No match:** 1967 · The Master and Margarita (Mikhail Bulgakov). still nothing.

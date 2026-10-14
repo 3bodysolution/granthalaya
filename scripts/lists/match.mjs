@@ -33,16 +33,19 @@ const FORCE = args.includes('--force');
 const SECOND = args.includes('--second');
 const only = args.filter((a) => !a.startsWith('--'));
 
+const memo = new Map();
+const once = (key, fn) => { if (!memo.has(key)) memo.set(key, fn()); return memo.get(key); };
+const CONCURRENCY = 4;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function getJSON(url) {
-  for (let i = 1; i <= 3; i++) {
+  for (let i = 1; i <= 2; i++) {
     try {
-      const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' } });
+      const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' }, signal: AbortSignal.timeout(10000) });
       if (r.status === 429 || r.status >= 500) throw new Error(String(r.status));
       if (!r.ok) return null;
       return await r.json();
     } catch {
-      await sleep(1500 * i);
+      await sleep(1000 * i);
     }
   }
   return null;
@@ -181,7 +184,7 @@ const best = (cands, names) => {
   }
   return top;
 };
-const gbSearch = async (q) => {
+const gbSearch = (q) => once('gb:' + q, async () => {
   const j = await getJSON(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=20${GB ? `&key=${GB}` : ''}`);
   await sleep(300);
   return (j?.items ?? []).map((v) => {
@@ -189,29 +192,39 @@ const gbSearch = async (q) => {
     const c = i.imageLinks?.thumbnail || i.imageLinks?.smallThumbnail;
     return { gb: v.id, title: i.title ?? '', authors: i.authors ?? [], cover: c ? c.replace(/^http:/, 'https:').replace('&edge=curl', '') : undefined };
   });
-};
+});
+
+const olSearch2 = (params) => once('ol:' + JSON.stringify(params), async () => {
+  const u = new URL('https://openlibrary.org/search.json');
+  for (const [k, v] of Object.entries(params)) if (v) u.searchParams.set(k, v);
+  u.searchParams.set('limit', '40');
+  u.searchParams.set('fields', 'key,title,author_name,cover_i');
+  const j = await getJSON(u); await sleep(150);
+  return (j?.docs ?? []).map((d) => ({ ol: d.key.replace('/works/', ''), title: d.title ?? '', authors: d.author_name ?? [], cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` : undefined }));
+});
 
 async function matchBookSecond(it) {
   const names = [it.title, it.original_title];
-  const cands = [];
-  const ol = async (params) => {
-    const u = new URL('https://openlibrary.org/search.json');
-    for (const [k, v] of Object.entries(params)) if (v) u.searchParams.set(k, v);
-    u.searchParams.set('limit', '40');
-    u.searchParams.set('fields', 'key,title,author_name,cover_i');
-    const j = await getJSON(u); await sleep(250);
-    for (const d of j?.docs ?? []) cands.push({ ol: d.key.replace('/works/', ''), title: d.title ?? '', authors: d.author_name ?? [], cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` : undefined });
-  };
-  if (it.original_title) { await ol({ title: it.original_title }); await ol({ q: it.original_title }); }
-  if (it.creator) await ol({ author: it.creator });
-  // a title match counts if the author fits, or the original (Devanagari) title is an almost exact match
+  // a match counts if the author fits, or the original (Devanagari) title is an almost exact match
   const fits = (c) => authorOk(it.creator, c.authors) || (it.original_title && sim(c.title, it.original_title) >= 0.9);
-  let pick = best(cands.filter(fits), names);
-  if (!pick) {
+  const fromGoogle = async () => {
     const g = [];
     if (it.original_title) g.push(...(await gbSearch(`intitle:${it.original_title}`)));
     if (it.creator) g.push(...(await gbSearch(`inauthor:${it.creator}`)));
-    pick = best(g.filter(fits), names);
+    return g;
+  };
+  const fromOpenLibrary = async () => {
+    const o = [];
+    if (it.original_title) o.push(...(await olSearch2({ title: it.original_title })), ...(await olSearch2({ q: it.original_title })));
+    if (it.creator) o.push(...(await olSearch2({ author: it.creator })));
+    return o;
+  };
+  // Google Books copes better with Devanagari, so ask it first for non-Latin titles
+  const order = /[^\u0000-ɏ]/.test(it.original_title ?? '') ? [fromGoogle, fromOpenLibrary] : [fromOpenLibrary, fromGoogle];
+  let pick = null;
+  for (const source of order) {
+    pick = best((await source()).filter(fits), names);
+    if (pick) break;
   }
   if (!pick) return { fail: 'still nothing' };
   return { ol: pick.ol, gb: pick.ol ? undefined : pick.gb, cover: pick.cover, note: pick.sc >= 0.95 ? null : `closest title "${pick.title}" by ${pick.authors.join(', ')}` };
@@ -248,11 +261,20 @@ for (const f of files) {
   if (list.kind === 'film' && !TMDB) continue;
   let ok = 0, doubt = 0, miss = 0, skipped = 0;
   const lines = [];
-  for (const it of list.items) {
-    if ((!FORCE || SECOND) && (it.ol || it.gb || it.tmdb)) { skipped++; continue; }
-    const r = SECOND
-      ? (list.kind === 'film' ? await matchFilmSecond(it) : await matchBookSecond(it))
-      : (list.kind === 'film' ? await matchFilm(it) : await matchBook(it));
+  const todo = list.items.filter((it) => !((!FORCE || SECOND) && (it.ol || it.gb || it.tmdb)));
+  skipped = list.items.length - todo.length;
+  const results = new Array(todo.length);
+  let next = 0;
+  await Promise.all(Array.from({ length: CONCURRENCY }, async () => {
+    while (next < todo.length) {
+      const n = next++, it = todo[n];
+      results[n] = SECOND
+        ? (list.kind === 'film' ? await matchFilmSecond(it) : await matchBookSecond(it))
+        : (list.kind === 'film' ? await matchFilm(it) : await matchBook(it));
+    }
+  }));
+  for (const [n, it] of todo.entries()) {
+    const r = results[n];
     const label = `${it.year} · ${it.title}${it.creator ? ` (${it.creator})` : ''}`;
     if (r.fail) { miss++; lines.push(`- **No match:** ${label}. ${r.fail}.`); continue; }
     for (const k of ['ol', 'gb', 'tmdb']) delete it[k];
@@ -272,9 +294,14 @@ for (const f of files) {
 
 if (SECOND) {
   const f = join(ROOT, 'docs', 'unmatched.md');
-  const old = readFileSync(f, 'utf8').replace(/\n## Second pass[\s\S]*$/, '');
+  const text = readFileSync(f, 'utf8');
+  const at = text.indexOf('\n## Second pass');
+  const old = at < 0 ? text : text.slice(0, at);
+  // keep the notes of lists not run this time; replace those that were
+  const ran = new Set(files.map((x) => x.replace('.json', '')));
+  const kept = at < 0 ? [] : text.slice(at + 1).split(/\n(?=## )/).slice(1).filter((blk) => !ran.has(blk.match(/\(([^)]+)\)\s*\n/)?.[1]));
   const note = 'Run with `--second` on items that had no match. Notes above may be out of date for items matched here.';
-  writeFileSync(f, old + '\n## Second pass\n\n' + note + '\n\n' + (report.join('\n') || 'Nothing new.\n'));
+  writeFileSync(f, old + '\n## Second pass\n\n' + note + '\n\n' + [...kept, ...report].join('\n') + '\n');
 } else writeFileSync(
   join(ROOT, 'docs', 'unmatched.md'),
   `# Unmatched and doubtful list items\n\nMade by \`scripts/lists/match.mjs\`. "Check" means a match was saved but may be the wrong work or film. "No match" means nothing was saved.\n\n${report.join('\n') || 'Everything matched.\n'}`,
