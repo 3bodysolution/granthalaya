@@ -71,7 +71,9 @@
       "creator": "Lucas Rijneveld",
       "original_title": "De avond is ongemak",
       "language": "nl",
-      "note": "Translated by Michele Hutchison"
+      "note": "Translated by Michele Hutchison",
+      "ol": "OL19740451W",
+      "cover": "https://covers.openlibrary.org/b/id/12388042-L.jpg"
     },
     {
       "year": 2019,
@@ -89,7 +91,9 @@
       "creator": "Olga Tokarczuk",
       "original_title": "Bieguni",
       "language": "pl",
-      "note": "Translated by Jennifer Croft"
+      "note": "Translated by Jennifer Croft",
+      "ol": "OL2097670W",
+      "cover": "https://covers.openlibrary.org/b/id/11426109-L.jpg"
     },
     {
       "year": 2017,
@@ -105,7 +109,9 @@
       "creator": "Han Kang",
       "original_title": "채식주의자",
       "language": "ko",
-      "note": "Translated by Deborah Smith"
+      "note": "Translated by Deborah Smith",
+      "ol": "OL17334243W",
+      "cover": "https://covers.openlibrary.org/b/id/7412625-L.jpg"
     }
   ]
 }

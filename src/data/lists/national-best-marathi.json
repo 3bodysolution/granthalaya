@@ -14,7 +14,9 @@
       "creator": "Paresh Mokashi",
       "language": "mr",
       "release_year": 2025,
-      "check": true
+      "check": true,
+      "tmdb": 1576389,
+      "cover": "https://image.tmdb.org/t/p/w500/hUIXIenoIPPhEUFcfR5PBSLX9oZ.jpg"
     },
     {
       "year": 2023,
@@ -71,14 +73,18 @@
       "creator": "Shivaji Lotan Patil",
       "language": "mr",
       "release_year": 2021,
-      "check": true
+      "check": true,
+      "tmdb": 862163,
+      "cover": "https://image.tmdb.org/t/p/w500/dypsORPTqwL9HnL44AHFcmDjuBc.jpg"
     },
     {
       "year": 2017,
       "title": "Kachcha Limboo",
       "creator": "Prasad Oak",
       "language": "mr",
-      "release_year": 2017
+      "release_year": 2017,
+      "tmdb": 496035,
+      "cover": "https://image.tmdb.org/t/p/w500/4y76KWeicrh0v3DdQzENpcGAkhw.jpg"
     },
     {
       "year": 2016,
@@ -139,7 +145,9 @@
       "creator": "Samruddhi Porey",
       "language": "mr",
       "release_year": 2011,
-      "check": true
+      "check": true,
+      "tmdb": 323595,
+      "cover": "https://image.tmdb.org/t/p/w500/uCzeAoHoUy948utCtW8bW9L1VQj.jpg"
     },
     {
       "year": 2009,
@@ -147,7 +155,9 @@
       "creator": "Ravindra Harischandra Jadhav",
       "language": "mr",
       "release_year": 2010,
-      "check": true
+      "check": true,
+      "tmdb": 158503,
+      "cover": "https://image.tmdb.org/t/p/w500/lY4heIR7bcOOlxfE0NevVR4r5o3.jpg"
     },
     {
       "year": 2008,
@@ -209,7 +219,9 @@
       "title": "Vastupurush",
       "creator": "Sumitra Bhave and Sunil Sukthankar",
       "language": "mr",
-      "release_year": 2002
+      "release_year": 2002,
+      "tmdb": 91527,
+      "cover": "https://image.tmdb.org/t/p/w500/pjYGC3mpG5KCwH9KWyGO4JEVXgr.jpg"
     },
     {
       "year": 2000,
@@ -268,7 +280,9 @@
       "title": "Ek Hota Vidushak",
       "creator": "Jabbar Patel",
       "language": "mr",
-      "release_year": 1992
+      "release_year": 1992,
+      "tmdb": 555535,
+      "cover": "https://image.tmdb.org/t/p/w500/nFnbkYC3Oum81oly8iCSpPocT3o.jpg"
     },
     {
       "year": 1989,
@@ -294,7 +308,9 @@
       "creator": "Rajdutt",
       "language": "mr",
       "release_year": 1984,
-      "check": true
+      "check": true,
+      "tmdb": 1211749,
+      "cover": "https://image.tmdb.org/t/p/w500/6xkM1Zgj4T8wqIwJ6Y0le9AanL9.jpg"
     },
     {
       "year": 1984,
@@ -302,7 +318,9 @@
       "creator": "K. G. Koregaonkar",
       "language": "mr",
       "release_year": 1983,
-      "check": true
+      "check": true,
+      "tmdb": 700937,
+      "cover": "https://image.tmdb.org/t/p/w500/yV3kn8DBWscyg5OIKC6LDS2hHd0.jpg"
     },
     {
       "year": 1983,
@@ -319,7 +337,9 @@
       "title": "Shapit",
       "creator": "Arvind Deshpande and Rajdutt",
       "language": "mr",
-      "release_year": 1982
+      "release_year": 1982,
+      "tmdb": 700786,
+      "cover": "https://image.tmdb.org/t/p/w500/kXB38p2g6OB40BNcalElRt7CGTC.jpg"
     },
     {
       "year": 1981,
@@ -354,7 +374,9 @@
       "title": "Saamna",
       "creator": "Jabbar Patel",
       "language": "mr",
-      "release_year": 1974
+      "release_year": 1974,
+      "tmdb": 922536,
+      "cover": "https://image.tmdb.org/t/p/w500/lNZHjpvEhO1cujTzWcSyVmWrLcl.jpg"
     },
     {
       "year": 1972,
@@ -390,7 +412,9 @@
       "creator": "Bhalji Pendharkar",
       "language": "mr",
       "release_year": 1968,
-      "check": true
+      "check": true,
+      "tmdb": 494059,
+      "cover": "https://image.tmdb.org/t/p/w500/4PCNqIJqp1pkT6oWih8p0LIp5qY.jpg"
     },
     {
       "year": 1968,
@@ -398,7 +422,8 @@
       "creator": "Raja Thakur",
       "language": "mr",
       "release_year": 1967,
-      "check": true
+      "check": true,
+      "tmdb": 1220504
     },
     {
       "year": 1967,
@@ -406,7 +431,8 @@
       "creator": "M. G. Pathak",
       "language": "mr",
       "release_year": 1966,
-      "check": true
+      "check": true,
+      "tmdb": 1582097
     },
     {
       "year": 1966,
@@ -414,14 +440,18 @@
       "creator": "Anant Thakur",
       "language": "mr",
       "release_year": 1965,
-      "check": true
+      "check": true,
+      "tmdb": 1588752,
+      "cover": "https://image.tmdb.org/t/p/w500/rzZKwWboebSYl8pq8mnX45Uzo29.jpg"
     },
     {
       "year": 1965,
       "title": "Sadhi Mansa",
       "creator": "Bhalji Pendharkar",
       "language": "mr",
-      "release_year": 1965
+      "release_year": 1965,
+      "tmdb": 1588752,
+      "cover": "https://image.tmdb.org/t/p/w500/rzZKwWboebSYl8pq8mnX45Uzo29.jpg"
     },
     {
       "year": 1965,
@@ -438,7 +468,9 @@
       "creator": "C. Vishwanath",
       "language": "mr",
       "release_year": 1964,
-      "check": true
+      "check": true,
+      "tmdb": 493952,
+      "cover": "https://image.tmdb.org/t/p/w500/qD3CReMu6wIu80IibvJsTgUbunk.jpg"
     },
     {
       "year": 1964,
@@ -454,7 +486,9 @@
       "creator": "Raja Nene",
       "language": "mr",
       "release_year": 1963,
-      "check": true
+      "check": true,
+      "tmdb": 495822,
+      "cover": "https://image.tmdb.org/t/p/w500/8zogFOYdzxvzUCV9icpDRQ3jY0w.jpg"
     },
     {
       "year": 1964,
@@ -471,15 +505,18 @@
       "creator": "Raja Paranjape",
       "language": "mr",
       "release_year": 1962,
-      "check": true
+      "check": true,
+      "tmdb": 717143,
+      "cover": "https://image.tmdb.org/t/p/w500/w540XHyAs4IjeqKi5JlA66rWNrH.jpg"
     },
     {
       "year": 1963,
       "title": "Te Majhe Ghar",
       "creator": "Ganesh Bhat",
       "language": "mr",
-      "release_year": 1962,
-      "check": true
+      "release_year": 1963,
+      "check": true,
+      "tmdb": 1218973
     },
     {
       "year": 1962,
@@ -496,15 +533,18 @@
       "creator": "Neelkanth Magdum",
       "language": "mr",
       "release_year": 1961,
-      "check": true
+      "check": true,
+      "tmdb": 402205,
+      "cover": "https://image.tmdb.org/t/p/w500/pV1TTfxFRhUCFvXAwinpRKJAH8f.jpg"
     },
     {
       "year": 1962,
       "title": "Gariba Gharchi Lek",
       "creator": "Kamlakar Vishnu Torne",
       "language": "mr",
-      "release_year": 1961,
-      "check": true
+      "release_year": 1962,
+      "check": true,
+      "tmdb": 1218958
     },
     {
       "year": 1961,
@@ -529,7 +569,9 @@
       "creator": "Madhav Shinde",
       "language": "mr",
       "release_year": 1960,
-      "check": true
+      "check": true,
+      "tmdb": 822354,
+      "cover": "https://image.tmdb.org/t/p/w500/wfKkoJafziXZAjy0HpOsUtfzf1W.jpg"
     },
     {
       "year": 1960,
@@ -556,7 +598,8 @@
       "creator": "Anant Mane",
       "language": "mr",
       "release_year": 1957,
-      "check": true
+      "check": true,
+      "tmdb": 1216722
     },
     {
       "year": 1957,
@@ -564,7 +607,9 @@
       "creator": "Madhav Shinde",
       "language": "mr",
       "release_year": 1956,
-      "check": true
+      "check": true,
+      "tmdb": 199240,
+      "cover": "https://image.tmdb.org/t/p/w500/zfR8AOw9KpFwJEH4PKWKZxAguEG.jpg"
     },
     {
       "year": 1955,
@@ -572,14 +617,17 @@
       "creator": "Raja Thakur",
       "language": "mr",
       "release_year": 1954,
-      "check": true
+      "check": true,
+      "tmdb": 409234
     },
     {
       "year": 1955,
       "title": "Shevagyachya Shenga",
       "creator": "Shantaram Athavale",
       "language": "mr",
-      "release_year": 1955
+      "release_year": 1955,
+      "tmdb": 402208,
+      "cover": "https://image.tmdb.org/t/p/w500/gz6dLS34W4Th4A7CbX1F1R0EZBF.jpg"
     },
     {
       "year": 1954,

@@ -519,7 +519,7 @@ const avatar = me?.avatar_url;
       opts.forEach((o, i) => o.setAttribute('aria-selected', String(i === sel)));
       opts[sel].scrollIntoView({ block: 'nearest' });
     }
-    async function open(mode = '') {
+    async function open(mode = '', q = '') {
       const d = dialog();
       if (d.open) return;
       d.dataset.mode = mode;
@@ -529,12 +529,12 @@ const avatar = me?.avatar_url;
       d.showModal();
       input.focus();
       await loadMine();
-      renderEmpty();
+      if (q) { input.value = q; input.dispatchEvent(new Event('input', { bubbles: true })); } else renderEmpty();
     }
     document.addEventListener('click', (ev) => {
       const el = ev.target as Element;
       const opener = el.closest<HTMLElement>('[data-search-open]');
-      if (opener) { ev.preventDefault(); open(opener.dataset.searchOpen || ''); return; }
+      if (opener) { ev.preventDefault(); open(opener.dataset.searchOpen || '', opener.dataset.searchQ || ''); return; }
       const d = dialog();
       if (d && d.open) {
         if (el === d) d.close(); // click on the backdrop

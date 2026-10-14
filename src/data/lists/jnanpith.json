@@ -149,7 +149,9 @@
       "creator": "Chandrashekhara Kambara",
       "original_title": "ಜೋಕುಮಾರಸ್ವಾಮಿ",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "ol": "OL43323048W",
+      "cover": "https://covers.openlibrary.org/b/id/15061944-L.jpg"
     },
     {
       "year": 2009,
@@ -235,7 +237,9 @@
       "creator": "Jayakanthan",
       "original_title": "சில நேரங்களில் சில மனிதர்கள்",
       "language": "ta",
-      "pick": true
+      "pick": true,
+      "ol": "OL38408486W",
+      "cover": "https://covers.openlibrary.org/b/id/14641797-L.jpg"
     },
     {
       "year": 2001,
@@ -272,7 +276,8 @@
       "creator": "Gurdial Singh",
       "original_title": "ਮੜ੍ਹੀ ਦਾ ਦੀਵਾ",
       "language": "pa",
-      "pick": true
+      "pick": true,
+      "ol": "OL10527084W"
     },
     {
       "year": 1998,
@@ -396,7 +401,8 @@
       "creator": "Pannalal Patel",
       "original_title": "માનવીની ભવાઈ",
       "language": "gu",
-      "pick": true
+      "pick": true,
+      "ol": "OL10465963W"
     },
     {
       "year": 1984,
@@ -551,7 +557,8 @@
       "title": "Sri Ramayana Darshanam",
       "creator": "Kuvempu",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "ol": "OL332325W"
     },
     {
       "year": 1966,

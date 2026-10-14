@@ -33,7 +33,9 @@
       "creator": "Han Kang",
       "original_title": "채식주의자",
       "language": "ko",
-      "pick": true
+      "pick": true,
+      "ol": "OL17334243W",
+      "cover": "https://covers.openlibrary.org/b/id/7412625-L.jpg"
     },
     {
       "year": 2023,
@@ -50,7 +52,9 @@
       "creator": "Annie Ernaux",
       "original_title": "Les Années",
       "language": "fr",
-      "pick": true
+      "pick": true,
+      "ol": "OL102389W",
+      "cover": "https://covers.openlibrary.org/b/id/968944-L.jpg"
     },
     {
       "year": 2021,
@@ -86,7 +90,9 @@
       "original_title": "Prowadź swój pług przez kości umarłych",
       "language": "pl",
       "note": "Announced in 2019, as the 2018 prize was postponed",
-      "pick": true
+      "pick": true,
+      "ol": "OL17351965W",
+      "cover": "https://covers.openlibrary.org/b/id/9768059-L.jpg"
     },
     {
       "year": 2017,
@@ -102,7 +108,9 @@
       "title": "Chronicles: Volume One",
       "creator": "Bob Dylan",
       "language": "en",
-      "pick": true
+      "pick": true,
+      "ol": "OL28809W",
+      "cover": "https://covers.openlibrary.org/b/id/473399-L.jpg"
     },
     {
       "year": 2015,
@@ -159,7 +167,9 @@
       "creator": "Mario Vargas Llosa",
       "original_title": "La fiesta del Chivo",
       "language": "es",
-      "pick": true
+      "pick": true,
+      "ol": "OL857600W",
+      "cover": "https://covers.openlibrary.org/b/id/1047728-L.jpg"
     },
     {
       "year": 2009,
@@ -167,7 +177,9 @@
       "creator": "Herta Müller",
       "original_title": "Herztier",
       "language": "de",
-      "pick": true
+      "pick": true,
+      "ol": "OL1732450W",
+      "cover": "https://covers.openlibrary.org/b/id/579611-L.jpg"
     },
     {
       "year": 2008,
@@ -194,7 +206,9 @@
       "creator": "Orhan Pamuk",
       "original_title": "Benim Adım Kırmızı",
       "language": "tr",
-      "pick": true
+      "pick": true,
+      "ol": "OL1019598W",
+      "cover": "https://covers.openlibrary.org/b/id/1054459-L.jpg"
     },
     {
       "year": 2005,
@@ -248,7 +262,9 @@
       "creator": "Gao Xingjian",
       "original_title": "靈山",
       "language": "zh",
-      "pick": true
+      "pick": true,
+      "ol": "OL4049087W",
+      "cover": "https://covers.openlibrary.org/b/id/52610-L.jpg"
     },
     {
       "year": 1999,
@@ -360,7 +376,9 @@
       "original_title": "بين القصرين",
       "language": "ar",
       "note": "First book of the Cairo Trilogy",
-      "pick": true
+      "pick": true,
+      "ol": "OL1599742W",
+      "cover": "https://covers.openlibrary.org/b/id/14816592-L.jpg"
     },
     {
       "year": 1987,

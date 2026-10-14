@@ -35,7 +35,7 @@ export function listTile(l: CatalogList, i: ListItem): RowItem {
     ? { kind: 'film', tmdbId: i.tmdb, title: i.title, year: i.release_year ?? i.year, cover: i.cover }
     : { kind: 'book', olKey: i.ol, title: i.title, creator: i.creator, year: i.year, cover: i.cover };
   return {
-    href, title: i.title, poster: i.cover, kind: film ? 'film' : 'book', save,
+    href, search: href ? undefined : i.title, title: i.title, poster: i.cover, kind: film ? 'film' : 'book', save,
     year: i.circa ? undefined : shown,
     sub: [i.circa ? `c. ${shown}` : '', i.creator].filter(Boolean).join(' · ') || undefined,
   };

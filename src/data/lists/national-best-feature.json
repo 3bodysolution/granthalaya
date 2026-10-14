@@ -305,7 +305,9 @@
       "title": "Charachar",
       "creator": "Buddhadeb Dasgupta",
       "language": "bn",
-      "release_year": 1993
+      "release_year": 1994,
+      "tmdb": 693936,
+      "cover": "https://image.tmdb.org/t/p/w500/pjQJrnBChm88VjVXO2WyL2JmjDP.jpg"
     },
     {
       "year": 1992,
@@ -360,7 +362,9 @@
       "title": "Halodhia Choraye Baodhan Khai",
       "creator": "Jahnu Barua",
       "language": "as",
-      "release_year": 1987
+      "release_year": 1987,
+      "tmdb": 327514,
+      "cover": "https://image.tmdb.org/t/p/w500/afhF3c8gsqkbMpxTqpIErbFUhdk.jpg"
     },
     {
       "year": 1986,
@@ -422,8 +426,10 @@
       "title": "Akaler Shandhaney",
       "creator": "Mrinal Sen",
       "language": "bn",
-      "release_year": 1982,
-      "check": true
+      "release_year": 1981,
+      "check": true,
+      "tmdb": 214386,
+      "cover": "https://image.tmdb.org/t/p/w500/xLPRkkZ1x6gCZjbsFd1MaeQA3u.jpg"
     },
     {
       "year": 1979,
@@ -447,7 +453,9 @@
       "title": "Mrigayaa",
       "creator": "Mrinal Sen",
       "language": "hi",
-      "release_year": 1976
+      "release_year": 1976,
+      "tmdb": 280272,
+      "cover": "https://image.tmdb.org/t/p/w500/yvIsc4W1g6GO79ZtMNxHXZhaQ5R.jpg"
     },
     {
       "year": 1975,
@@ -490,7 +498,9 @@
       "title": "Seemabaddha",
       "creator": "Satyajit Ray",
       "language": "bn",
-      "release_year": 1971
+      "release_year": 1971,
+      "tmdb": 45940,
+      "cover": "https://image.tmdb.org/t/p/w500/2I7jg9ZKylXEushCU36y6D3TqVR.jpg"
     },
     {
       "year": 1970,
@@ -597,7 +607,9 @@
       "title": "Apur Sansar",
       "creator": "Satyajit Ray",
       "language": "bn",
-      "release_year": 1959
+      "release_year": 1959,
+      "tmdb": 896,
+      "cover": "https://image.tmdb.org/t/p/w500/nl0jE2e1yGzO1CdbPUjDUCkCDd8.jpg"
     },
     {
       "year": 1958,
@@ -614,7 +626,9 @@
       "title": "Do Aankhen Barah Haath",
       "creator": "V. Shantaram",
       "language": "hi",
-      "release_year": 1957
+      "release_year": 1957,
+      "tmdb": 917,
+      "cover": "https://image.tmdb.org/t/p/w500/AlfM9yLcK1rhv73iNbDiOU9vnnu.jpg"
     },
     {
       "year": 1956,

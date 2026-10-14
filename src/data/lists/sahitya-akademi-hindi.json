@@ -187,7 +187,9 @@
       "creator": "Alka Saraogi",
       "language": "hi",
       "original_title": "कलिकथा वाया बाईपास",
-      "check": true
+      "check": true,
+      "ol": "OL12398578M",
+      "cover": "https://covers.openlibrary.org/b/id/3079611-L.jpg"
     },
     {
       "year": 2000,
@@ -405,7 +407,8 @@
       "title": "Kavita Ke Naye Pratiman",
       "creator": "Namwar Singh",
       "language": "hi",
-      "original_title": "कविता के नये प्रतिमान"
+      "original_title": "कविता के नये प्रतिमान",
+      "ol": "OL35507381W"
     },
     {
       "year": 1970,
@@ -428,7 +431,9 @@
       "title": "Do Chattanen",
       "creator": "Harivansh Rai Bachchan",
       "language": "hi",
-      "original_title": "दो चट्टानें"
+      "original_title": "दो चट्टानें",
+      "ol": "OL27054676W",
+      "cover": "https://covers.openlibrary.org/b/id/12567594-L.jpg"
     },
     {
       "year": 1967,

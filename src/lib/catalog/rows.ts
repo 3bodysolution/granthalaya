@@ -10,6 +10,8 @@ import { getList, listTile, listHref } from '../lists';
 export interface RowItem {
   href: string; title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
   status?: string; save?: Record<string, unknown>;
+  /** no page of our own: the tile opens the site search with this filled in */
+  search?: string;
 }
 export interface Row { title: string; href?: string; tone?: 'film' | 'book' | 'essay'; items: RowItem[] }
 

@@ -604,7 +604,9 @@
       "year": 1967,
       "title": "Blowup",
       "creator": "Michelangelo Antonioni",
-      "release_year": 1966
+      "release_year": 1966,
+      "tmdb": 1052,
+      "cover": "https://image.tmdb.org/t/p/w500/jVDVpydUw8Z50naUDAG4NbRCrSa.jpg"
     },
     {
       "year": 1966,

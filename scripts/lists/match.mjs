@@ -6,6 +6,8 @@
 // Keys come from .env (TMDB_API_KEY, optional GOOGLE_BOOKS_API_KEY) and are never printed.
 // Run from the project root: node scripts/lists/match.mjs [--force] [slug ...]
 //   Items that already have an id are skipped unless --force is given.
+//   --second: a second pass on unmatched items only (original titles, author alone, closest title).
+//   Its results are appended to docs/unmatched.md under "Second pass".
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -28,6 +30,7 @@ if (!GB) console.error('No GOOGLE_BOOKS_API_KEY: Google Books will answer "too m
 
 const args = process.argv.slice(2);
 const FORCE = args.includes('--force');
+const SECOND = args.includes('--second');
 const only = args.filter((a) => !a.startsWith('--'));
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -158,6 +161,82 @@ async function matchFilm(it) {
   return { fail: doubtful ?? 'nothing found' };
 }
 
+
+// ---------- second pass (unmatched items only) ----------
+// Like norm(), but keeps Devanagari vowel signs so Hindi and Marathi words stay whole.
+const norm2 = (s) =>
+  (s ?? '').normalize('NFC').toLowerCase().replace(/&/g, ' and ').replace(/^(the|a|an)\s+/, '').replace(/[^\p{L}\p{M}\p{N}]+/gu, ' ').trim();
+/** 0 to 1: how alike two titles are (shared words, Dice score) */
+function sim(a, b) {
+  const x = new Set(norm2(a).split(' ').filter(Boolean)), y = new Set(norm2(b).split(' ').filter(Boolean));
+  if (!x.size || !y.size) return 0;
+  let n = 0; for (const w of x) if (y.has(w)) n++;
+  return (2 * n) / (x.size + y.size);
+}
+const best = (cands, names) => {
+  let top = null;
+  for (const c of cands) {
+    const sc = Math.max(...names.filter(Boolean).map((n) => sim(c.title, n)));
+    if (sc >= 0.5 && (!top || sc > top.sc)) top = { ...c, sc };
+  }
+  return top;
+};
+const gbSearch = async (q) => {
+  const j = await getJSON(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}&maxResults=20${GB ? `&key=${GB}` : ''}`);
+  await sleep(300);
+  return (j?.items ?? []).map((v) => {
+    const i = v.volumeInfo ?? {};
+    const c = i.imageLinks?.thumbnail || i.imageLinks?.smallThumbnail;
+    return { gb: v.id, title: i.title ?? '', authors: i.authors ?? [], cover: c ? c.replace(/^http:/, 'https:').replace('&edge=curl', '') : undefined };
+  });
+};
+
+async function matchBookSecond(it) {
+  const names = [it.title, it.original_title];
+  const cands = [];
+  const ol = async (params) => {
+    const u = new URL('https://openlibrary.org/search.json');
+    for (const [k, v] of Object.entries(params)) if (v) u.searchParams.set(k, v);
+    u.searchParams.set('limit', '40');
+    u.searchParams.set('fields', 'key,title,author_name,cover_i');
+    const j = await getJSON(u); await sleep(250);
+    for (const d of j?.docs ?? []) cands.push({ ol: d.key.replace('/works/', ''), title: d.title ?? '', authors: d.author_name ?? [], cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` : undefined });
+  };
+  if (it.original_title) { await ol({ title: it.original_title }); await ol({ q: it.original_title }); }
+  if (it.creator) await ol({ author: it.creator });
+  // a title match counts if the author fits, or the original (Devanagari) title is an almost exact match
+  const fits = (c) => authorOk(it.creator, c.authors) || (it.original_title && sim(c.title, it.original_title) >= 0.9);
+  let pick = best(cands.filter(fits), names);
+  if (!pick) {
+    const g = [];
+    if (it.original_title) g.push(...(await gbSearch(`intitle:${it.original_title}`)));
+    if (it.creator) g.push(...(await gbSearch(`inauthor:${it.creator}`)));
+    pick = best(g.filter(fits), names);
+  }
+  if (!pick) return { fail: 'still nothing' };
+  return { ol: pick.ol, gb: pick.ol ? undefined : pick.gb, cover: pick.cover, note: pick.sc >= 0.95 ? null : `closest title "${pick.title}" by ${pick.authors.join(', ')}` };
+}
+
+async function matchFilmSecond(it) {
+  const y = it.release_year ?? it.year, lang = it.language;
+  const names = [it.title, it.original_title];
+  const ry = (r) => (r.release_date ? +r.release_date.slice(0, 4) : null);
+  const cands = [];
+  const add = (j) => { for (const r of j?.results ?? []) cands.push(r); };
+  for (const q of [it.original_title, it.title].filter(Boolean)) {
+    add(await tm('/search/movie', { query: q, include_adult: 'false', language: lang ? `${lang}-IN` : undefined })); await sleep(120);
+  }
+  if (lang && y) for (const yr of [y, y - 1, y + 1]) {
+    add(await tm('/discover/movie', { with_original_language: lang, primary_release_year: String(yr), sort_by: 'popularity.desc' })); await sleep(120);
+  }
+  const ok = cands.filter((r) => (!lang || r.original_language === lang) && ry(r) && y && Math.abs(ry(r) - y) <= 2)
+    .map((r) => ({ r, title: r.title, sc: Math.max(...names.concat(r.original_title).filter(Boolean).map((n) => Math.max(sim(r.title, n), sim(r.original_title, n)))) }))
+    .filter((c) => c.sc >= 0.5).sort((a, b) => b.sc - a.sc)[0];
+  if (!ok) return { fail: 'still nothing' };
+  const r = ok.r;
+  return { tmdb: r.id, cover: r.poster_path ? `https://image.tmdb.org/t/p/w500${r.poster_path}` : undefined, release_year: ry(r), note: ok.sc >= 0.95 ? null : `closest "${r.title}" (${ry(r)})` };
+}
+
 // ---------- run ----------
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json') && (!only.length || only.includes(f.replace('.json', ''))));
 const report = [];
@@ -170,8 +249,10 @@ for (const f of files) {
   let ok = 0, doubt = 0, miss = 0, skipped = 0;
   const lines = [];
   for (const it of list.items) {
-    if (!FORCE && (it.ol || it.gb || it.tmdb)) { skipped++; continue; }
-    const r = list.kind === 'film' ? await matchFilm(it) : await matchBook(it);
+    if ((!FORCE || SECOND) && (it.ol || it.gb || it.tmdb)) { skipped++; continue; }
+    const r = SECOND
+      ? (list.kind === 'film' ? await matchFilmSecond(it) : await matchBookSecond(it))
+      : (list.kind === 'film' ? await matchFilm(it) : await matchBook(it));
     const label = `${it.year} · ${it.title}${it.creator ? ` (${it.creator})` : ''}`;
     if (r.fail) { miss++; lines.push(`- **No match:** ${label}. ${r.fail}.`); continue; }
     for (const k of ['ol', 'gb', 'tmdb']) delete it[k];
@@ -189,7 +270,12 @@ for (const f of files) {
   if (lines.length) report.push(`## ${list.title} (${list.slug})\n\n${lines.join('\n')}\n`);
 }
 
-writeFileSync(
+if (SECOND) {
+  const f = join(ROOT, 'docs', 'unmatched.md');
+  const old = readFileSync(f, 'utf8').replace(/\n## Second pass[\s\S]*$/, '');
+  const note = 'Run with `--second` on items that had no match. Notes above may be out of date for items matched here.';
+  writeFileSync(f, old + '\n## Second pass\n\n' + note + '\n\n' + (report.join('\n') || 'Nothing new.\n'));
+} else writeFileSync(
   join(ROOT, 'docs', 'unmatched.md'),
   `# Unmatched and doubtful list items\n\nMade by \`scripts/lists/match.mjs\`. "Check" means a match was saved but may be the wrong work or film. "No match" means nothing was saved.\n\n${report.join('\n') || 'Everything matched.\n'}`,
 );
