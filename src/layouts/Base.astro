@@ -418,11 +418,20 @@ const avatar = me?.avatar_url;
     let loadTimer = 0;
     document.addEventListener('astro:before-preparation', () => {
       clearTimeout(loadTimer);
+      if ((window as any).__keepPlace != null) return; // a filter change: the page stays put, so no loader
       loadTimer = window.setTimeout(() => document.getElementById('pageload')?.classList.add('on'), 450);
     });
     const loaded = () => { clearTimeout(loadTimer); document.getElementById('pageload')?.classList.remove('on'); };
     document.addEventListener('astro:after-swap', loaded);
     document.addEventListener('astro:page-load', loaded);
+    // after a filter change the router scrolls to the top; put the page back where it was
+    const keepPlace = () => {
+      const y = (window as any).__keepPlace;
+      if (y == null) return;
+      window.scrollTo({ top: y, left: 0, behavior: 'instant' });
+    };
+    document.addEventListener('astro:after-swap', keepPlace);
+    document.addEventListener('astro:page-load', () => { keepPlace(); requestAnimationFrame(() => { keepPlace(); (window as any).__keepPlace = null; }); });
 
     // ——— the paintings stay on the page: no right-click saving, no dragging ———
     const guarded = (t: EventTarget | null) => !!(t as Element)?.closest?.('.art, .valley, .cover, img');

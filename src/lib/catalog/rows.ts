@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks } from './onsite';
-import { getList, listTile, listHref } from '../lists';
+import { getList, listTile, listBrowseHref } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
 export interface RowItem {
@@ -35,7 +35,7 @@ const list = (p: Promise<{ items: Card[] }>) => safe(p.then((r) => r.items), [] 
 function listRow(slug: string, title: string, tone: 'film' | 'book'): Row {
   const l = getList(slug);
   const items = l ? l.items.map((i) => listTile(l, i)).filter((t) => t.href && t.poster).slice(0, MAX) : [];
-  return { title, href: listHref(slug), tone, items };
+  return { title, href: l ? listBrowseHref(l) : undefined, tone, items };
 }
 
 /** the Films front page (or TV, with kind 'tv') */

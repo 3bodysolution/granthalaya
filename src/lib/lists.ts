@@ -48,3 +48,14 @@ export function listTile(l: CatalogList, i: ListItem): RowItem {
     sub: [i.circa ? `c. ${shown}` : '', i.creator].filter(Boolean).join(' · ') || undefined,
   };
 }
+
+/** a list shown in place on the Books or Films page, under the filters (the shareable page is `listHref`) */
+export const listBrowseHref = (l: Pick<CatalogList, 'slug' | 'kind'>) => `/${l.kind === 'film' ? 'films' : 'books'}/?list=${l.slug}`;
+/** the list in the address, if it exists and belongs on this page */
+export const pickList = (slug: string | null | undefined, kind: 'book' | 'film') => {
+  const l = slug ? getList(slug) : undefined;
+  return l && l.kind === kind ? l : undefined;
+};
+/** the decades a list has items in, newest first, for the Decade filter */
+export const listDecades = (l: CatalogList): [string, string][] =>
+  [...new Set(l.items.map((i) => i.year - (i.year % 10)))].sort((a, b) => b - a).map((d) => [String(d), `${d}s`]);

@@ -9,7 +9,8 @@ import Pager from '../../components/title/Pager.astro';
 import PosterRow from '../../components/title/PosterRow.astro';
 import { bookRows, markRows, type Row } from '../../lib/catalog/rows';
 import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
-import { listsOfKind, listHref } from '../../lib/lists';
+import ListGrid from '../../components/title/ListGrid.astro';
+import { listsOfKind, pickList, listDecades, listBrowseHref } from '../../lib/lists';
 import { myMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
 
@@ -29,14 +30,16 @@ const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && 
 const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort')) ?? 'popular';
 const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
 
+// a prize or classics list chosen in the filter bar shows in place; the other filters don't apply to it (Decade does)
+const picked = pickList(q.get('list'), 'book');
 const front = [...q.keys()].length === 0;
 const [list, rowsRaw] = await Promise.all([
-  front ? Promise.resolve({ items: [], total: 0, pages: 0 }) : browseBooks({ subject, language, year, decade, sort, page }),
+  front || picked ? Promise.resolve({ items: [], total: 0, pages: 0 }) : browseBooks({ subject, language, year, decade, sort, page }),
   front ? bookRows() : Promise.resolve([] as Row[]),
 ]);
 const sb = Astro.locals.supabase;
 const [marks, rows] = await Promise.all([
-  sb && !front ? myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : Promise.resolve(new Map<string, string>()),
+  sb && !front && !picked ? myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : Promise.resolve(new Map<string, string>()),
   markRows(sb, Astro.locals.me, rowsRaw),
 ]);
 
@@ -46,6 +49,7 @@ const langName = language ? bookLanguageName(language) : '';
 let title = subject ? (known ? `${langName ? langName + ' ' : ''}${known.toLowerCase()}` : `${langName ? langName + ' books' : 'Books'} about ${subjectName.toLowerCase()}`) : `${langName ? langName + ' ' : ''}books`;
 title += year ? ` from ${year}` : decade ? ` from the ${decade}s` : '';
 title = title.replace(/^./, (c) => c.toUpperCase());
+if (picked) title = picked.title;
 
 const now = new Date().getUTCFullYear();
 const decades: [string, string][] = Array.from({ length: Math.floor((now - 1850) / 10) + 1 }, (_, i) => { const d = Math.floor(now / 10) * 10 - i * 10; return [String(d), `${d}s`]; });
@@ -53,15 +57,20 @@ const subjects: [string, string][] = [['', 'Any subject'], ...(subject && !known
 const subjectLinks = SUBJECTS.map(([k, n]) => [`/books/?subject=${k}`, n]);
 const langLinks = BOOK_LANGUAGES.slice(0, 14).map(([c, n]) => [`/books/?language=${c}`, n]);
 const decadeLinks = decades.slice(0, 10).map(([d, n]) => [`/books/?decade=${d}`, n]);
+const listDec = picked ? listDecades(picked) : [];
+const dcPicked = picked && decade && listDec.some(([d]) => d === String(decade)) ? decade : undefined;
+const listNames = ['subject', 'language', 'decade', 'year', 'sort'];
+const resets = picked ? ['list'] : undefined; // changing any other filter leaves the list
 const fields = [
-  { name: 'subject', label: 'Subject', value: subject ?? '', options: subjects },
-  { name: 'language', label: 'Language', value: language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][] },
-  year
-    ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
-    : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
-  // a shortcut to the prize and classics lists, not a filter on this page
-  { name: 'list', label: 'Prizes and classics', value: '', go: true, options: [['', 'Prizes and classics'], ...listsOfKind('book').map((l) => [listHref(l.slug), l.title] as [string, string])] },
-  { name: 'sort', label: 'Order', value: sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][] },
+  { name: 'subject', label: 'Subject', value: picked ? '' : subject ?? '', options: subjects, clears: resets },
+  { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][], clears: resets },
+  picked
+    ? { name: 'decade', label: 'Decade', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
+    : year
+      ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
+      : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+  { name: 'list', label: 'Prizes and classics', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...listsOfKind('book').map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
+  { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
 ];
 ---
 <Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`}>
@@ -77,9 +86,14 @@ const fields = [
         <div class="bset"><h2 class="eyebrow">By subject</h2><div class="chips">{subjectLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">By original language</h2><div class="chips">{langLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
-        <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('book').map((l) => <a class="gchip" href={listHref(l.slug)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>
+        <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('book').map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>
       </div>
       <p class="credit-line">Book data from Open Library.</p>
+    </section>
+  ) : picked ? (
+    <section class="pad">
+      <p class="muted lede">{picked.intro}</p>
+      <ListGrid list={picked} decade={dcPicked} />
     </section>
   ) : (
   <section class="pad">
@@ -101,6 +115,7 @@ const fields = [
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
+  .lede { margin: 0 0 28px; max-width: 60ch; font-size: 16px; }
   .empty { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; font-size: 16px; }
   .empty p { margin: 0; }
   .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }

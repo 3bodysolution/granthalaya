@@ -9,7 +9,8 @@ import Pager from '../../components/title/Pager.astro';
 import PosterRow from '../../components/title/PosterRow.astro';
 import { filmRows, markRows, type Row } from '../../lib/catalog/rows';
 import { discover, services, genreBySlug, languageName, FILM_GENRES, TV_GENRES, genreSlug, tmdbReady } from '../../lib/catalog/tmdb';
-import { listsOfKind, listHref } from '../../lib/lists';
+import ListGrid from '../../components/title/ListGrid.astro';
+import { listsOfKind, pickList, listDecades, listBrowseHref } from '../../lib/lists';
 import { myMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
 
@@ -24,16 +25,18 @@ const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort'
 const page = Math.max(1, Math.min(500, Number(q.get('page')) || 1));
 
 // the front page is the address with nothing but Films or TV chosen
+// a prize or classics list chosen in the filter bar shows in place (films only); the other filters don't apply to it
+const picked = kind === 'film' ? pickList(q.get('list'), 'film') : undefined;
 const front = [...q.keys()].every((k) => k === 'kind');
 const empty = { items: [], pages: 0, total: 0 };
 const [list, svc, rowsRaw] = await Promise.all([
-  front ? Promise.resolve(empty) : discover({ kind, genre: genre?.id, year, decade, language, service, sort, page }),
+  front || picked ? Promise.resolve(empty) : discover({ kind, genre: genre?.id, year, decade, language, service, sort, page }),
   services(),
   front ? filmRows(kind) : Promise.resolve([] as Row[]),
 ]);
 const sb = Astro.locals.supabase;
 const [marks, rows] = await Promise.all([
-  sb && !front ? myMarks(sb, Astro.locals.me, list.items.map((c) => ({ kind: c.kind, tmdb: c.id }))) : Promise.resolve(new Map<string, string>()),
+  sb && !front && !picked ? myMarks(sb, Astro.locals.me, list.items.map((c) => ({ kind: c.kind, tmdb: c.id }))) : Promise.resolve(new Map<string, string>()),
   markRows(sb, Astro.locals.me, rowsRaw),
 ]);
 const serviceName = svc.find((s) => s.id === service)?.name;
@@ -43,21 +46,29 @@ const noun = kind === 'tv' ? 'TV' : 'films';
 const head = [language && languageName(language), genre && genre.name.toLowerCase(), noun].filter(Boolean).join(' ');
 const when = year ? ` from ${year}` : decade ? ` from the ${decade}s` : '';
 const where = serviceName ? ` on ${serviceName}` : '';
-const title = (head + when + where).replace(/^./, (c) => c.toUpperCase());
+const title = picked ? picked.title : (head + when + where).replace(/^./, (c) => c.toUpperCase());
 
 const now = new Date().getUTCFullYear();
 const decades: [string, string][] = Array.from({ length: Math.floor((now - 1920) / 10) + 1 }, (_, i) => { const d = Math.floor(now / 10) * 10 - i * 10; return [String(d), `${d}s`]; });
 const LANGS = ['hi', 'mr', 'ml', 'ta', 'te', 'bn', 'kn', 'gu', 'pa', 'en', 'ko', 'ja', 'fr', 'es', 'it', 'de', 'zh', 'fa'];
 const langs: [string, string][] = [...new Set([...(language ? [language] : []), ...LANGS])].map((c) => [c, languageName(c) ?? c]);
+const listDec = picked ? listDecades(picked) : [];
+const dcPicked = picked && decade && listDec.some(([d]) => d === String(decade)) ? decade : undefined;
+const resets = picked ? ['list'] : undefined; // changing any other filter leaves the list
 const fields = [
-  { name: 'genre', label: 'Genre', value: genre?.slug ?? '', options: [['', 'Any genre'], ...(kind === 'tv' ? TV_GENRES : FILM_GENRES).map(([, n]) => [genreSlug(n), n])] as [string, string][] },
-  year
-    ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
-    : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
-  { name: 'language', label: 'Language', value: language ?? '', options: [['', 'Any language'], ...langs] as [string, string][] },
-  ...(svc.length ? [{ name: 'service', label: 'Service', value: service ? String(service) : '', options: [['', 'Any service'], ...svc.slice(0, 16).map((s) => [String(s.id), s.name])] as [string, string][] }] : []),
-  { name: 'sort', label: 'Order', value: sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][] },
+  { name: 'genre', label: 'Genre', value: picked ? '' : genre?.slug ?? '', options: [['', 'Any genre'], ...(kind === 'tv' ? TV_GENRES : FILM_GENRES).map(([, n]) => [genreSlug(n), n])] as [string, string][], clears: resets },
+  picked
+    ? { name: 'decade', label: 'Decade', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
+    : year
+      ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
+      : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+  { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...langs] as [string, string][], clears: resets },
+  ...(svc.length ? [{ name: 'service', label: 'Service', value: picked ? '' : service ? String(service) : '', options: [['', 'Any service'], ...svc.slice(0, 16).map((s) => [String(s.id), s.name])] as [string, string][], clears: resets }] : []),
+  // film lists only: there are none for TV
+  ...(kind === 'film' ? [{ name: 'list', label: 'Prizes and classics', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...listsOfKind('film').map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: ['genre', 'language', 'service', 'decade', 'year', 'sort'] }] : []),
+  { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
 ];
+
 const base = kind === 'tv' ? '/films/?kind=tv&' : '/films/?';
 const genreLinks = (kind === 'tv' ? TV_GENRES : FILM_GENRES).map(([, n]) => [`${base}genre=${genreSlug(n)}`, n]);
 const langLinks = LANGS.slice(0, 12).map((c) => [`${base}language=${c}`, languageName(c) ?? c]);
@@ -74,7 +85,12 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
     <h1 class="title">{title}</h1>
     <Filters fields={fields} keep={kind === 'tv' ? { kind: 'tv' } : {}} />
   </section>
-  {front && tmdbReady() ? (
+  {picked ? (
+    <section class="pad">
+      <p class="muted lede">{picked.intro}</p>
+      <ListGrid list={picked} decade={dcPicked} />
+    </section>
+  ) : front && tmdbReady() ? (
     <section class="pad rows">
       {rows.map((r) => <PosterRow {...r} />)}
       <div class="browse">
@@ -82,7 +98,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
         <div class="bset"><h2 class="eyebrow">By language</h2><div class="chips">{langLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         {serviceLinks.length > 0 && <div class="bset"><h2 class="eyebrow">Streaming in India</h2><div class="chips">{serviceLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>}
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
-        {kind === 'film' && <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('film').map((l) => <a class="gchip" href={listHref(l.slug)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>}
+        {kind === 'film' && <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('film').map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>}
       </div>
       <p class="credit-line">Data from TMDB. Streaming data from JustWatch.</p>
     </section>
@@ -105,6 +121,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
   .sw { display: inline-flex; align-items: center; height: 36px; padding: 0 18px; border-radius: 18px; font-size: 13px; font-weight: 600; }
   .sw.on { background: var(--ink); color: var(--bg); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
+  .lede { margin: 0 0 28px; max-width: 60ch; font-size: 16px; }
   .empty { font-size: 16px; }
   .rows { display: flex; flex-direction: column; gap: 48px; padding-bottom: 8px; }
   .browse { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; padding-top: 8px; }

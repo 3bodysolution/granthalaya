@@ -1,7 +1,8 @@
 ---
 // The filter bar on Films and Books: each choice reloads the list, and the address keeps them all.
-// A field with `go` is a shortcut instead: its options are page addresses, and choosing one opens that page.
-interface Props { fields: { name: string; label: string; value: string; options: [string, string][]; go?: boolean }[]; keep?: Record<string, string> }
+// A field with `clears` resets the named fields to Any when it changes (choosing a list resets the filters that don't apply to it).
+// A change keeps the page where it is: no jump to the top and no loader flash (see Base.astro).
+interface Props { fields: { name: string; label: string; value: string; options: [string, string][]; clears?: string[] }[]; keep?: Record<string, string> }
 const { fields, keep = {} } = Astro.props;
 ---
 <form class="filters" method="get" data-filters>
@@ -9,7 +10,7 @@ const { fields, keep = {} } = Astro.props;
   {fields.map((f) => (
     <label class:list={['fl', f.value && 'on']}>
       <span class="sr">{f.label}</span>
-      <select name={f.go ? undefined : f.name} data-go={f.go ? '' : undefined} onchange={f.go ? "if (this.value) location.href = this.value" : "this.form.requestSubmit()"}>
+      <select name={f.name} data-clears={f.clears?.join(',')}>
         {f.options.map(([v, t]) => <option value={v} selected={v === f.value}>{t}</option>)}
       </select>
     </label>
@@ -32,11 +33,23 @@ const { fields, keep = {} } = Astro.props;
   }
 </style>
 <script>
+  document.addEventListener('change', (ev) => {
+    const sel = (ev.target as Element).closest('select');
+    const form = sel?.closest<HTMLFormElement>('[data-filters]');
+    if (!sel || !form) return;
+    for (const n of (sel.dataset.clears ?? '').split(',').filter(Boolean)) {
+      const el = form.elements.namedItem(n);
+      if (el instanceof HTMLSelectElement) el.value = '';
+    }
+    (window as any).__keepPlace = scrollY; // Base.astro puts the page back where it was
+    setTimeout(() => { (window as any).__keepPlace = null; }, 15000); // in case the visit never happens
+    form.requestSubmit();
+  });
   // drop empty choices from the address, so it stays short
   document.addEventListener('submit', (ev) => {
     const f = ev.target as HTMLFormElement;
     if (!f.matches('[data-filters]')) return;
-    f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select:not([data-go]), input[type=hidden]').forEach((el) => { el.disabled = !el.value; });
+    f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input[type=hidden]').forEach((el) => { el.disabled = !el.value; });
     setTimeout(() => f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input').forEach((el) => (el.disabled = false)), 0);
   }, true);
 </script>
