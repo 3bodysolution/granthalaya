@@ -29,7 +29,9 @@ Still to gather (use the `fetcher` agent or a script; Wikidata or the Wikipedia 
 - Film awards: `oscar-best-picture`, `palme-dor` (from 1955), `national-best-feature`, `national-best-marathi` (each film with its `release_year` for matching).
 - Classics, chosen by us, about 30 to 40 each: `marathi-classics`, `hindi-classics`, `world-classics`, `indian-cinema-classics`. Well-known works only; a factual note of up to 12 words each.
 
-Then:
+Done: the lists are gathered and matched (`docs/unmatched.md` lists the doubtful ones), `/lists/` and `/lists/<slug>/` exist (`src/lib/lists.ts`), and the Books and Films front pages have the list rows and a "Prizes and classics" chip set. Still to do: the "Prizes and classics" choice in the Books filters, and a quick look at `docs/unmatched.md`.
+
+Original steps:
 1. Match every item to the catalogue with a script run locally: Open Library work key and cover for books (Google Books when Open Library has nothing), TMDB id and poster for films. Store `ol`, `gb`, `tmdb` and `cover` on each item. List the ones that didn't match for a quick look.
 2. Pages: `/lists/` (all lists, grouped: book prizes, Indian book prizes, film awards, classics) and `/lists/<slug>/` (a poster grid with the year on each, save bookmarks and your statuses, the source credited at the bottom).
 3. Rows on the front pages: Books gets Booker, Sahitya Akademi Marathi and Marathi classics rows plus chips for every book list; Films gets Oscar Best Picture, National Award Best Marathi Film and Indian cinema classics rows plus chips. The Books filters get a "Prizes and classics" choice that opens a list.

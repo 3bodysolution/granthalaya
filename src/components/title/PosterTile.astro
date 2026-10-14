@@ -6,22 +6,23 @@ import StatusIcon from '../ui/StatusIcon.astro';
 import { paletteFor } from '../../lib/data';
 import { statusLabel, type Kind, type Status } from '../../lib/kinds';
 interface Props {
-  href: string; title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
+  href: string; // empty for a title with no page title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
   status?: string; save?: Record<string, unknown>;
 }
 const { href, title, year, poster, kind, sub, status, save } = Astro.props;
 const me = Astro.locals.me;
 const p = paletteFor(title);
+const Link = href ? 'a' : 'span'; // list items we couldn't match have no page
 ---
 <div class="pt">
-  <a href={href} class="pt-link">
+  <Link href={href || undefined} class="pt-link">
     <span class:list={['pt-cover', kind === 'book' ? 'book' : 'film', poster ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
       {poster && <img src={poster} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
       <i class="sun"></i><i class="hill"></i><span class="serif pt-w">{title}</span>
     </span>
     <span class="pt-t">{title}</span>
     <span class="pt-s">{[year, sub].filter(Boolean).join(' · ')}</span>
-  </a>
+  </Link>
   {status ? (
     <StatusIcon status={(status === 'done' ? 'done' : status) as any} label={statusLabel(kind as Kind, status as Status)} class="pt-badge" />
   ) : me && save ? (

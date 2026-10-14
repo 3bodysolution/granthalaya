@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks } from './onsite';
+import { getList, listTile, listHref } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
 export interface RowItem {
@@ -27,6 +28,13 @@ export const bookItem = (b: BookCard): RowItem => ({
 const films = (cards: Card[]) => cards.filter((c) => c.poster).slice(0, MAX).map(filmItem);
 const books = (cards: BookCard[]) => cards.filter((b) => b.cover).slice(0, MAX).map(bookItem);
 const list = (p: Promise<{ items: Card[] }>) => safe(p.then((r) => r.items), [] as Card[]);
+
+/** a row from one of the prize or classics lists (only items with a page and a cover) */
+function listRow(slug: string, title: string, tone: 'film' | 'book'): Row {
+  const l = getList(slug);
+  const items = l ? l.items.map((i) => listTile(l, i)).filter((t) => t.href && t.poster).slice(0, MAX) : [];
+  return { title, href: listHref(slug), tone, items };
+}
 
 /** the Films front page (or TV, with kind 'tv') */
 export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
@@ -62,6 +70,9 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     { title: 'Marathi films people love', href: '/films/?language=mr&sort=top', tone: 'film', items: films(marathi) },
     { title: 'New from the south', tone: 'film', items: films(south) },
     { title: 'Highest rated', href: '/films/?sort=top', tone: 'film', items: films(top) },
+    listRow('oscar-best-picture', 'Best Picture winners', 'film'),
+    listRow('national-best-marathi', 'National Award winners, Marathi', 'film'),
+    listRow('indian-cinema-classics', 'Indian cinema classics', 'film'),
   ];
 }
 
@@ -77,6 +88,9 @@ export async function bookRows(): Promise<Row[]> {
     { title: 'Popular this week', href: '/books/?sort=popular', tone: 'book', items: books(week) },
     { title: 'Fiction readers love', href: '/books/?subject=fiction', tone: 'book', items: books(fiction) },
     { title: 'Highest rated', href: '/books/?sort=top', tone: 'book', items: books(top) },
+    listRow('booker', 'Booker Prize winners', 'book'),
+    listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book'),
+    listRow('marathi-classics', 'Marathi classics', 'book'),
   ];
 }
 

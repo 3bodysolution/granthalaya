@@ -9,6 +9,7 @@ import Pager from '../../components/title/Pager.astro';
 import PosterRow from '../../components/title/PosterRow.astro';
 import { filmRows, markRows, type Row } from '../../lib/catalog/rows';
 import { discover, services, genreBySlug, languageName, FILM_GENRES, TV_GENRES, genreSlug, tmdbReady } from '../../lib/catalog/tmdb';
+import { listsOfKind, listHref } from '../../lib/lists';
 import { myMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
 
@@ -81,6 +82,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
         <div class="bset"><h2 class="eyebrow">By language</h2><div class="chips">{langLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         {serviceLinks.length > 0 && <div class="bset"><h2 class="eyebrow">Streaming in India</h2><div class="chips">{serviceLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>}
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
+        {kind === 'film' && <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('film').map((l) => <a class="gchip" href={listHref(l.slug)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>}
       </div>
       <p class="credit-line">Data from TMDB. Streaming data from JustWatch.</p>
     </section>
