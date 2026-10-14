@@ -7,7 +7,11 @@ import { bookHref } from './books';
 import { adminClient, env } from '../supabase';
 import { base, getJSON, slug as slugOf } from './fetch';
 
-export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string }
+export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string;
+  /** only loaded by rowBySlug */ source?: string | null; original_title?: string | null; language?: string | null; note?: string | null }
+
+/** `source` of a book made from a prize or classics list: it has no Open Library page, so never look for one */
+export const LIST_SOURCE = 'Granthalaya lists';
 
 /** the public page for one of our catalogue titles */
 export function titlePageHref(t: Pick<TitleRow, 'kind' | 'slug' | 'title' | 'tmdb_id' | 'ol_key' | 'link'>): string | null {
@@ -39,7 +43,7 @@ export async function rowsForBook(sb: SupabaseClient, key: string) {
   return (data ?? []) as TitleRow[];
 }
 export async function rowBySlug(sb: SupabaseClient, kind: string, slug: string) {
-  const { data } = await sb.from('titles').select(COLS).eq('kind', kind).eq('slug', slug).maybeSingle();
+  const { data } = await sb.from('titles').select(`${COLS}, source, original_title, language, note`).eq('kind', kind).eq('slug', slug).maybeSingle();
   return (data as TitleRow) ?? null;
 }
 
@@ -127,7 +131,7 @@ export async function healFilm(row: TitleRow): Promise<number | null> {
 }
 
 export async function healBook(row: TitleRow): Promise<string | null> {
-  if (row.ol_key || row.kind !== 'book') return row.ol_key;
+  if (row.ol_key || row.kind !== 'book' || row.source === LIST_SOURCE) return row.ol_key;
   const q = `title:"${row.title.replace(/"/g, '')}"${row.creator ? ` author:"${row.creator.replace(/"/g, '')}"` : ''}`;
   const j = await getJSON(`${base.ol()}/search.json?q=${encodeURIComponent(q)}&fields=key,title,author_name,first_publish_year&limit=5`, { ttl: 86400 });
   const surname = (row.creator ?? '').trim().split(/\s+/).pop()?.toLowerCase();

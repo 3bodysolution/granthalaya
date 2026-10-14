@@ -14,7 +14,8 @@
       "creator": "Vairamuthu",
       "original_title": "கள்ளிக்காட்டு இதிகாசம்",
       "language": "ta",
-      "pick": true
+      "pick": true,
+      "slug": "kallikattu-ithihasam"
     },
     {
       "year": 2024,
@@ -32,7 +33,8 @@
       "creator": "Rambhadracharya",
       "language": "sa",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "sribhargavaraghaviyam"
     },
     {
       "year": 2023,
@@ -61,7 +63,8 @@
       "original_title": "সূৰ্য হেনু নামি আহে এই নদীয়েদি",
       "language": "as",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "surya-henu-nami-ase-ei-nodiyedi"
     },
     {
       "year": 2019,
@@ -69,7 +72,8 @@
       "creator": "Akkitham Achuthan Namboothiri",
       "original_title": "ഇരുപതാം നൂറ്റാണ്ടിന്റെ ഇതിഹാസം",
       "language": "ml",
-      "pick": true
+      "pick": true,
+      "slug": "irupatham-noottandinte-ithihasam"
     },
     {
       "year": 2018,
@@ -96,7 +100,8 @@
       "creator": "Shankha Ghosh",
       "original_title": "বাবরের প্রার্থনা",
       "language": "bn",
-      "pick": true
+      "pick": true,
+      "slug": "babarer-prarthana"
     },
     {
       "year": 2015,
@@ -105,7 +110,8 @@
       "original_title": "અમૃતા",
       "language": "gu",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "amrita"
     },
     {
       "year": 2014,
@@ -123,7 +129,8 @@
       "creator": "Kedarnath Singh",
       "original_title": "अकाल में सारस",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "slug": "akal-mein-saras"
     },
     {
       "year": 2012,
@@ -131,7 +138,8 @@
       "creator": "Ravuri Bharadhwaja",
       "original_title": "పాకుడురాళ్ళు",
       "language": "te",
-      "pick": true
+      "pick": true,
+      "slug": "paakudu-raallu"
     },
     {
       "year": 2011,
@@ -160,7 +168,8 @@
       "original_title": "इन्हीं हथियारों से",
       "language": "hi",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "inhin-hathiyaron-se"
     },
     {
       "year": 2009,
@@ -177,7 +186,8 @@
       "creator": "Akhlaq Mohammed Khan",
       "original_title": "خواب کا در بند ہے",
       "language": "ur",
-      "pick": true
+      "pick": true,
+      "slug": "khwab-ka-dar-band-hai"
     },
     {
       "year": 2007,
@@ -186,7 +196,8 @@
       "original_title": "ഭൂമിക്കൊരു ചരമഗീതം",
       "language": "ml",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "bhoomikkoru-charamageetham"
     },
     {
       "year": 2006,
@@ -194,7 +205,8 @@
       "creator": "Ravindra Kelekar",
       "language": "kok",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "himalayant"
     },
     {
       "year": 2006,
@@ -211,7 +223,8 @@
       "creator": "Kunwar Narayan",
       "original_title": "आत्मजयी",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "slug": "atmajayee"
     },
     {
       "year": 2004,
@@ -220,7 +233,8 @@
       "original_title": "نوروز صبا",
       "language": "ks",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "nawroz-e-saba"
     },
     {
       "year": 2003,
@@ -229,7 +243,8 @@
       "original_title": "स्पर्शाची पालवी",
       "language": "mr",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "sparshachi-palvi"
     },
     {
       "year": 2002,
@@ -248,7 +263,8 @@
       "original_title": "ધ્વનિ",
       "language": "gu",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "dhwani"
     },
     {
       "year": 2000,
@@ -303,7 +319,8 @@
       "creator": "Mahasweta Devi",
       "original_title": "হাজার চুরাশির মা",
       "language": "bn",
-      "pick": true
+      "pick": true,
+      "slug": "hajar-churashir-maa"
     },
     {
       "year": 1995,
@@ -332,7 +349,8 @@
       "original_title": "ଶବ୍ଦର ଆକାଶ",
       "language": "or",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "sabdar-akash"
     },
     {
       "year": 1992,
@@ -341,7 +359,8 @@
       "original_title": "अरण्या",
       "language": "hi",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "aranya"
     },
     {
       "year": 1991,
@@ -349,7 +368,8 @@
       "creator": "Subhash Mukhopadhyay",
       "original_title": "পদাতিক",
       "language": "bn",
-      "pick": true
+      "pick": true,
+      "slug": "padatik"
     },
     {
       "year": 1990,
@@ -385,7 +405,8 @@
       "creator": "Kusumagraj",
       "original_title": "विशाखा",
       "language": "mr",
-      "pick": true
+      "pick": true,
+      "slug": "vishakha"
     },
     {
       "year": 1986,
@@ -394,7 +415,8 @@
       "original_title": "ପାଣ୍ଡୁଲିପି",
       "language": "or",
       "pick": true,
-      "check": true
+      "check": true,
+      "slug": "pandulipi"
     },
     {
       "year": 1985,
@@ -438,7 +460,8 @@
       "title": "Kagaj te Canvas",
       "creator": "Amrita Pritam",
       "language": "pa",
-      "pick": true
+      "pick": true,
+      "slug": "kagaj-te-canvas"
     },
     {
       "year": 1980,
@@ -462,28 +485,32 @@
       "title": "Kitni Navon Men Kitni Bar",
       "creator": "Sachchidananda Vatsyayan 'Agyeya'",
       "language": "hi",
-      "pick": true
+      "pick": true,
+      "slug": "kitni-navon-men-kitni-bar"
     },
     {
       "year": 1977,
       "title": "Mookajjiya Kanasugalu",
       "creator": "K. Shivaram Karanth",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "slug": "mookajjiya-kanasugalu"
     },
     {
       "year": 1976,
       "title": "Prothom Protishruti",
       "creator": "Ashapoorna Devi",
       "language": "bn",
-      "pick": true
+      "pick": true,
+      "slug": "prothom-protishruti"
     },
     {
       "year": 1975,
       "title": "Chitrai Pavai",
       "creator": "Akilan",
       "language": "ta",
-      "pick": true
+      "pick": true,
+      "slug": "chitrai-pavai"
     },
     {
       "year": 1974,
@@ -499,14 +526,16 @@
       "title": "Naaku Tanti",
       "creator": "D. R. Bendre",
       "language": "kn",
-      "pick": true
+      "pick": true,
+      "slug": "naaku-tanti"
     },
     {
       "year": 1973,
       "title": "Mati Matala",
       "creator": "Gopinath Mohanty",
       "language": "or",
-      "pick": true
+      "pick": true,
+      "slug": "mati-matala"
     },
     {
       "year": 1972,
@@ -522,21 +551,24 @@
       "title": "Smriti Satta Bhabishyat",
       "creator": "Bishnu Dey",
       "language": "bn",
-      "pick": true
+      "pick": true,
+      "slug": "smriti-satta-bhabishyat"
     },
     {
       "year": 1970,
       "title": "Ramayana Kalpavruksham",
       "creator": "Viswanatha Satyanarayana",
       "language": "te",
-      "pick": true
+      "pick": true,
+      "slug": "ramayana-kalpavruksham"
     },
     {
       "year": 1969,
       "title": "Gul-e-Naghma",
       "creator": "Firaq Gorakhpuri",
       "language": "ur",
-      "pick": true
+      "pick": true,
+      "slug": "gul-e-naghma"
     },
     {
       "year": 1968,
@@ -551,7 +583,8 @@
       "title": "Nishita",
       "creator": "Umashankar Joshi",
       "language": "gu",
-      "pick": true
+      "pick": true,
+      "slug": "nishita"
     },
     {
       "year": 1967,
@@ -574,7 +607,8 @@
       "title": "Odakkuzhal",
       "creator": "G. Sankara Kurup",
       "language": "ml",
-      "pick": true
+      "pick": true,
+      "slug": "odakkuzhal"
     }
   ]
 }

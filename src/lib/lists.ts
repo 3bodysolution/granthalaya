@@ -6,6 +6,8 @@ import type { RowItem } from './catalog/rows';
 export interface ListItem {
   year: number; title: string; creator?: string; original_title?: string; language?: string; note?: string;
   pick?: boolean; release_year?: number; circa?: boolean; ol?: string; gb?: string; tmdb?: number; cover?: string;
+  /** a book that Open Library and Google Books don't have: our own catalogue record (scripts/lists/make-records.mjs) */
+  slug?: string;
 }
 export interface CatalogList {
   slug: string; title: string; kind: 'book' | 'film'; intro: string; source: { name: string; url: string }; items: ListItem[];
@@ -26,14 +28,20 @@ export const listHref = (slug: string) => `/lists/${slug}/`;
 export const listsOfKind = (kind: 'book' | 'film') => all.filter((l) => l.kind === kind);
 export const isPrize = (l: CatalogList) => !GROUPS[3].slugs.includes(l.slug);
 
+/** the year on our own record of a book: the year it came out for classics, none for prizes (their year is the prize's) */
+export const ownYear = (l: Pick<CatalogList, 'slug'>, i: Pick<ListItem, 'year'>) => (l.slug.endsWith('-classics') ? i.year : undefined);
+
 /** a list item as a poster tile; items we couldn't match have no link or bookmark */
 export function listTile(l: CatalogList, i: ListItem): RowItem {
   const film = l.kind === 'film';
-  const href = film ? (i.tmdb ? filmHref(i.tmdb, i.title) : '') : i.ol ? bookHref(i.ol, i.title) : i.gb ? bookHref(`gb-${i.gb}`) : '';
+  const href = film ? (i.tmdb ? filmHref(i.tmdb, i.title) : '') : i.ol ? bookHref(i.ol, i.title) : i.gb ? bookHref(`gb-${i.gb}`) : i.slug ? `/book/${i.slug}/` : '';
   const shown = film ? i.release_year ?? i.year : i.year;
-  const save = !href || (!film && !i.ol) ? undefined : film
+  const save = !href || (!film && !i.ol && !i.slug) ? undefined : film
     ? { kind: 'film', tmdbId: i.tmdb, title: i.title, year: i.release_year ?? i.year, cover: i.cover }
-    : { kind: 'book', olKey: i.ol, title: i.title, creator: i.creator, year: i.year, cover: i.cover };
+    : i.slug
+      // our own record: saving finds it again by title and author, so it carries no year (the year here is the prize's)
+      ? { kind: 'book', title: i.title, creator: i.creator, year: ownYear(l, i), cover: i.cover }
+      : { kind: 'book', olKey: i.ol, title: i.title, creator: i.creator, year: i.year, cover: i.cover };
   return {
     href, search: href ? undefined : i.title, title: i.title, poster: i.cover, kind: film ? 'film' : 'book', save,
     year: i.circa ? undefined : shown,

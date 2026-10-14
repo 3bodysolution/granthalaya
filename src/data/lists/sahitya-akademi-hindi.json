@@ -13,21 +13,24 @@
       "title": "Jeete Jee Allahabad",
       "creator": "Mamta Kalia",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "jeete-jee-allahabad"
     },
     {
       "year": 2024,
       "title": "Main Jab Tak Aai Bahar",
       "creator": "Gagan Gill",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "main-jab-tak-aai-bahar"
     },
     {
       "year": 2023,
       "title": "Mujhe Pahachaano",
       "creator": "Sanjeev",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "mujhe-pahachaano"
     },
     {
       "year": 2022,
@@ -43,21 +46,24 @@
       "title": "Samraat Ashok",
       "creator": "Daya Prakash Sinha",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "samraat-ashok"
     },
     {
       "year": 2020,
       "title": "Tokri Mein Digant 'Their Gatha",
       "creator": "Anamika",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "tokri-mein-digant-their-gatha"
     },
     {
       "year": 2019,
       "title": "Chheelatey Hue Apne Ko",
       "creator": "Nand Kishore Acharya",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "chheelatey-hue-apne-ko"
     },
     {
       "year": 2018,
@@ -72,14 +78,16 @@
       "title": "Vishw Mithak Sarit Sagar",
       "creator": "Ramesh Kuntal Megh",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "vishw-mithak-sarit-sagar"
     },
     {
       "year": 2016,
       "title": "Parijat",
       "creator": "Nasira Sharma",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "parijat"
     },
     {
       "year": 2015,
@@ -87,84 +95,96 @@
       "creator": "Ramdarash Mishra",
       "language": "hi",
       "original_title": "आग की हँसी",
-      "check": true
+      "check": true,
+      "slug": "aag-ki-hansi"
     },
     {
       "year": 2014,
       "title": "Vinayak",
       "creator": "Ramesh Chandra Shah",
       "language": "hi",
-      "original_title": "विनायक"
+      "original_title": "विनायक",
+      "slug": "vinayak"
     },
     {
       "year": 2013,
       "title": "Miljul Man",
       "creator": "Mridula Garg",
       "language": "hi",
-      "original_title": "मिलजुल मन"
+      "original_title": "मिलजुल मन",
+      "slug": "miljul-man"
     },
     {
       "year": 2012,
       "title": "Patthar fenk Raha Hoon",
       "creator": "Chandrakant Devtale",
       "language": "hi",
-      "original_title": "पत्थर फेंक रहा हूँ"
+      "original_title": "पत्थर फेंक रहा हूँ",
+      "slug": "patthar-fenk-raha-hoon"
     },
     {
       "year": 2011,
       "title": "Rehan Par Raghu",
       "creator": "Kashinath Singh",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "rehan-par-raghu"
     },
     {
       "year": 2010,
       "title": "Mohan Das",
       "creator": "Uday Prakash",
       "language": "hi",
-      "original_title": "मोहन दास"
+      "original_title": "मोहन दास",
+      "slug": "mohan-das"
     },
     {
       "year": 2009,
       "title": "Hawa mein Hastakshar",
       "creator": "Kailash Vajpeyi",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "hawa-mein-hastakshar"
     },
     {
       "year": 2008,
       "title": "Kohre Mein Kaid Rang",
       "creator": "Govind Mishra",
       "language": "hi",
-      "original_title": "कोहरे में कैद रंग"
+      "original_title": "कोहरे में कैद रंग",
+      "slug": "kohre-mein-kaid-rang"
     },
     {
       "year": 2007,
       "title": "Inhin Hathiyaron Se",
       "creator": "Amar Kant",
       "language": "hi",
-      "original_title": "इन्हीं हथियारों से"
+      "original_title": "इन्हीं हथियारों से",
+      "slug": "inhin-hathiyaron-se-kant"
     },
     {
       "year": 2006,
       "title": "Sanshyatma",
       "creator": "Gyanendrapati",
       "language": "hi",
-      "original_title": "संशयात्मा"
+      "original_title": "संशयात्मा",
+      "slug": "sanshyatma"
     },
     {
       "year": 2005,
       "title": "Kyap",
       "creator": "Manohar Shyam Joshi",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "kyap"
     },
     {
       "year": 2004,
       "title": "Dushchakra Mein Srista",
       "creator": "Viren Dangwal",
       "language": "hi",
-      "original_title": "दुष्चक्र में सृष्टा"
+      "original_title": "दुष्चक्र में सृष्टा",
+      "slug": "dushchakra-mein-srista"
     },
     {
       "year": 2003,
@@ -179,7 +199,8 @@
       "title": "Do Panktiyon Ke Beech",
       "creator": "Rajesh Joshi",
       "language": "hi",
-      "original_title": "दो पंक्तियों के बीच"
+      "original_title": "दो पंक्तियों के बीच",
+      "slug": "do-panktiyon-ke-beech"
     },
     {
       "year": 2001,
@@ -196,14 +217,16 @@
       "title": "Hum Jo Dekhte Hain",
       "creator": "Manglesh Dabral",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "hum-jo-dekhte-hain"
     },
     {
       "year": 1999,
       "title": "Deewar Main Ek Khirkee Rahathi Thi",
       "creator": "Vinod Kumar Shukla",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "deewar-main-ek-khirkee-rahathi-thi"
     },
     {
       "year": 1998,
@@ -211,14 +234,16 @@
       "creator": "Arun Kamal",
       "language": "hi",
       "original_title": "नये इलाके में",
-      "check": true
+      "check": true,
+      "slug": "naye-ilake-mein"
     },
     {
       "year": 1997,
       "title": "Anubhav Ke Aakash Mein Chand",
       "creator": "Leeladhar Jagudi",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "anubhav-ke-aakash-mein-chand"
     },
     {
       "year": 1996,
@@ -234,7 +259,8 @@
       "title": "Koi Doosra Nahin",
       "creator": "Kunwar Narayan",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "koi-doosra-nahin"
     },
     {
       "year": 1994,
@@ -266,28 +292,32 @@
       "title": "Main Vaqt Ke Hun Samne",
       "creator": "Girija Kumar Mathur",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "main-vaqt-ke-hun-samne"
     },
     {
       "year": 1990,
       "title": "Neela Chand",
       "creator": "Shiv Prasaad Singh",
       "language": "hi",
-      "original_title": "नीला चाँद"
+      "original_title": "नीला चाँद",
+      "slug": "neela-chand"
     },
     {
       "year": 1989,
       "title": "Akaal Mein Saras",
       "creator": "Kedarnath Singh",
       "language": "hi",
-      "original_title": "अकाल में सारस"
+      "original_title": "अकाल में सारस",
+      "slug": "akaal-mein-saras"
     },
     {
       "year": 1988,
       "title": "Aranya",
       "creator": "Naresh Mehta",
       "language": "hi",
-      "original_title": "अरण्या"
+      "original_title": "अरण्या",
+      "slug": "aranya"
     },
     {
       "year": 1987,
@@ -318,35 +348,40 @@
       "title": "Log Bhool Gaye Hain",
       "creator": "Raghuvir Sahay",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "log-bhool-gaye-hain"
     },
     {
       "year": 1983,
       "title": "Khutiyon Par Tange Log",
       "creator": "Sarveshwar Dayal Saxena",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "khutiyon-par-tange-log"
     },
     {
       "year": 1982,
       "title": "Viklang Shraddha Ka Daur",
       "creator": "Harishankar Parsai",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "viklang-shraddha-ka-daur"
     },
     {
       "year": 1981,
       "title": "Tap Ke Taye Hue Din",
       "creator": "Trilochan Shastri",
       "language": "hi",
-      "original_title": "ताप के ताए हुए दिन"
+      "original_title": "ताप के ताए हुए दिन",
+      "slug": "tap-ke-taye-hue-din"
     },
     {
       "year": 1980,
       "title": "Zindaginama - Zinda Rukh",
       "creator": "Krishna Sobti",
       "language": "hi",
-      "original_title": "ज़िन्दगीनामा - ज़िन्दा रुख़"
+      "original_title": "ज़िन्दगीनामा - ज़िन्दा रुख़",
+      "slug": "zindaginama-zinda-rukh"
     },
     {
       "year": 1979,
@@ -362,21 +397,24 @@
       "title": "Utna Vah Suraj Hai",
       "creator": "Bharat Bhushan Agarwal",
       "language": "hi",
-      "original_title": "उतना वह सूरज है"
+      "original_title": "उतना वह सूरज है",
+      "slug": "utna-vah-suraj-hai"
     },
     {
       "year": 1977,
       "title": "Chuka Bhi Hun Nahin Main",
       "creator": "Shamsher Bahadur Singh",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "chuka-bhi-hun-nahin-main"
     },
     {
       "year": 1976,
       "title": "Meri Teri Uski Baat",
       "creator": "Yashpal",
       "language": "hi",
-      "original_title": "मेरी तेरी उसकी बात"
+      "original_title": "मेरी तेरी उसकी बात",
+      "slug": "meri-teri-uski-baat"
     },
     {
       "year": 1975,
@@ -392,7 +430,8 @@
       "title": "Mitti Ki Baraat",
       "creator": "Shivmangal Singh 'Suman'",
       "language": "hi",
-      "original_title": "मिट्टी की बारात"
+      "original_title": "मिट्टी की बारात",
+      "slug": "mitti-ki-baraat"
     },
     {
       "year": 1973,
@@ -407,7 +446,8 @@
       "title": "Buni Huyi Rassi",
       "creator": "Bhawani Prasad Mishra",
       "language": "hi",
-      "original_title": "बुनी हुई रस्सी"
+      "original_title": "बुनी हुई रस्सी",
+      "slug": "buni-huyi-rassi"
     },
     {
       "year": 1971,
@@ -455,7 +495,8 @@
       "title": "Muktibodh",
       "creator": "Jainendra Kumar",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "muktibodh"
     },
     {
       "year": 1965,
@@ -470,14 +511,16 @@
       "title": "Angan Ke Par Dwar",
       "creator": "Agyeya",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "angan-ke-par-dwar"
     },
     {
       "year": 1963,
       "title": "Premchand: Kalam Ka Sipahi",
       "creator": "Amrit Rai",
       "language": "hi",
-      "original_title": "प्रेमचंद: कलम का सिपाही"
+      "original_title": "प्रेमचंद: कलम का सिपाही",
+      "slug": "premchand-kalam-ka-sipahi"
     },
     {
       "year": 1961,
@@ -493,7 +536,8 @@
       "title": "Kala aur Budha Chand",
       "creator": "Sumitranandan Pant",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "kala-aur-budha-chand"
     },
     {
       "year": 1959,
@@ -501,35 +545,40 @@
       "creator": "Ramdhari Singh 'Dinkar'",
       "language": "hi",
       "original_title": "संस्कृति के चार अध्याय",
-      "check": true
+      "check": true,
+      "slug": "sanskriti-ke-char-adhyay"
     },
     {
       "year": 1958,
       "title": "Madhya Asia Ka Itihas",
       "creator": "Rahul Sankrityayan",
       "language": "hi",
-      "original_title": "मध्य एशिया का इतिहास"
+      "original_title": "मध्य एशिया का इतिहास",
+      "slug": "madhya-asia-ka-itihas"
     },
     {
       "year": 1957,
       "title": "Bauddha Dharma Darshan",
       "creator": "Acharya Narendra Dev",
       "language": "hi",
-      "original_title": "बुद्ध धर्म–दर्शन"
+      "original_title": "बुद्ध धर्म–दर्शन",
+      "slug": "bauddha-dharma-darshan"
     },
     {
       "year": 1956,
       "title": "Padmavat Sanjivani Vyakhya",
       "creator": "Vasudev Sharan Agarwal",
       "language": "hi",
-      "original_title": "पद्मावत : संजीवनी व्याख्या"
+      "original_title": "पद्मावत : संजीवनी व्याख्या",
+      "slug": "padmavat-sanjivani-vyakhya"
     },
     {
       "year": 1955,
       "title": "Him Tarangini",
       "creator": "Makhanlal Chaturvedi",
       "language": "hi",
-      "check": true
+      "check": true,
+      "slug": "him-tarangini"
     }
   ]
 }

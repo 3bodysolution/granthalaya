@@ -131,7 +131,8 @@
       "title": "War and Peace",
       "creator": "Leo Tolstoy",
       "language": "ru",
-      "note": "Five families during Napoleon's invasion of Russia"
+      "note": "Five families during Napoleon's invasion of Russia",
+      "slug": "war-and-peace"
     },
     {
       "year": 1878,
@@ -234,7 +235,8 @@
       "title": "Snow Country",
       "creator": "Yasunari Kawabata",
       "language": "ja",
-      "note": "A Tokyo man visits a geisha at a mountain hot spring"
+      "note": "A Tokyo man visits a geisha at a mountain hot spring",
+      "slug": "snow-country"
     },
     {
       "year": 1949,
@@ -303,7 +305,8 @@
       "title": "The Master and Margarita",
       "creator": "Mikhail Bulgakov",
       "language": "ru",
-      "note": "The devil visits Moscow, written in the 1930s and published later"
+      "note": "The devil visits Moscow, written in the 1930s and published later",
+      "slug": "the-master-and-margarita"
     },
     {
       "year": 1981,

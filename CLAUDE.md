@@ -49,6 +49,7 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - Colours: the accent `--lat` is peacock teal (#0F6A66 by day, #6CC9BF by night). Books use `--book` (coffee), films and TV `--sky`, essays `--moss`. Teal is for actions; filters and details use flat grey chips (`.gchip`). No orange accents.
 - **Privacy first:** every new table gets row level security and explicit grants in `supabase/schema.sql` (this project doesn't expose new tables automatically). Private accounts, "Only me" entries and blocks must hold in the database, not just in the page.
 - Never ask for or handle passwords, keys or tokens in the chat. They go in Vercel and `.env` only.
+- **Never run `npm run db:apply` (or any script that changes the live database's structure) unless Sarthak asks for it in that same message.** Always run it with `--dry` first, show the output, and wait for his yes before the real run. A yes to an earlier run doesn't carry over to the next.
 - Never add Claude as a co-author on commits.
 
 ## Commands

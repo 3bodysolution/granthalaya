@@ -9,7 +9,7 @@ import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
 import { olBook, gbBook, bookKey, bookHref, type BookPage } from '../../lib/catalog/books';
 import { slug } from '../../lib/catalog/fetch';
-import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, type TitleRow } from '../../lib/catalog/onsite';
+import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, LIST_SOURCE, type TitleRow } from '../../lib/catalog/onsite';
 import { aboutHours } from '../../lib/data';
 import { site as siteConfig } from '../../data/site';
 export const prerender = false;
@@ -29,7 +29,7 @@ if ('ol' in k) {
 } else if (sb) {
   // a book in our catalogue by its address name (added by hand, or before it had an Open Library key)
   const row = await rowBySlug(sb, 'book', k.slug);
-  if (row && !row.ol_key && !/books\.google\./.test(row.link ?? '')) {
+  if (row && !row.ol_key && row.source !== LIST_SOURCE && !/books\.google\./.test(row.link ?? '')) {
     const ol = await healBook(row);
     if (ol) return Astro.redirect(bookHref(ol, row.title), 302);
   }
@@ -37,7 +37,7 @@ if ('ol' in k) {
   if (row && home && home !== `/book/${k.slug}/`) return Astro.redirect(home, 301);
   if (row) {
     rows = [row];
-    b = { kind: 'book', key: row.slug, title: row.title, authors: row.creator ? [{ name: row.creator }] : [], year: row.year ?? undefined, languages: [], subjects: [], description: '', cover: row.cover_url ?? undefined, publishers: [], source: 'Open Library', sourceLink: '' };
+    b = { kind: 'book', key: row.slug, title: row.title, subtitle: row.original_title ?? undefined, authors: row.creator ? [{ name: row.creator }] : [], year: row.year ?? undefined, languages: [], subjects: [], description: row.note ?? '', cover: row.cover_url ?? undefined, publishers: [], source: 'Open Library', sourceLink: '' };
   }
 }
 if (!b) { Astro.response.status = 404; return Astro.rewrite('/404'); }
@@ -58,6 +58,7 @@ const find = [
   { label: 'Find it in a library', url: `https://search.worldcat.org/search?q=${q}` },
 ].filter(Boolean) as { label: string; url: string }[];
 const tabs = [{ key: 'details', label: 'Details' }, b.subjects.length && { key: 'subjects', label: 'Subjects' }].filter(Boolean) as { key: string; label: string }[];
+const language = row?.language ? new Intl.DisplayNames(['en'], { type: 'language' }).of(row.language) : null;
 const manyEditions = (b.editions ?? 0) >= 2;
 const paras = b.description ? b.description.split(/\n{2,}/) : [];
 const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
@@ -86,6 +87,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
         <div role="tabpanel" id="book-p-details" aria-labelledby="book-t-details" class="tp">
           <dl class="facts">
             {b.year && <><dt>First published</dt><dd><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></dd></>}
+            {language && <><dt>Language</dt><dd>{language}</dd></>}
             {b.pages && <><dt>Length</dt><dd>{b.pages} pages{reading ? `, ${reading} to read` : ''}</dd></>}
             {b.languages.length > 0 && <><dt>Editions in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}
             {b.publishers.length > 0 && <><dt>Publishers</dt><dd>{b.publishers.join(', ')}</dd></>}

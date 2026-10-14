@@ -121,7 +121,10 @@ create table public.titles (
   words int check (words between 0 and 10000000),    -- essays
   cover_url text check (cover_url is null or char_length(cover_url) <= 600),
   link text check (link is null or char_length(link) <= 1000),
-  source text check (source is null or char_length(source) <= 120),
+  source text check (source is null or char_length(source) <= 120),  -- 'Granthalaya lists' = made from a prize or classics list, never looked up on Open Library
+  original_title text check (original_title is null or char_length(original_title) <= 300),  -- in its own script
+  language text check (language is null or language ~ '^[a-z]{2,3}$'),  -- ISO 639-1, else 639-3
+  note text check (note is null or char_length(note) <= 300),
   tmdb_id int,
   ol_key text,                                       -- Open Library work, like OL45883W
   trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),

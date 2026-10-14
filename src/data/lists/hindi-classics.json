@@ -25,7 +25,8 @@
       "creator": "Surdas",
       "language": "hi",
       "note": "Braj verses on the childhood of Krishna",
-      "circa": true
+      "circa": true,
+      "slug": "sursagar"
     },
     {
       "year": 1574,
@@ -53,7 +54,8 @@
       "original_title": "अंधेर नगरी",
       "creator": "Bharatendu Harishchandra",
       "language": "hi",
-      "note": "Satirical play about a kingdom without judgement"
+      "note": "Satirical play about a kingdom without judgement",
+      "slug": "andher-nagari"
     },
     {
       "year": 1882,
@@ -233,7 +235,8 @@
       "original_title": "झूठा सच",
       "creator": "Yashpal",
       "language": "hi",
-      "note": "Two part novel of Lahore and Delhi around Partition"
+      "note": "Two part novel of Lahore and Delhi around Partition",
+      "slug": "jhootha-sach"
     },
     {
       "year": 1964,
@@ -251,7 +254,8 @@
       "original_title": "अँधेरे में",
       "creator": "Gajanan Madhav Muktibodh",
       "language": "hi",
-      "note": "Long poem on conscience and the fear of the state"
+      "note": "Long poem on conscience and the fear of the state",
+      "slug": "andhere-mein"
     },
     {
       "year": 1966,
@@ -259,7 +263,8 @@
       "original_title": "आधा गाँव",
       "creator": "Rahi Masoom Raza",
       "language": "hi",
-      "note": "Novel of a Shia Muslim village in Ghazipur"
+      "note": "Novel of a Shia Muslim village in Ghazipur",
+      "slug": "aadha-gaon"
     },
     {
       "year": 1968,
@@ -305,7 +310,8 @@
       "original_title": "साये में धूप",
       "creator": "Dushyant Kumar",
       "language": "hi",
-      "note": "Ghazal collection of protest verses"
+      "note": "Ghazal collection of protest verses",
+      "slug": "saaye-mein-dhoop"
     },
     {
       "year": 1979,
@@ -343,7 +349,8 @@
       "original_title": "काशी का अस्सी",
       "creator": "Kashinath Singh",
       "language": "hi",
-      "note": "Novel of the Assi neighbourhood in Varanasi"
+      "note": "Novel of the Assi neighbourhood in Varanasi",
+      "slug": "kashi-ka-assi"
     }
   ]
 }

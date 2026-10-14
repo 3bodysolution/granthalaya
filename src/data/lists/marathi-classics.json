@@ -25,7 +25,8 @@
       "creator": "Tukaram",
       "language": "mr",
       "note": "Collected abhangas of the Varkari saint poet",
-      "circa": true
+      "circa": true,
+      "slug": "tukaram-gatha"
     },
     {
       "year": 1654,
@@ -53,7 +54,8 @@
       "original_title": "पण लक्षात कोण घेतो",
       "creator": "Hari Narayan Apte",
       "language": "mr",
-      "note": "Social novel about the lives of Maharashtrian women"
+      "note": "Social novel about the lives of Maharashtrian women",
+      "slug": "pan-lakshat-kon-gheto"
     },
     {
       "year": 1899,
@@ -61,7 +63,8 @@
       "original_title": "संगीत शारदा",
       "creator": "Govind Ballal Deval",
       "language": "mr",
-      "note": "Play against marriage of young girls to old men"
+      "note": "Play against marriage of young girls to old men",
+      "slug": "sangeet-sharada"
     },
     {
       "year": 1907,
@@ -69,7 +72,8 @@
       "original_title": "माझा प्रवास",
       "creator": "Vishnubhat Godse",
       "language": "mr",
-      "note": "Travel account of the 1857 uprising by an eyewitness"
+      "note": "Travel account of the 1857 uprising by an eyewitness",
+      "slug": "majha-pravas"
     },
     {
       "year": 1915,
@@ -77,7 +81,8 @@
       "original_title": "गीतारहस्य",
       "creator": "Bal Gangadhar Tilak",
       "language": "mr",
-      "note": "Commentary on the Gita, written in Mandalay prison"
+      "note": "Commentary on the Gita, written in Mandalay prison",
+      "slug": "gitarahasya"
     },
     {
       "year": 1919,
@@ -94,7 +99,8 @@
       "original_title": "माझी जन्मठेप",
       "creator": "V. D. Savarkar",
       "language": "mr",
-      "note": "Memoir of his years in the Andaman cellular jail"
+      "note": "Memoir of his years in the Andaman cellular jail",
+      "slug": "majhi-janmathep"
     },
     {
       "year": 1934,
@@ -121,7 +127,8 @@
       "original_title": "अमृतवेल",
       "creator": "V. S. Khandekar",
       "language": "mr",
-      "note": "Novel of a doomed love between an artist and a widow"
+      "note": "Novel of a doomed love between an artist and a widow",
+      "slug": "amrutvel"
     },
     {
       "year": 1942,
@@ -129,7 +136,8 @@
       "original_title": "विशाखा",
       "creator": "Kusumagraj",
       "language": "mr",
-      "note": "Poetry collection with the poem Kranticha Jaijaykar"
+      "note": "Poetry collection with the poem Kranticha Jaijaykar",
+      "slug": "vishakha"
     },
     {
       "year": 1947,
@@ -156,7 +164,8 @@
       "original_title": "बनगरवाडी",
       "creator": "Vyankatesh Madgulkar",
       "language": "mr",
-      "note": "Novel about a shepherd village and its new schoolteacher"
+      "note": "Novel about a shepherd village and its new schoolteacher",
+      "slug": "banagarwadi"
     },
     {
       "year": 1958,
@@ -164,7 +173,8 @@
       "original_title": "बटाट्याची चाळ",
       "creator": "P. L. Deshpande",
       "language": "mr",
-      "note": "Humorous sketches of life in a Mumbai tenement"
+      "note": "Humorous sketches of life in a Mumbai tenement",
+      "slug": "batatyachi-chal"
     },
     {
       "year": 1959,
@@ -181,7 +191,8 @@
       "original_title": "स्वामी",
       "creator": "Ranjit Desai",
       "language": "mr",
-      "note": "Novel about Peshwa Madhavrao and his wife Ramabai"
+      "note": "Novel about Peshwa Madhavrao and his wife Ramabai",
+      "slug": "swami"
     },
     {
       "year": 1963,
@@ -199,7 +210,8 @@
       "original_title": "असा मी असामी",
       "creator": "P. L. Deshpande",
       "language": "mr",
-      "note": "Comic account of a clerk's life in Mumbai"
+      "note": "Comic account of a clerk's life in Mumbai",
+      "slug": "asa-mi-asami"
     },
     {
       "year": 1967,
@@ -217,7 +229,8 @@
       "original_title": "शांतता! कोर्ट चालू आहे",
       "creator": "Vijay Tendulkar",
       "language": "mr",
-      "note": "Play set in a mock trial among amateur actors"
+      "note": "Play set in a mock trial among amateur actors",
+      "slug": "shantata-court-chalu-aahe"
     },
     {
       "year": 1970,
@@ -225,7 +238,8 @@
       "original_title": "नटसम्राट",
       "creator": "V. V. Shirwadkar",
       "language": "mr",
-      "note": "Play about an ageing stage actor and his children"
+      "note": "Play about an ageing stage actor and his children",
+      "slug": "natsamrat"
     },
     {
       "year": 1972,
@@ -271,7 +285,8 @@
       "original_title": "छावा",
       "creator": "Shivaji Sawant",
       "language": "mr",
-      "note": "Novel about Sambhaji, son of Shivaji"
+      "note": "Novel about Sambhaji, son of Shivaji",
+      "slug": "chhava"
     },
     {
       "year": 1980,
