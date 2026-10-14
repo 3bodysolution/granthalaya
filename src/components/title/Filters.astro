@@ -1,6 +1,7 @@
 ---
 // The filter bar on Films and Books: each choice reloads the list, and the address keeps them all.
-interface Props { fields: { name: string; label: string; value: string; options: [string, string][] }[]; keep?: Record<string, string> }
+// A field with `go` is a shortcut instead: its options are page addresses, and choosing one opens that page.
+interface Props { fields: { name: string; label: string; value: string; options: [string, string][]; go?: boolean }[]; keep?: Record<string, string> }
 const { fields, keep = {} } = Astro.props;
 ---
 <form class="filters" method="get" data-filters>
@@ -8,7 +9,7 @@ const { fields, keep = {} } = Astro.props;
   {fields.map((f) => (
     <label class:list={['fl', f.value && 'on']}>
       <span class="sr">{f.label}</span>
-      <select name={f.name} onchange="this.form.requestSubmit()">
+      <select name={f.go ? undefined : f.name} data-go={f.go ? '' : undefined} onchange={f.go ? "if (this.value) location.href = this.value" : "this.form.requestSubmit()"}>
         {f.options.map(([v, t]) => <option value={v} selected={v === f.value}>{t}</option>)}
       </select>
     </label>
@@ -35,7 +36,7 @@ const { fields, keep = {} } = Astro.props;
   document.addEventListener('submit', (ev) => {
     const f = ev.target as HTMLFormElement;
     if (!f.matches('[data-filters]')) return;
-    f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input[type=hidden]').forEach((el) => { el.disabled = !el.value; });
+    f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select:not([data-go]), input[type=hidden]').forEach((el) => { el.disabled = !el.value; });
     setTimeout(() => f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input').forEach((el) => (el.disabled = false)), 0);
   }, true);
 </script>

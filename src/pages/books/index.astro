@@ -59,6 +59,8 @@ const fields = [
   year
     ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
     : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+  // a shortcut to the prize and classics lists, not a filter on this page
+  { name: 'list', label: 'Prizes and classics', value: '', go: true, options: [['', 'Prizes and classics'], ...listsOfKind('book').map((l) => [listHref(l.slug), l.title] as [string, string])] },
   { name: 'sort', label: 'Order', value: sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][] },
 ];
 ---
