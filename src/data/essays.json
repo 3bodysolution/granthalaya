@@ -3,41 +3,774 @@
     "name": "Read Something Great",
     "url": "https://readsomethinggreat.com"
   },
-  "items": [
+  "themes": [
     {
-      "title": "Personal Renewal",
-      "author": "John W. Gardner",
-      "publication": null,
-      "year": null,
-      "link": "https://www.pbs.org/johngardner/sections/writings_speech_1.html"
+      "name": "Found via Read Something Great",
+      "items": [
+        {
+          "title": "Personal Renewal",
+          "author": "John W. Gardner",
+          "publication": null,
+          "year": null,
+          "link": "https://www.pbs.org/johngardner/sections/writings_speech_1.html",
+          "note": "Speech by the founder of Common Cause.",
+          "via": "Read Something Great"
+        },
+        {
+          "title": "Andrew Chen on marketplaces",
+          "author": "Andrew Chen",
+          "publication": "Stripe Atlas guide",
+          "year": null,
+          "link": "https://stripe.com/es-us/atlas/guides/andrew-chen-marketplaces",
+          "note": "Guide to starting a two-sided marketplace.",
+          "via": "Read Something Great"
+        },
+        {
+          "title": "The Epic Story of Container Shipping",
+          "author": "Venkatesh Rao",
+          "publication": "Ribbonfarm",
+          "year": 2009,
+          "link": "https://ribbonfarm.com/2009/07/07/the-epic-story-of-container-shipping/",
+          "note": "Posted 7 July 2009; the site lists the author as Venkat.",
+          "via": "Read Something Great"
+        },
+        {
+          "title": "The illusion of moral decline",
+          "author": "Adam Mastroianni",
+          "publication": "Experimental History",
+          "year": null,
+          "link": "https://www.experimental-history.com/p/the-illusion-of-moral-decline",
+          "note": "Argues people wrongly think morals are worsening.",
+          "via": "Read Something Great"
+        },
+        {
+          "title": "In Praise of the Gods",
+          "author": "Simon Sarris",
+          "publication": "Simon Sarris (Substack)",
+          "year": null,
+          "link": "https://simonsarris.substack.com/p/in-praise-of-the-gods",
+          "note": "Essay on the gods and the modern world.",
+          "via": "Read Something Great"
+        }
+      ]
     },
     {
-      "title": "Andrew Chen on marketplaces",
-      "author": "Andrew Chen",
-      "publication": null,
-      "year": null,
-      "link": "https://stripe.com/es-us/atlas/guides/andrew-chen-marketplaces"
+      "name": "Writing and reading",
+      "items": [
+        {
+          "title": "Why I Write",
+          "author": "George Orwell",
+          "publication": "Gangrel",
+          "year": 1946,
+          "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/why-i-write/",
+          "note": "Orwell lists four motives for writing and his own history."
+        },
+        {
+          "title": "Politics and the English Language",
+          "author": "George Orwell",
+          "publication": "Horizon",
+          "year": 1946,
+          "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/",
+          "note": "Six rules for clear writing, with examples of bad prose."
+        },
+        {
+          "title": "Of Studies",
+          "author": "Francis Bacon",
+          "publication": "Essays",
+          "year": 1625,
+          "link": "https://www.gutenberg.org/ebooks/575",
+          "note": "Short essay on what study is for; full Essays at Gutenberg."
+        },
+        {
+          "title": "Of Books",
+          "author": "Michel de Montaigne",
+          "publication": "Essays",
+          "year": 1580,
+          "link": "https://www.gutenberg.org/ebooks/3600",
+          "note": "Montaigne on his reading habits; Cotton translation, essay II.10."
+        },
+        {
+          "title": "The Age of the Essay",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2004,
+          "link": "https://paulgraham.com/essay.html",
+          "note": "Traces the essay from school exercise to a way of finding things out."
+        },
+        {
+          "title": "Putting Ideas into Words",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2012,
+          "link": "https://paulgraham.com/words.html",
+          "note": "On writing as the way to find out what you think."
+        },
+        {
+          "title": "The Philosophy of Composition",
+          "author": "Edgar Allan Poe",
+          "publication": "Graham's Magazine",
+          "year": 1846,
+          "link": "https://en.wikisource.org/wiki/The_Philosophy_of_Composition",
+          "note": "Poe describes writing \"The Raven\" step by step."
+        },
+        {
+          "title": "A Defence of Poetry",
+          "author": "Percy Bysshe Shelley",
+          "publication": "published posthumously",
+          "year": 1840,
+          "link": "https://www.poetryfoundation.org/articles/69388/a-defence-of-poetry",
+          "note": "Written 1821; includes the line about poets as legislators."
+        },
+        {
+          "title": "Tradition and the Individual Talent",
+          "author": "T. S. Eliot",
+          "publication": "The Egoist",
+          "year": 1919,
+          "link": "https://www.poetryfoundation.org/articles/69400/tradition-and-the-individual-talent",
+          "note": "Eliot argues a poet is judged against the whole tradition."
+        },
+        {
+          "title": "On the Pleasure of Hating",
+          "author": "William Hazlitt",
+          "publication": "The Plain Speaker",
+          "year": 1826,
+          "link": "https://en.wikisource.org/wiki/On_the_Pleasure_of_Hating",
+          "note": "Hazlitt examines his own capacity for hatred."
+        },
+        {
+          "title": "Fenimore Cooper's Literary Offenses",
+          "author": "Mark Twain",
+          "publication": "North American Review",
+          "year": 1895,
+          "link": "https://en.wikisource.org/wiki/Fenimore_Cooper%27s_Literary_Offenses",
+          "note": "Twain lists 18 rules Cooper's novels break."
+        }
+      ]
     },
     {
-      "title": "The Epic Story of Container Shipping",
-      "author": "Venkat",
-      "publication": null,
-      "year": null,
-      "link": "https://ribbonfarm.com/2009/07/07/the-epic-story-of-container-shipping/"
+      "name": "Living, attention and nature",
+      "items": [
+        {
+          "title": "Self-Reliance",
+          "author": "Ralph Waldo Emerson",
+          "publication": "Essays: First Series",
+          "year": 1841,
+          "link": "https://en.wikisource.org/wiki/Essays:_First_Series/Self-Reliance",
+          "note": "Contains \"a foolish consistency is the hobgoblin of little minds\"."
+        },
+        {
+          "title": "Nature",
+          "author": "Ralph Waldo Emerson",
+          "publication": "self-published",
+          "year": 1836,
+          "link": "https://en.wikisource.org/wiki/Nature_(Emerson)",
+          "note": "Founding text of American Transcendentalism."
+        },
+        {
+          "title": "The American Scholar",
+          "author": "Ralph Waldo Emerson",
+          "publication": "Harvard address",
+          "year": 1837,
+          "link": "https://en.wikisource.org/wiki/The_American_Scholar",
+          "note": "Phi Beta Kappa address on independent thinking."
+        },
+        {
+          "title": "Life Without Principle",
+          "author": "Henry David Thoreau",
+          "publication": "The Atlantic",
+          "year": 1863,
+          "link": "https://en.wikisource.org/wiki/Life_Without_Principle",
+          "note": "Thoreau on work, money and how to spend a life."
+        },
+        {
+          "title": "Some Thoughts on the Common Toad",
+          "author": "George Orwell",
+          "publication": "Tribune",
+          "year": 1946,
+          "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/some-thoughts-on-the-common-toad/",
+          "note": "Orwell on spring and noticing nature in London."
+        },
+        {
+          "title": "The Book of Tea",
+          "author": "Okakura Kakuzo",
+          "publication": "Putnam",
+          "year": 1906,
+          "link": "https://www.gutenberg.org/ebooks/769",
+          "note": "Short book on tea and Japanese aesthetics, written in English."
+        },
+        {
+          "title": "Why Procrastinators Procrastinate",
+          "author": "Tim Urban",
+          "publication": "Wait But Why",
+          "year": 2013,
+          "link": "https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html",
+          "note": "Illustrated account of the Instant Gratification Monkey."
+        }
+      ]
     },
     {
-      "title": "The illusion of moral decline",
-      "author": "Adam Mastroianni",
-      "publication": null,
-      "year": null,
-      "link": "https://www.experimental-history.com/p/the-illusion-of-moral-decline"
+      "name": "Work, craft and ideas",
+      "items": [
+        {
+          "title": "How to Do Great Work",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2023,
+          "link": "https://paulgraham.com/greatwork.html",
+          "note": "Long guide to choosing and pursuing ambitious work."
+        },
+        {
+          "title": "Do Things That Don't Scale",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2013,
+          "link": "https://paulgraham.com/ds.html",
+          "note": "Advice to startup founders on early manual effort."
+        },
+        {
+          "title": "How to Do What You Love",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2006,
+          "link": "https://paulgraham.com/love.html",
+          "note": "On the trouble with finding work you enjoy."
+        },
+        {
+          "title": "Hackers and Painters",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2003,
+          "link": "https://paulgraham.com/hp.html",
+          "note": "Compares programmers to painters, as makers."
+        },
+        {
+          "title": "Maker's Schedule, Manager's Schedule",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2009,
+          "link": "https://paulgraham.com/makersschedule.html",
+          "note": "Why meetings cost makers more than managers."
+        },
+        {
+          "title": "Beating the Averages",
+          "author": "Paul Graham",
+          "publication": "paulgraham.com",
+          "year": 2001,
+          "link": "https://paulgraham.com/avg.html",
+          "note": "On using Lisp for a startup and why it helped."
+        },
+        {
+          "title": "You and Your Research",
+          "author": "Richard Hamming",
+          "publication": "Bell Communications Research talk",
+          "year": 1986,
+          "link": "https://www.cs.virginia.edu/~robins/YouAndYourResearch.html",
+          "note": "Hamming on why some scientists do important work."
+        },
+        {
+          "title": "A Mathematician's Lament",
+          "author": "Paul Lockhart",
+          "publication": "self-published, later a book",
+          "year": 2002,
+          "link": "https://www.maa.org/external_archive/devlin/LockhartsLament.pdf",
+          "note": "Argues school mathematics hides what mathematics is."
+        },
+        {
+          "title": "1,000 True Fans",
+          "author": "Kevin Kelly",
+          "publication": "The Technium",
+          "year": 2008,
+          "link": "https://kk.org/thetechnium/1000-true-fans/",
+          "note": "Argues a creator can live on a thousand devoted fans."
+        },
+        {
+          "title": "The Cathedral and the Bazaar",
+          "author": "Eric S. Raymond",
+          "publication": "self-published",
+          "year": 1997,
+          "link": "http://www.catb.org/~esr/writings/cathedral-bazaar/cathedral-bazaar/",
+          "note": "Compares two ways of building open source software."
+        },
+        {
+          "title": "The Rise of \"Worse Is Better\"",
+          "author": "Richard P. Gabriel",
+          "publication": "Lisp: Good News, Bad News",
+          "year": 1991,
+          "link": "https://www.dreamsongs.com/WIB.html",
+          "note": "Argues simple software often beats the more correct kind."
+        },
+        {
+          "title": "Reflections on Trusting Trust",
+          "author": "Ken Thompson",
+          "publication": "Communications of the ACM",
+          "year": 1984,
+          "link": "https://www.cs.cmu.edu/~rdriley/487/papers/Thompson_1984_ReflectionsonTrustingTrust.pdf",
+          "note": "Turing Award lecture on a hidden compiler backdoor."
+        },
+        {
+          "title": "The Gervais Principle",
+          "author": "Venkatesh Rao",
+          "publication": "Ribbonfarm",
+          "year": 2009,
+          "link": "https://ribbonfarm.com/2009/10/07/the-gervais-principle-or-the-office-according-to-the-office/",
+          "note": "Reads office life through the TV show The Office."
+        },
+        {
+          "title": "Cargo Cult Science",
+          "author": "Richard Feynman",
+          "publication": "Caltech commencement address",
+          "year": 1974,
+          "link": "https://calteches.library.caltech.edu/51/2/CargoCult.htm",
+          "note": "Feynman on scientific integrity and fooling yourself."
+        },
+        {
+          "title": "As We May Think",
+          "author": "Vannevar Bush",
+          "publication": "The Atlantic",
+          "year": 1945,
+          "link": "https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/",
+          "note": "Describes the \"memex\", an early idea of linked information."
+        },
+        {
+          "title": "Computing Machinery and Intelligence",
+          "author": "Alan Turing",
+          "publication": "Mind",
+          "year": 1950,
+          "link": "https://academic.oup.com/mind/article/LIX/236/433/986238",
+          "note": "Poses \"Can machines think?\" and the imitation game."
+        },
+        {
+          "title": "The Tragedy of the Commons",
+          "author": "Garrett Hardin",
+          "publication": "Science",
+          "year": 1968,
+          "link": "https://www.science.org/doi/10.1126/science.162.3859.1243",
+          "note": "Shared resources get overused when each user gains alone."
+        },
+        {
+          "title": "Meditations on Moloch",
+          "author": "Scott Alexander",
+          "publication": "Slate Star Codex",
+          "year": 2014,
+          "link": "https://slatestarcodex.com/2014/07/30/meditations-on-moloch/",
+          "note": "On competition forcing outcomes nobody chose."
+        },
+        {
+          "title": "I Can Tolerate Anything Except the Outgroup",
+          "author": "Scott Alexander",
+          "publication": "Slate Star Codex",
+          "year": 2014,
+          "link": "https://slatestarcodex.com/2014/09/30/i-can-tolerate-anything-except-the-outgroup/",
+          "note": "Argues tribal dislike targets the nearest group."
+        },
+        {
+          "title": "Slow Ideas",
+          "author": "Atul Gawande",
+          "publication": "The New Yorker",
+          "year": 2013,
+          "link": "https://www.newyorker.com/magazine/2013/07/29/slow-ideas",
+          "note": "Why some medical practices spread slowly and others fast."
+        }
+      ]
     },
     {
-      "title": "In Praise of the Gods",
-      "author": "Simon Sarris",
-      "publication": null,
-      "year": null,
-      "link": "https://simonsarris.substack.com/p/in-praise-of-the-gods"
+      "name": "Freedom, justice and conscience",
+      "items": [
+        {
+          "title": "Letter from Birmingham Jail",
+          "author": "Martin Luther King Jr.",
+          "publication": "written in jail, widely printed",
+          "year": 1963,
+          "link": "https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html",
+          "note": "Reply to clergymen who called his protests untimely."
+        },
+        {
+          "title": "Civil Disobedience",
+          "author": "Henry David Thoreau",
+          "publication": "Aesthetic Papers (as \"Resistance to Civil Government\")",
+          "year": 1849,
+          "link": "https://en.wikisource.org/wiki/Civil_Disobedience_(Thoreau)",
+          "note": "Thoreau explains why he refused to pay a tax."
+        },
+        {
+          "title": "A Modest Proposal",
+          "author": "Jonathan Swift",
+          "publication": "pamphlet",
+          "year": 1729,
+          "link": "https://www.gutenberg.org/ebooks/1080",
+          "note": "Satire proposing the Irish poor sell their children as food."
+        },
+        {
+          "title": "Shooting an Elephant",
+          "author": "George Orwell",
+          "publication": "New Writing",
+          "year": 1936,
+          "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/shooting-an-elephant/",
+          "note": "Orwell as a colonial policeman in Burma."
+        },
+        {
+          "title": "A Hanging",
+          "author": "George Orwell",
+          "publication": "The Adelphi",
+          "year": 1931,
+          "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/a-hanging/",
+          "note": "Orwell describes witnessing an execution in Burma."
+        },
+        {
+          "title": "Reflections on Gandhi",
+          "author": "George Orwell",
+          "publication": "Partisan Review",
+          "year": 1949,
+          "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/reflections-on-gandhi/",
+          "note": "Orwell weighs Gandhi's saintliness against his politics."
+        },
+        {
+          "title": "Why Socialism?",
+          "author": "Albert Einstein",
+          "publication": "Monthly Review",
+          "year": 1949,
+          "link": "https://monthlyreview.org/2009/05/01/why-socialism/",
+          "note": "Einstein's essay on the economy and individual freedom."
+        },
+        {
+          "title": "The Case for Reparations",
+          "author": "Ta-Nehisi Coates",
+          "publication": "The Atlantic",
+          "year": 2014,
+          "link": "https://www.theatlantic.com/magazine/archive/2014/06/the-case-for-reparations/361631/",
+          "note": "Traces housing discrimination in the US from the 1930s on."
+        },
+        {
+          "title": "What to the Slave Is the Fourth of July?",
+          "author": "Frederick Douglass",
+          "publication": "speech in Rochester",
+          "year": 1852,
+          "link": "https://teachingamericanhistory.org/document/what-to-the-slave-is-the-fourth-of-july/",
+          "note": "Douglass addresses a July 4 audience about slavery."
+        },
+        {
+          "title": "Of Our Spiritual Strivings",
+          "author": "W. E. B. Du Bois",
+          "publication": "The Souls of Black Folk",
+          "year": 1903,
+          "link": "https://www.gutenberg.org/ebooks/408",
+          "note": "Opening chapter; introduces \"double consciousness\". Full book at Gutenberg."
+        },
+        {
+          "title": "The Soul of Man under Socialism",
+          "author": "Oscar Wilde",
+          "publication": "The Fortnightly Review",
+          "year": 1891,
+          "link": "https://www.gutenberg.org/ebooks/1017",
+          "note": "Wilde argues socialism would free people to develop individually."
+        },
+        {
+          "title": "Why I Am Not a Christian",
+          "author": "Bertrand Russell",
+          "publication": "lecture, London",
+          "year": 1927,
+          "link": "https://users.drew.edu/jlenz/whynot.html",
+          "note": "Russell's argument against belief and the church."
+        },
+        {
+          "title": "The Subjection of Women",
+          "author": "John Stuart Mill",
+          "publication": "book-length essay",
+          "year": 1869,
+          "link": "https://www.gutenberg.org/ebooks/27083",
+          "note": "Mill argues for legal equality of the sexes."
+        },
+        {
+          "title": "A Room of One's Own",
+          "author": "Virginia Woolf",
+          "publication": "book-length essay",
+          "year": 1929,
+          "link": "https://gutenberg.net.au/ebooks02/0200791h.html",
+          "note": "Woolf on women, money and writing; public domain in Australia."
+        },
+        {
+          "title": "The Will to Believe",
+          "author": "William James",
+          "publication": "The New World",
+          "year": 1896,
+          "link": "https://en.wikisource.org/wiki/The_Will_to_Believe",
+          "note": "James argues belief can be justified without proof."
+        }
+      ]
+    },
+    {
+      "name": "India, in English",
+      "items": [
+        {
+          "title": "Sadhana: The Realisation of Life",
+          "author": "Rabindranath Tagore",
+          "publication": "Macmillan",
+          "year": 1913,
+          "link": "https://www.gutenberg.org/ebooks/2549",
+          "note": "Lectures on the self and the infinite, given at Harvard."
+        },
+        {
+          "title": "Why I Am an Atheist",
+          "author": "Bhagat Singh",
+          "publication": "written in prison",
+          "year": 1930,
+          "link": "https://www.marxists.org/archive/bhagat-singh/1930/10/05.htm",
+          "note": "Written in Lahore jail, October 1930."
+        }
+      ]
+    },
+    {
+      "name": "Fiction, craft and storytelling",
+      "items": [
+        {
+          "title": "A Chapter on Dreams",
+          "author": "Robert Louis Stevenson",
+          "publication": "Scribner's Magazine",
+          "year": 1888,
+          "link": "https://www.gutenberg.org/ebooks/614",
+          "note": "How his stories came to him through dreams and night visions."
+        },
+        {
+          "title": "Gossip on Romance",
+          "author": "Robert Louis Stevenson",
+          "publication": "Longman's Magazine",
+          "year": 1882,
+          "link": "https://www.gutenberg.org/ebooks/381",
+          "note": "Argues that romance is the oldest and most lasting form of story."
+        },
+        {
+          "title": "A Humble Remonstrance",
+          "author": "Robert Louis Stevenson",
+          "publication": "Longman's Magazine",
+          "year": 1884,
+          "link": "https://www.gutenberg.org/ebooks/381",
+          "note": "A reply to Henry James defending romance against the psychological novel."
+        },
+        {
+          "title": "A Note on Realism",
+          "author": "Robert Louis Stevenson",
+          "publication": "Essays of the Art of Writing",
+          "year": 1883,
+          "link": "https://www.gutenberg.org/ebooks/492",
+          "note": "Argues realism in fiction depends on selection and form."
+        },
+        {
+          "title": "Books Which Have Influenced Me",
+          "author": "Robert Louis Stevenson",
+          "publication": "Essays of the Art of Writing",
+          "year": 1887,
+          "link": "https://www.gutenberg.org/ebooks/492",
+          "note": "Stevenson lists the books that shaped his own style."
+        },
+        {
+          "title": "The Decay of Lying",
+          "author": "Oscar Wilde",
+          "publication": "The Nineteenth Century",
+          "year": 1889,
+          "link": "https://www.gutenberg.org/ebooks/887",
+          "note": "A dialogue arguing that art, not life, should model fiction."
+        },
+        {
+          "title": "The Critic as Artist",
+          "author": "Oscar Wilde",
+          "publication": "The Nineteenth Century",
+          "year": 1890,
+          "link": "https://www.gutenberg.org/ebooks/887",
+          "note": "A dialogue treating criticism as a creative art."
+        },
+        {
+          "title": "How to Tell a Story",
+          "author": "Mark Twain",
+          "publication": "How to Tell a Story and Other Essays",
+          "year": 1895,
+          "link": "https://www.gutenberg.org/ebooks/142",
+          "note": "Twain on the humour and timing of a told tale."
+        },
+        {
+          "title": "Modern Fiction",
+          "author": "Virginia Woolf",
+          "publication": "The Common Reader",
+          "year": 1919,
+          "link": "https://www.gutenberg.org/ebooks/64457",
+          "note": "Woolf argues that novels should capture life as it is felt."
+        },
+        {
+          "title": "Mr Bennett and Mrs Brown",
+          "author": "Virginia Woolf",
+          "publication": "Hogarth Essays",
+          "year": 1923,
+          "link": "https://www.gutenberg.org/ebooks/63022",
+          "note": "Woolf's lecture on how character changed in the modern novel."
+        },
+        {
+          "title": "Preface to The Nigger of the Narcissus",
+          "author": "Joseph Conrad",
+          "publication": "Book preface",
+          "year": 1897,
+          "link": "https://www.gutenberg.org/ebooks/17731",
+          "note": "Conrad says the writer's task is to make readers see."
+        },
+        {
+          "title": "The Writing of Fiction",
+          "author": "Edith Wharton",
+          "publication": "Scribner's",
+          "year": 1925,
+          "link": "https://www.gutenberg.org/ebooks/72446",
+          "note": "Wharton's practical guide to plot, character and the short story."
+        },
+        {
+          "title": "Introduction to Frankenstein (1831)",
+          "author": "Mary Shelley",
+          "publication": "Frankenstein, 1831 edition",
+          "year": 1831,
+          "link": "https://www.gutenberg.org/ebooks/84",
+          "note": "Shelley on how the story came to her in a dream."
+        },
+        {
+          "title": "A Defence of Detective Stories",
+          "author": "G. K. Chesterton",
+          "publication": "The Defendant",
+          "year": 1901,
+          "link": "https://www.gutenberg.org/ebooks/12245",
+          "note": "Chesterton defends detective fiction as a moral and imaginative form."
+        },
+        {
+          "title": "Of King's Treasuries",
+          "author": "John Ruskin",
+          "publication": "Sesame and Lilies",
+          "year": 1865,
+          "link": "https://www.gutenberg.org/ebooks/1293",
+          "note": "Ruskin on reading good books slowly and choosing them with care."
+        },
+        {
+          "title": "Style",
+          "author": "Walter Pater",
+          "publication": "Appreciations",
+          "year": 1888,
+          "link": "https://www.gutenberg.org/ebooks/4037",
+          "note": "Pater on prose craft and choosing each word."
+        },
+        {
+          "title": "The Rambler, No. 4",
+          "author": "Samuel Johnson",
+          "publication": "The Rambler",
+          "year": 1750,
+          "link": "https://www.gutenberg.org/ebooks/43656",
+          "note": "Johnson defends the novel and asks whether it teaches useful truths."
+        },
+        {
+          "title": "Preface to Joseph Andrews",
+          "author": "Henry Fielding",
+          "publication": "Joseph Andrews",
+          "year": 1742,
+          "link": "https://www.gutenberg.org/ebooks/9611",
+          "note": "Fielding calls his novel a comic epic in prose."
+        },
+        {
+          "title": "An Autobiography",
+          "author": "Anthony Trollope",
+          "publication": "An Autobiography",
+          "year": 1883,
+          "link": "https://www.gutenberg.org/ebooks/5978",
+          "note": "Trollope on his daily writing routine and the novel."
+        },
+        {
+          "title": "Preface to Cromwell",
+          "author": "Victor Hugo",
+          "publication": "Cromwell",
+          "year": 1827,
+          "link": "https://en.wikisource.org/wiki/Preface_to_Cromwell",
+          "note": "Hugo's manifesto for mixing the grotesque with the sublime in drama."
+        },
+        {
+          "title": "Sahitya ka Uddeshya",
+          "author": "Premchand",
+          "publication": "Progressive Writers' address",
+          "year": 1936,
+          "link": "https://hi.wikisource.org/wiki/%E0%A4%B8%E0%A4%BE%E0%A4%B9%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF_%E0%A4%95%E0%A4%BE_%E0%A4%89%E0%A4%A6%E0%A5%8D%E0%A4%A6%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%AF",
+          "note": "Premchand on literature's purpose and the writer's duty to society."
+        },
+        {
+          "title": "The Necklace",
+          "author": "Guy de Maupassant",
+          "publication": "Le Gaulois",
+          "year": 1884,
+          "link": "https://en.wikisource.org/wiki/The_Necklace",
+          "note": "A woman borrows a necklace that turns out to be paste."
+        },
+        {
+          "title": "The Story of an Hour",
+          "author": "Kate Chopin",
+          "publication": "Vogue",
+          "year": 1894,
+          "link": "https://en.wikisource.org/wiki/The_Story_of_an_Hour",
+          "note": "A woman learns her husband is dead and feels a sudden freedom."
+        },
+        {
+          "title": "The Yellow Wallpaper",
+          "author": "Charlotte Perkins Gilman",
+          "publication": "The New England Magazine",
+          "year": 1892,
+          "link": "https://en.wikisource.org/wiki/The_Yellow_Wallpaper",
+          "note": "A woman confined to a room by her husband's rest cure."
+        },
+        {
+          "title": "The Open Window",
+          "author": "Saki",
+          "publication": "The Westminster Gazette",
+          "year": 1914,
+          "link": "https://en.wikisource.org/wiki/The_Open_Window",
+          "note": "A lie told to a nervous visitor drives the story."
+        },
+        {
+          "title": "The Lady with the Dog",
+          "author": "Anton Chekhov",
+          "publication": "Russian Thought",
+          "year": 1899,
+          "link": "https://en.wikisource.org/wiki/The_Lady_with_the_Dog",
+          "note": "A married man and a woman fall in love at a resort."
+        },
+        {
+          "title": "The Death of Ivan Ilyich",
+          "author": "Leo Tolstoy",
+          "publication": "Russkaya Mysl",
+          "year": 1886,
+          "link": "https://en.wikisource.org/wiki/The_Death_of_Ivan_Ilyich",
+          "note": "A magistrate faces his own death and the emptiness of his life."
+        },
+        {
+          "title": "A Defence of Penny Dreadfuls",
+          "author": "G. K. Chesterton",
+          "publication": "The Defendant",
+          "year": 1901,
+          "link": "https://www.gutenberg.org/ebooks/12245",
+          "note": "Chesterton defends cheap popular fiction as honest and imaginative."
+        },
+        {
+          "title": "Literary Taste: How to Form It",
+          "author": "Arnold Bennett",
+          "publication": "Literary Taste",
+          "year": 1909,
+          "link": "https://www.gutenberg.org/ebooks/13852",
+          "note": "Bennett on how a reader can learn to judge good books."
+        },
+        {
+          "title": "Idgah",
+          "author": "Premchand",
+          "publication": "Hindi literary magazine",
+          "year": 1933,
+          "link": "https://hi.wikisource.org/wiki/%E0%A4%88%E0%A4%A6%E0%A4%97%E0%A4%BE%E0%A4%B9",
+          "note": "A boy buys tongs for his grandmother instead of sweets."
+        },
+        {
+          "title": "The Literature of Knowledge and the Literature of Power",
+          "author": "Thomas De Quincey",
+          "publication": "Essays on Literature",
+          "year": 1848,
+          "link": "https://www.gutenberg.org/ebooks/23788",
+          "note": "De Quincey separates books that inform from books that move us."
+        }
+      ]
     }
   ]
 }

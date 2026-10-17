@@ -1,0 +1,71 @@
+---
+// Essays chosen by Granthalaya. Each one links to the original; nothing is copied here.
+import Base from '../../layouts/Base.astro';
+import data from '../../data/essays.json';
+export const prerender = false;
+const via = data.themes.find((t) => t.name.startsWith('Found via'));
+const themes = data.themes.filter((t) => t !== via);
+const total = data.themes.reduce((n, t) => n + t.items.length, 0);
+const host = (u: string) => new URL(u).hostname.replace(/^www\./, '');
+const byline = (e: { author: string; publication: string | null; year: number | null }) =>
+  [e.author, e.publication, e.year].filter(Boolean).join(' · ');
+---
+<Base title="Essays" active="essays" description="Essays worth reading, each linking to a free copy at the original.">
+  <section class="pad head">
+    <h1 class="title">Essays</h1>
+    <p class="muted lede">{total} essays worth an afternoon, chosen by us. Each one opens at its original home, so nothing is copied here.</p>
+  </section>
+  <section class="pad groups">
+    {themes.map((t) => (
+      <div class="grp">
+        <h2 class="eyebrow">{t.name}</h2>
+        <ul class="es">
+          {t.items.map((e) => (
+            <li>
+              <a class="row" href={e.link} target="_blank" rel="noopener noreferrer">
+                <span class="et">{e.title}</span>
+                <span class="eb">{byline(e)}</span>
+                <span class="en">{e.note}</span>
+                <span class="eh">{host(e.link)} ↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+    {via && (
+      <div class="grp">
+        <h2 class="eyebrow">Found via <a class="credit" href={data.source.url} target="_blank" rel="noopener noreferrer">{data.source.name}</a></h2>
+        <ul class="es">
+          {via.items.map((e) => (
+            <li>
+              <a class="row" href={e.link} target="_blank" rel="noopener noreferrer">
+                <span class="et">{e.title}</span>
+                <span class="eb">{byline(e)}</span>
+                <span class="en">{e.note}</span>
+                <span class="eh">{host(e.link)} ↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </section>
+</Base>
+<style>
+  .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 12px; }
+  .lede { margin: 0; max-width: 56ch; font-size: 16px; }
+  .groups { display: flex; flex-direction: column; gap: 40px; padding-bottom: 24px; }
+  .grp { display: flex; flex-direction: column; gap: 14px; }
+  .es { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .row { display: flex; flex-direction: column; gap: 4px; height: 100%; min-height: 64px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; transition: border-color .2s ease, transform .2s ease; }
+  .row:hover { border-color: var(--lat); color: inherit; }
+  .row:active { transform: scale(.985); }
+  .row:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
+  .et { font-weight: 600; font-size: 15px; line-height: 1.3; }
+  .eb { font-size: 12.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .en { font-size: 13.5px; line-height: 1.45; }
+  .eh { margin-top: auto; padding-top: 4px; font-size: 12px; color: var(--muted); }
+  .credit { color: var(--lat); }
+  @media (max-width: 780px) { .head { padding-top: 28px; } .es { grid-template-columns: 1fr; } }
+</style>
