@@ -18,33 +18,25 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 
 - [x] **Why I Write** · George Orwell · Gangrel · 1946 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/why-i-write/> · Orwell lists four motives for writing and his own history.
 - [x] **Politics and the English Language** · George Orwell · Horizon · 1946 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/> · Six rules for clear writing, with examples of bad prose.
-- [x] **Books v. Cigarettes** · George Orwell · Tribune · 1946 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/books-v-cigarettes/> · Orwell compares what reading and smoking cost him yearly. ⚠ DEAD (404)
 - [x] **Of Studies** · Francis Bacon · Essays · 1625 · <https://www.gutenberg.org/ebooks/575> · Short essay on what study is for; full Essays at Gutenberg.
 - [x] **Of Books** · Michel de Montaigne · Essays · 1580 · <https://www.gutenberg.org/ebooks/3600> · Montaigne on his reading habits; Cotton translation, essay II.10.
 - [x] **The Age of the Essay** · Paul Graham · paulgraham.com · 2004 · <https://paulgraham.com/essay.html> · Traces the essay from school exercise to a way of finding things out.
 - [x] **Putting Ideas into Words** · Paul Graham · paulgraham.com · 2012 · <https://paulgraham.com/words.html> · On writing as the way to find out what you think.
-- [x] **The Art of Fiction** · Henry James · Longman's Magazine · 1884 · <https://en.wikisource.org/wiki/The_Art_of_Fiction_(James)> · Reply to Walter Besant on what a novel should be. ⚠ DEAD (404)
 - [x] **The Philosophy of Composition** · Edgar Allan Poe · Graham's Magazine · 1846 · <https://en.wikisource.org/wiki/The_Philosophy_of_Composition> · Poe describes writing "The Raven" step by step.
 - [x] **A Defence of Poetry** · Percy Bysshe Shelley · published posthumously · 1840 · <https://www.poetryfoundation.org/articles/69388/a-defence-of-poetry> · Written 1821; includes the line about poets as legislators.
 - [x] **Tradition and the Individual Talent** · T. S. Eliot · The Egoist · 1919 · <https://www.poetryfoundation.org/articles/69400/tradition-and-the-individual-talent> · Eliot argues a poet is judged against the whole tradition.
 - [x] **On the Pleasure of Hating** · William Hazlitt · The Plain Speaker · 1826 · <https://en.wikisource.org/wiki/On_the_Pleasure_of_Hating> · Hazlitt examines his own capacity for hatred.
 - [x] **Fenimore Cooper's Literary Offenses** · Mark Twain · North American Review · 1895 · <https://en.wikisource.org/wiki/Fenimore_Cooper%27s_Literary_Offenses> · Twain lists 18 rules Cooper's novels break.
-- [x] **A Dissertation upon Roast Pig** · Charles Lamb · London Magazine · 1822 · <https://en.wikisource.org/wiki/Essays_of_Elia/A_Dissertation_upon_Roast_Pig> · Comic origin story of roast pork. ⚠ DEAD (404)
 
 ## Living, attention and nature
 
-- [x] **In Praise of Idleness** · Bertrand Russell · Harper's · 1932 · <https://www.zpub.com/notes/idle.html> · Russell argues for a four-hour working day. ⚠ DEAD (404)
-- [x] **An Apology for Idlers** · Robert Louis Stevenson · Cornhill Magazine · 1877 · <https://en.wikisource.org/wiki/An_Apology_for_Idlers> · Defends time spent outside formal work and study. ⚠ DEAD (404)
-- [x] **Walking** · Henry David Thoreau · The Atlantic · 1862 · <https://en.wikisource.org/wiki/Walking_(Thoreau)> · Thoreau on walking, wildness and the West. ⚠ DEAD (404)
 - [x] **Self-Reliance** · Ralph Waldo Emerson · Essays: First Series · 1841 · <https://en.wikisource.org/wiki/Essays:_First_Series/Self-Reliance> · Contains "a foolish consistency is the hobgoblin of little minds".
 - [x] **Nature** · Ralph Waldo Emerson · self-published · 1836 · <https://en.wikisource.org/wiki/Nature_(Emerson)> · Founding text of American Transcendentalism.
 - [x] **The American Scholar** · Ralph Waldo Emerson · Harvard address · 1837 · <https://en.wikisource.org/wiki/The_American_Scholar> · Phi Beta Kappa address on independent thinking.
 - [x] **Life Without Principle** · Henry David Thoreau · The Atlantic · 1863 · <https://en.wikisource.org/wiki/Life_Without_Principle> · Thoreau on work, money and how to spend a life.
 - [x] **Some Thoughts on the Common Toad** · George Orwell · Tribune · 1946 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/some-thoughts-on-the-common-toad/> · Orwell on spring and noticing nature in London.
-- [x] **On the Shortness of Life** · Seneca · Latin text, English translation · c. 49 CE · <https://en.wikisource.org/wiki/On_the_Shortness_of_Life> · Seneca says life is long enough if not wasted. ⚠ DEAD (404)
 - [x] **The Book of Tea** · Okakura Kakuzo · Putnam · 1906 · <https://www.gutenberg.org/ebooks/769> · Short book on tea and Japanese aesthetics, written in English.
 - [x] **Why Procrastinators Procrastinate** · Tim Urban · Wait But Why · 2013 · <https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html> · Illustrated account of the Instant Gratification Monkey.
-- [x] **Why We Travel** · Pico Iyer · Salon · 2000 · <https://www.salon.com/2000/03/18/why_we_travel/> · Iyer on travel as a way to see afresh. ⚠ DEAD (404)
 
 ## Work, craft and ideas
 
@@ -77,8 +69,6 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **Shooting an Elephant** · George Orwell · New Writing · 1936 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/shooting-an-elephant/> · Orwell as a colonial policeman in Burma.
 - [x] **A Hanging** · George Orwell · The Adelphi · 1931 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/a-hanging/> · Orwell describes witnessing an execution in Burma.
 - [x] **Reflections on Gandhi** · George Orwell · Partisan Review · 1949 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/reflections-on-gandhi/> · Orwell weighs Gandhi's saintliness against his politics.
-- [x] **The Lion and the Unicorn** · George Orwell · Searchlight Books · 1941 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/the-lion-and-the-unicorn-socialism-and-the-english-genius/> · Book-length essay on England during the Blitz. ⚠ DEAD (404)
-- [x] **Famine, Affluence, and Morality** · Peter Singer · Philosophy & Public Affairs · 1972 · <https://www.utilitarian.net/singer/by/1972----.htm> · Argues we should give until further giving costs us something comparable. ⚠ DEAD (no answer)
 - [x] **Why Socialism?** · Albert Einstein · Monthly Review · 1949 · <https://monthlyreview.org/2009/05/01/why-socialism/> · Einstein's essay on the economy and individual freedom.
 - [x] **The Case for Reparations** · Ta-Nehisi Coates · The Atlantic · 2014 · <https://www.theatlantic.com/magazine/archive/2014/06/the-case-for-reparations/361631/> · Traces housing discrimination in the US from the 1930s on. ⚠ CHECK (403)
 - [x] **What to the Slave Is the Fourth of July?** · Frederick Douglass · speech in Rochester · 1852 · <https://teachingamericanhistory.org/document/what-to-the-slave-is-the-fourth-of-july/> · Douglass addresses a July 4 audience about slavery. ⚠ CHECK (403)
@@ -91,10 +81,38 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 
 ## India, in English
 
-- [x] **Hind Swaraj** · M. K. Gandhi · Indian Opinion · 1909 · <https://www.mkgandhi.org/swarajya/coverpage.htm> · Gandhi's dialogue on self-rule and modern civilisation. ⚠ DEAD (404)
-- [x] **Annihilation of Caste** · B. R. Ambedkar · undelivered address, self-published · 1936 · <https://en.wikisource.org/wiki/Annihilation_of_Caste> · Written for a Lahore conference that withdrew its invitation. ⚠ DEAD (404)
-- [x] **Buddha or Karl Marx** · B. R. Ambedkar · written late in life · 1956 · <http://www.columbia.edu/itc/mealac/pritchett/00ambedkar/ambedkar_marx/index.html> · Ambedkar compares the Buddha's and Marx's aims. ⚠ DEAD (404)
-- [x] **Nationalism** · Rabindranath Tagore · lectures in Japan and the US · 1917 · <https://en.wikisource.org/wiki/Nationalism_(Tagore)> · Tagore's warning about the nation as a machine. ⚠ DEAD (404)
 - [x] **Sadhana: The Realisation of Life** · Rabindranath Tagore · Macmillan · 1913 · <https://www.gutenberg.org/ebooks/2549> · Lectures on the self and the infinite, given at Harvard.
 - [x] **Why I Am an Atheist** · Bhagat Singh · written in prison · 1930 · <https://www.marxists.org/archive/bhagat-singh/1930/10/05.htm> · Written in Lahore jail, October 1930.
-- [x] **The End of Imagination** · Arundhati Roy · Frontline and Outlook · 1998 · <https://frontline.thehindu.com/static/html/fl1517/15170040.htm> · Roy's response to India's nuclear tests. ⚠ DEAD (404)
+
+## Fiction, craft and storytelling
+- [x] **A Chapter on Dreams** · Robert Louis Stevenson · Scribner's Magazine · 1888 · <https://www.gutenberg.org/ebooks/614> · How his stories came to him through dreams and night visions.
+- [x] **Gossip on Romance** · Robert Louis Stevenson · Longman's Magazine · 1882 · <https://www.gutenberg.org/ebooks/381> · Argues that romance is the oldest and most lasting form of story.
+- [x] **A Humble Remonstrance** · Robert Louis Stevenson · Longman's Magazine · 1884 · <https://www.gutenberg.org/ebooks/381> · A reply to Henry James defending romance against the psychological novel.
+- [x] **A Note on Realism** · Robert Louis Stevenson · Essays of the Art of Writing · 1883 · <https://www.gutenberg.org/ebooks/492> · Argues realism in fiction depends on selection and form. (check)
+- [x] **Books Which Have Influenced Me** · Robert Louis Stevenson · Essays of the Art of Writing · 1887 · <https://www.gutenberg.org/ebooks/492> · Stevenson lists the books that shaped his own style. (check)
+- [x] **The Decay of Lying** · Oscar Wilde · The Nineteenth Century · 1889 · <https://www.gutenberg.org/ebooks/887> · A dialogue arguing that art, not life, should model fiction.
+- [x] **The Critic as Artist** · Oscar Wilde · The Nineteenth Century · 1890 · <https://www.gutenberg.org/ebooks/887> · A dialogue treating criticism as a creative art. (check)
+- [x] **How to Tell a Story** · Mark Twain · How to Tell a Story and Other Essays · 1895 · <https://www.gutenberg.org/ebooks/142> · Twain on the humour and timing of a told tale. (check)
+- [x] **Modern Fiction** · Virginia Woolf · The Common Reader · 1919 · <https://www.gutenberg.org/ebooks/64457> · Woolf argues that novels should capture life as it is felt.
+- [x] **Mr Bennett and Mrs Brown** · Virginia Woolf · Hogarth Essays · 1923 · <https://www.gutenberg.org/ebooks/63022> · Woolf's lecture on how character changed in the modern novel.
+- [x] **Preface to The Nigger of the Narcissus** · Joseph Conrad · Book preface · 1897 · <https://www.gutenberg.org/ebooks/17731> · Conrad says the writer's task is to make readers see. (check)
+- [x] **The Writing of Fiction** · Edith Wharton · Scribner's · 1925 · <https://www.gutenberg.org/ebooks/72446> · Wharton's practical guide to plot, character and the short story. (check)
+- [x] **Introduction to Frankenstein (1831)** · Mary Shelley · Frankenstein, 1831 edition · 1831 · <https://www.gutenberg.org/ebooks/84> · Shelley on how the story came to her in a dream. (check)
+- [x] **A Defence of Detective Stories** · G. K. Chesterton · The Defendant · 1901 · <https://www.gutenberg.org/ebooks/12245> · Chesterton defends detective fiction as a moral and imaginative form.
+- [x] **Of King's Treasuries** · John Ruskin · Sesame and Lilies · 1865 · <https://www.gutenberg.org/ebooks/1293> · Ruskin on reading good books slowly and choosing them with care.
+- [x] **Style** · Walter Pater · Appreciations · 1888 · <https://www.gutenberg.org/ebooks/4037> · Pater on prose craft and choosing each word. (check)
+- [x] **The Rambler, No. 4** · Samuel Johnson · The Rambler · 1750 · <https://www.gutenberg.org/ebooks/43656> · Johnson defends the novel and asks whether it teaches useful truths. (check)
+- [x] **Preface to Joseph Andrews** · Henry Fielding · Joseph Andrews · 1742 · <https://www.gutenberg.org/ebooks/9611> · Fielding calls his novel a comic epic in prose. (check)
+- [x] **An Autobiography** · Anthony Trollope · An Autobiography · 1883 · <https://www.gutenberg.org/ebooks/5978> · Trollope on his daily writing routine and the novel. (check)
+- [x] **Preface to Cromwell** · Victor Hugo · Cromwell · 1827 · <https://en.wikisource.org/wiki/Preface_to_Cromwell> · Hugo's manifesto for mixing the grotesque with the sublime in drama.
+- [x] **Sahitya ka Uddeshya** · Premchand · Progressive Writers' address · 1936 · <https://hi.wikisource.org/wiki/%E0%A4%B8%E0%A4%BE%E0%A4%B9%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF_%E0%A4%95%E0%A4%BE_%E0%A4%89%E0%A4%A6%E0%A5%8D%E0%A4%A6%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%AF> · Premchand on literature's purpose and the writer's duty to society. (check)
+- [x] **The Necklace** · Guy de Maupassant · Le Gaulois · 1884 · <https://en.wikisource.org/wiki/The_Necklace> · A woman borrows a necklace that turns out to be paste.
+- [x] **The Story of an Hour** · Kate Chopin · Vogue · 1894 · <https://en.wikisource.org/wiki/The_Story_of_an_Hour> · A woman learns her husband is dead and feels a sudden freedom.
+- [x] **The Yellow Wallpaper** · Charlotte Perkins Gilman · The New England Magazine · 1892 · <https://en.wikisource.org/wiki/The_Yellow_Wallpaper> · A woman confined to a room by her husband's rest cure.
+- [x] **The Open Window** · Saki · The Westminster Gazette · 1914 · <https://en.wikisource.org/wiki/The_Open_Window> · A lie told to a nervous visitor drives the story. (check)
+- [x] **The Lady with the Dog** · Anton Chekhov · Russian Thought · 1899 · <https://en.wikisource.org/wiki/The_Lady_with_the_Dog> · A married man and a woman fall in love at a resort.
+- [x] **The Death of Ivan Ilyich** · Leo Tolstoy · Russkaya Mysl · 1886 · <https://en.wikisource.org/wiki/The_Death_of_Ivan_Ilyich> · A magistrate faces his own death and the emptiness of his life.
+- [x] **A Defence of Penny Dreadfuls** · G. K. Chesterton · The Defendant · 1901 · <https://www.gutenberg.org/ebooks/12245> · Chesterton defends cheap popular fiction as honest and imaginative. (check)
+- [x] **Literary Taste: How to Form It** · Arnold Bennett · Literary Taste · 1909 · <https://www.gutenberg.org/ebooks/13852> · Bennett on how a reader can learn to judge good books. (check)
+- [x] **Idgah** · Premchand · Hindi literary magazine · 1933 · <https://hi.wikisource.org/wiki/%E0%A4%88%E0%A4%A6%E0%A4%97%E0%A4%BE%E0%A4%B9> · A boy buys tongs for his grandmother instead of sweets. (check)
+- [x] **The Literature of Knowledge and the Literature of Power** · Thomas De Quincey · Essays on Literature · 1848 · <https://www.gutenberg.org/ebooks/23788> · De Quincey separates books that inform from books that move us. (check)
