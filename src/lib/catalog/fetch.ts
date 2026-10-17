@@ -18,20 +18,27 @@ const MAX = 400;
 export async function getJSON<T = any>(url: string, { ttl = 3600, ms = 6000 }: { ttl?: number; ms?: number } = {}): Promise<T | null> {
   const hit = memory.get(url);
   if (hit && Date.now() - hit.at < hit.ttl * 1000) return hit.value as T;
-  const ctl = new AbortController();
-  const timer = setTimeout(() => ctl.abort(), ms);
-  try {
-    const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } });
-    if (!r.ok) return null;
-    const value = (await r.json()) as T;
-    if (memory.size >= MAX) memory.delete(memory.keys().next().value!);
-    memory.set(url, { at: Date.now(), ttl, value });
-    return value;
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timer);
+  // a slow or busy answer (timeout, 429, 5xx) is asked once more; a plain "not found" is not
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), ms);
+    try {
+      const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } });
+      if (!r.ok) {
+        if (attempt === 0 && (r.status === 429 || r.status >= 500)) { await new Promise((x) => setTimeout(x, 500)); continue; }
+        return null;
+      }
+      const value = (await r.json()) as T;
+      if (memory.size >= MAX) memory.delete(memory.keys().next().value!);
+      memory.set(url, { at: Date.now(), ttl, value });
+      return value;
+    } catch {
+      if (attempt === 1) return null;
+    } finally {
+      clearTimeout(timer);
+    }
   }
+  return null;
 }
 
 /** a short, safe address name from any title: "Don't Look Up" → "dont-look-up" */

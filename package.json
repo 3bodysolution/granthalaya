@@ -10,7 +10,8 @@
     "trivia": "node scripts/trivia.mjs",
     "migrate": "node scripts/migrate.mjs",
     "db:apply": "node scripts/db-apply.mjs",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "check:site": "node scripts/check-site.mjs"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
