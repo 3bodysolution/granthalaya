@@ -1,4 +1,4 @@
-// Acting on a report (admins only).
+// Acting on a report, or hiding a suggested book (admins only).
 import type { APIRoute } from 'astro';
 import { json, oops, body, sameOrigin } from '../../lib/http';
 import { adminClient } from '../../lib/supabase';
@@ -8,8 +8,13 @@ export const POST: APIRoute = async (ctx) => {
   if (!sameOrigin(ctx)) return oops('Please try again from the site.', 403);
   if (!ctx.locals.me?.is_admin) return oops('Not found.', 404);
   const b = await body<{ id?: string; action?: string }>(ctx.request);
-  if (!b?.id) return oops('Which report?');
   const db = adminClient();
+  if (b?.action === 'hide_book' || b?.action === 'show_book') {
+    if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which book?');
+    const { error } = await db.from('book_suggestions').update({ hidden: b.action === 'hide_book' }).eq('id', b.id);
+    return error ? oops('Couldn’t change that.', 500) : json({ ok: true });
+  }
+  if (!b?.id) return oops('Which report?');
   const { data: r } = await db.from('reports').select('id, target_user, target_log').eq('id', b.id).maybeSingle();
   if (!r) return oops('Couldn’t find that report.', 404);
   if (b.action === 'dismiss') await db.from('reports').update({ status: 'dismissed' }).eq('id', r.id);

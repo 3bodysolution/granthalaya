@@ -77,7 +77,7 @@ ARTICLE:
 ${page.text}`;
 
 // tries > 1 waits and asks again when the free model is busy (used by `npm run trivia`)
-async function askGemini(key, model, text, tries = 1) {
+export async function askGemini(key, model, text, tries = 1) {
   const models = model ? [model] : ['gemini-flash-latest', 'gemini-2.5-flash'];
   let last;
   for (let i = 0; i < tries; i++) {
@@ -99,7 +99,7 @@ async function askGemini(key, model, text, tries = 1) {
 }
 
 // Groq's free plan allows about one article a minute, so with tries > 1 it waits for the minute to pass
-async function askGroq(key, model, text, tries = 1) {
+export async function askGroq(key, model, text, tries = 1) {
   for (let i = 0; ; i++) {
     try {
       const j = await getJSON('https://api.groq.com/openai/v1/chat/completions', {

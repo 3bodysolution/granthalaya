@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks } from './onsite';
-import { getList, listTile, listBrowseHref } from '../lists';
+import { getList, listTile, listBrowseHref, type CatalogList } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
 export interface RowItem {
@@ -32,8 +32,7 @@ const books = (cards: BookCard[]) => cards.filter((b) => b.cover).slice(0, MAX).
 const list = (p: Promise<{ items: Card[] }>) => safe(p.then((r) => r.items), [] as Card[]);
 
 /** a row from one of the prize or classics lists (only items with a page and a cover) */
-function listRow(slug: string, title: string, tone: 'film' | 'book'): Row {
-  const l = getList(slug);
+function listRow(slug: string, title: string, tone: 'film' | 'book', l: CatalogList | undefined = getList(slug)): Row {
   const items = l ? l.items.map((i) => listTile(l, i)).filter((t) => t.href && t.poster).slice(0, MAX) : [];
   return { title, href: l ? listBrowseHref(l) : undefined, tone, items };
 }
@@ -79,7 +78,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
 }
 
 /** the Books front page */
-export async function bookRows(): Promise<Row[]> {
+export async function bookRows(suggested: CatalogList[] = []): Promise<Row[]> {
   const pick = (p: Promise<{ items: BookCard[] }>) => safe(p.then((r) => r.items), [] as BookCard[]);
   const [week, fiction, top] = await Promise.all([
     safe(trendingBooks('weekly'), []),
@@ -93,6 +92,7 @@ export async function bookRows(): Promise<Row[]> {
     listRow('booker', 'Booker Prize winners', 'book'),
     listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book'),
     listRow('marathi-classics', 'Marathi classics', 'book'),
+    ...suggested.map((l) => listRow(l.slug, l.title, 'book', l)).filter((r) => r.items.length),
   ];
 }
 

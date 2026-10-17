@@ -138,6 +138,18 @@ create unique index titles_ol_key on public.titles (ol_key) where ol_key is not 
 create unique index titles_link_key on public.titles (link) where kind = 'essay' and link is not null;
 create index titles_created_by on public.titles (created_by, created_at);
 
+-- Marathi and Hindi books suggested each week by a free AI model, each checked against a real source first.
+create table public.book_suggestions (
+  id uuid primary key default gen_random_uuid(),
+  language text not null check (language in ('mr', 'hi')),
+  title_id uuid not null references public.titles (id) on delete cascade,
+  checked_with text not null check (checked_with in ('Open Library', 'Google Books', 'Wikipedia')),
+  hidden boolean not null default false,
+  created_at timestamptz not null default now(),
+  unique (language, title_id)
+);
+create index book_suggestions_shown on public.book_suggestions (language, created_at desc) where not hidden;
+
 -- ───────────────────────── shelves ─────────────────────────
 
 -- One row per visit: a re-read or re-watch is a new row with again = true.
@@ -286,6 +298,7 @@ alter table public.profiles enable row level security;
 alter table public.username_history enable row level security;
 alter table public.profile_details enable row level security;
 alter table public.titles enable row level security;
+alter table public.book_suggestions enable row level security;
 alter table public.logs enable row level security;
 alter table public.highlights enable row level security;
 alter table public.threads enable row level security;
@@ -310,6 +323,7 @@ create policy "details: create your own" on public.profile_details for insert to
 create policy "details: edit your own" on public.profile_details for update to authenticated
   using (id = auth.uid()) with check (id = auth.uid());
 
+create policy "book suggestions: readable unless hidden" on public.book_suggestions for select to anon, authenticated using (not hidden);
 create policy "titles: readable by everyone" on public.titles for select to anon, authenticated using (true);
 
 create policy "logs: yours, or a visible shelf" on public.logs for select to anon, authenticated
@@ -355,7 +369,7 @@ create policy "reports: send one" on public.reports for insert to authenticated
 -- (new tables aren't exposed automatically in this project, so every permission is listed here)
 
 grant select on public.profiles, public.username_history, public.profile_details, public.titles,
-  public.logs, public.highlights, public.threads, public.thread_items to anon, authenticated;
+  public.logs, public.highlights, public.threads, public.thread_items, public.book_suggestions to anon, authenticated;
 grant insert (id, username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
 grant update (username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
 grant insert, update on public.profile_details to authenticated;

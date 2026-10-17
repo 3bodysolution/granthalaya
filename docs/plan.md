@@ -10,7 +10,7 @@ Read this at the start of a session; update it when a part is done.
   - [x] Part 1. Films, TV and Books front pages (rows of posters, browse chips) and the discovery-first home page.
   - [x] Part 2. Prize and classics lists (details below).
   - [ ] Part 3. About 50 to 60 essays, chosen by Granthalaya, each linking to a free, legal original. readsomethinggreat.com has no archive (only 5 current essays on its homepage), so only those 5 carry "Found via Read Something Great". Candidates are in `docs/essay-candidates.md` (a checklist for Sarthak to tick); `node scripts/essays/check-links.mjs` marks dead links. Marathi and Hindi essays were dropped; all 75 remaining are ticked. Done: `scripts/essays/build.mjs` makes `src/data/essays.json` from the ticked lines, and `/essays/` shows all 91 (an Essays link in the top bar; credit on About). Still to look at: the 7 links that refused the check, the "(check)" years in the fiction section, and Premchand's Idgah (US copyright). Saving an essay to a shelf is not built yet.
-  - [ ] Part 4. Marathi and Hindi book lists suggested by a free AI model each week, every book checked against Open Library, Google Books or Wikipedia, with an admin "hide".
+  - [ ] Part 4. Marathi and Hindi book lists suggested by a free AI model each week, every book checked against Open Library, Google Books or Wikipedia, with an admin "hide". Built and committed; goes live after the steps in "Step 3, part 4" below (run 003, set `CRON_SECRET`).
 - [ ] Step 4. Import from Goodreads, Letterboxd or our own export zip.
 - [ ] Go live: re-run `npm run migrate`, merge `phase-1` into `main`, add the environment variables to Production in Vercel. Before that: `site.contact`, read Privacy and Terms again, Google branding links and publish the Google app, `npm audit`.
 
@@ -33,6 +33,13 @@ Original steps:
 2. Pages: `/lists/` (all lists, grouped: book prizes, Indian book prizes, film awards, classics) and `/lists/<slug>/` (a poster grid with the year on each, save bookmarks and your statuses, the source credited at the bottom).
 3. Rows on the front pages: Books gets Booker, Sahitya Akademi Marathi and Marathi classics rows plus chips for every book list; Films gets Oscar Best Picture, National Award Best Marathi Film and Indian cinema classics rows plus chips. The Books filters get a "Prizes and classics" choice that opens a list.
 4. Test locally with `npm run dev`, build, commit.
+
+## Step 3, part 4: weekly Marathi and Hindi suggestions
+
+- `src/lib/suggest.ts`: asks Gemini (then Groq) for 20 books; keeps one only if Open Library, then Google Books, then Wikipedia has the same title and the author's surname (an invented book is dropped); up to 10 new per run, published automatically. Books Open Library lacks get our own record (`source = 'Granthalaya lists'`). Table `book_suggestions` (`supabase/changes/003-book-suggestions.sql`, also in `schema.sql`); hidden rows stay so a book never comes back.
+- `/api/suggest?lang=mr|hi` needs `Authorization: Bearer <CRON_SECRET>` (Vercel sends it on its own when `CRON_SECRET` is set); `&dry=1` shows what it would add and writes nothing. Crons in `vercel.json`: Marathi on Mondays, Hindi on Thursdays (04:30 UTC). `maxDuration` is now 60.
+- Shown as two lists, `suggested-marathi` and `suggested-hindi` (`suggestedLists` in `src/lib/lists.ts`): rows on the Books front page (only books with a cover), the "Prizes and classics" filter and chips, and `/books/?list=suggested-marathi`. Admin page: "Suggested books" with Hide / Show again.
+- To go live: run 003 (Sarthak asks for `npm run db:apply`; dry run shown first), add `CRON_SECRET` (any long random text) to Vercel, then call the two addresses once by hand to fill the lists. A dry run on this computer with real Gemini and Open Library found 9 to 10 real books per language.
 
 ## Decisions to keep
 

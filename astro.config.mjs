@@ -8,7 +8,7 @@ import vercel from '@astrojs/vercel';
 export default defineConfig({
   site: 'https://granthalaya-sarthak.vercel.app',
   output: 'server',
-  adapter: vercel({ maxDuration: 30 }), // saving can take a few seconds while it looks a title up
+  adapter: vercel({ maxDuration: 60 }), // saving can take a few seconds while it looks a title up
   trailingSlash: 'ignore',
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   security: {

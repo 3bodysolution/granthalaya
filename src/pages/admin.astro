@@ -1,5 +1,5 @@
 ---
-// Reports, for the person who runs the site (profiles.is_admin, set by hand in the database).
+// Reports and the weekly book suggestions, for the person who runs the site (profiles.is_admin, set by hand in the database).
 import Base from '../layouts/Base.astro';
 import { adminClient } from '../lib/supabase';
 export const prerender = false;
@@ -11,6 +11,7 @@ const db = adminClient();
 let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug))').order('created_at', { ascending: false }).limit(100);
 if (show === 'open') q = q.eq('status', 'open');
 const { data: reports, error } = await q;
+const { data: picks } = await db.from('book_suggestions').select('id, language, hidden, checked_with, created_at, title:titles(title, creator, slug)').order('created_at', { ascending: false }).limit(200);
 const REASON: Record<string, string> = { spam: 'Spam or fake', abuse: 'Harassment', sexual: 'Sexual content', hate: 'Hate', illegal: 'Illegal', other: 'Something else' };
 const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 ---
@@ -43,6 +44,19 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
       ))}
     </div>
   </section>
+  <section class="pad wrap picks">
+    <h2 class="title">Suggested books</h2>
+    <p class="muted small">Marathi and Hindi books added each week by the AI model, each checked against a real source. Hide one and it never comes back.</p>
+    {(picks ?? []).length === 0 && <p class="muted small">None yet. The first runs are on a Monday (Marathi) and a Thursday (Hindi).</p>}
+    <ul class="plist">
+      {(picks ?? []).map((k: any) => (
+        <li class:list={['pick', k.hidden && 'off']}>
+          <span class="pt">{k.title ? <a class="accent" href={`/book/${k.title.slug}/`}>{k.title.title}</a> : 'Removed book'}<span class="muted"> · {k.title?.creator} · {k.language === 'mr' ? 'Marathi' : 'Hindi'} · checked with {k.checked_with} · {when(k.created_at)}</span></span>
+          <button class="btn sm" data-admin={JSON.stringify({ id: k.id, action: k.hidden ? 'show_book' : 'hide_book' })}>{k.hidden ? 'Show again' : 'Hide'}</button>
+        </li>
+      ))}
+    </ul>
+  </section>
 </Base>
 <style>
   .wrap { padding-top: 48px; max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
@@ -53,6 +67,11 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
   .between { display: flex; justify-content: space-between; gap: 12px; }
   .small { font-size: 14px; }
   .quote { font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 17px; }
+  .picks { padding-top: 8px; padding-bottom: 48px; }
+  .picks .title { font-size: 28px; }
+  .plist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .pick { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-size: 14px; }
+  .pick.off { opacity: .55; }
   .btn.sm { height: 34px; padding: 0 12px; font-size: 13px; }
 </style>
 <script>

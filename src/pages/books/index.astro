@@ -10,7 +10,7 @@ import PosterRow from '../../components/title/PosterRow.astro';
 import { bookRows, markRows, type Row } from '../../lib/catalog/rows';
 import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import ListGrid from '../../components/title/ListGrid.astro';
-import { listsOfKind, pickList, listDecades, listBrowseHref } from '../../lib/lists';
+import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists } from '../../lib/lists';
 import { myMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
 
@@ -31,11 +31,13 @@ const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort'
 const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
 
 // a prize or classics list chosen in the filter bar shows in place; the other filters don't apply to it (Decade does)
-const picked = pickList(q.get('list'), 'book');
+const suggested = await suggestedLists(Astro.locals.supabase).catch(() => []);
+const bookLists = [...listsOfKind('book'), ...suggested];
+const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
 const front = [...q.keys()].length === 0;
 const [list, rowsRaw] = await Promise.all([
   front || picked ? Promise.resolve({ items: [], total: 0, pages: 0 }) : browseBooks({ subject, language, year, decade, sort, page }),
-  front ? bookRows() : Promise.resolve([] as Row[]),
+  front ? bookRows(suggested) : Promise.resolve([] as Row[]),
 ]);
 const sb = Astro.locals.supabase;
 const [marks, rows] = await Promise.all([
@@ -69,7 +71,7 @@ const fields = [
     : year
       ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
       : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
-  { name: 'list', label: 'Prizes and classics', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...listsOfKind('book').map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
+  { name: 'list', label: 'Prizes and classics', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...bookLists.map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
   { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
 ];
 ---
@@ -86,7 +88,7 @@ const fields = [
         <div class="bset"><h2 class="eyebrow">By subject</h2><div class="chips">{subjectLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">By original language</h2><div class="chips">{langLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
-        <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('book').map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>
+        <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{bookLists.map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>
       </div>
       <p class="credit-line">Book data from Open Library.</p>
     </section>

@@ -1,6 +1,7 @@
 // Prize and classics lists: one JSON file each in src/data/lists, matched to the catalogue by scripts/lists/match.mjs.
 import { bookHref } from './catalog/books';
 import { filmHref } from './catalog/tmdb';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RowItem } from './catalog/rows';
 
 export interface ListItem {
@@ -44,7 +45,7 @@ export function listTile(l: CatalogList, i: ListItem): RowItem {
       : { kind: 'book', olKey: i.ol, title: i.title, creator: i.creator, year: i.year, cover: i.cover };
   return {
     href, search: href ? undefined : i.title, title: i.title, poster: i.cover, kind: film ? 'film' : 'book', save,
-    year: i.circa ? undefined : shown,
+    year: i.circa || !shown ? undefined : shown,
     sub: [i.circa ? `c. ${shown}` : '', i.creator].filter(Boolean).join(' · ') || undefined,
   };
 }
@@ -58,4 +59,24 @@ export const pickList = (slug: string | null | undefined, kind: 'book' | 'film')
 };
 /** the decades a list has items in, newest first, for the Decade filter */
 export const listDecades = (l: CatalogList): [string, string][] =>
-  [...new Set(l.items.map((i) => i.year - (i.year % 10)))].sort((a, b) => b - a).map((d) => [String(d), `${d}s`]);
+  [...new Set(l.items.filter((i) => i.year).map((i) => i.year - (i.year % 10)))].sort((a, b) => b - a).map((d) => [String(d), `${d}s`]);
+
+/**
+ * The Marathi and Hindi books suggested each week (lib/suggest.ts): a list like the others, read from the database.
+ * Newest suggestions first. Hidden ones are left out by the database itself. Empty until the first run.
+ */
+export const SUGGESTED = { 'suggested-marathi': ['mr', 'Marathi books to try'], 'suggested-hindi': ['hi', 'Hindi books to try'] } as const;
+export async function suggestedLists(sb: SupabaseClient | null | undefined): Promise<CatalogList[]> {
+  if (!sb) return [];
+  const { data } = await sb.from('book_suggestions').select('language, checked_with, title:titles(slug, title, creator, year, ol_key, cover_url)')
+    .order('created_at', { ascending: false }).limit(300);
+  return Object.entries(SUGGESTED).map(([slug, [lang, title]]) => ({
+    slug, title, kind: 'book' as const,
+    intro: `Well-regarded ${title.split(' ')[0]} books, suggested by an AI model each week. Each one is checked against Open Library, Google Books or Wikipedia before it appears.`,
+    source: { name: 'Suggested by an AI model, checked against real sources', url: '' },
+    items: (data ?? []).filter((r: any) => r.language === lang && r.title).map((r: any): ListItem => ({
+      year: r.title.year ?? 0, title: r.title.title, creator: r.title.creator || undefined, slug: r.title.slug,
+      ol: r.title.ol_key ?? undefined, cover: r.title.cover_url ?? undefined,
+    })),
+  })).filter((l) => l.items.length);
+}
