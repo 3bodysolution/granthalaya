@@ -47,31 +47,31 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **Maker's Schedule, Manager's Schedule** · Paul Graham · paulgraham.com · 2009 · <https://paulgraham.com/makersschedule.html> · Why meetings cost makers more than managers.
 - [x] **Beating the Averages** · Paul Graham · paulgraham.com · 2001 · <https://paulgraham.com/avg.html> · On using Lisp for a startup and why it helped.
 - [x] **You and Your Research** · Richard Hamming · Bell Communications Research talk · 1986 · <https://www.cs.virginia.edu/~robins/YouAndYourResearch.html> · Hamming on why some scientists do important work.
-- [x] **A Mathematician's Lament** · Paul Lockhart · self-published, later a book · 2002 · <https://www.maa.org/external_archive/devlin/LockhartsLament.pdf> · Argues school mathematics hides what mathematics is. ⚠ CHECK (403)
+- [x] **A Mathematician's Lament** · Paul Lockhart · self-published, later a book · 2002 · <https://www.maa.org/external_archive/devlin/LockhartsLament.pdf> · Argues school mathematics hides what mathematics is. ✓ exists (checked by search; the site blocks scripts)
 - [x] **1,000 True Fans** · Kevin Kelly · The Technium · 2008 · <https://kk.org/thetechnium/1000-true-fans/> · Argues a creator can live on a thousand devoted fans.
 - [x] **The Cathedral and the Bazaar** · Eric S. Raymond · self-published · 1997 · <http://www.catb.org/~esr/writings/cathedral-bazaar/cathedral-bazaar/> · Compares two ways of building open source software.
 - [x] **The Rise of "Worse Is Better"** · Richard P. Gabriel · Lisp: Good News, Bad News · 1991 · <https://www.dreamsongs.com/WIB.html> · Argues simple software often beats the more correct kind.
 - [x] **Reflections on Trusting Trust** · Ken Thompson · Communications of the ACM · 1984 · <https://www.cs.cmu.edu/~rdriley/487/papers/Thompson_1984_ReflectionsonTrustingTrust.pdf> · Turing Award lecture on a hidden compiler backdoor.
 - [x] **The Gervais Principle** · Venkatesh Rao · Ribbonfarm · 2009 · <https://ribbonfarm.com/2009/10/07/the-gervais-principle-or-the-office-according-to-the-office/> · Reads office life through the TV show The Office.
 - [x] **Cargo Cult Science** · Richard Feynman · Caltech commencement address · 1974 · <https://calteches.library.caltech.edu/51/2/CargoCult.htm> · Feynman on scientific integrity and fooling yourself.
-- [x] **As We May Think** · Vannevar Bush · The Atlantic · 1945 · <https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/> · Describes the "memex", an early idea of linked information. ⚠ CHECK (403)
-- [x] **Computing Machinery and Intelligence** · Alan Turing · Mind · 1950 · <https://academic.oup.com/mind/article/LIX/236/433/986238> · Poses "Can machines think?" and the imitation game. ⚠ CHECK (403)
-- [x] **The Tragedy of the Commons** · Garrett Hardin · Science · 1968 · <https://www.science.org/doi/10.1126/science.162.3859.1243> · Shared resources get overused when each user gains alone. ⚠ CHECK (403)
+- [x] **As We May Think** · Vannevar Bush · The Atlantic · 1945 · <https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/> · Describes the "memex", an early idea of linked information. ✓ exists (checked by search; the site blocks scripts)
+- [x] **Computing Machinery and Intelligence** · Alan Turing · Mind · 1950 · <https://academic.oup.com/mind/article/LIX/236/433/986238> · Poses "Can machines think?" and the imitation game. ✓ exists (checked by search; the site blocks scripts)
+- [x] **The Tragedy of the Commons** · Garrett Hardin · Science · 1968 · <https://www.science.org/doi/10.1126/science.162.3859.1243> · Shared resources get overused when each user gains alone. ✓ exists (checked by search; the site blocks scripts)
 - [x] **Meditations on Moloch** · Scott Alexander · Slate Star Codex · 2014 · <https://slatestarcodex.com/2014/07/30/meditations-on-moloch/> · On competition forcing outcomes nobody chose.
 - [x] **I Can Tolerate Anything Except the Outgroup** · Scott Alexander · Slate Star Codex · 2014 · <https://slatestarcodex.com/2014/09/30/i-can-tolerate-anything-except-the-outgroup/> · Argues tribal dislike targets the nearest group.
 - [x] **Slow Ideas** · Atul Gawande · The New Yorker · 2013 · <https://www.newyorker.com/magazine/2013/07/29/slow-ideas> · Why some medical practices spread slowly and others fast.
 
 ## Freedom, justice and conscience
 
-- [x] **Letter from Birmingham Jail** · Martin Luther King Jr. · written in jail, widely printed · 1963 · <https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html> · Reply to clergymen who called his protests untimely. ⚠ CHECK (403)
+- [x] **Letter from Birmingham Jail** · Martin Luther King Jr. · written in jail, widely printed · 1963 · <https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html> · Reply to clergymen who called his protests untimely. ✓ exists (checked by search; the site blocks scripts)
 - [x] **Civil Disobedience** · Henry David Thoreau · Aesthetic Papers (as "Resistance to Civil Government") · 1849 · <https://en.wikisource.org/wiki/Civil_Disobedience_(Thoreau)> · Thoreau explains why he refused to pay a tax.
 - [x] **A Modest Proposal** · Jonathan Swift · pamphlet · 1729 · <https://www.gutenberg.org/ebooks/1080> · Satire proposing the Irish poor sell their children as food.
 - [x] **Shooting an Elephant** · George Orwell · New Writing · 1936 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/shooting-an-elephant/> · Orwell as a colonial policeman in Burma.
 - [x] **A Hanging** · George Orwell · The Adelphi · 1931 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/a-hanging/> · Orwell describes witnessing an execution in Burma.
 - [x] **Reflections on Gandhi** · George Orwell · Partisan Review · 1949 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/reflections-on-gandhi/> · Orwell weighs Gandhi's saintliness against his politics.
 - [x] **Why Socialism?** · Albert Einstein · Monthly Review · 1949 · <https://monthlyreview.org/2009/05/01/why-socialism/> · Einstein's essay on the economy and individual freedom.
-- [x] **The Case for Reparations** · Ta-Nehisi Coates · The Atlantic · 2014 · <https://www.theatlantic.com/magazine/archive/2014/06/the-case-for-reparations/361631/> · Traces housing discrimination in the US from the 1930s on. ⚠ CHECK (403)
-- [x] **What to the Slave Is the Fourth of July?** · Frederick Douglass · speech in Rochester · 1852 · <https://teachingamericanhistory.org/document/what-to-the-slave-is-the-fourth-of-july/> · Douglass addresses a July 4 audience about slavery. ⚠ CHECK (403)
+- [x] **The Case for Reparations** · Ta-Nehisi Coates · The Atlantic · 2014 · <https://www.theatlantic.com/magazine/archive/2014/06/the-case-for-reparations/361631/> · Traces housing discrimination in the US from the 1930s on. ✓ exists (checked by search; the site blocks scripts)
+- [x] **What to the Slave Is the Fourth of July?** · Frederick Douglass · speech in Rochester · 1852 · <https://teachingamericanhistory.org/document/what-to-the-slave-is-the-fourth-of-july/> · Douglass addresses a July 4 audience about slavery. ✓ exists (checked by search; the site blocks scripts)
 - [x] **Of Our Spiritual Strivings** · W. E. B. Du Bois · The Souls of Black Folk · 1903 · <https://www.gutenberg.org/ebooks/408> · Opening chapter; introduces "double consciousness". Full book at Gutenberg.
 - [x] **The Soul of Man under Socialism** · Oscar Wilde · The Fortnightly Review · 1891 · <https://www.gutenberg.org/ebooks/1017> · Wilde argues socialism would free people to develop individually.
 - [x] **Why I Am Not a Christian** · Bertrand Russell · lecture, London · 1927 · <https://users.drew.edu/jlenz/whynot.html> · Russell's argument against belief and the church.
@@ -88,31 +88,31 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **A Chapter on Dreams** · Robert Louis Stevenson · Scribner's Magazine · 1888 · <https://www.gutenberg.org/ebooks/614> · How his stories came to him through dreams and night visions.
 - [x] **Gossip on Romance** · Robert Louis Stevenson · Longman's Magazine · 1882 · <https://www.gutenberg.org/ebooks/381> · Argues that romance is the oldest and most lasting form of story.
 - [x] **A Humble Remonstrance** · Robert Louis Stevenson · Longman's Magazine · 1884 · <https://www.gutenberg.org/ebooks/381> · A reply to Henry James defending romance against the psychological novel.
-- [x] **A Note on Realism** · Robert Louis Stevenson · Essays of the Art of Writing · 1883 · <https://www.gutenberg.org/ebooks/492> · Argues realism in fiction depends on selection and form. (check)
-- [x] **Books Which Have Influenced Me** · Robert Louis Stevenson · Essays of the Art of Writing · 1887 · <https://www.gutenberg.org/ebooks/492> · Stevenson lists the books that shaped his own style. (check)
+- [x] **A Note on Realism** · Robert Louis Stevenson · The Magazine of Art · 1883 · <https://www.gutenberg.org/ebooks/492> · Argues realism in fiction depends on selection and form.
+- [x] **Books Which Have Influenced Me** · Robert Louis Stevenson · British Weekly · 1887 · <https://www.gutenberg.org/ebooks/492> · Stevenson lists the books that shaped his own style.
 - [x] **The Decay of Lying** · Oscar Wilde · The Nineteenth Century · 1889 · <https://www.gutenberg.org/ebooks/887> · A dialogue arguing that art, not life, should model fiction.
-- [x] **The Critic as Artist** · Oscar Wilde · The Nineteenth Century · 1890 · <https://www.gutenberg.org/ebooks/887> · A dialogue treating criticism as a creative art. (check)
-- [x] **How to Tell a Story** · Mark Twain · How to Tell a Story and Other Essays · 1895 · <https://www.gutenberg.org/ebooks/142> · Twain on the humour and timing of a told tale. (check)
+- [x] **The Critic as Artist** · Oscar Wilde · The Nineteenth Century · 1890 · <https://www.gutenberg.org/ebooks/887> · A dialogue treating criticism as a creative art.
+- [x] **How to Tell a Story** · Mark Twain · Youth's Companion · 1895 · <https://www.gutenberg.org/ebooks/142> · Twain on the humour and timing of a told tale.
 - [x] **Modern Fiction** · Virginia Woolf · The Common Reader · 1919 · <https://www.gutenberg.org/ebooks/64457> · Woolf argues that novels should capture life as it is felt.
 - [x] **Mr Bennett and Mrs Brown** · Virginia Woolf · Hogarth Essays · 1923 · <https://www.gutenberg.org/ebooks/63022> · Woolf's lecture on how character changed in the modern novel.
-- [x] **Preface to The Nigger of the Narcissus** · Joseph Conrad · Book preface · 1897 · <https://www.gutenberg.org/ebooks/17731> · Conrad says the writer's task is to make readers see. (check)
-- [x] **The Writing of Fiction** · Edith Wharton · Scribner's · 1925 · <https://www.gutenberg.org/ebooks/72446> · Wharton's practical guide to plot, character and the short story. (check)
-- [x] **Introduction to Frankenstein (1831)** · Mary Shelley · Frankenstein, 1831 edition · 1831 · <https://www.gutenberg.org/ebooks/84> · Shelley on how the story came to her in a dream. (check)
+- [x] **Preface to The Nigger of the Narcissus** · Joseph Conrad · Book preface · 1897 · <https://www.gutenberg.org/ebooks/17731> · Conrad says the writer's task is to make readers see.
+- [x] **The Writing of Fiction** · Edith Wharton · Charles Scribner's Sons · 1925 · <https://www.gutenberg.org/ebooks/72446> · Wharton's practical guide to plot, character and the short story.
+- [x] **Introduction to Frankenstein (1831)** · Mary Shelley · Frankenstein, 1831 edition · 1831 · <https://www.gutenberg.org/ebooks/84> · Shelley on how the story came to her in a dream.
 - [x] **A Defence of Detective Stories** · G. K. Chesterton · The Defendant · 1901 · <https://www.gutenberg.org/ebooks/12245> · Chesterton defends detective fiction as a moral and imaginative form.
 - [x] **Of King's Treasuries** · John Ruskin · Sesame and Lilies · 1865 · <https://www.gutenberg.org/ebooks/1293> · Ruskin on reading good books slowly and choosing them with care.
-- [x] **Style** · Walter Pater · Appreciations · 1888 · <https://www.gutenberg.org/ebooks/4037> · Pater on prose craft and choosing each word. (check)
-- [x] **The Rambler, No. 4** · Samuel Johnson · The Rambler · 1750 · <https://www.gutenberg.org/ebooks/43656> · Johnson defends the novel and asks whether it teaches useful truths. (check)
-- [x] **Preface to Joseph Andrews** · Henry Fielding · Joseph Andrews · 1742 · <https://www.gutenberg.org/ebooks/9611> · Fielding calls his novel a comic epic in prose. (check)
-- [x] **An Autobiography** · Anthony Trollope · An Autobiography · 1883 · <https://www.gutenberg.org/ebooks/5978> · Trollope on his daily writing routine and the novel. (check)
+- [x] **Style** · Walter Pater · The Fortnightly Review · 1888 · <https://www.gutenberg.org/ebooks/4037> · Pater on prose craft and choosing each word.
+- [x] **The Rambler, No. 4** · Samuel Johnson · The Rambler · 1750 · <https://www.gutenberg.org/ebooks/43656> · Johnson defends the novel and asks whether it teaches useful truths.
+- [x] **Preface to Joseph Andrews** · Henry Fielding · Joseph Andrews · 1742 · <https://www.gutenberg.org/ebooks/9611> · Fielding calls his novel a comic epic in prose.
+- [x] **An Autobiography** · Anthony Trollope · Blackwood · 1883 · <https://www.gutenberg.org/ebooks/5978> · Trollope on his daily writing routine and the novel.
 - [x] **Preface to Cromwell** · Victor Hugo · Cromwell · 1827 · <https://en.wikisource.org/wiki/Preface_to_Cromwell> · Hugo's manifesto for mixing the grotesque with the sublime in drama.
-- [x] **Sahitya ka Uddeshya** · Premchand · Progressive Writers' address · 1936 · <https://hi.wikisource.org/wiki/%E0%A4%B8%E0%A4%BE%E0%A4%B9%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF_%E0%A4%95%E0%A4%BE_%E0%A4%89%E0%A4%A6%E0%A5%8D%E0%A4%A6%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%AF> · Premchand on literature's purpose and the writer's duty to society. (check)
+- [x] **Sahitya ka Uddeshya** · Premchand · Progressive Writers' address · 1936 · <https://hi.wikisource.org/wiki/%E0%A4%95%E0%A5%81%E0%A4%9B_%E0%A4%B5%E0%A4%BF%E0%A4%9A%E0%A4%BE%E0%A4%B0_-_%E0%A5%A7/%E0%A4%B8%E0%A4%BE%E0%A4%B9%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF_%E0%A4%95%E0%A4%BE_%E0%A4%89%E0%A4%A6%E0%A5%8D%E0%A4%A6%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%AF> · Premchand on literature's purpose and the writer's duty to society.
 - [x] **The Necklace** · Guy de Maupassant · Le Gaulois · 1884 · <https://en.wikisource.org/wiki/The_Necklace> · A woman borrows a necklace that turns out to be paste.
 - [x] **The Story of an Hour** · Kate Chopin · Vogue · 1894 · <https://en.wikisource.org/wiki/The_Story_of_an_Hour> · A woman learns her husband is dead and feels a sudden freedom.
 - [x] **The Yellow Wallpaper** · Charlotte Perkins Gilman · The New England Magazine · 1892 · <https://en.wikisource.org/wiki/The_Yellow_Wallpaper> · A woman confined to a room by her husband's rest cure.
-- [x] **The Open Window** · Saki · The Westminster Gazette · 1914 · <https://en.wikisource.org/wiki/The_Open_Window> · A lie told to a nervous visitor drives the story. (check)
+- [x] **The Open Window** · Saki · Westminster Gazette · 1911 · <https://en.wikisource.org/wiki/The_Open_Window> · A lie told to a nervous visitor drives the story.
 - [x] **The Lady with the Dog** · Anton Chekhov · Russian Thought · 1899 · <https://en.wikisource.org/wiki/The_Lady_with_the_Dog> · A married man and a woman fall in love at a resort.
 - [x] **The Death of Ivan Ilyich** · Leo Tolstoy · Russkaya Mysl · 1886 · <https://en.wikisource.org/wiki/The_Death_of_Ivan_Ilyich> · A magistrate faces his own death and the emptiness of his life.
-- [x] **A Defence of Penny Dreadfuls** · G. K. Chesterton · The Defendant · 1901 · <https://www.gutenberg.org/ebooks/12245> · Chesterton defends cheap popular fiction as honest and imaginative. (check)
-- [x] **Literary Taste: How to Form It** · Arnold Bennett · Literary Taste · 1909 · <https://www.gutenberg.org/ebooks/13852> · Bennett on how a reader can learn to judge good books. (check)
-- [x] **Idgah** · Premchand · Hindi literary magazine · 1933 · <https://hi.wikisource.org/wiki/%E0%A4%88%E0%A4%A6%E0%A4%97%E0%A4%BE%E0%A4%B9> · A boy buys tongs for his grandmother instead of sweets. (check)
-- [x] **The Literature of Knowledge and the Literature of Power** · Thomas De Quincey · Essays on Literature · 1848 · <https://www.gutenberg.org/ebooks/23788> · De Quincey separates books that inform from books that move us. (check)
+- [x] **A Defence of Penny Dreadfuls** · G. K. Chesterton · The Defendant · 1901 · <https://www.gutenberg.org/ebooks/12245> · Chesterton defends cheap popular fiction as honest and imaginative.
+- [x] **Literary Taste: How to Form It** · Arnold Bennett · Literary Taste · 1909 · <https://www.gutenberg.org/ebooks/13852> · Bennett on how a reader can learn to judge good books.
+- [x] **Idgah** · Premchand · Mansarovar · ? · <https://hi.wikisource.org/wiki/%E0%A4%AE%E0%A4%BE%E0%A4%A8%E0%A4%B8%E0%A4%B0%E0%A5%8B%E0%A4%B5%E0%A4%B0_%E0%A5%A7/%E0%A4%88%E0%A4%A6%E0%A4%97%E0%A4%BE%E0%A4%B9> · A boy buys tongs for his grandmother instead of sweets.
+- [x] **The Literature of Knowledge and the Literature of Power** · Thomas De Quincey · North British Review · 1848 · <https://www.gutenberg.org/ebooks/23788> · De Quincey separates books that inform from books that move us.

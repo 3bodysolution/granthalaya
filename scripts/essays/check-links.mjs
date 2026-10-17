@@ -40,7 +40,9 @@ for (let i = 0; i < lines.length; i++) {
   if (!m) continue
   total++
   const r = await probe(m[1])
-  if (!r.ok) {
+  if (!r.ok && [401, 403, 429].includes(r.status) && lines[i].includes('✓')) {
+    // refused the script but confirmed by hand
+  } else if (!r.ok) {
     const refused = [401, 403, 429].includes(r.status)
     lines[i] += ` ⚠ ${refused ? 'CHECK' : 'DEAD'} (${r.status})`
     ;(refused ? check : dead).push(lines[i].match(/\*\*(.*?)\*\*/)?.[1] ?? m[1])
