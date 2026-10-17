@@ -9,7 +9,7 @@ Read this at the start of a session; update it when a part is done.
 - [ ] Step 3. Discovery, in four parts:
   - [x] Part 1. Films, TV and Books front pages (rows of posters, browse chips) and the discovery-first home page.
   - [x] Part 2. Prize and classics lists (details below).
-  - [ ] Part 3. About 50 to 60 essays chosen from readsomethinggreat.com, credited, each linking to the original.
+  - [ ] Part 3. About 50 to 60 essays, chosen by Granthalaya, each linking to a free, legal original. readsomethinggreat.com has no archive (only 5 current essays on its homepage), so only those 5 carry "Found via Read Something Great". Candidates are in `docs/essay-candidates.md` (a checklist for Sarthak to tick); `node scripts/essays/check-links.mjs` marks dead links. Next: tick, fix or drop the dead ones, then build `src/data/essays.json` and the page.
   - [ ] Part 4. Marathi and Hindi book lists suggested by a free AI model each week, every book checked against Open Library, Google Books or Wikipedia, with an admin "hide".
 - [ ] Step 4. Import from Goodreads, Letterboxd or our own export zip.
 - [ ] Go live: re-run `npm run migrate`, merge `phase-1` into `main`, add the environment variables to Production in Vercel. Before that: `site.contact`, read Privacy and Terms again, Google branding links and publish the Google app, `npm audit`.

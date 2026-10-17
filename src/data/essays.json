@@ -1,0 +1,43 @@
+{
+  "source": {
+    "name": "Read Something Great",
+    "url": "https://readsomethinggreat.com"
+  },
+  "items": [
+    {
+      "title": "Personal Renewal",
+      "author": "John W. Gardner",
+      "publication": null,
+      "year": null,
+      "link": "https://www.pbs.org/johngardner/sections/writings_speech_1.html"
+    },
+    {
+      "title": "Andrew Chen on marketplaces",
+      "author": "Andrew Chen",
+      "publication": null,
+      "year": null,
+      "link": "https://stripe.com/es-us/atlas/guides/andrew-chen-marketplaces"
+    },
+    {
+      "title": "The Epic Story of Container Shipping",
+      "author": "Venkat",
+      "publication": null,
+      "year": null,
+      "link": "https://ribbonfarm.com/2009/07/07/the-epic-story-of-container-shipping/"
+    },
+    {
+      "title": "The illusion of moral decline",
+      "author": "Adam Mastroianni",
+      "publication": null,
+      "year": null,
+      "link": "https://www.experimental-history.com/p/the-illusion-of-moral-decline"
+    },
+    {
+      "title": "In Praise of the Gods",
+      "author": "Simon Sarris",
+      "publication": null,
+      "year": null,
+      "link": "https://simonsarris.substack.com/p/in-praise-of-the-gods"
+    }
+  ]
+}
