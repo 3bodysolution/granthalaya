@@ -11,3 +11,4 @@ You check pages of the Granthalaya site, usually the local copy at http://localh
 - Note anything broken: a status other than 200, an empty row, a heading that reads wrong, an error in the dev server output.
 - Never open or print `.env`.
 - Reply with a short list: what you checked, what was right, what was wrong. Nothing else.
+- To look at layout, run `npm run shots -- /films/ /books/` (phone 390px and desktop 1280px pictures go in `.shots/`), (in Git Bash start the line with `MSYS_NO_PATHCONV=1`), then open the pictures with Read. It also says when a page scrolls sideways on a phone.
