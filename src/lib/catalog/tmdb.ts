@@ -70,7 +70,7 @@ export interface ShowPage extends Common {
   seasons: { n: number; name: string; episodes?: number; year?: number; poster?: string; overview: string }[];
 }
 
-const person = (p: any, role: string): Person => ({ id: p.id, name: p.name, role, photo: img(p.profile_path, 'w185'), href: personHref(p.id, p.name) });
+const person = (p: { id: number; name: string; profile_path?: string | null }, role: string): Person => ({ id: p.id, name: p.name, role, photo: img(p.profile_path, 'w185'), href: personHref(p.id, p.name) });
 function where(wp: any): Where | null {
   const r = wp?.results?.[REGION];
   if (!r) return null;

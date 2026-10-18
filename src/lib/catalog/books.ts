@@ -36,8 +36,8 @@ export function bookKey(param: string | undefined): { ol: string } | { gb: strin
 export const authorKey = (param: string | undefined) => { const m = String(param ?? '').match(/^(ol\d{1,10}a)(?:-|$)/i); return m ? m[1].toUpperCase() : null; };
 
 const cover = (id?: number | null, size: 'S' | 'M' | 'L' = 'L') => (id && id > 0 ? `https://covers.openlibrary.org/b/id/${id}-${size}.jpg` : undefined);
-const gbCover = (links: any) => {
-  const u: string | undefined = links?.thumbnail ?? links?.smallThumbnail;
+const gbCover = (links?: { thumbnail?: string; smallThumbnail?: string }) => {
+  const u = links?.thumbnail ?? links?.smallThumbnail;
   return u ? u.replace(/^http:/, 'https:').replace(/&edge=curl/, '') : undefined;
 };
 

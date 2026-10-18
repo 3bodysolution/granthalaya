@@ -3,7 +3,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
-import { myMarks } from './onsite';
+import { myMarks, type Mark } from './onsite';
 import { savedId } from '../saved';
 import { getList, listTile, listBrowseHref, type CatalogList } from '../lists';
 
@@ -129,10 +129,10 @@ export async function homeRows(): Promise<Row[]> {
 export async function markRows(sb: SupabaseClient | null | undefined, me: { id: string } | null, rows: Row[]): Promise<Row[]> {
   if (!sb || !me) return rows;
   const keys = rows.flatMap((r) => r.items.map((i) => {
-    const s = i.save as any;
+    const s = i.save as { olKey?: string } | undefined;
     return i.kind === 'book' ? { kind: 'book', ol: s?.olKey } : { kind: i.kind, tmdb: Number(i.href.match(/\/(\d+)-/)?.[1]) };
   })).filter((k) => k.ol || k.tmdb);
-  const marks = await myMarks(sb, me, keys).catch(() => new Map<string, string>());
+  const marks = await myMarks(sb, me, keys).catch(() => new Map<string, Mark>());
   if (!marks.size) return rows;
   return rows.map((r) => ({
     ...r,

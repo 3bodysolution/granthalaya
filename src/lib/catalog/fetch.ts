@@ -49,7 +49,7 @@ export const slug = (s: string) =>
 /** plain text from catalogue descriptions (they sometimes carry markdown or HTML) */
 export function plain(s: unknown, max = 2400): string {
   if (typeof s !== 'string') {
-    if (s && typeof s === 'object' && typeof (s as any).value === 'string') return plain((s as any).value, max);
+    if (s && typeof s === 'object' && typeof (s as { value?: unknown }).value === 'string') return plain((s as { value: string }).value, max);
     return '';
   }
   let t = s

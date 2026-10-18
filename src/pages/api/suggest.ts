@@ -17,7 +17,7 @@ export const GET: APIRoute = async ({ request, url }) => {
   if (!(lang in LANGS)) return json({ ok: true, skipped: 'nothing to do today' });
   try {
     return json({ ok: true, ...(await suggestBooks(lang, { dry: url.searchParams.get('dry') === '1' })) });
-  } catch (e: any) {
-    return json({ ok: false, error: String(e?.message ?? e).slice(0, 200) }, 500);
+  } catch (e) {
+    return json({ ok: false, error: String(e instanceof Error ? e.message : e).slice(0, 200) }, 500);
   }
 };

@@ -7,6 +7,7 @@ import { loadProfile, loadShelf, href, palette, radius, kind, fullTitle } from '
 import { searchAll } from '../../lib/catalog/tmdb';
 import { searchBooks } from '../../lib/catalog/books';
 export const prerender = false;
+type Member = { username: string; display_name: string | null; avatar_url: string | null };
 
 export const GET: APIRoute = async ({ locals, url }) => {
   const text = (url.searchParams.get('q') ?? '').trim().slice(0, 100);
@@ -18,9 +19,9 @@ export const GET: APIRoute = async ({ locals, url }) => {
       searchBooks(text).catch(() => ({ books: [], authors: [] })),
       locals.supabase && like
         ? locals.supabase.from('profiles').select('username, display_name, avatar_url').or(`username.ilike.%${like}%,display_name.ilike.%${like}%`).limit(4)
-        : Promise.resolve({ data: [] as any[] }),
+        : Promise.resolve({ data: [] as Member[] }),
     ]);
-    const members = ((mem as any).data ?? []).map((p: any) => ({ username: p.username, name: p.display_name || p.username, avatar: p.avatar_url, href: `/@${p.username}/` }));
+    const members = ((mem.data ?? []) as Member[]).map((p) => ({ username: p.username, name: p.display_name || p.username, avatar: p.avatar_url, href: `/@${p.username}/` }));
     return new Response(JSON.stringify({ ...tm, ...bk, members }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
   }
   const u = (url.searchParams.get('u') ?? '').toLowerCase();

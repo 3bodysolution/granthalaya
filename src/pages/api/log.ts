@@ -29,16 +29,17 @@ function fields(b: Record<string, any>, kind: Kind, status: Status) {
   };
 }
 /** the lines you underlined, checked */
+type LineIn = { text?: unknown; where?: unknown; note?: unknown; mine?: unknown };
 function lines(b: Record<string, any>) {
   const list = Array.isArray(b.lines) ? b.lines : b.line ? [b.line] : [];
-  return list.slice(0, 50).map((l: any, i: number) => ({
+  return list.slice(0, 50).map((l: LineIn | null, i: number) => ({
     body: str(l?.text, 2000), where_at: str(l?.where, 80) ?? '', note: str(l?.note, 1000) ?? '', mine: l?.mine === true, position: i,
-  })).filter((l: any) => l.body);
+  })).filter((l) => l.body);
 }
 
 async function kindOf(ctx: APIContext, titleId: string): Promise<{ kind: Kind; slug: string } | null> {
   const { data } = await ctx.locals.supabase.from('titles').select('kind, slug').eq('id', titleId).maybeSingle();
-  return (data as any) ?? null;
+  return (data as { kind: Kind; slug: string } | null) ?? null;
 }
 
 export const POST: APIRoute = async (ctx) => {

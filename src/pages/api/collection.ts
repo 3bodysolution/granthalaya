@@ -18,9 +18,9 @@ export const GET: APIRoute = async (ctx) => {
   if (error) return oops(dbMessage(error));
   return json({
     ok: true,
-    collections: (data ?? []).map((t: any) => ({
+    collections: ((data ?? []) as { id: string; slug: string; name: string; thread_items?: { title_id: string }[] }[]).map((t) => ({
       id: t.id, slug: t.slug, name: t.name, count: (t.thread_items ?? []).length,
-      has: !!title && (t.thread_items ?? []).some((i: any) => i.title_id === title),
+      has: !!title && (t.thread_items ?? []).some((i) => i.title_id === title),
     })),
   });
 };

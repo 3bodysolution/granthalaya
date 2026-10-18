@@ -23,9 +23,10 @@ const httpUrl = (v: unknown) => {
 };
 
 /** tidy whatever the browser sent about a title */
-export function cleanHit(h: any): Hit | null {
-  if (!h || typeof h !== 'object') return null;
-  const kind = KINDS.includes(h.kind) ? (h.kind as Kind) : null;
+export function cleanHit(raw: unknown): Hit | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const h = raw as Record<string, unknown>;
+  const kind = KINDS.includes(h.kind as Kind) ? (h.kind as Kind) : null;
   const title = clip(h.title, 300);
   if (!kind || !title) return null;
   const cover = clip(h.cover, 600);

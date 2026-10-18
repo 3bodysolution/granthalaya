@@ -74,9 +74,9 @@ export async function suggestedLists(sb: SupabaseClient | null | undefined): Pro
     slug, title, kind: 'book' as const,
     intro: `Well-regarded ${title.split(' ')[0]} books, suggested by an AI model each week. Each one is checked against Open Library, Google Books or Wikipedia before it appears.`,
     source: { name: 'Suggested by an AI model, checked against real sources', url: '' },
-    items: (data ?? []).filter((r: any) => r.language === lang && r.title).map((r: any): ListItem => ({
-      year: r.title.year ?? 0, title: r.title.title, creator: r.title.creator || undefined, slug: r.title.slug,
-      ol: r.title.ol_key ?? undefined, cover: r.title.cover_url ?? undefined,
+    items: ((data ?? []) as unknown as { language: string; title: { slug: string; title: string; creator: string | null; year: number | null; ol_key: string | null; cover_url: string | null } | null }[]).filter((r) => r.language === lang && r.title).map((r): ListItem => ({
+      year: r.title!.year ?? 0, title: r.title!.title, creator: r.title!.creator || undefined, slug: r.title!.slug,
+      ol: r.title!.ol_key ?? undefined, cover: r.title!.cover_url ?? undefined,
     })),
   })).filter((l) => l.items.length);
 }

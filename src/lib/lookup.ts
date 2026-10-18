@@ -34,7 +34,7 @@ const yearOf = (d?: string | null) => (d ? +d.slice(0, 4) || undefined : undefin
 /* ——— books: Open Library (free, no key) ——— */
 export async function books(q: string, limit = 6): Promise<Hit[]> {
   const j = await getJSON(`${base.ol()}/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year,number_of_pages_median,cover_i`);
-  return (j.docs ?? []).map((d: any) => ({
+  return (j.docs ?? []).map((d: { title: string; author_name?: string[]; first_publish_year?: number; number_of_pages_median?: number; cover_i?: number; key?: string }): Hit => ({
     kind: 'book', title: d.title, creator: d.author_name?.[0], year: d.first_publish_year, pages: d.number_of_pages_median,
     cover: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-L.jpg` : undefined,
     olKey: typeof d.key === 'string' ? d.key.replace('/works/', '') : undefined,

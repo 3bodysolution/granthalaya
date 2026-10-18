@@ -52,8 +52,8 @@ async function ask(text: string): Promise<Candidate[]> {
   }
   const list = JSON.parse(raw.replace(/^```(?:json)?|```$/g, '').trim()).books;
   return (Array.isArray(list) ? list : [])
-    .filter((b: any) => typeof b?.title === 'string' && typeof b?.author === 'string' && b.title.trim() && b.author.trim())
-    .map((b: any) => ({ title: b.title.trim().slice(0, 200), author: b.author.trim().slice(0, 120), year: Number.isInteger(b.year) && b.year > 1000 && b.year < 2100 ? b.year : undefined }));
+    .filter((b: { title?: unknown; author?: unknown }): b is { title: string; author: string; year?: unknown } => typeof b?.title === 'string' && typeof b?.author === 'string' && !!b.title.trim() && !!b.author.trim())
+    .map((b) => ({ title: b.title.trim().slice(0, 200), author: b.author.trim().slice(0, 120), year: typeof b.year === 'number' && Number.isInteger(b.year) && b.year > 1000 && b.year < 2100 ? b.year : undefined }));
 }
 
 /** Is this a real book? Open Library first, then Google Books, then Wikipedia. */

@@ -37,7 +37,7 @@ const [list, svc, rowsRaw] = await Promise.all([
 ]);
 const sb = Astro.locals.supabase;
 const [marks, rows] = await Promise.all([
-  sb && !front && !picked ? myMarks(sb, Astro.locals.me, list.items.map((c) => ({ kind: c.kind, tmdb: c.id }))) : Promise.resolve(new Map<string, string>()),
+  sb && !front && !picked ? myMarks(sb, Astro.locals.me, list.items.map((c) => ({ kind: c.kind, tmdb: c.id }))) : Promise.resolve(new Map()),
   markRows(sb, Astro.locals.me, rowsRaw),
 ]);
 const serviceName = svc.find((s) => s.id === service)?.name;

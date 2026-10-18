@@ -12,7 +12,7 @@ export async function plainOf(sb: SupabaseClient, logs: LogRow[]): Promise<Set<s
   const maybe = logs.filter((l) => l.status === 'want' && l.rating == null && !l.loved && !l.notes && !l.where_seen && visits.get(l.title_id) === 1);
   if (!maybe.length) return new Set();
   const { data } = await sb.from('highlights').select('log_id').in('log_id', maybe.map((l) => l.id));
-  const withLines = new Set((data ?? []).map((h: any) => h.log_id));
+  const withLines = new Set((data ?? []).map((h: { log_id: string }) => h.log_id));
   return new Set(maybe.filter((l) => !withLines.has(l.id)).map((l) => l.id));
 }
 

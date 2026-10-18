@@ -7,7 +7,7 @@ import { createServerClient, parseCookieHeader } from '@supabase/ssr';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { AstroCookies } from 'astro';
 
-export const env = (k: string): string => ((globalThis as any).process?.env?.[k] ?? (import.meta.env as Record<string, string>)[k] ?? '') as string;
+export const env = (k: string): string => ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[k] ?? (import.meta.env as Record<string, string>)[k] ?? '') as string;
 
 export const supabaseReady = () => !!(env('PUBLIC_SUPABASE_URL') && env('PUBLIC_SUPABASE_PUBLISHABLE_KEY'));
 
