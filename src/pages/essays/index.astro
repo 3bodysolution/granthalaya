@@ -14,12 +14,13 @@ const picked = themes.find((t) => t.slug === pick);
 // which of these are already on your shelf: one lookup for the whole page
 const sb = Astro.locals.supabase;
 const marks = await essayMarks(sb, Astro.locals.me, (picked ? picked.items : allEssays).map((e) => e.link)).catch(() => new Map());
-const fields = [{ name: 'theme', label: 'Theme', value: picked?.slug ?? '', options: [['', 'All themes'], ...themes.map((t) => [t.slug, t.name])] as [string, string][] }];
+const fields = [{ name: 'theme', label: 'Theme', value: picked?.slug ?? '', options: [['', 'All themes'], ...themes.map((t) => [t.slug, t.label])] as [string, string][] }];
+const heading = !picked ? 'Essays' : picked.name === 'Picks' ? 'Picks' : `Essays ${picked.label.replace('On ', 'on ')}`;
 const hasPicks = !picked || picked.name === 'Picks';
 ---
-<Base title={picked ? `${picked.name} essays` : 'Essays'} active="essays" description="Essays worth reading, each linking to a free copy at the original.">
+<Base title={heading} active="essays" description="Essays worth reading, each linking to a free copy at the original.">
   <section class="pad head">
-    <h1 class="title">{picked ? `${picked.name} essays` : 'Essays'}</h1>
+    <h1 class="title">{heading}</h1>
     <p class="muted lede">{picked ? `${picked.items.length} essays` : `${total} essays`} worth an afternoon, chosen by us. Each opens at its original home.</p>
     <Filters fields={fields} />
   </section>
@@ -32,7 +33,7 @@ const hasPicks = !picked || picked.name === 'Picks';
   ) : (
     <section class="pad rows">
       {themes.map((t) => (
-        <PosterRow title={t.name} tone="essay" href={t.items.length > ROW ? `/essays/?theme=${t.slug}` : undefined} col="min(290px, 80vw)">
+        <PosterRow title={t.label} tone="essay" href={t.items.length > ROW ? `/essays/?theme=${t.slug}` : undefined} col="min(290px, 80vw)">
           {t.items.slice(0, ROW).map((e) => <li><EssayCard e={e} mark={marks.get(e.link)} /></li>)}
         </PosterRow>
       ))}

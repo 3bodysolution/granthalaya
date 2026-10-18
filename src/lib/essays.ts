@@ -5,7 +5,9 @@ import { authorHref } from './catalog/books';
 export type Essay = (typeof data.themes)[number]['items'][number];
 export const source = data.source;
 /** one word each; the address is /essays/?theme=<slug> */
-export const themes = data.themes.map((t) => ({ name: t.name, slug: t.name.toLowerCase(), items: t.items as Essay[] }));
+/** shown as "On writing", "On India" and so on; Picks is not a subject, so it keeps its name */
+const label = (n: string) => (n === 'Picks' ? n : `On ${n === 'India' ? n : n.toLowerCase()}`);
+export const themes = data.themes.map((t) => ({ name: t.name, label: label(t.name), slug: t.name.toLowerCase(), items: t.items as Essay[] }));
 export const allEssays = themes.flatMap((t) => t.items);
 export const total = allEssays.length;
 
