@@ -17,7 +17,7 @@ export const POST: APIRoute = async (ctx) => {
   if (!b) return oops('Nothing to save.');
   if (b.agree !== true) return oops('Please agree to the terms and privacy policy.');
   let ip: string | null = null;
-  try { ip = clientAddress; } catch {}
+  try { ip = clientAddress; } catch { /* address-less (local dev) */ }
   if (!(await isHuman(b.turnstile, ip))) return oops('The quick check didn’t go through. Please wait a moment and try again.');
 
   const username = (str(b.username, 40) ?? '').toLowerCase().replace(/^@/, '');

@@ -54,7 +54,7 @@ export function factsLater(title: { id: string; kind: Kind; title: string; year?
   const job = (async () => {
     const t = await getTrivia({ title: title.title, year: title.year ?? undefined, creator: title.creator ?? undefined, type: title.kind }, keys);
     if (t?.trivia?.length) await adminClient().from('titles').update({ trivia: t.trivia, trivia_source: t.source }).eq('id', title.id).eq('trivia', '[]');
-  })().catch(() => {});
+  })().catch((e) => console.error('Facts for a new title could not be picked', e));
   try { waitUntil(job); } catch { /* not on Vercel: the promise just finishes on its own */ }
 }
 

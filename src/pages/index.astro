@@ -17,7 +17,7 @@ const sb = Astro.locals.supabase;
 let featured: Awaited<ReturnType<typeof loadFeatured>> = [];
 // what's popular this week, for everyone (the rows load alongside the visitor's own shelf)
 const rowsP = homeRows();
-try { if (sb) featured = await loadFeatured(sb, 6); } catch {}
+try { if (sb) featured = await loadFeatured(sb, 6); } catch (e) { console.error('Home: featured shelves could not be loaded', e); }
 
 // signed in: your own home
 let shelf: Awaited<ReturnType<typeof loadShelf>> = [];

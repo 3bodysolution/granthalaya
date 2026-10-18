@@ -57,7 +57,7 @@ const avatar = me?.avatar_url;
     (function () {
       function apply() {
         var t = null;
-        try { t = localStorage.getItem('theme'); } catch (e) {}
+        try { t = localStorage.getItem('theme'); } catch (e) { /* storage */ }
         document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark';
       }
       apply();
@@ -181,7 +181,7 @@ const avatar = me?.avatar_url;
       if (!t) return;
       const root = document.documentElement;
       const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
-      const flip = () => { root.dataset.theme = next; try { localStorage.setItem('theme', next); } catch (e) {} };
+      const flip = () => { root.dataset.theme = next; try { localStorage.setItem('theme', next); } catch (e) { /* storage */ } };
       const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
       // @ts-ignore
       if (document.startViewTransition && !reduce) document.startViewTransition(flip); else flip();
@@ -212,10 +212,10 @@ const avatar = me?.avatar_url;
       setTimeout(close, opts.action ? 5000 : 3200);
     }
     // a message to show once the page has reloaded (with Undo for something just saved)
-    function later(note: { msg: string; redo?: string }) { try { sessionStorage.setItem('toastNext', JSON.stringify(note)); } catch (e) {} }
+    function later(note: { msg: string; redo?: string }) { try { sessionStorage.setItem('toastNext', JSON.stringify(note)); } catch (e) { /* storage */ } }
     document.addEventListener('astro:page-load', () => {
       let note: { msg: string; redo?: string } | null = null;
-      try { note = JSON.parse(sessionStorage.getItem('toastNext') || 'null'); sessionStorage.removeItem('toastNext'); } catch (e) {}
+      try { note = JSON.parse(sessionStorage.getItem('toastNext') || 'null'); sessionStorage.removeItem('toastNext'); } catch (e) { /* storage */ }
       if (!note) return;
       // the only Undo left: a removal that took its page away (your own saved entry), which puts the save back
       const redo = note.redo;
@@ -462,7 +462,7 @@ const avatar = me?.avatar_url;
     document.addEventListener('click', async (ev) => {
       const b = (ev.target as Element).closest<HTMLButtonElement>('[data-copy]');
       if (!b) return;
-      try { await navigator.clipboard.writeText(b.dataset.copy!); } catch (e) {}
+      try { await navigator.clipboard.writeText(b.dataset.copy!); } catch (e) { /* clipboard */ }
       const label = b.getAttribute('aria-label');
       if (b.classList.contains('copied')) return;
       b.classList.add('copied');

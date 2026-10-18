@@ -16,7 +16,7 @@ try {
     const m = line.match(/^\s*([A-Z_]+)\s*=\s*"?([^"#]*?)"?\s*(#.*)?$/);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
   }
-} catch {}
+} catch { /* no .env */ }
 const keys = { gemini: process.env.GEMINI_API_KEY, geminiModel: process.env.GEMINI_MODEL, groq: process.env.GROQ_API_KEY, groqModel: process.env.GROQ_MODEL };
 if (!keys.gemini && !keys.groq) { console.log('No GEMINI_API_KEY or GROQ_API_KEY in .env, so there is nothing to do.'); process.exit(0); }
 if (!process.env.PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) { console.log('Add PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to .env first.'); process.exit(1); }

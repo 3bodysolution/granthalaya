@@ -30,7 +30,7 @@ for (const [label, viewport] of Object.entries(sizes)) {
   page.on('pageerror', (e) => errors.push(e.message));
   for (const p of pages) {
     errors.length = 0;
-    await page.goto(base + p, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => {});
+    await page.goto(base + p, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => { /* timeout: take the picture of what loaded */ });
     await page.waitForTimeout(600);
     const file = `${out}/${nameOf(p)}.${label}.png`;
     await page.screenshot({ path: file, fullPage: !fold });

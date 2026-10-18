@@ -13,6 +13,6 @@ export const DELETE: APIRoute = async (ctx) => {
   // removing the sign-in removes everything that hangs off it (profile, shelf, lines, collections, blocks)
   const { error } = await adminClient().auth.admin.deleteUser(me.id);
   if (error) return oops('Couldn’t delete the account just now. Please try again.', 500);
-  await ctx.locals.supabase.auth.signOut().catch(() => {});
+  await ctx.locals.supabase.auth.signOut().catch(() => { /* best-effort */ });
   return json({ ok: true });
 };

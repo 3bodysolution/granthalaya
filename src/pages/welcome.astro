@@ -12,7 +12,7 @@ if (!user) return Astro.redirect(`/signin/?next=${encodeURIComponent(next)}`);
 if (Astro.locals.me) return Astro.redirect(next);
 const seed = user.name || user.email?.split('@')[0] || 'reader';
 let ideas: string[] = [];
-try { ideas = await suggestUsernames(seed, user.id); } catch {}
+try { ideas = await suggestUsernames(seed, user.id); } catch (e) { console.error('Welcome: username ideas could not be made', e); }
 const first = ideas[0] ?? '';
 const siteKey = turnstileSiteKey();
 ---

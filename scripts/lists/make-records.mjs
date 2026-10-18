@@ -19,7 +19,7 @@ try {
     const m = line.match(/^\s*([A-Z_]+)\s*=\s*"?([^"#]*?)"?\s*(#.*)?$/);
     if (m && !process.env[m[1]]) process.env[m[1]] = m[2];
   }
-} catch {}
+} catch { /* no .env */ }
 const dry = process.argv.includes('--dry');
 const url = process.env.PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SECRET_KEY;
 if (!url || !key) { console.log('Add PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to .env first.'); process.exit(1); }

@@ -24,7 +24,7 @@ try {
     const { data: ps } = await adminClient().from('profiles').select('id, username, display_name').in('id', ids);
     blocked = ps ?? [];
   }
-} catch {}
+} catch (e) { console.error('Settings: the blocked list could not be loaded', e); }
 const googlePhoto = Astro.locals.user?.avatar ?? null;
 const nextChange = me.username_changed_at ? new Date(new Date(me.username_changed_at).getTime() + 30 * 86400000) : null;
 const canRename = !nextChange || nextChange < new Date();
