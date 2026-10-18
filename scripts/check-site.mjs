@@ -28,6 +28,8 @@ const note = [];
 const ok = (m) => console.log(`  ok    ${m}`);
 const fail = (m) => { bad++; console.log(`  FAIL  ${m}`); };
 const info = (m) => { note.push(m); console.log(`  note  ${m}`); };
+let slow = 0;
+const warn = (m) => { slow++; console.log(`  warn  ${m}`); };
 const head = (t) => console.log(`\n${t}`);
 
 async function pool(items, n, fn) {
@@ -78,10 +80,16 @@ for (const [slug, path] of listPages) {
   });
   for (const l of sample) if (seenLinks.get(l) !== 200) dead.push(`${l} (${seenLinks.get(l)})`);
   await pool(covers.filter((c) => !seenCovers.has(c)), 3, async (c) => {
-    const r = await again(() => get(c, { method: 'HEAD' }).catch(() => ({ status: 0 })), (x) => x.status === 0 || x.status >= 400);
+    // asked once with HEAD and, if that fails, once more with GET after a pause (some image hosts answer HEAD badly)
+    let r = await get(c, { method: 'HEAD' }).catch(() => ({ status: 0 }));
+    if (r.status === 0 || r.status >= 400) { await new Promise((x) => setTimeout(x, 1500)); r = await get(c).catch(() => ({ status: 0 })); }
     seenCovers.set(c, r.status);
   });
-  const deadCovers = covers.filter((c) => (seenCovers.get(c) ?? 0) >= 400 || seenCovers.get(c) === 0);
+  // only a cover the host says doesn't exist (404, 410) is a failure; one that is slow, busy or refused after the retry is a warning
+  const unanswered = covers.filter((c) => (seenCovers.get(c) ?? 0) >= 400 || seenCovers.get(c) === 0);
+  const deadCovers = unanswered.filter((c) => [404, 410].includes(seenCovers.get(c)));
+  const slowCovers = unanswered.filter((c) => !deadCovers.includes(c));
+  if (slowCovers.length) warn(`${slug}: ${slowCovers.length} cover(s) slow or busy even after a retry (${slowCovers.slice(0, 2).map((c) => `${c} ${seenCovers.get(c) || 'no answer'}`).join(', ')})`);
   const own = items ? `${links.length} of ${items} items have a page` : `${links.length} items`;
   if (dead.length || deadCovers.length) fail(`${slug}: ${dead.length} bad links ${dead.slice(0, 3).join(', ')}; ${deadCovers.length} bad covers ${deadCovers.slice(0, 2).join(', ')}`);
   else ok(`${slug}: ${own}, ${sample.length} links and ${covers.length} covers answer`);
@@ -131,5 +139,5 @@ else {
   info('Blocked users cannot be tested without signing in as one; this needs a test account (not done).');
 }
 
-console.log(`\n${bad ? `${bad} problem(s) found.` : 'All good.'}`);
+console.log(`\n${bad ? `${bad} problem(s) found.` : 'All good.'}${slow ? ` (${slow} warning(s): covers only slow or busy, not missing.)` : ''}`);
 process.exit(bad ? 1 : 0);

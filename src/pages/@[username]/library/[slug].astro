@@ -143,12 +143,12 @@ const pinnedId = shown?.pinned ? shown.id : null;
               : [d.creator, d.year, d.pages && `about ${Math.round(d.pages / 10) * 10} pages`].filter(Boolean).join(' · ')}
           </p>
           <div class="stats rise d4 num">
-            <div class="stat"><span class="eyebrow">{done ? 'Rating' : 'Status'}</span>
+            <div class="stat"><span class="sub">{done ? 'Rating' : 'Status'}</span>
               {done ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s || 'Not rated'}</span> : <b>{sLabel}</b>}
             </div>
-            <div class="stat"><span class="eyebrow">{d.status === 'want' ? 'Added' : done ? (isFilm ? 'Watched' : 'Finished') : 'Started'}</span><b>{long(done ? (d.finished ?? d.date) : (d.started ?? d.date))}</b></div>
-            <div class="stat"><span class="eyebrow">{isFilm ? 'Runtime' : 'Reading time'}</span><b>{isFilm ? duration(mins) : `≈ ${duration(mins)}`}</b></div>
-            <div class="stat"><span class="eyebrow">{isFilm ? 'Times seen' : 'Times read'}</span><b>{d.again && d.times === 1 ? (isFilm ? 'A rewatch' : 'A re-read') : timesWord(d.times, isFilm ? 'watch' : 'read')}</b></div>
+            <div class="stat"><span class="sub">{d.status === 'want' ? 'Added' : done ? (isFilm ? 'Watched' : 'Finished') : 'Started'}</span><b>{long(done ? (d.finished ?? d.date) : (d.started ?? d.date))}</b></div>
+            <div class="stat"><span class="sub">{isFilm ? 'Runtime' : 'Reading time'}</span><b>{isFilm ? duration(mins) : `≈ ${duration(mins)}`}</b></div>
+            <div class="stat"><span class="sub">{isFilm ? 'Times seen' : 'Times read'}</span><b>{d.again && d.times === 1 ? (isFilm ? 'A rewatch' : 'A re-read') : timesWord(d.times, isFilm ? 'watch' : 'read')}</b></div>
           </div>
           {d.private && <span class="priv"><Lock width="15" height="15" /> Only you can see this entry</span>}
           {notes && (
@@ -159,13 +159,13 @@ const pinnedId = shown?.pinned ? shown.id : null;
           )}
           {inCols.length > 0 && (
             <div class="chips rise d6">
-              <span class="eyebrow" style="margin-right: 4px">In collections</span>
+              <span class="sub" style="margin-right: 4px">In collections</span>
               {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
             </div>
           )}
           {visits.length > 1 && (
             <div class="stack rise d6" style="gap: 10px; margin-top: 8px">
-              <p class="eyebrow">Every time</p>
+              <p class="sub">Every time</p>
               <ol class="visits">
                 {visits.map((v) => (
                   <li><span class="num">{long(v.data.date)}</span><span>{statusLabel(v.data.type, v.data.status)}{v.data.again ? ' · again' : ''}{stars(v) ? ` · ${stars(v)}` : ''}</span><span class="muted">{excerpt(v, 80)}</span></li>
@@ -232,7 +232,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
                     title={pinnedId === h.id ? 'Pinned to your profile' : 'Pin to your profile'}><Mark size={14} /><span>{pinnedId === h.id ? 'Pinned' : 'Pin to profile'}</span></button>
                 )}
                 <p class:list={['serif q', h.mine && 'own']}>{h.mine ? h.text : `“${h.text}”`}</p>
-                {h.note && <p class="soft-note"><span class="eyebrow">My note</span>{h.note}</p>}
+                {h.note && <p class="soft-note"><span class="sub">My note</span>{h.note}</p>}
                 {h.where && <span class="num muted" style="margin-top: auto; font-size: 12px">{h.where}</span>}
               </article>
             ))}
@@ -257,7 +257,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
   ) : (
     <article class="essay-page">
       <a href={`/@${profile.username}/library/`} class="owner rise"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
-      <p class="eyebrow rise d1" style="color: var(--moss)">Essay · {d.source ?? 'on the web'} · {d.creator}</p>
+      <p class="sub rise d1" style="color: var(--moss)">Essay · {d.source ?? 'on the web'} · {d.creator}</p>
       <h1 class="serif rise d2 et" transition:name={tname}>{d.title}</h1>
       <p class="rise d2 num muted" style="margin: 0; font-size: 15px">
         {mins}-minute read · {d.status === 'want' ? 'saved for later' : 'read'} {long(d.date)}{s && <> · <span style="color: var(--lat)">{s}</span></>}
@@ -290,14 +290,14 @@ const pinnedId = shown?.pinned ? shown.id : null;
       </div>
       {inCols.length > 0 && (
         <div class="chips rise d5">
-          <span class="eyebrow" style="margin-right: 4px">In collections</span>
+          <span class="sub" style="margin-right: 4px">In collections</span>
           {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
         </div>
       )}
       {(prev || next) && (
         <div class="pn rise d5">
-          {prev ? <a href={href(prev)} class="stack" style="gap: 4px"><span class="eyebrow" style="font-size: 11px">← Previous in collection</span><span class="serif" style="font-size: 18px">{prev.data.title}</span></a> : <span></span>}
-          {next && <a href={href(next)} class="stack" style="gap: 4px; text-align: right"><span class="eyebrow" style="font-size: 11px">Next in collection →</span><span class="serif" style="font-size: 18px">{next.data.title}</span></a>}
+          {prev ? <a href={href(prev)} class="stack" style="gap: 4px"><span class="sub" style="font-size: 11px">← Previous in collection</span><span class="serif" style="font-size: 18px">{prev.data.title}</span></a> : <span></span>}
+          {next && <a href={href(next)} class="stack" style="gap: 4px; text-align: right"><span class="sub" style="font-size: 11px">Next in collection →</span><span class="serif" style="font-size: 18px">{next.data.title}</span></a>}
         </div>
       )}
     </article>
@@ -405,6 +405,8 @@ const pinnedId = shown?.pinned ? shown.id : null;
     .essay-page { padding-top: 36px; }
   }
   .mynotes { display: flex; flex-direction: column; gap: 10px; }
+  /* small plain headings; the uppercase eyebrow is kept for the four main sections (notes, lines, behind the film, sits well next to) */
+  .sub { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
   .mynotes .eyebrow { color: var(--lat); margin: 0; }
   .trivia { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .trivia li { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 10px; }
