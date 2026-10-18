@@ -100,7 +100,7 @@ html[data-theme="dark"] .theme-moon { display: none; }
 .foot a:hover { color: #8FDCD2; }
 
 /* day and night versions of the footer painting */
-html[data-theme="dark"] .skyL, html[data-theme="light"] .skyD { display: none !important; }
+html[data-theme="dark"] .skyL, html[data-theme="light"] .skyD { display: none; }
 
 /* paintings: shown as backgrounds (not images), so they can't be dragged or saved with a right-click */
 .art { position: relative; background-image: var(--day); background-size: cover; background-position: center; background-repeat: no-repeat;

@@ -73,7 +73,7 @@ const isFilm = d.type === 'film' || d.type === 'tv';
 <style>
   .c { background: var(--c-bg); border-radius: var(--c-r); box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6EEDF; }
   .c > * { position: relative; }
-  .sun, .hill, .spine { position: absolute !important; display: block; }
+  .sun, .hill, .spine { position: absolute; display: block; }
   .sun { border-radius: 50%; background: var(--c-accent); opacity: .78; }
   .hill { left: -20%; width: 140%; border-radius: 50% 50% 0 0; background: var(--c-hill); }
   .spine { left: 0; top: 0; bottom: 0; width: 12px; background: linear-gradient(90deg, rgba(0,0,0,.3), rgba(255,255,255,.08) 70%, rgba(0,0,0,0)); }
@@ -118,7 +118,7 @@ const isFilm = d.type === 'film' || d.type === 'tv';
 
   /* real covers: the picture fills the shape; the painted sun, hill and title step aside */
   .real { position: relative; overflow: hidden; }
-  .pic { position: absolute !important; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-select: none; user-select: none; }
+  .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-select: none; user-select: none; }
   .real > :not(.pic):not(.spine) { visibility: hidden; }
   .real .spine { z-index: 1; visibility: visible; }
   .real.filmtop .k { visibility: visible; z-index: 1; align-self: flex-start; padding: 3px 7px; border-radius: 4px; background: rgba(12, 14, 18, .55); }

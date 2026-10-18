@@ -220,10 +220,10 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
   #add[data-kind="book"] .only-film, #add[data-kind="book"] .only-tv, #add[data-kind="book"] .only-essay, #add[data-kind="book"] .only-filmish,
   #add[data-kind="film"] .only-book, #add[data-kind="film"] .only-tv, #add[data-kind="film"] .only-essay,
   #add[data-kind="tv"] .only-book, #add[data-kind="tv"] .only-essay,
-  #add[data-kind="essay"] .only-book, #add[data-kind="essay"] .only-film, #add[data-kind="essay"] .only-tv, #add[data-kind="essay"] .only-filmish, #add[data-kind="essay"] .not-essay { display: none !important; }
-  #add[data-kind="tv"] .only-film:not(.only-tv) { display: none !important; }
-  #add:not([data-status="done"]) .done-only { display: none !important; }
-  #add[data-status="want"] .not-want { display: none !important; }
+  #add[data-kind="essay"] .only-book, #add[data-kind="essay"] .only-film, #add[data-kind="essay"] .only-tv, #add[data-kind="essay"] .only-filmish, #add[data-kind="essay"] .not-essay { display: none; }
+  #add[data-kind="tv"] .only-film:not(.only-tv) { display: none; }
+  #add:not([data-status="done"]) .done-only { display: none; }
+  #add[data-status="want"] .not-want { display: none; }
   #add .done-mark { position: relative; width: 96px; height: 96px; margin-top: 20px; }
   #add .done-mark span { position: absolute; inset: 0; border-radius: 48px; }
   #add .ring { border: 2px solid var(--moss); animation: ring 1.2s var(--spring) .3s backwards; opacity: 0; }
