@@ -181,6 +181,17 @@ export interface BookFilters { subject?: string; language?: string; year?: numbe
    subject keys instead of free text, leaving fiction out of non-fiction subjects, and ordering "Popular" by what
    readers log on Open Library rather than by edition count. */
 const NON_FICTION = new Set(['poetry', 'drama', 'essays', 'biography', 'autobiography', 'history', 'philosophy', 'psychology', 'self-help', 'science', 'politics', 'religion', 'travel']);
+/* A genre needs two independent tags before a book is listed under it: the subject key and the matching shelf category that
+   publishers and booksellers give a book (Open Library keeps it as a subject like "Fiction, science fiction, general").
+   One tag alone is not enough: stray tags from other editions put Game of Thrones under Science fiction and The Hunger Games
+   under Short stories. A shorter list that is right beats a long one that isn't. Only used without a language filter,
+   because books in Indian languages don't carry the shelf category. */
+const SHELF_CATEGORY: Record<string, string> = {
+  'science-fiction': 'fiction, science fiction, general', fantasy: 'fiction, fantasy, general', mystery: 'fiction, mystery & detective, general',
+  thriller: 'fiction, thrillers, general', romance: 'fiction, romance, general', horror: 'fiction, horror',
+  'historical-fiction': 'fiction, historical, general', 'short-stories': 'fiction, short stories (single author)',
+  humor: 'fiction, humorous, general', 'graphic-novels': 'comics & graphic novels, general',
+};
 const INDIAN = new Set(['mar', 'hin', 'ben', 'tam', 'tel', 'mal', 'kan', 'guj', 'pan', 'urd', 'ori', 'asm', 'san']);
 const ENGLISH_LIT = ['English fiction', 'American fiction', 'English literature', 'American literature', 'English drama', 'English poetry'];
 
@@ -192,6 +203,7 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
     const key = subject.replace(/-/g, '_');
     parts.push(subject.includes('-') ? `(subject_key:${key} OR subject_key:${subject})` : `subject_key:${key}`);
     if (NON_FICTION.has(subject)) parts.push('-subject_key:fiction');
+    if (SHELF_CATEGORY[subject] && !f.language) parts.push(`subject:"${SHELF_CATEGORY[subject]}"`);
   }
   if (code) {
     // Open Library lists a work under every language it has been translated into, so "Marathi" alone brings back
