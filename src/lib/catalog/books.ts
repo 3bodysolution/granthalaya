@@ -1,7 +1,7 @@
 // Books and authors: Open Library first (free, open data), Google Books when Open Library doesn't have it.
 // Open Library is thin on Marathi and Hindi books, so search tries both, and anyone can add a book by hand.
 import { env } from '../supabase';
-import { base, getJSON, plain, slug, yearOf } from './fetch';
+import { base, getJSON, getJSONOrThrow, plain, slug, yearOf } from './fetch';
 
 /* ——— languages: Open Library uses library (MARC) codes like "mar" and "fre" ——— */
 const MARC_TO_ISO: Record<string, string> = {
@@ -86,7 +86,7 @@ const ol = (path: string) => base.ol() + path;
 /* ——— one book ——— */
 export async function olBook(olid: string): Promise<BookPage | null> {
   const [w, s] = await Promise.all([
-    getJSON(ol(`/works/${olid}.json`), { ttl: 43200 }),
+    getJSONOrThrow(ol(`/works/${olid}.json`), { ttl: 43200 }, 'Open Library'),
     getJSON(ol(`/search.json?q=${encodeURIComponent(`key:/works/${olid}`)}&fields=${SEARCH_FIELDS}&limit=1`), { ttl: 43200 }),
   ]);
   if (!w?.title) return null;
@@ -119,7 +119,7 @@ const gbUrl = (path: string, params: Record<string, string> = {}) => {
   return u.toString();
 };
 export async function gbBook(id: string): Promise<BookPage | null> {
-  const v = await getJSON(gbUrl(`/volumes/${encodeURIComponent(id)}`), { ttl: 43200 });
+  const v = await getJSONOrThrow(gbUrl(`/volumes/${encodeURIComponent(id)}`), { ttl: 43200 }, 'Google Books');
   const i = v?.volumeInfo;
   if (!i?.title) return null;
   const lang = i.language as string | undefined;
@@ -139,7 +139,7 @@ export async function gbBook(id: string): Promise<BookPage | null> {
 export interface AuthorPage { key: string; name: string; bio: string; born?: string; died?: string; photo?: string; wikipedia?: string; books: BookCard[] }
 export async function author(olid: string): Promise<AuthorPage | null> {
   const [a, s] = await Promise.all([
-    getJSON(ol(`/authors/${olid}.json`), { ttl: 86400 }),
+    getJSONOrThrow(ol(`/authors/${olid}.json`), { ttl: 86400 }, 'Open Library'),
     getJSON(ol(`/search.json?q=${encodeURIComponent(`author_key:${olid}`)}&sort=editions&fields=${SEARCH_FIELDS}&limit=60`), { ttl: 43200 }),
   ]);
   if (!a?.name) return null;

@@ -1,0 +1,41 @@
+---
+// Shown (with a 503) when a catalogue we depend on (TMDB, Open Library, Google Books) is slow, busy or down.
+// A page that doesn't exist is a 404; this is a different thing and says so.
+import Base from '../layouts/Base.astro';
+export const prerender = false;
+Astro.response.status = 503;
+Astro.response.headers.set('Retry-After', '5');
+---
+<Base title="Couldn’t load this right now" noindex>
+  <section class="nf bleed">
+    <div class="art melt settle bg" style="--day: url(/art/lost-day.webp); --night: url(/art/lost-night.webp)" aria-hidden="true"></div>
+    <div class="pad words">
+      <p class="eyebrow rise d1">503</p>
+      <h1 class="title rise d2">Couldn’t load this right now</h1>
+      <p class="lede rise d3">The page exists, but the place we get its details from isn’t answering. Give it a moment and try again.</p>
+    </div>
+  </section>
+  <div class="pad rise d4 row">
+    <button type="button" class="btn primary" data-retry>Try again</button>
+    <a href="/" class="btn">Go home</a>
+  </div>
+</Base>
+<script>
+  document.addEventListener('click', (ev) => {
+    if ((ev.target as Element).closest('[data-retry]')) location.reload();
+  });
+</script>
+<style>
+  .nf { position: relative; aspect-ratio: 2172 / 724; min-height: 440px; max-height: 720px; }
+  .bg { position: absolute; inset: 0; background-position: center bottom; }
+  .words { position: relative; padding-top: clamp(36px, 5vw, 80px); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+  .words .title { color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .55); }
+  .words .title em { color: #0B5552; }
+  .words .eyebrow { color: #0B5552; }
+  .words .lede { color: #3A2E25; text-shadow: 0 1px 12px rgba(255, 240, 220, .6); }
+  :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
+  :global(html[data-theme="dark"]) .words .title em, :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
+  :global(html[data-theme="dark"]) .words .lede { color: #E4DCCB; text-shadow: 0 2px 12px rgba(8, 14, 32, .7); }
+  .row { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+  @media (max-width: 780px) { .nf { aspect-ratio: auto; min-height: 480px; } .bg { background-position: 20% bottom; } }
+</style>

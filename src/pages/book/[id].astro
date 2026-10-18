@@ -12,6 +12,7 @@ import { slug } from '../../lib/catalog/fetch';
 import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, LIST_SOURCE, type TitleRow } from '../../lib/catalog/onsite';
 import { aboutHours } from '../../lib/data';
 import { site as siteConfig } from '../../data/site';
+import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -21,6 +22,7 @@ const k = bookKey(param);
 let b: BookPage | null = null;
 let rows: TitleRow[] = [];
 if (!k) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+try {
 if ('ol' in k) {
   [b, rows] = await Promise.all([olBook(k.ol), sb ? rowsForBook(sb, k.ol) : Promise.resolve([])]);
   if (b && param !== `${k.ol.toLowerCase()}-${slug(b.title)}` && slug(b.title)) return Astro.redirect(bookHref(k.ol, b.title) + Astro.url.search, 301);
@@ -40,6 +42,7 @@ if ('ol' in k) {
     b = { kind: 'book', key: row.slug, title: row.title, subtitle: row.original_title ?? undefined, authors: row.creator ? [{ name: row.creator }] : [], year: row.year ?? undefined, languages: [], subjects: [], description: row.note ?? '', cover: row.cover_url ?? undefined, publishers: [], source: 'Open Library', sourceLink: '' };
   }
 }
+} catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // a catalogue failing is not "not found"
 if (!b) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
 const row = rows[0];

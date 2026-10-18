@@ -10,12 +10,15 @@ import { savedId } from '../../lib/saved';
 import EssayCard from '../../components/title/EssayCard.astro';
 import { allEssays } from '../../lib/essays';
 import { essayMarks } from '../../lib/catalog/onsite';
+import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
 const key = authorKey(param);
 if (!key) { Astro.response.status = 404; return Astro.rewrite('/404'); }
-const a = await author(key);
+let a: Awaited<ReturnType<typeof author>>;
+try { a = await author(key); }
+catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // Open Library failing is not "not found"
 if (!a) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${key.toLowerCase()}-${slug(a.name)}` && slug(a.name)) return Astro.redirect(authorHref(key, a.name), 301);
 const sb = Astro.locals.supabase;

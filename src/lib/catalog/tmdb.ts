@@ -1,7 +1,7 @@
 // Films, TV and the people who make them, from TMDB (The Movie Database). Where-to-watch data comes
 // through TMDB from JustWatch, and must be credited to JustWatch wherever it's shown.
 import { env } from '../supabase';
-import { base, getJSON, plain, slug, yearOf } from './fetch';
+import { base, getJSON, getJSONOrThrow, SourceUnavailable, plain, slug, yearOf } from './fetch';
 
 const key = () => env('TMDB_API_KEY');
 export const tmdbReady = () => !!key();
@@ -115,8 +115,8 @@ function common(m: any, kind: 'film' | 'tv'): Omit<Common, 'cast' | 'crew'> {
 
 /* ——— a film ——— */
 export async function film(id: number): Promise<FilmPage | null> {
-  if (!key()) return null;
-  const m = await getJSON(q(`/movie/${id}`, { append_to_response: 'credits,watch/providers,external_ids,videos,keywords' }), { ttl: 21600 });
+  if (!key()) throw new SourceUnavailable('TMDB');
+  const m = await getJSONOrThrow(q(`/movie/${id}`, { append_to_response: 'credits,watch/providers,external_ids,videos,keywords' }), { ttl: 21600 }, 'TMDB');
   if (!m?.id) return null;
   const crew = m.credits?.crew ?? [];
   return {
@@ -131,8 +131,8 @@ export async function film(id: number): Promise<FilmPage | null> {
 
 /* ——— a TV show and its seasons ——— */
 export async function show(id: number): Promise<ShowPage | null> {
-  if (!key()) return null;
-  const t = await getJSON(q(`/tv/${id}`, { append_to_response: 'aggregate_credits,watch/providers,external_ids,videos,keywords' }), { ttl: 21600 });
+  if (!key()) throw new SourceUnavailable('TMDB');
+  const t = await getJSONOrThrow(q(`/tv/${id}`, { append_to_response: 'aggregate_credits,watch/providers,external_ids,videos,keywords' }), { ttl: 21600 }, 'TMDB');
   if (!t?.id) return null;
   const ac = t.aggregate_credits ?? {};
   return {
@@ -156,8 +156,8 @@ export interface PersonPage {
 }
 const GROUP_LABEL: Record<string, string> = { Directing: 'Director', Writing: 'Writer', Acting: 'Actor', Camera: 'Cinematography', Sound: 'Music', Editing: 'Editor', Production: 'Producer' };
 export async function personPage(id: number): Promise<PersonPage | null> {
-  if (!key()) return null;
-  const p = await getJSON(q(`/person/${id}`, { append_to_response: 'combined_credits,external_ids' }), { ttl: 21600 });
+  if (!key()) throw new SourceUnavailable('TMDB');
+  const p = await getJSONOrThrow(q(`/person/${id}`, { append_to_response: 'combined_credits,external_ids' }), { ttl: 21600 }, 'TMDB');
   if (!p?.id) return null;
   const card = (c: any, role: string): Card => {
     const kind = c.media_type === 'tv' ? 'tv' : 'film';

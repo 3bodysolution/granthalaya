@@ -13,6 +13,7 @@ import { film, idFrom, filmHref, type FilmPage } from '../../lib/catalog/tmdb';
 import { slug } from '../../lib/catalog/fetch';
 import { rowsForFilm, rowBySlug, onSite, healFilm, type TitleRow } from '../../lib/catalog/onsite';
 import { duration } from '../../lib/data';
+import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -22,7 +23,8 @@ const id = idFrom(param);
 let f: FilmPage | null = null;
 let rows: TitleRow[] = [];
 if (id) {
-  [f, rows] = await Promise.all([film(id), sb ? rowsForFilm(sb, id) : Promise.resolve([])]);
+  try { [f, rows] = await Promise.all([film(id), sb ? rowsForFilm(sb, id) : Promise.resolve([])]); }
+  catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // TMDB failing is not "not found"
   if (f && param !== `${id}-${slug(f.title)}` && slug(f.title)) return Astro.redirect(filmHref(id, f.title) + Astro.url.search, 301);
 } else if (sb) {
   // a film in our catalogue by its address name: go to its TMDB page, or show what we have

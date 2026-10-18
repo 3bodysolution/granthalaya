@@ -6,12 +6,15 @@ import PosterTile from '../../components/title/PosterTile.astro';
 import { personPage, idFrom, personHref } from '../../lib/catalog/tmdb';
 import { slug } from '../../lib/catalog/fetch';
 import { myMarks } from '../../lib/catalog/onsite';
+import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
 const id = idFrom(param);
 if (!id) { Astro.response.status = 404; return Astro.rewrite('/404'); }
-const p = await personPage(id);
+let p: Awaited<ReturnType<typeof personPage>>;
+try { p = await personPage(id); }
+catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // TMDB failing is not "not found"
 if (!p) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${id}-${slug(p.name)}` && slug(p.name)) return Astro.redirect(personHref(id, p.name), 301);
 const sb = Astro.locals.supabase;

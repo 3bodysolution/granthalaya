@@ -14,6 +14,7 @@ import { show, idFrom, showHref } from '../../lib/catalog/tmdb';
 import { slug } from '../../lib/catalog/fetch';
 import { rowsForShow, onSite } from '../../lib/catalog/onsite';
 import { statusLabel, type Status } from '../../lib/kinds';
+import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -21,7 +22,9 @@ const sb = Astro.locals.supabase;
 const me = Astro.locals.me;
 const id = idFrom(param);
 if (!id) { Astro.response.status = 404; return Astro.rewrite('/404'); }
-const [t, rows] = await Promise.all([show(id), sb ? rowsForShow(sb, id) : Promise.resolve([])]);
+let t: Awaited<ReturnType<typeof show>>, rows: Awaited<ReturnType<typeof rowsForShow>>;
+try { [t, rows] = await Promise.all([show(id), sb ? rowsForShow(sb, id) : Promise.resolve([])]); }
+catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // TMDB failing is not "not found"
 if (!t) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${id}-${slug(t.title)}` && slug(t.title)) return Astro.redirect(showHref(id, t.title) + Astro.url.search, 301);
 const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };

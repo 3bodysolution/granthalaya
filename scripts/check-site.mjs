@@ -53,9 +53,10 @@ const pages = [
   ['/about', 200], ['/privacy', 200], ['/terms', 200], ['/signin', 200], ['/this-page-does-not-exist/', 404],
 ];
 await pool(pages, 4, async ([p, want]) => {
-  const r = await get(BASE + p).catch((e) => ({ status: 0, text: async () => String(e) }));
+  // asked once more after a pause if it didn't answer as expected (a catalogue can be busy for a moment)
+  const r = await again(() => get(BASE + p).catch((e) => ({ status: 0, text: async () => String(e) })), (x) => x.status !== want);
   const html = r.status ? await r.text() : '';
-  if (r.status !== want) fail(`${p} answered ${r.status}, expected ${want}`);
+  if (r.status !== want) fail(`${p} answered ${r.status}${r.status === 503 ? ' (a catalogue is not answering)' : ''}, expected ${want}`);
   else if (want === 200 && (!/<title>[^<]+<\/title>/.test(html) || /Internal Server Error|Unhandled|ReferenceError|TypeError/.test(html))) fail(`${p} loaded but looks broken`);
   else ok(`${p} ${r.status}`);
 });
