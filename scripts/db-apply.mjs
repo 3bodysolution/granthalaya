@@ -15,20 +15,22 @@ let dbUrl = process.env.SUPABASE_DB_URL;
 try {
   const line = fs.readFileSync('.env', 'utf8').split(/\r?\n/).find((l) => l.startsWith('SUPABASE_DB_URL='));
   if (line) dbUrl = line.slice('SUPABASE_DB_URL='.length).trim().replace(/^(["'])(.*)\1$/, '$2');
-} catch {}
+} catch { /* no .env: fall back to the environment */ }
 const args = process.argv.slice(2);
 const dry = args.includes('--dry');
 const mark = args.includes('--mark') ? args[args.indexOf('--mark') + 1] : null;
 if (!dbUrl) { console.log('Add SUPABASE_DB_URL to .env first.'); process.exit(1); }
 
 const DIR = 'supabase/changes';
+const CA = 'supabase/prod-ca-2021.crt';
 const files = fs.readdirSync(DIR).filter((f) => /^\d+.*\.sql$/.test(f)).sort();
 // Split the address by hand at the LAST "@", so a password with "@" or other symbols in it works unescaped.
 function connection(url) {
   const m = url.match(/^postgres(?:ql)?:\/\/([^:@/]+):(.*)@([^@/:]+):(\d+)\/([^?]+)/);
   if (!m) { console.log('SUPABASE_DB_URL should look like postgresql://user:password@host:5432/postgres'); process.exit(1); }
   const [, user, password, host, port, database] = m;
-  return { user, password, host, port: +port, database, ssl: { rejectUnauthorized: false } };
+  // the connection is verified against Supabase's own CA certificate (supabase/prod-ca-2021.crt)
+  return { user, password, host, port: +port, database, ssl: { ca: fs.readFileSync(CA, 'utf8'), rejectUnauthorized: true } };
 }
 const client = new pg.Client(connection(dbUrl));
 try { await client.connect(); } catch (e) { console.log(`Could not connect: ${e.message}`); process.exit(1); }
@@ -65,7 +67,7 @@ for (const f of waiting) {
     await client.query('insert into public.applied_changes (name) values ($1)', [f]);
     console.log('  done');
   } catch (e) {
-    await client.query('rollback').catch(() => {});
+    await client.query('rollback').catch((e2) => console.log(`  (rollback also failed: ${e2.message})`));
     console.log(`  failed, nothing from this file was kept: ${e.message}`);
     await client.end(); process.exit(1);
   }
