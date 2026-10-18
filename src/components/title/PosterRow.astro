@@ -4,28 +4,28 @@
 import PosterTile from './PosterTile.astro';
 import type { RowItem } from '../../lib/catalog/rows';
 // Poster tiles come from `items`; a row of something else (the Essays cards) passes its own <li>s in the slot, with `col` as the card width.
-interface Props { title: string; items?: RowItem[]; href?: string; all?: string; tone?: 'film' | 'book' | 'essay'; id?: string; col?: string }
-const { title, items = [], href, all = 'See all', tone, id = 'row-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-'), col } = Astro.props;
+interface Props { title: string; items?: RowItem[]; href?: string; all?: string; tone?: 'film' | 'book' | 'essay'; id?: string; col?: string; big?: boolean }
+const { title, items = [], href, all = 'See all', tone, id = 'row-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-'), col, big } = Astro.props;
 const filled = items.length > 0 || Astro.slots.has('default');
 ---
 {filled && (
-  <section class="prow" aria-labelledby={id} style={col ? `--prow-col:${col}` : undefined}>
+  <section class:list={['prow', big && 'big']} aria-labelledby={id} style={col ? `--prow-col:${col}` : undefined}>
     <div class="prow-head">
       <h2 class="prow-t" id={id} data-tone={tone}>{title}</h2>
       {href && <a class="prow-all" href={href}>{all} <span aria-hidden="true">→</span></a>}
-      <div class="prow-nav" aria-hidden="true">
-        <button type="button" class="prow-btn" data-row="-1" tabindex="-1" aria-label="Scroll back" disabled>
-          <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
-        </button>
-        <button type="button" class="prow-btn" data-row="1" tabindex="-1" aria-label="Scroll forward">
-          <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
-        </button>
-      </div>
     </div>
-    <ul class="prow-list" data-row-list>
-      {items.map((i) => <li><PosterTile {...i} /></li>)}
-      <slot />
-    </ul>
+    <div class="prow-body">
+      <button type="button" class="prow-btn prev" data-row="-1" tabindex="-1" aria-label="Scroll back" aria-hidden="true" disabled>
+        <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
+      </button>
+      <ul class="prow-list" data-row-list>
+        {items.map((i) => <li><PosterTile {...i} large={big} /></li>)}
+        <slot />
+      </ul>
+      <button type="button" class="prow-btn next" data-row="1" tabindex="-1" aria-label="Scroll forward" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
+      </button>
+    </div>
   </section>
 )}
 
@@ -40,20 +40,30 @@ const filled = items.length > 0 || Astro.slots.has('default');
   .prow-all:hover { color: var(--lat); }
   .prow-all span { display: inline-block; margin-left: 3px; transition: transform .2s var(--spring); }
   .prow-all:hover span { transform: translateX(2px); }
-  .prow-nav { margin-left: auto; display: flex; gap: 6px; }
-  .prow-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; transition: border-color .2s ease, color .2s ease, opacity .2s ease, transform .2s var(--spring); }
+  .prow-body { position: relative; min-width: 0; }
+  /* the arrows sit in the page margin at each side, level with the middle of the posters, and show when the pointer is on the row */
+  .prow-btn { position: absolute; top: calc(50% - 40px); z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: grid; place-items: center; cursor: pointer; opacity: 0; transition: border-color .2s ease, color .2s ease, opacity .2s ease, transform .2s var(--spring); }
+  .prow-btn.prev { left: -46px; }
+  .prow-btn.next { right: -46px; }
+  .prow-body:hover .prow-btn:not(:disabled) { opacity: 1; }
   .prow-btn:hover:not(:disabled) { border-color: var(--lat); color: var(--lat); }
   .prow-btn:active:not(:disabled) { transform: scale(.94); }
-  .prow-btn:disabled { opacity: .35; cursor: default; }
+  .prow-btn:disabled { opacity: 0; cursor: default; pointer-events: none; }
   .prow-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* room above and below so a poster can lift on hover without being cut off */
   .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px 2px 14px; display: grid; grid-auto-flow: column; grid-auto-columns: var(--prow-col, 152px); gap: 20px;
     overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px; scrollbar-width: none; }
   .prow-list::-webkit-scrollbar { display: none; }
   .prow-list > li { scroll-snap-align: start; min-width: 0; }
-  @media (hover: none), (max-width: 780px) { .prow-nav { display: none; } }
+  /* the large row: four across, three on a tablet, two on a phone */
+  .big { --prow-col: calc((100% - 60px) / 4); }
+  .big .prow-t { font-size: 13px; }
+  @media (max-width: 1000px) { .big { --prow-col: calc((100% - 40px) / 3); } }
+  @media (max-width: 1100px) { .prow-btn.prev { left: -34px; } .prow-btn.next { right: -34px; } .prow-btn { width: 30px; height: 30px; } }
+  @media (hover: none), (max-width: 780px) { .prow-btn { display: none; } }
   @media (max-width: 780px) {
     /* on a phone the row runs to the screen edge, so it's clear there's more to swipe */
+    .big { --prow-col: calc((100% - 12px) / 2.25); }
     .prow-list { grid-auto-columns: var(--prow-col, clamp(108px, 34%, 156px)); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
   }
 </style>

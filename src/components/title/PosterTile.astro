@@ -14,12 +14,14 @@ interface Props {
   logId?: string;
   /** poster only (the dense grids): the name shows when you point at it; a tile with no cover still shows its title and author on the placeholder */
   bare?: boolean;
+  /** a bigger picture, for the large posters in the Popular this week row */
+  large?: boolean;
 }
-const { href, title, year, poster, kind, sub, status, save, search, logId, bare } = Astro.props;
+const { href, title, year, poster, kind, sub, status, save, search, logId, bare, large } = Astro.props;
 const by = (Array.isArray(sub) ? sub[0] : sub) || '';
 const me = Astro.locals.me;
 const p = paletteFor(title);
-const pic = poster ? tileImage(poster) : null;
+const pic = poster ? tileImage(poster, large) : null;
 // list items we couldn't match have no page of their own: the tile opens the search with the title in it
 const Link = href || search ? 'a' : 'span';
 const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefined);

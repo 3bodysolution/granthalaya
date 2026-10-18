@@ -5,10 +5,12 @@ const TMDB = /^(https:\/\/image\.tmdb\.org\/t\/p\/)(?:w\d+|original)(\/.+)$/;
 const OL = /^(https:\/\/covers\.openlibrary\.org\/b\/id\/\d+)-[SML](\.jpg)$/;
 
 /** the `src` and `srcset` for a poster or cover shown in a tile */
-export function tileImage(url: string): { src: string; srcset?: string } {
+export function tileImage(url: string, large = false): { src: string; srcset?: string } {
   const t = url.match(TMDB);
+  if (t && large) return { src: `${t[1]}w342${t[2]}`, srcset: `${t[1]}w342${t[2]} 1x, ${t[1]}w500${t[2]} 2x` };
   if (t) return { src: `${t[1]}w185${t[2]}`, srcset: `${t[1]}w185${t[2]} 1x, ${t[1]}w342${t[2]} 2x` };
   const o = url.match(OL);
+  if (o && large) return { src: `${o[1]}-L${o[2]}` };
   if (o) return { src: `${o[1]}-M${o[2]}`, srcset: `${o[1]}-M${o[2]} 1x, ${o[1]}-L${o[2]} 2x` };
   return { src: url };
 }

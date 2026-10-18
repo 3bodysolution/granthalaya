@@ -16,7 +16,8 @@ export interface RowItem {
   /** no page of our own: the tile opens the site search with this filled in */
   search?: string;
 }
-export interface Row { title: string; href?: string; tone?: 'film' | 'book' | 'essay'; items: RowItem[] }
+/** `big`: the row of large posters, four across, that opens a front page */
+export interface Row { title: string; href?: string; tone?: 'film' | 'book' | 'essay'; items: RowItem[]; big?: boolean }
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
 /** a row that hasn't answered in this long is left out (the lookup carries on and is remembered for next time) */
@@ -64,7 +65,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
       list(discover({ kind, sort: 'top' })),
     ]);
     return onceEach([
-      { title: 'Popular this week', href: '/films/?kind=tv&sort=popular', tone: 'film', items: films(week) },
+      { title: 'Popular this week', href: '/films/?kind=tv&sort=popular', tone: 'film', big: true, items: films(week) },
       { title: 'New series streaming in India', tone: 'film', items: films(fresh) },
       { title: 'Indian series people love', href: '/films/?kind=tv&language=hi&sort=top', tone: 'film', items: films(indian) },
       { title: 'Korean dramas', href: '/films/?kind=tv&language=ko&genre=drama', tone: 'film', items: films(korean) },
@@ -80,7 +81,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     list(discover({ kind, sort: 'top' })),
   ]);
   return onceEach([
-    { title: 'Popular this week', href: '/films/?sort=popular', tone: 'film', items: films(week) },
+    { title: 'Popular this week', href: '/films/?sort=popular', tone: 'film', big: true, items: films(week) },
     { title: 'New on streaming in India', tone: 'film', items: films(fresh) },
     { title: 'New Hindi films', href: '/films/?language=hi', tone: 'film', items: films(hindi) },
     { title: 'Marathi films people love', href: '/films/?language=mr&sort=top', tone: 'film', items: films(marathi) },
@@ -102,7 +103,7 @@ export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[
     safe(Promise.resolve(suggestedIn), [] as CatalogList[]),
   ]);
   return onceEach([
-    { title: 'Popular this week', href: '/books/?sort=popular', tone: 'book', items: books(week) },
+    { title: 'Popular this week', href: '/books/?sort=popular', tone: 'book', big: true, items: books(week) },
     { title: 'Fiction readers love', href: '/books/?subject=fiction', tone: 'book', items: books(fiction) },
     { title: 'Highest rated', href: '/books/?sort=top', tone: 'book', items: books(top) },
     listRow('booker', 'Booker Prize winners', 'book'),
