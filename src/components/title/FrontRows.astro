@@ -1,0 +1,10 @@
+---
+// The rows of posters on the home, Films and Books front pages. The page starts the lookups and hands over
+// the promise; the wait happens here, so everything above these rows (header, painting, title, filters) is
+// sent to the browser first and the rows follow in the same response. A row that fails is simply missing.
+import PosterRow from './PosterRow.astro';
+import type { Row } from '../../lib/catalog/rows';
+interface Props { rows: Promise<Row[]> }
+const rows = await Astro.props.rows.catch((e) => { console.error('Rows could not be loaded', e); return [] as Row[]; });
+---
+{rows.map((r) => <PosterRow {...r} />)}

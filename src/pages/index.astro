@@ -8,14 +8,14 @@ import StatusTag from '../components/ui/StatusTag.astro';
 import { loadShelf, loadFeatured, loadDetails, href, short, fullTitle, profileHref, linesHref, pickLine } from '../lib/data';
 import { statusLabel } from '../lib/kinds';
 import { supabaseReady } from '../lib/supabase';
-import PosterRow from '../components/title/PosterRow.astro';
+import FrontRows from '../components/title/FrontRows.astro';
 import { homeRows, markRows } from '../lib/catalog/rows';
 export const prerender = false;
 
 const me = Astro.locals.me;
 const sb = Astro.locals.supabase;
 // what's popular this week, for everyone (the rows load alongside the visitor's own shelf)
-const rowsP = homeRows();
+const rowsP = homeRows().then((r) => markRows(sb, me, r)).catch(() => []);
 // the shelves to visit, the visitor's own shelf and their details are independent, so they load together
 const featuredP = sb ? loadFeatured(sb, 6).catch((e) => { console.error('Home: featured shelves could not be loaded', e); return []; }) : Promise.resolve([]);
 const [featured, shelf, details] = await Promise.all([
@@ -23,7 +23,6 @@ const [featured, shelf, details] = await Promise.all([
   me && sb ? loadShelf(sb, me) : Promise.resolve([] as Awaited<ReturnType<typeof loadShelf>>),
   me && sb ? loadDetails(sb, me.id) : Promise.resolve(null),
 ]);
-const rows = await markRows(sb, me, await rowsP);
 const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
 const wants = shelf.filter((e) => e.data.status === 'want');
 // what you're in the middle of; if nothing, what you saved for next
@@ -56,7 +55,7 @@ const features = [
     </section>
 
     <section class="pad rows rise d4">
-      {rows.map((r) => <PosterRow {...r} />)}
+      <FrontRows rows={rowsP} />
     </section>
 
     <section class="pad feats rise d4">
@@ -144,7 +143,7 @@ const features = [
     )}
 
     <section class="pad rows block rise d6">
-      {rows.map((r) => <PosterRow {...r} />)}
+      <FrontRows rows={rowsP} />
     </section>
 
     {others.length > 0 && (

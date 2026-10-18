@@ -93,12 +93,13 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
 }
 
 /** the Books front page */
-export async function bookRows(suggested: CatalogList[] = []): Promise<Row[]> {
+export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[]> = []): Promise<Row[]> {
   const pick = (p: Promise<{ items: BookCard[] }>) => safe(p.then((r) => r.items), [] as BookCard[]);
-  const [week, fiction, top] = await Promise.all([
+  const [week, fiction, top, suggested] = await Promise.all([
     safe(trendingBooks('weekly'), []),
     pick(browseBooks({ subject: 'fiction' })),
     pick(browseBooks({ sort: 'top' })),
+    safe(Promise.resolve(suggestedIn), [] as CatalogList[]),
   ]);
   return onceEach([
     { title: 'Popular this week', href: '/books/?sort=popular', tone: 'book', items: books(week) },

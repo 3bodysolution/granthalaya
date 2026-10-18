@@ -6,8 +6,8 @@ import Base from '../../layouts/Base.astro';
 import PosterTile from '../../components/title/PosterTile.astro';
 import Filters from '../../components/title/Filters.astro';
 import Pager from '../../components/title/Pager.astro';
-import PosterRow from '../../components/title/PosterRow.astro';
-import { filmRows, markRows, type Row } from '../../lib/catalog/rows';
+import FrontRows from '../../components/title/FrontRows.astro';
+import { filmRows, markRows } from '../../lib/catalog/rows';
 import { discover, services, genreBySlug, languageName, FILM_GENRES, TV_GENRES, genreSlug, tmdbReady } from '../../lib/catalog/tmdb';
 import ListGrid from '../../components/title/ListGrid.astro';
 import { listsOfKind, pickList, listDecades, listBrowseHref } from '../../lib/lists';
@@ -30,16 +30,14 @@ const page = Math.max(1, Math.min(500, Number(q.get('page')) || 1));
 const picked = kind === 'film' ? pickList(q.get('list'), 'film') : undefined;
 const front = [...q.keys()].every((k) => k === 'kind');
 const empty = { items: [], pages: 0, total: 0 };
-const [list, svc, rowsRaw] = await Promise.all([
+const sb = Astro.locals.supabase;
+// the rows are started now and waited for further down the page (FrontRows), so the top of the page is sent first
+const rowsP = front ? filmRows(kind).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
+const [list, svc] = await Promise.all([
   front || picked ? Promise.resolve(empty) : discover({ kind, genre: genre?.id, year, decade, language, service, sort, page }),
   services(),
-  front ? filmRows(kind) : Promise.resolve([] as Row[]),
 ]);
-const sb = Astro.locals.supabase;
-const [marks, rows] = await Promise.all([
-  sb && !front && !picked ? myMarks(sb, Astro.locals.me, list.items.map((c) => ({ kind: c.kind, tmdb: c.id }))) : Promise.resolve(new Map()),
-  markRows(sb, Astro.locals.me, rowsRaw),
-]);
+const marks = sb && !front && !picked ? await myMarks(sb, Astro.locals.me, list.items.map((c) => ({ kind: c.kind, tmdb: c.id }))) : new Map();
 const serviceName = svc.find((s) => s.id === service)?.name;
 
 // the heading says what the list is: "Marathi drama films from the 2010s on Netflix"
@@ -93,7 +91,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
     </section>
   ) : front && tmdbReady() ? (
     <section class="pad rows">
-      {rows.map((r) => <PosterRow {...r} />)}
+      <FrontRows rows={rowsP!} />
       <div class="browse">
         <div class="bset"><h2 class="eyebrow">By genre</h2><div class="chips">{genreLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">By language</h2><div class="chips">{langLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
