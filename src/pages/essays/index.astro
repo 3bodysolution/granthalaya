@@ -4,7 +4,13 @@ import Base from '../../layouts/Base.astro';
 import data from '../../data/essays.json';
 export const prerender = false;
 const via = data.themes.find((t) => t.name.startsWith('Found via'));
-const themes = data.themes.filter((t) => t !== via);
+const slug = (n: string) => n.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
+const all = data.themes.filter((t) => t !== via);
+const pick = Astro.url.searchParams.get('theme') ?? '';
+const chips = [...all.map((t) => ({ k: slug(t.name), name: t.name })), ...(via ? [{ k: 'read-something-great', name: 'Found via Read Something Great' }] : [])];
+const on = chips.some((c) => c.k === pick) ? pick : '';
+const themes = on ? all.filter((t) => slug(t.name) === on) : all;
+const showVia = !!via && (!on || on === 'read-something-great');
 const total = data.themes.reduce((n, t) => n + t.items.length, 0);
 const host = (u: string) => new URL(u).hostname.replace(/^www\./, '');
 const byline = (e: { author: string; publication: string | null; year: number | null }) =>
@@ -15,6 +21,10 @@ const byline = (e: { author: string; publication: string | null; year: number | 
     <h1 class="title">Essays</h1>
     <p class="muted lede">{total} essays worth an afternoon, chosen by us. Each one opens at its original home, so nothing is copied here.</p>
   </section>
+  <nav class="pad chips" aria-label="Themes">
+    <a class:list={['gchip', !on && 'on']} href="/essays/" aria-current={!on ? 'page' : undefined}>All</a>
+    {chips.map((c) => <a class:list={['gchip', on === c.k && 'on']} href={`/essays/?theme=${c.k}`} aria-current={on === c.k ? 'page' : undefined}>{c.name}</a>)}
+  </nav>
   <section class="pad groups">
     {themes.map((t) => (
       <div class="grp">
@@ -33,7 +43,7 @@ const byline = (e: { author: string; publication: string | null; year: number | 
         </ul>
       </div>
     ))}
-    {via && (
+    {showVia && via && (
       <div class="grp">
         <h2 class="eyebrow">Found via <a class="credit" href={data.source.url} target="_blank" rel="noopener noreferrer">{data.source.name}</a></h2>
         <ul class="es">
@@ -55,6 +65,7 @@ const byline = (e: { author: string; publication: string | null; year: number | 
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; gap: 12px; }
   .lede { margin: 0; max-width: 56ch; font-size: 16px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 24px; }
   .groups { display: flex; flex-direction: column; gap: 40px; padding-bottom: 24px; }
   .grp { display: flex; flex-direction: column; gap: 14px; }
   .es { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }

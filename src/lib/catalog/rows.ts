@@ -37,6 +37,16 @@ function listRow(slug: string, title: string, tone: 'film' | 'book', l: CatalogL
   return { title, href: l ? listBrowseHref(l) : undefined, tone, items };
 }
 
+/** a film or book shows once per page: anything already in an earlier row is left out of the later ones */
+export function onceEach(rows: Row[]): Row[] {
+  const seen = new Set<string>();
+  // the same title can carry a different name in its address (list tile vs catalogue card), so compare the id part
+  const key = (href: string) => href.match(/^\/(?:film|tv|book)\/(?:gb-)?[^/-]+/)?.[0] ?? href;
+  return rows
+    .map((r) => ({ ...r, items: r.items.filter((i) => !seen.has(key(i.href)) && seen.add(key(i.href))) }))
+    .filter((r) => r.items.length);
+}
+
 /** the Films front page (or TV, with kind 'tv') */
 export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
   if (kind === 'tv') {
@@ -48,13 +58,13 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
       list(discover({ kind, language: 'ko', genre: 18 })),
       list(discover({ kind, sort: 'top' })),
     ]);
-    return [
+    return onceEach([
       { title: 'Popular this week', href: '/films/?kind=tv&sort=popular', tone: 'film', items: films(week) },
       { title: 'New series streaming in India', tone: 'film', items: films(fresh) },
       { title: 'Indian series people love', href: '/films/?kind=tv&language=hi&sort=top', tone: 'film', items: films(indian) },
       { title: 'Korean dramas', href: '/films/?kind=tv&language=ko&genre=drama', tone: 'film', items: films(korean) },
       { title: 'Highest rated', href: '/films/?kind=tv&sort=top', tone: 'film', items: films(top) },
-    ];
+    ]);
   }
   const [week, fresh, hindi, marathi, south, top] = await Promise.all([
     safe(trending('film'), []),
@@ -64,7 +74,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     list(discover({ kind, language: 'ml|ta|te|kn', since: daysAgo(2 * 365) })),
     list(discover({ kind, sort: 'top' })),
   ]);
-  return [
+  return onceEach([
     { title: 'Popular this week', href: '/films/?sort=popular', tone: 'film', items: films(week) },
     { title: 'New on streaming in India', tone: 'film', items: films(fresh) },
     { title: 'New Hindi films', href: '/films/?language=hi', tone: 'film', items: films(hindi) },
@@ -74,7 +84,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     listRow('oscar-best-picture', 'Best Picture winners', 'film'),
     listRow('national-best-marathi', 'National Award winners, Marathi', 'film'),
     listRow('indian-cinema-classics', 'Indian cinema classics', 'film'),
-  ];
+  ]);
 }
 
 /** the Books front page */
@@ -85,7 +95,7 @@ export async function bookRows(suggested: CatalogList[] = []): Promise<Row[]> {
     pick(browseBooks({ subject: 'fiction' })),
     pick(browseBooks({ sort: 'top' })),
   ]);
-  return [
+  return onceEach([
     { title: 'Popular this week', href: '/books/?sort=popular', tone: 'book', items: books(week) },
     { title: 'Fiction readers love', href: '/books/?subject=fiction', tone: 'book', items: books(fiction) },
     { title: 'Highest rated', href: '/books/?sort=top', tone: 'book', items: books(top) },
@@ -93,7 +103,7 @@ export async function bookRows(suggested: CatalogList[] = []): Promise<Row[]> {
     listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book'),
     listRow('marathi-classics', 'Marathi classics', 'book'),
     ...suggested.map((l) => listRow(l.slug, l.title, 'book', l)).filter((r) => r.items.length),
-  ];
+  ]);
 }
 
 /** the home page: a little of everything */
@@ -104,12 +114,12 @@ export async function homeRows(): Promise<Row[]> {
     list(discover({ kind: 'film', language: 'hi|mr|ml|ta|te|kn|bn', since: daysAgo(540) })),
     safe(trending('tv'), []),
   ]);
-  return [
+  return onceEach([
     { title: 'Popular films this week', href: '/films/', tone: 'film', items: films(films_) },
     { title: 'Popular books this week', href: '/books/', tone: 'book', items: books(books_) },
     { title: 'New Indian films', href: '/films/', tone: 'film', items: films(indian) },
     { title: 'Popular series this week', href: '/films/?kind=tv', tone: 'film', items: films(series) },
-  ];
+  ]);
 }
 
 /** mark what's already on the visitor's shelf (one lookup for every row on the page) */
