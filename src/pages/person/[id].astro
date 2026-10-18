@@ -14,12 +14,17 @@ const id = idFrom(param);
 if (!id) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 let p: Awaited<ReturnType<typeof personPage>>;
 try { p = await personPage(id); }
-catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // TMDB failing is not "not found"
+catch (e) {
+  // TMDB failing (or sending something unexpected) is not "not found" and must not be an error page
+  if (!(e instanceof SourceUnavailable)) console.error('person page', id, e);
+  return Astro.rewrite('/unavailable');
+}
 if (!p) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${id}-${slug(p.name)}` && slug(p.name)) return Astro.redirect(personHref(id, p.name), 301);
 const sb = Astro.locals.supabase;
 const all = p.groups.flatMap((g) => g.items);
-const marks = sb ? await myMarks(sb, Astro.locals.me, all.map((c) => ({ kind: c.kind, tmdb: c.id }))) : new Map();
+// your own marks are a nicety: if they can't be looked up, the page still shows
+const marks = sb ? await myMarks(sb, Astro.locals.me, all.map((c) => ({ kind: c.kind, tmdb: c.id }))).catch((e) => { console.error('person marks', e); return new Map(); }) : new Map();
 const day = (d?: string) => (d ? new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '');
 const bioParas = p.bio.split(/\n{2,}/).filter(Boolean);
 const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted in', Writer: 'Wrote', Cinematography: 'Shot', Music: 'Music for', Editor: 'Edited', Producer: 'Produced' } as Record<string, string>)[l] ?? l;

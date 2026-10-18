@@ -157,7 +157,7 @@ export interface PersonPage {
 const GROUP_LABEL: Record<string, string> = { Directing: 'Director', Writing: 'Writer', Acting: 'Actor', Camera: 'Cinematography', Sound: 'Music', Editing: 'Editor', Production: 'Producer' };
 export async function personPage(id: number): Promise<PersonPage | null> {
   if (!key()) throw new SourceUnavailable('TMDB');
-  const p = await getJSONOrThrow(q(`/person/${id}`, { append_to_response: 'combined_credits,external_ids' }), { ttl: 21600 }, 'TMDB');
+  const p = await getJSONOrThrow(q(`/person/${id}`, { append_to_response: 'combined_credits,external_ids' }), { ttl: 21600, ms: 10000 }, 'TMDB'); // long careers send a lot
   if (!p?.id) return null;
   const card = (c: any, role: string): Card => {
     const kind = c.media_type === 'tv' ? 'tv' : 'film';
