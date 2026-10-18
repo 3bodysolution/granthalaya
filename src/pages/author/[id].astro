@@ -7,6 +7,9 @@ import { author, authorKey, authorHref } from '../../lib/catalog/books';
 import { slug } from '../../lib/catalog/fetch';
 import { myMarks } from '../../lib/catalog/onsite';
 import { savedId } from '../../lib/saved';
+import EssayCard from '../../components/title/EssayCard.astro';
+import { allEssays } from '../../lib/essays';
+import { essayMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -17,6 +20,9 @@ if (!a) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${key.toLowerCase()}-${slug(a.name)}` && slug(a.name)) return Astro.redirect(authorHref(key, a.name), 301);
 const sb = Astro.locals.supabase;
 const marks = sb ? await myMarks(sb, Astro.locals.me, a.books.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
+// essays of theirs that we've picked
+const essays = allEssays.filter((e) => e.authorKey === key);
+const essayOn = essays.length ? await essayMarks(sb, Astro.locals.me, essays.map((e) => e.link)).catch(() => new Map()) : new Map();
 const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
 ---
 <Base title={a.name} description={a.bio ? a.bio.slice(0, 180) : `Books by ${a.name} on Granthalaya.`} image={a.photo}>
@@ -47,6 +53,14 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
       </div>
     )}
   </section>
+  {essays.length > 0 && (
+    <section class="pad work">
+      <div class="rule"><h2 class="eyebrow">Essays <span class="num">{essays.length}</span></h2></div>
+      <div class="egrid">
+        {essays.map((e) => <EssayCard e={e} mark={essayOn.get(e.link)} />)}
+      </div>
+    </section>
+  )}
   <p class="pad credit-line">Book data from Open Library.</p>
 </Base>
 
@@ -65,11 +79,13 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
   .links { margin: 0; display: flex; gap: 18px; font-size: 13px; font-weight: 600; }
   .work { padding-top: 48px; display: flex; flex-direction: column; gap: 24px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
+  .egrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
   .credit-line { margin: 40px 0 0; font-size: 12px; color: var(--muted); }
   @media (max-width: 780px) {
     .head { grid-template-columns: 1fr; gap: 16px; margin-top: -40px; }
     .head > .stack { padding-top: 0; }
     .ph { width: 120px; }
     .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; }
+    .egrid { grid-template-columns: 1fr; }
   }
 </style>

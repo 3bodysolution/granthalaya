@@ -1,0 +1,42 @@
+---
+// One essay as a light card: title (opens the essay), "by" the author (opens their page), one line on what it is about,
+// and a bookmark that shows when it's on your shelf. Used in the Essays rows and grids and on author pages.
+import Mark from '../ui/Mark.astro';
+import { statusLabel } from '../../lib/kinds';
+import { authorLink, essayHit, type Essay } from '../../lib/essays';
+import { savedId } from '../../lib/saved';
+import type { Mark as OnShelf } from '../../lib/catalog/onsite';
+interface Props { e: Essay; mark?: OnShelf }
+const { e, mark } = Astro.props;
+const me = Astro.locals.me;
+const plain = savedId(mark);
+const label = mark ? statusLabel('essay', mark.status as any) : '';
+const words = e.title.split(' ');
+const last = words.pop()!;
+---
+<article class="ec">
+  <h3 class="serif et"><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
+  <p class="by">by <a href={authorLink(e)}>{e.author}</a></p>
+  <p class="en">{e.note}</p>
+  {me && (mark && !plain
+    ? <span class="es-save is-saved" role="img" title={label} aria-label={`${e.title}: ${label}`}><Mark size={16} /></span>
+    : <button type="button" class:list={['es-save', plain && 'is-saved']} data-quick-add={JSON.stringify({ hit: essayHit(e), status: 'want' })} data-unsave={plain} aria-label={plain ? `Saved: ${e.title}. Tap to remove` : `Save ${e.title}`} title={plain ? 'Saved. Tap to remove' : 'Save to your shelf'}><Mark size={16} /></button>)}
+</article>
+<style>
+  .ec { position: relative; height: 100%; display: flex; flex-direction: column; gap: 6px; padding: 16px 48px 16px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
+  .et { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 500; }
+  .et a:hover { color: var(--lat); }
+  .et a:focus-visible, .by a:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; border-radius: 3px; }
+  .nw { white-space: nowrap; }
+  .out { font-size: .7em; color: var(--muted); }
+  .by { margin: 0; font-size: 14px; color: var(--muted); }
+  .by a { transition: color .2s ease; }
+  .by a:hover { color: var(--lat); }
+  .en { margin: 2px 0 0; font-size: 14.5px; line-height: 1.5; }
+  .es-save { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .2s ease, color .2s ease, transform .25s var(--spring); }
+  .ec:hover .es-save, .es-save:focus-visible, .es-save:global(.is-saved) { opacity: 1; }
+  .es-save:hover { color: var(--ink); }
+  .es-save:active { transform: scale(.92); }
+  .es-save:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
+  @media (hover: none) { .es-save { opacity: 1; } }
+</style>

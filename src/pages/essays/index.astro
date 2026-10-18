@@ -1,77 +1,51 @@
 ---
 // Essays chosen by Granthalaya. Each one links to the original; nothing is copied here.
+// Front page: one sideways row per theme. Pick a theme in the filter bar and it becomes a grid of that theme.
 import Base from '../../layouts/Base.astro';
-import Mark from '../../components/ui/Mark.astro';
-import data from '../../data/essays.json';
+import PosterRow from '../../components/title/PosterRow.astro';
+import EssayCard from '../../components/title/EssayCard.astro';
+import Filters from '../../components/title/Filters.astro';
+import { themes, allEssays, total, source } from '../../lib/essays';
 import { essayMarks } from '../../lib/catalog/onsite';
-import { statusLabel } from '../../lib/kinds';
-import { savedId } from '../../lib/saved';
 export const prerender = false;
-const me = Astro.locals.me;
-const sb = Astro.locals.supabase;
-const via = data.themes.find((t) => t.name.startsWith('Found via'));
-const themes = data.themes.filter((t) => t !== via);
-const total = data.themes.reduce((n, t) => n + t.items.length, 0);
-const slug = (n: string) => n.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
-const chips = [...themes.map((t) => ({ id: slug(t.name), name: t.name })), ...(via ? [{ id: 'read-something-great', name: 'Found via Read Something Great' }] : [])];
-const groups = [...themes.map((t) => ({ id: slug(t.name), t, credit: false })), ...(via ? [{ id: 'read-something-great', t: via, credit: true }] : [])];
+const ROW = 10;
+const pick = Astro.url.searchParams.get('theme') ?? '';
+const picked = themes.find((t) => t.slug === pick);
 // which of these are already on your shelf: one lookup for the whole page
-const marks = await essayMarks(sb, me, data.themes.flatMap((t) => t.items.map((e) => e.link))).catch(() => new Map());
-// what the bookmark sends: the essay joins the shared catalogue the first time someone saves it
-const hit = (e: (typeof themes)[number]['items'][number]) => ({ kind: 'essay', title: e.title, creator: e.author, year: e.year ?? undefined, link: e.link, source: e.publication ?? undefined });
+const sb = Astro.locals.supabase;
+const marks = await essayMarks(sb, Astro.locals.me, (picked ? picked.items : allEssays).map((e) => e.link)).catch(() => new Map());
+const fields = [{ name: 'theme', label: 'Theme', value: picked?.slug ?? '', options: [['', 'All themes'], ...themes.map((t) => [t.slug, t.name])] as [string, string][] }];
+const hasPicks = !picked || picked.name === 'Picks';
 ---
-<Base title="Essays" active="essays" description="Essays worth reading, each linking to a free copy at the original.">
-  <div class="pad">
-    <div class="col">
-      <header class="head">
-        <h1 class="title">Essays</h1>
-        <p class="muted lede">{total} essays worth an afternoon, chosen by us. Each opens at its original home.</p>
-      </header>
-      <nav class="chips" aria-label="Jump to a theme">
-        {chips.map((c) => <a class="gchip" href={`#${c.id}`}>{c.name}</a>)}
-      </nav>
-      {groups.map(({ id, t, credit }) => (
-        <section class="grp" id={id}>
-          <h2 class="eyebrow">{credit ? <>Found via <a class="credit" href={data.source.url} target="_blank" rel="noopener noreferrer">{data.source.name}</a></> : t.name}</h2>
-          <ul class="es">
-            {t.items.map((e) => (
-              <li class="e">
-                <a class="serif et" href={e.link} target="_blank" rel="noopener noreferrer">{e.title.slice(0, e.title.lastIndexOf(' ') + 1)}<span class="nw">{e.title.slice(e.title.lastIndexOf(' ') + 1)}<span class="out" aria-hidden="true"> ↗</span></span></a>
-                <span class="by"> by {e.author}</span>
-                <p class="en">{e.note}</p>
-                {me && (marks.has(e.link) && !savedId(marks.get(e.link))
-                  ? <span class="es-save is-saved" role="img" title={statusLabel('essay', marks.get(e.link)!.status as any)} aria-label={`${e.title}: ${statusLabel('essay', marks.get(e.link)!.status as any)}`}><Mark size={16} /></span>
-                  : <button type="button" class:list={['es-save', savedId(marks.get(e.link)) && 'is-saved']} data-quick-add={JSON.stringify({ hit: hit(e), status: 'want' })} data-unsave={savedId(marks.get(e.link))} aria-label={savedId(marks.get(e.link)) ? `Saved: ${e.title}. Tap to remove` : `Save ${e.title}`} title={savedId(marks.get(e.link)) ? 'Saved. Tap to remove' : 'Save to your shelf'}><Mark size={16} /></button>)}
-              </li>
-            ))}
-          </ul>
-        </section>
+<Base title={picked ? `${picked.name} essays` : 'Essays'} active="essays" description="Essays worth reading, each linking to a free copy at the original.">
+  <section class="pad head">
+    <h1 class="title">{picked ? `${picked.name} essays` : 'Essays'}</h1>
+    <p class="muted lede">{picked ? `${picked.items.length} essays` : `${total} essays`} worth an afternoon, chosen by us. Each opens at its original home.</p>
+    <Filters fields={fields} />
+  </section>
+  {picked ? (
+    <section class="pad">
+      <div class="grid">
+        {picked.items.map((e) => <EssayCard e={e} mark={marks.get(e.link)} />)}
+      </div>
+    </section>
+  ) : (
+    <section class="pad rows">
+      {themes.map((t) => (
+        <PosterRow title={t.name} tone="essay" href={t.items.length > ROW ? `/essays/?theme=${t.slug}` : undefined} col="min(290px, 80vw)">
+          {t.items.slice(0, ROW).map((e) => <li><EssayCard e={e} mark={marks.get(e.link)} /></li>)}
+        </PosterRow>
       ))}
-    </div>
-  </div>
+    </section>
+  )}
+  {hasPicks && <p class="pad credit-line">Picks were found via <a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a>.</p>}
 </Base>
 <style>
-  .col { max-width: 640px; margin: 0 auto; padding-bottom: 48px; }
-  .head { padding-top: 48px; display: flex; flex-direction: column; gap: 12px; }
-  .lede { margin: 0; font-size: 16px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 24px 0 8px; }
-  .grp { padding-top: 48px; scroll-margin-top: 72px; display: flex; flex-direction: column; gap: 22px; }
-  .eyebrow { font-size: 11.5px; }
-  .es { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 26px; }
-  .e { position: relative; padding-right: 44px; }
-  .et { font-size: 19px; line-height: 1.3; font-weight: 500; }
-  .et:hover { color: var(--lat); }
-  .et:focus-visible { outline: 2px solid var(--lat); outline-offset: 3px; border-radius: 3px; }
-  .nw { white-space: nowrap; }
-  .out { font-size: .7em; color: var(--muted); }
-  .by { font-size: 15px; color: var(--muted); }
-  .en { margin: 4px 0 0; font-size: 15px; line-height: 1.5; }
-  .credit { color: var(--lat); text-transform: none; letter-spacing: 0; }
-  .es-save { position: absolute; top: -4px; right: 0; width: 40px; height: 40px; border: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .2s ease, color .2s ease, transform .25s var(--spring); }
-  .e:hover .es-save, .es-save:focus-visible, .es-save:global(.is-saved) { opacity: 1; }
-  .es-save:hover { color: var(--ink); }
-  .es-save:active { transform: scale(.92); }
-  .es-save:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
-  @media (hover: none) { .es-save { opacity: 1; } }
-  @media (max-width: 780px) { .head { padding-top: 28px; } .grp { padding-top: 40px; } }
+  .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+  .lede { margin: 0; max-width: 56ch; font-size: 16px; }
+  .rows { display: flex; flex-direction: column; gap: 48px; padding-bottom: 8px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }
+  .credit-line a { color: var(--lat); }
+  @media (max-width: 780px) { .head { padding-top: 28px; } .rows { gap: 36px; } .grid { grid-template-columns: 1fr; } }
 </style>

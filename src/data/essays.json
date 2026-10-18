@@ -5,11 +5,13 @@
   },
   "themes": [
     {
-      "name": "Found via Read Something Great",
+      "name": "Picks",
       "items": [
         {
           "title": "Personal Renewal",
           "author": "John W. Gardner",
+          "authorKey": "OL4409681A",
+          "authorSlug": "john-w-gardner",
           "publication": null,
           "year": null,
           "link": "https://www.pbs.org/johngardner/sections/writings_speech_1.html",
@@ -19,6 +21,8 @@
         {
           "title": "Andrew Chen on marketplaces",
           "author": "Andrew Chen",
+          "authorKey": "OL7318750A",
+          "authorSlug": "andrew-chen",
           "publication": "Stripe Atlas guide",
           "year": null,
           "link": "https://stripe.com/es-us/atlas/guides/andrew-chen-marketplaces",
@@ -28,6 +32,8 @@
         {
           "title": "The Epic Story of Container Shipping",
           "author": "Venkatesh Rao",
+          "authorKey": "OL10614081A",
+          "authorSlug": "venkatesh-rao",
           "publication": "Ribbonfarm",
           "year": 2009,
           "link": "https://ribbonfarm.com/2009/07/07/the-epic-story-of-container-shipping/",
@@ -37,6 +43,8 @@
         {
           "title": "The illusion of moral decline",
           "author": "Adam Mastroianni",
+          "authorKey": null,
+          "authorSlug": "adam-mastroianni",
           "publication": "Experimental History",
           "year": null,
           "link": "https://www.experimental-history.com/p/the-illusion-of-moral-decline",
@@ -46,6 +54,8 @@
         {
           "title": "In Praise of the Gods",
           "author": "Simon Sarris",
+          "authorKey": "OL7297207A",
+          "authorSlug": "simon-sarris",
           "publication": "Simon Sarris (Substack)",
           "year": null,
           "link": "https://simonsarris.substack.com/p/in-praise-of-the-gods",
@@ -55,11 +65,13 @@
       ]
     },
     {
-      "name": "Writing and reading",
+      "name": "Writing",
       "items": [
         {
           "title": "Why I Write",
           "author": "George Orwell",
+          "authorKey": "OL118077A",
+          "authorSlug": "george-orwell",
           "publication": "Gangrel",
           "year": 1946,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/why-i-write/",
@@ -68,6 +80,8 @@
         {
           "title": "Politics and the English Language",
           "author": "George Orwell",
+          "authorKey": "OL118077A",
+          "authorSlug": "george-orwell",
           "publication": "Horizon",
           "year": 1946,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/",
@@ -76,6 +90,8 @@
         {
           "title": "Of Studies",
           "author": "Francis Bacon",
+          "authorKey": "OL23720A",
+          "authorSlug": "francis-bacon",
           "publication": "Essays",
           "year": 1625,
           "link": "https://www.gutenberg.org/ebooks/575",
@@ -84,6 +100,8 @@
         {
           "title": "Of Books",
           "author": "Michel de Montaigne",
+          "authorKey": "OL112816A",
+          "authorSlug": "michel-de-montaigne",
           "publication": "Essays",
           "year": 1580,
           "link": "https://www.gutenberg.org/ebooks/3600",
@@ -92,6 +110,8 @@
         {
           "title": "The Age of the Essay",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2004,
           "link": "https://paulgraham.com/essay.html",
@@ -100,6 +120,8 @@
         {
           "title": "Putting Ideas into Words",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2012,
           "link": "https://paulgraham.com/words.html",
@@ -108,6 +130,8 @@
         {
           "title": "The Philosophy of Composition",
           "author": "Edgar Allan Poe",
+          "authorKey": "OL28127A",
+          "authorSlug": "edgar-allan-poe",
           "publication": "Graham's Magazine",
           "year": 1846,
           "link": "https://en.wikisource.org/wiki/The_Philosophy_of_Composition",
@@ -116,6 +140,8 @@
         {
           "title": "A Defence of Poetry",
           "author": "Percy Bysshe Shelley",
+          "authorKey": "OL20743A",
+          "authorSlug": "percy-bysshe-shelley",
           "publication": "published posthumously",
           "year": 1840,
           "link": "https://www.poetryfoundation.org/articles/69388/a-defence-of-poetry",
@@ -124,6 +150,8 @@
         {
           "title": "Tradition and the Individual Talent",
           "author": "T. S. Eliot",
+          "authorKey": "OL116256A",
+          "authorSlug": "t-s-eliot",
           "publication": "The Egoist",
           "year": 1919,
           "link": "https://www.poetryfoundation.org/articles/69400/tradition-and-the-individual-talent",
@@ -132,6 +160,8 @@
         {
           "title": "On the Pleasure of Hating",
           "author": "William Hazlitt",
+          "authorKey": "OL220326A",
+          "authorSlug": "william-hazlitt",
           "publication": "The Plain Speaker",
           "year": 1826,
           "link": "https://en.wikisource.org/wiki/On_the_Pleasure_of_Hating",
@@ -140,6 +170,8 @@
         {
           "title": "Fenimore Cooper's Literary Offenses",
           "author": "Mark Twain",
+          "authorKey": "OL18319A",
+          "authorSlug": "mark-twain",
           "publication": "North American Review",
           "year": 1895,
           "link": "https://en.wikisource.org/wiki/Fenimore_Cooper%27s_Literary_Offenses",
@@ -148,11 +180,13 @@
       ]
     },
     {
-      "name": "Living, attention and nature",
+      "name": "Nature",
       "items": [
         {
           "title": "Self-Reliance",
           "author": "Ralph Waldo Emerson",
+          "authorKey": "OL18405A",
+          "authorSlug": "ralph-waldo-emerson",
           "publication": "Essays: First Series",
           "year": 1841,
           "link": "https://en.wikisource.org/wiki/Essays:_First_Series/Self-Reliance",
@@ -161,6 +195,8 @@
         {
           "title": "Nature",
           "author": "Ralph Waldo Emerson",
+          "authorKey": "OL18405A",
+          "authorSlug": "ralph-waldo-emerson",
           "publication": "self-published",
           "year": 1836,
           "link": "https://en.wikisource.org/wiki/Nature_(Emerson)",
@@ -169,6 +205,8 @@
         {
           "title": "The American Scholar",
           "author": "Ralph Waldo Emerson",
+          "authorKey": "OL18405A",
+          "authorSlug": "ralph-waldo-emerson",
           "publication": "Harvard address",
           "year": 1837,
           "link": "https://en.wikisource.org/wiki/The_American_Scholar",
@@ -177,6 +215,8 @@
         {
           "title": "Life Without Principle",
           "author": "Henry David Thoreau",
+          "authorKey": "OL19690A",
+          "authorSlug": "henry-david-thoreau",
           "publication": "The Atlantic",
           "year": 1863,
           "link": "https://en.wikisource.org/wiki/Life_Without_Principle",
@@ -185,6 +225,8 @@
         {
           "title": "Some Thoughts on the Common Toad",
           "author": "George Orwell",
+          "authorKey": "OL118077A",
+          "authorSlug": "george-orwell",
           "publication": "Tribune",
           "year": 1946,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/some-thoughts-on-the-common-toad/",
@@ -193,6 +235,8 @@
         {
           "title": "The Book of Tea",
           "author": "Okakura Kakuzo",
+          "authorKey": "OL840964A",
+          "authorSlug": "okakura-kakuzo",
           "publication": "Putnam",
           "year": 1906,
           "link": "https://www.gutenberg.org/ebooks/769",
@@ -201,6 +245,8 @@
         {
           "title": "Why Procrastinators Procrastinate",
           "author": "Tim Urban",
+          "authorKey": null,
+          "authorSlug": "tim-urban",
           "publication": "Wait But Why",
           "year": 2013,
           "link": "https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html",
@@ -209,11 +255,13 @@
       ]
     },
     {
-      "name": "Work, craft and ideas",
+      "name": "Work",
       "items": [
         {
           "title": "How to Do Great Work",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2023,
           "link": "https://paulgraham.com/greatwork.html",
@@ -222,6 +270,8 @@
         {
           "title": "Do Things That Don't Scale",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2013,
           "link": "https://paulgraham.com/ds.html",
@@ -230,6 +280,8 @@
         {
           "title": "How to Do What You Love",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2006,
           "link": "https://paulgraham.com/love.html",
@@ -238,6 +290,8 @@
         {
           "title": "Hackers and Painters",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2003,
           "link": "https://paulgraham.com/hp.html",
@@ -246,6 +300,8 @@
         {
           "title": "Maker's Schedule, Manager's Schedule",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2009,
           "link": "https://paulgraham.com/makersschedule.html",
@@ -254,6 +310,8 @@
         {
           "title": "Beating the Averages",
           "author": "Paul Graham",
+          "authorKey": null,
+          "authorSlug": "paul-graham",
           "publication": "paulgraham.com",
           "year": 2001,
           "link": "https://paulgraham.com/avg.html",
@@ -262,6 +320,8 @@
         {
           "title": "You and Your Research",
           "author": "Richard Hamming",
+          "authorKey": "OL119729A",
+          "authorSlug": "richard-hamming",
           "publication": "Bell Communications Research talk",
           "year": 1986,
           "link": "https://www.cs.virginia.edu/~robins/YouAndYourResearch.html",
@@ -270,6 +330,8 @@
         {
           "title": "A Mathematician's Lament",
           "author": "Paul Lockhart",
+          "authorKey": "OL6613277A",
+          "authorSlug": "paul-lockhart",
           "publication": "self-published, later a book",
           "year": 2002,
           "link": "https://www.maa.org/external_archive/devlin/LockhartsLament.pdf",
@@ -278,6 +340,8 @@
         {
           "title": "1,000 True Fans",
           "author": "Kevin Kelly",
+          "authorKey": "OL234120A",
+          "authorSlug": "kevin-kelly",
           "publication": "The Technium",
           "year": 2008,
           "link": "https://kk.org/thetechnium/1000-true-fans/",
@@ -286,6 +350,8 @@
         {
           "title": "The Cathedral and the Bazaar",
           "author": "Eric S. Raymond",
+          "authorKey": "OL1517703A",
+          "authorSlug": "eric-s-raymond",
           "publication": "self-published",
           "year": 1997,
           "link": "http://www.catb.org/~esr/writings/cathedral-bazaar/cathedral-bazaar/",
@@ -294,6 +360,8 @@
         {
           "title": "The Rise of \"Worse Is Better\"",
           "author": "Richard P. Gabriel",
+          "authorKey": "OL453405A",
+          "authorSlug": "richard-p-gabriel",
           "publication": "Lisp: Good News, Bad News",
           "year": 1991,
           "link": "https://www.dreamsongs.com/WIB.html",
@@ -302,6 +370,8 @@
         {
           "title": "Reflections on Trusting Trust",
           "author": "Ken Thompson",
+          "authorKey": null,
+          "authorSlug": "ken-thompson",
           "publication": "Communications of the ACM",
           "year": 1984,
           "link": "https://www.cs.cmu.edu/~rdriley/487/papers/Thompson_1984_ReflectionsonTrustingTrust.pdf",
@@ -310,6 +380,8 @@
         {
           "title": "The Gervais Principle",
           "author": "Venkatesh Rao",
+          "authorKey": "OL10614081A",
+          "authorSlug": "venkatesh-rao",
           "publication": "Ribbonfarm",
           "year": 2009,
           "link": "https://ribbonfarm.com/2009/10/07/the-gervais-principle-or-the-office-according-to-the-office/",
@@ -318,6 +390,8 @@
         {
           "title": "Cargo Cult Science",
           "author": "Richard Feynman",
+          "authorKey": "OL35793A",
+          "authorSlug": "richard-feynman",
           "publication": "Caltech commencement address",
           "year": 1974,
           "link": "https://calteches.library.caltech.edu/51/2/CargoCult.htm",
@@ -326,6 +400,8 @@
         {
           "title": "As We May Think",
           "author": "Vannevar Bush",
+          "authorKey": "OL1122532A",
+          "authorSlug": "vannevar-bush",
           "publication": "The Atlantic",
           "year": 1945,
           "link": "https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/",
@@ -334,6 +410,8 @@
         {
           "title": "Computing Machinery and Intelligence",
           "author": "Alan Turing",
+          "authorKey": "OL770877A",
+          "authorSlug": "alan-turing",
           "publication": "Mind",
           "year": 1950,
           "link": "https://academic.oup.com/mind/article/LIX/236/433/986238",
@@ -342,6 +420,8 @@
         {
           "title": "The Tragedy of the Commons",
           "author": "Garrett Hardin",
+          "authorKey": "OL399084A",
+          "authorSlug": "garrett-hardin",
           "publication": "Science",
           "year": 1968,
           "link": "https://www.science.org/doi/10.1126/science.162.3859.1243",
@@ -350,6 +430,8 @@
         {
           "title": "Meditations on Moloch",
           "author": "Scott Alexander",
+          "authorKey": null,
+          "authorSlug": "scott-alexander",
           "publication": "Slate Star Codex",
           "year": 2014,
           "link": "https://slatestarcodex.com/2014/07/30/meditations-on-moloch/",
@@ -358,6 +440,8 @@
         {
           "title": "I Can Tolerate Anything Except the Outgroup",
           "author": "Scott Alexander",
+          "authorKey": null,
+          "authorSlug": "scott-alexander",
           "publication": "Slate Star Codex",
           "year": 2014,
           "link": "https://slatestarcodex.com/2014/09/30/i-can-tolerate-anything-except-the-outgroup/",
@@ -366,6 +450,8 @@
         {
           "title": "Slow Ideas",
           "author": "Atul Gawande",
+          "authorKey": "OL1485501A",
+          "authorSlug": "atul-gawande",
           "publication": "The New Yorker",
           "year": 2013,
           "link": "https://www.newyorker.com/magazine/2013/07/29/slow-ideas",
@@ -374,11 +460,13 @@
       ]
     },
     {
-      "name": "Freedom, justice and conscience",
+      "name": "Freedom",
       "items": [
         {
           "title": "Letter from Birmingham Jail",
           "author": "Martin Luther King Jr.",
+          "authorKey": "OL233499A",
+          "authorSlug": "martin-luther-king-jr",
           "publication": "written in jail, widely printed",
           "year": 1963,
           "link": "https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html",
@@ -387,6 +475,8 @@
         {
           "title": "Civil Disobedience",
           "author": "Henry David Thoreau",
+          "authorKey": "OL19690A",
+          "authorSlug": "henry-david-thoreau",
           "publication": "Aesthetic Papers (as \"Resistance to Civil Government\")",
           "year": 1849,
           "link": "https://en.wikisource.org/wiki/Civil_Disobedience_(Thoreau)",
@@ -395,6 +485,8 @@
         {
           "title": "A Modest Proposal",
           "author": "Jonathan Swift",
+          "authorKey": "OL24522A",
+          "authorSlug": "jonathan-swift",
           "publication": "pamphlet",
           "year": 1729,
           "link": "https://www.gutenberg.org/ebooks/1080",
@@ -403,6 +495,8 @@
         {
           "title": "Shooting an Elephant",
           "author": "George Orwell",
+          "authorKey": "OL118077A",
+          "authorSlug": "george-orwell",
           "publication": "New Writing",
           "year": 1936,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/shooting-an-elephant/",
@@ -411,6 +505,8 @@
         {
           "title": "A Hanging",
           "author": "George Orwell",
+          "authorKey": "OL118077A",
+          "authorSlug": "george-orwell",
           "publication": "The Adelphi",
           "year": 1931,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/a-hanging/",
@@ -419,6 +515,8 @@
         {
           "title": "Reflections on Gandhi",
           "author": "George Orwell",
+          "authorKey": "OL118077A",
+          "authorSlug": "george-orwell",
           "publication": "Partisan Review",
           "year": 1949,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/reflections-on-gandhi/",
@@ -427,6 +525,8 @@
         {
           "title": "Why Socialism?",
           "author": "Albert Einstein",
+          "authorKey": "OL3175986A",
+          "authorSlug": "albert-einstein",
           "publication": "Monthly Review",
           "year": 1949,
           "link": "https://monthlyreview.org/2009/05/01/why-socialism/",
@@ -435,6 +535,8 @@
         {
           "title": "The Case for Reparations",
           "author": "Ta-Nehisi Coates",
+          "authorKey": "OL3379613A",
+          "authorSlug": "ta-nehisi-coates",
           "publication": "The Atlantic",
           "year": 2014,
           "link": "https://www.theatlantic.com/magazine/archive/2014/06/the-case-for-reparations/361631/",
@@ -443,6 +545,8 @@
         {
           "title": "What to the Slave Is the Fourth of July?",
           "author": "Frederick Douglass",
+          "authorKey": "OL23684A",
+          "authorSlug": "frederick-douglass",
           "publication": "speech in Rochester",
           "year": 1852,
           "link": "https://teachingamericanhistory.org/document/what-to-the-slave-is-the-fourth-of-july/",
@@ -451,6 +555,8 @@
         {
           "title": "Of Our Spiritual Strivings",
           "author": "W. E. B. Du Bois",
+          "authorKey": "OL26460A",
+          "authorSlug": "w-e-b-du-bois",
           "publication": "The Souls of Black Folk",
           "year": 1903,
           "link": "https://www.gutenberg.org/ebooks/408",
@@ -459,6 +565,8 @@
         {
           "title": "The Soul of Man under Socialism",
           "author": "Oscar Wilde",
+          "authorKey": "OL20646A",
+          "authorSlug": "oscar-wilde",
           "publication": "The Fortnightly Review",
           "year": 1891,
           "link": "https://www.gutenberg.org/ebooks/1017",
@@ -467,6 +575,8 @@
         {
           "title": "Why I Am Not a Christian",
           "author": "Bertrand Russell",
+          "authorKey": "OL112912A",
+          "authorSlug": "bertrand-russell",
           "publication": "lecture, London",
           "year": 1927,
           "link": "https://users.drew.edu/jlenz/whynot.html",
@@ -475,6 +585,8 @@
         {
           "title": "The Subjection of Women",
           "author": "John Stuart Mill",
+          "authorKey": "OL108289A",
+          "authorSlug": "john-stuart-mill",
           "publication": "book-length essay",
           "year": 1869,
           "link": "https://www.gutenberg.org/ebooks/27083",
@@ -483,6 +595,8 @@
         {
           "title": "A Room of One's Own",
           "author": "Virginia Woolf",
+          "authorKey": "OL19450A",
+          "authorSlug": "virginia-woolf",
           "publication": "book-length essay",
           "year": 1929,
           "link": "https://gutenberg.net.au/ebooks02/0200791h.html",
@@ -491,6 +605,8 @@
         {
           "title": "The Will to Believe",
           "author": "William James",
+          "authorKey": "OL109602A",
+          "authorSlug": "william-james",
           "publication": "The New World",
           "year": 1896,
           "link": "https://en.wikisource.org/wiki/The_Will_to_Believe",
@@ -499,11 +615,13 @@
       ]
     },
     {
-      "name": "India, in English",
+      "name": "India",
       "items": [
         {
           "title": "Sadhana: The Realisation of Life",
           "author": "Rabindranath Tagore",
+          "authorKey": "OL1770A",
+          "authorSlug": "rabindranath-tagore",
           "publication": "Macmillan",
           "year": 1913,
           "link": "https://www.gutenberg.org/ebooks/2549",
@@ -512,6 +630,8 @@
         {
           "title": "Why I Am an Atheist",
           "author": "Bhagat Singh",
+          "authorKey": "OL4769985A",
+          "authorSlug": "bhagat-singh",
           "publication": "written in prison",
           "year": 1930,
           "link": "https://www.marxists.org/archive/bhagat-singh/1930/10/05.htm",
@@ -520,11 +640,13 @@
       ]
     },
     {
-      "name": "Fiction, craft and storytelling",
+      "name": "Fiction",
       "items": [
         {
           "title": "A Chapter on Dreams",
           "author": "Robert Louis Stevenson",
+          "authorKey": "OL25963A",
+          "authorSlug": "robert-louis-stevenson",
           "publication": "Scribner's Magazine",
           "year": 1888,
           "link": "https://www.gutenberg.org/ebooks/614",
@@ -533,6 +655,8 @@
         {
           "title": "Gossip on Romance",
           "author": "Robert Louis Stevenson",
+          "authorKey": "OL25963A",
+          "authorSlug": "robert-louis-stevenson",
           "publication": "Longman's Magazine",
           "year": 1882,
           "link": "https://www.gutenberg.org/ebooks/381",
@@ -541,6 +665,8 @@
         {
           "title": "A Humble Remonstrance",
           "author": "Robert Louis Stevenson",
+          "authorKey": "OL25963A",
+          "authorSlug": "robert-louis-stevenson",
           "publication": "Longman's Magazine",
           "year": 1884,
           "link": "https://www.gutenberg.org/ebooks/381",
@@ -549,6 +675,8 @@
         {
           "title": "A Note on Realism",
           "author": "Robert Louis Stevenson",
+          "authorKey": "OL25963A",
+          "authorSlug": "robert-louis-stevenson",
           "publication": "The Magazine of Art",
           "year": 1883,
           "link": "https://www.gutenberg.org/ebooks/492",
@@ -557,6 +685,8 @@
         {
           "title": "Books Which Have Influenced Me",
           "author": "Robert Louis Stevenson",
+          "authorKey": "OL25963A",
+          "authorSlug": "robert-louis-stevenson",
           "publication": "British Weekly",
           "year": 1887,
           "link": "https://www.gutenberg.org/ebooks/492",
@@ -565,6 +695,8 @@
         {
           "title": "The Decay of Lying",
           "author": "Oscar Wilde",
+          "authorKey": "OL20646A",
+          "authorSlug": "oscar-wilde",
           "publication": "The Nineteenth Century",
           "year": 1889,
           "link": "https://www.gutenberg.org/ebooks/887",
@@ -573,6 +705,8 @@
         {
           "title": "The Critic as Artist",
           "author": "Oscar Wilde",
+          "authorKey": "OL20646A",
+          "authorSlug": "oscar-wilde",
           "publication": "The Nineteenth Century",
           "year": 1890,
           "link": "https://www.gutenberg.org/ebooks/887",
@@ -581,6 +715,8 @@
         {
           "title": "How to Tell a Story",
           "author": "Mark Twain",
+          "authorKey": "OL18319A",
+          "authorSlug": "mark-twain",
           "publication": "Youth's Companion",
           "year": 1895,
           "link": "https://www.gutenberg.org/ebooks/142",
@@ -589,6 +725,8 @@
         {
           "title": "Modern Fiction",
           "author": "Virginia Woolf",
+          "authorKey": "OL19450A",
+          "authorSlug": "virginia-woolf",
           "publication": "The Common Reader",
           "year": 1919,
           "link": "https://www.gutenberg.org/ebooks/64457",
@@ -597,6 +735,8 @@
         {
           "title": "Mr Bennett and Mrs Brown",
           "author": "Virginia Woolf",
+          "authorKey": "OL19450A",
+          "authorSlug": "virginia-woolf",
           "publication": "Hogarth Essays",
           "year": 1923,
           "link": "https://www.gutenberg.org/ebooks/63022",
@@ -605,6 +745,8 @@
         {
           "title": "Preface to The Nigger of the Narcissus",
           "author": "Joseph Conrad",
+          "authorKey": "OL19441A",
+          "authorSlug": "joseph-conrad",
           "publication": "Book preface",
           "year": 1897,
           "link": "https://www.gutenberg.org/ebooks/17731",
@@ -613,6 +755,8 @@
         {
           "title": "The Writing of Fiction",
           "author": "Edith Wharton",
+          "authorKey": "OL20188A",
+          "authorSlug": "edith-wharton",
           "publication": "Charles Scribner's Sons",
           "year": 1925,
           "link": "https://www.gutenberg.org/ebooks/72446",
@@ -621,6 +765,8 @@
         {
           "title": "Introduction to Frankenstein (1831)",
           "author": "Mary Shelley",
+          "authorKey": "OL25342A",
+          "authorSlug": "mary-shelley",
           "publication": "Frankenstein, 1831 edition",
           "year": 1831,
           "link": "https://www.gutenberg.org/ebooks/84",
@@ -629,6 +775,8 @@
         {
           "title": "A Defence of Detective Stories",
           "author": "G. K. Chesterton",
+          "authorKey": "OL18524A",
+          "authorSlug": "g-k-chesterton",
           "publication": "The Defendant",
           "year": 1901,
           "link": "https://www.gutenberg.org/ebooks/12245",
@@ -637,6 +785,8 @@
         {
           "title": "Of King's Treasuries",
           "author": "John Ruskin",
+          "authorKey": "OL20108A",
+          "authorSlug": "john-ruskin",
           "publication": "Sesame and Lilies",
           "year": 1865,
           "link": "https://www.gutenberg.org/ebooks/1293",
@@ -645,6 +795,8 @@
         {
           "title": "Style",
           "author": "Walter Pater",
+          "authorKey": "OL10968A",
+          "authorSlug": "walter-pater",
           "publication": "The Fortnightly Review",
           "year": 1888,
           "link": "https://www.gutenberg.org/ebooks/4037",
@@ -653,6 +805,8 @@
         {
           "title": "The Rambler, No. 4",
           "author": "Samuel Johnson",
+          "authorKey": null,
+          "authorSlug": "samuel-johnson",
           "publication": "The Rambler",
           "year": 1750,
           "link": "https://www.gutenberg.org/ebooks/43656",
@@ -661,6 +815,8 @@
         {
           "title": "Preface to Joseph Andrews",
           "author": "Henry Fielding",
+          "authorKey": "OL18298A",
+          "authorSlug": "henry-fielding",
           "publication": "Joseph Andrews",
           "year": 1742,
           "link": "https://www.gutenberg.org/ebooks/9611",
@@ -669,6 +825,8 @@
         {
           "title": "An Autobiography",
           "author": "Anthony Trollope",
+          "authorKey": "OL29698A",
+          "authorSlug": "anthony-trollope",
           "publication": "Blackwood",
           "year": 1883,
           "link": "https://www.gutenberg.org/ebooks/5978",
@@ -677,6 +835,8 @@
         {
           "title": "Preface to Cromwell",
           "author": "Victor Hugo",
+          "authorKey": "OL107571A",
+          "authorSlug": "victor-hugo",
           "publication": "Cromwell",
           "year": 1827,
           "link": "https://en.wikisource.org/wiki/Preface_to_Cromwell",
@@ -685,6 +845,8 @@
         {
           "title": "Sahitya ka Uddeshya",
           "author": "Premchand",
+          "authorKey": "OL4683A",
+          "authorSlug": "premchand",
           "publication": "Progressive Writers' address",
           "year": 1936,
           "link": "https://hi.wikisource.org/wiki/%E0%A4%95%E0%A5%81%E0%A4%9B_%E0%A4%B5%E0%A4%BF%E0%A4%9A%E0%A4%BE%E0%A4%B0_-_%E0%A5%A7/%E0%A4%B8%E0%A4%BE%E0%A4%B9%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF_%E0%A4%95%E0%A4%BE_%E0%A4%89%E0%A4%A6%E0%A5%8D%E0%A4%A6%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%AF",
@@ -693,6 +855,8 @@
         {
           "title": "The Necklace",
           "author": "Guy de Maupassant",
+          "authorKey": "OL29388A",
+          "authorSlug": "guy-de-maupassant",
           "publication": "Le Gaulois",
           "year": 1884,
           "link": "https://en.wikisource.org/wiki/The_Necklace",
@@ -701,6 +865,8 @@
         {
           "title": "The Story of an Hour",
           "author": "Kate Chopin",
+          "authorKey": "OL35183A",
+          "authorSlug": "kate-chopin",
           "publication": "Vogue",
           "year": 1894,
           "link": "https://en.wikisource.org/wiki/The_Story_of_an_Hour",
@@ -709,6 +875,8 @@
         {
           "title": "The Yellow Wallpaper",
           "author": "Charlotte Perkins Gilman",
+          "authorKey": "OL408063A",
+          "authorSlug": "charlotte-perkins-gilman",
           "publication": "The New England Magazine",
           "year": 1892,
           "link": "https://en.wikisource.org/wiki/The_Yellow_Wallpaper",
@@ -717,6 +885,8 @@
         {
           "title": "The Open Window",
           "author": "Saki",
+          "authorKey": "OL591204A",
+          "authorSlug": "saki",
           "publication": "Westminster Gazette",
           "year": 1911,
           "link": "https://en.wikisource.org/wiki/The_Open_Window",
@@ -725,6 +895,8 @@
         {
           "title": "The Lady with the Dog",
           "author": "Anton Chekhov",
+          "authorKey": null,
+          "authorSlug": "anton-chekhov",
           "publication": "Russian Thought",
           "year": 1899,
           "link": "https://en.wikisource.org/wiki/The_Lady_with_the_Dog",
@@ -733,6 +905,8 @@
         {
           "title": "The Death of Ivan Ilyich",
           "author": "Leo Tolstoy",
+          "authorKey": "OL26783A",
+          "authorSlug": "leo-tolstoy",
           "publication": "Russkaya Mysl",
           "year": 1886,
           "link": "https://en.wikisource.org/wiki/The_Death_of_Ivan_Ilyich",
@@ -741,6 +915,8 @@
         {
           "title": "A Defence of Penny Dreadfuls",
           "author": "G. K. Chesterton",
+          "authorKey": "OL18524A",
+          "authorSlug": "g-k-chesterton",
           "publication": "The Defendant",
           "year": 1901,
           "link": "https://www.gutenberg.org/ebooks/12245",
@@ -749,6 +925,8 @@
         {
           "title": "Literary Taste: How to Form It",
           "author": "Arnold Bennett",
+          "authorKey": "OL29586A",
+          "authorSlug": "arnold-bennett",
           "publication": "Literary Taste",
           "year": 1909,
           "link": "https://www.gutenberg.org/ebooks/13852",
@@ -757,6 +935,8 @@
         {
           "title": "Idgah",
           "author": "Premchand",
+          "authorKey": "OL4683A",
+          "authorSlug": "premchand",
           "publication": "Mansarovar",
           "year": null,
           "link": "https://hi.wikisource.org/wiki/%E0%A4%AE%E0%A4%BE%E0%A4%A8%E0%A4%B8%E0%A4%B0%E0%A5%8B%E0%A4%B5%E0%A4%B0_%E0%A5%A7/%E0%A4%88%E0%A4%A6%E0%A4%97%E0%A4%BE%E0%A4%B9",
@@ -765,6 +945,8 @@
         {
           "title": "The Literature of Knowledge and the Literature of Power",
           "author": "Thomas De Quincey",
+          "authorKey": "OL34278A",
+          "authorSlug": "thomas-de-quincey",
           "publication": "North British Review",
           "year": 1848,
           "link": "https://www.gutenberg.org/ebooks/23788",

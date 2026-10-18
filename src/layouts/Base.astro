@@ -212,15 +212,14 @@ const avatar = me?.avatar_url;
       setTimeout(close, opts.action ? 5000 : 3200);
     }
     // a message to show once the page has reloaded (with Undo for something just saved)
-    function later(note: { msg: string; undo?: string; redo?: string }) { try { sessionStorage.setItem('toastNext', JSON.stringify(note)); } catch (e) {} }
+    function later(note: { msg: string; redo?: string }) { try { sessionStorage.setItem('toastNext', JSON.stringify(note)); } catch (e) {} }
     document.addEventListener('astro:page-load', () => {
-      let note: { msg: string; undo?: string; redo?: string } | null = null;
+      let note: { msg: string; redo?: string } | null = null;
       try { note = JSON.parse(sessionStorage.getItem('toastNext') || 'null'); sessionStorage.removeItem('toastNext'); } catch (e) {}
       if (!note) return;
-      // Undo of a save deletes it again; Undo of a removal puts the save back
+      // the only Undo left: a removal that took its page away (your own saved entry), which puts the save back
       const redo = note.redo;
-      toast(note.msg, { mark: true, action: note.undo ? { label: 'Undo', run: async () => { if (await send('/api/log', 'DELETE', { id: note!.undo })) reload(); } }
-        : redo ? { label: 'Undo', run: async () => { const r = await send('/api/log', 'POST', JSON.parse(redo)); if (r) navigate(r.href); } } : undefined });
+      toast(note.msg, { mark: true, action: redo ? { label: 'Undo', run: async () => { const r = await send('/api/log', 'POST', JSON.parse(redo)); if (r) navigate(r.href); } } : undefined });
     });
     // a button that's waiting: its icon becomes the Ink loader
     function busy(b: HTMLElement, on: boolean) {
@@ -304,10 +303,8 @@ const avatar = me?.avatar_url;
         // the filled bookmark now takes the save back when tapped
         qa.dataset.unsave = r.id; qa.dataset.before = before; qa.title = 'Saved. Tap to remove'; qa.disabled = false;
         // in a log panel the rest of the panel changes too, so reload it and say so afterwards
-        if (qa.closest('.logpanel')) { later({ msg: 'Saved to your shelf', undo: r.id }); reload(); return; }
-        toast('Saved to your shelf', { mark: true, action: { label: 'Undo', run: async () => {
-          if (await send('/api/log', 'DELETE', { id: r.id })) { qa.classList.remove('is-saved'); delete qa.dataset.unsave; qa.disabled = false; if (label) label.textContent = before; qa.title = 'Save to your shelf'; }
-        } } });
+        if (qa.closest('.logpanel')) { later({ msg: 'Saved to your shelf' }); reload(); return; }
+        toast('Saved to your shelf', { mark: true }); // tapping the filled bookmark again takes it back
         return;
       }
       const pin = el.closest<HTMLButtonElement>('[data-pin]');

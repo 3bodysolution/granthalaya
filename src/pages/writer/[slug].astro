@@ -1,0 +1,36 @@
+---
+// A simple author page for an essay writer who isn't on Open Library: their essays here.
+import Base from '../../layouts/Base.astro';
+import Face from '../../components/Face.astro';
+import EssayCard from '../../components/title/EssayCard.astro';
+import { allEssays } from '../../lib/essays';
+import { essayMarks } from '../../lib/catalog/onsite';
+export const prerender = false;
+
+const slug = String(Astro.params.slug ?? '');
+const essays = allEssays.filter((e) => !e.authorKey && e.authorSlug === slug);
+if (!essays.length) { Astro.response.status = 404; return Astro.rewrite('/404'); }
+const name = essays[0].author;
+const marks = await essayMarks(Astro.locals.supabase, Astro.locals.me, essays.map((e) => e.link)).catch(() => new Map());
+---
+<Base title={name} description={`Essays by ${name} on Granthalaya.`}>
+  <section class="pad head">
+    <Face name={name} size={96} />
+    <div class="stack" style="gap: 8px; min-width: 0">
+      <p class="eyebrow" style="color: var(--moss)">Author</p>
+      <h1 class="title">{name}</h1>
+    </div>
+  </section>
+  <section class="pad work">
+    <div class="rule"><h2 class="eyebrow">Essays <span class="num">{essays.length}</span></h2></div>
+    <div class="grid">
+      {essays.map((e) => <EssayCard e={e} mark={marks.get(e.link)} />)}
+    </div>
+  </section>
+</Base>
+<style>
+  .head { padding-top: 44px; display: flex; align-items: center; gap: 24px; }
+  .work { padding-top: 40px; display: flex; flex-direction: column; gap: 24px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  @media (max-width: 780px) { .head { padding-top: 28px; } .grid { grid-template-columns: 1fr; } }
+</style>

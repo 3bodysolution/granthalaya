@@ -3,11 +3,13 @@
 // Used on the home page and the Films and Books front pages. Rows with nothing in them are left out.
 import PosterTile from './PosterTile.astro';
 import type { RowItem } from '../../lib/catalog/rows';
-interface Props { title: string; items: RowItem[]; href?: string; all?: string; tone?: 'film' | 'book' | 'essay'; id?: string }
-const { title, items, href, all = 'See all', tone, id = 'row-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-') } = Astro.props;
+// Poster tiles come from `items`; a row of something else (the Essays cards) passes its own <li>s in the slot, with `col` as the card width.
+interface Props { title: string; items?: RowItem[]; href?: string; all?: string; tone?: 'film' | 'book' | 'essay'; id?: string; col?: string }
+const { title, items = [], href, all = 'See all', tone, id = 'row-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-'), col } = Astro.props;
+const filled = items.length > 0 || Astro.slots.has('default');
 ---
-{items.length > 0 && (
-  <section class="prow" aria-labelledby={id}>
+{filled && (
+  <section class="prow" aria-labelledby={id} style={col ? `--prow-col:${col}` : undefined}>
     <div class="prow-head">
       <h2 class="prow-t" id={id} data-tone={tone}>{title}</h2>
       {href && <a class="prow-all" href={href}>{all} <span aria-hidden="true">→</span></a>}
@@ -22,6 +24,7 @@ const { title, items, href, all = 'See all', tone, id = 'row-' + title.toLowerCa
     </div>
     <ul class="prow-list" data-row-list>
       {items.map((i) => <li><PosterTile {...i} /></li>)}
+      <slot />
     </ul>
   </section>
 )}
@@ -44,14 +47,14 @@ const { title, items, href, all = 'See all', tone, id = 'row-' + title.toLowerCa
   .prow-btn:disabled { opacity: .35; cursor: default; }
   .prow-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* room above and below so a poster can lift on hover without being cut off */
-  .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px 2px 14px; display: grid; grid-auto-flow: column; grid-auto-columns: 152px; gap: 20px;
+  .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px 2px 14px; display: grid; grid-auto-flow: column; grid-auto-columns: var(--prow-col, 152px); gap: 20px;
     overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px; scrollbar-width: none; }
   .prow-list::-webkit-scrollbar { display: none; }
   .prow-list > li { scroll-snap-align: start; min-width: 0; }
   @media (hover: none), (max-width: 780px) { .prow-nav { display: none; } }
   @media (max-width: 780px) {
     /* on a phone the row runs to the screen edge, so it's clear there's more to swipe */
-    .prow-list { grid-auto-columns: clamp(108px, 34%, 156px); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
+    .prow-list { grid-auto-columns: var(--prow-col, clamp(108px, 34%, 156px)); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
   }
 </style>
 

@@ -4,7 +4,7 @@ Tick the ones you want (about 50 to 60). Written from memory with no browsing, s
 
 Every link goes to the original publisher, the author's own site, or a public-domain archive (Wikisource, Project Gutenberg, and similar). Years are the year of first publication or delivery.
 
-## Found via Read Something Great
+## Picks
 
 These five are on the site's homepage now. Only these get the credit "Found via Read Something Great". Publication and year are not on the site, so they stay blank until we open each page.
 
@@ -14,7 +14,7 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **The illusion of moral decline** · Adam Mastroianni · Experimental History · year ? · <https://www.experimental-history.com/p/the-illusion-of-moral-decline> · Why people keep believing that morals are getting worse.
 - [x] **In Praise of the Gods** · Simon Sarris · Simon Sarris (Substack) · year ? · <https://simonsarris.substack.com/p/in-praise-of-the-gods> · What the old gods still offer a modern, disenchanted world.
 
-## Writing and reading
+## Writing
 
 - [x] **Why I Write** · George Orwell · Gangrel · 1946 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/why-i-write/> · Orwell on what drives him to write, and how he began.
 - [x] **Politics and the English Language** · George Orwell · Horizon · 1946 · <https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/> · How lazy language spoils thought, and how to write plainly.
@@ -28,7 +28,7 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **On the Pleasure of Hating** · William Hazlitt · The Plain Speaker · 1826 · <https://en.wikisource.org/wiki/On_the_Pleasure_of_Hating> · Why people enjoy hating, and what it says about them.
 - [x] **Fenimore Cooper's Literary Offenses** · Mark Twain · North American Review · 1895 · <https://en.wikisource.org/wiki/Fenimore_Cooper%27s_Literary_Offenses> · A funny list of the rules a bad novel breaks.
 
-## Living, attention and nature
+## Nature
 
 - [x] **Self-Reliance** · Ralph Waldo Emerson · Essays: First Series · 1841 · <https://en.wikisource.org/wiki/Essays:_First_Series/Self-Reliance> · Trust your own mind rather than the crowd.
 - [x] **Nature** · Ralph Waldo Emerson · self-published · 1836 · <https://en.wikisource.org/wiki/Nature_(Emerson)> · Emerson on finding meaning and renewal in the natural world.
@@ -38,7 +38,7 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **The Book of Tea** · Okakura Kakuzo · Putnam · 1906 · <https://www.gutenberg.org/ebooks/769> · Tea as a way into Japanese ideas of beauty and calm.
 - [x] **Why Procrastinators Procrastinate** · Tim Urban · Wait But Why · 2013 · <https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html> · A funny look at what happens inside a procrastinating mind.
 
-## Work, craft and ideas
+## Work
 
 - [x] **How to Do Great Work** · Paul Graham · paulgraham.com · 2023 · <https://paulgraham.com/greatwork.html> · How to find work you love and do it well.
 - [x] **Do Things That Don't Scale** · Paul Graham · paulgraham.com · 2013 · <https://paulgraham.com/ds.html> · Why early startups should win customers by hand.
@@ -61,7 +61,7 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **I Can Tolerate Anything Except the Outgroup** · Scott Alexander · Slate Star Codex · 2014 · <https://slatestarcodex.com/2014/09/30/i-can-tolerate-anything-except-the-outgroup/> · We dislike the group nearest to us most.
 - [x] **Slow Ideas** · Atul Gawande · The New Yorker · 2013 · <https://www.newyorker.com/magazine/2013/07/29/slow-ideas> · Why some good medical ideas spread slowly while others race ahead.
 
-## Freedom, justice and conscience
+## Freedom
 
 - [x] **Letter from Birmingham Jail** · Martin Luther King Jr. · written in jail, widely printed · 1963 · <https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html> · King answers critics who told him to wait for justice. ✓ exists (checked by search; the site blocks scripts)
 - [x] **Civil Disobedience** · Henry David Thoreau · Aesthetic Papers (as "Resistance to Civil Government") · 1849 · <https://en.wikisource.org/wiki/Civil_Disobedience_(Thoreau)> · Why Thoreau refused to obey a law he thought unjust.
@@ -79,12 +79,12 @@ These five are on the site's homepage now. Only these get the credit "Found via 
 - [x] **A Room of One's Own** · Virginia Woolf · book-length essay · 1929 · <https://gutenberg.net.au/ebooks02/0200791h.html> · Why a woman needs money and a room to write.
 - [x] **The Will to Believe** · William James · The New World · 1896 · <https://en.wikisource.org/wiki/The_Will_to_Believe> · When it is fair to believe something without proof.
 
-## India, in English
+## India
 
 - [x] **Sadhana: The Realisation of Life** · Rabindranath Tagore · Macmillan · 1913 · <https://www.gutenberg.org/ebooks/2549> · Tagore on the self and its search for the infinite.
 - [x] **Why I Am an Atheist** · Bhagat Singh · written in prison · 1930 · <https://www.marxists.org/archive/bhagat-singh/1930/10/05.htm> · Bhagat Singh explains his lack of faith from a prison cell.
 
-## Fiction, craft and storytelling
+## Fiction
 - [x] **A Chapter on Dreams** · Robert Louis Stevenson · Scribner's Magazine · 1888 · <https://www.gutenberg.org/ebooks/614> · Stevenson on how his stories arrive while he sleeps.
 - [x] **Gossip on Romance** · Robert Louis Stevenson · Longman's Magazine · 1882 · <https://www.gutenberg.org/ebooks/381> · Why tales of adventure grip us more than realistic ones.
 - [x] **A Humble Remonstrance** · Robert Louis Stevenson · Longman's Magazine · 1884 · <https://www.gutenberg.org/ebooks/381> · Stevenson replies to Henry James on what a novel should do.

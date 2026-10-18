@@ -2,10 +2,14 @@
 // Run: node scripts/essays/build.mjs
 // Only ticked lines count. Line format:
 //   - [x] **Title** · Author · Publication · Year · <url> · note
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 
 const SRC = new URL('../../docs/essay-candidates.md', import.meta.url)
 const OUT = new URL('../../src/data/essays.json', import.meta.url)
+
+// author → Open Library key and page slug, made once by scripts/essays/authors.mjs
+const AUTHORS = new URL('./authors.json', import.meta.url)
+const authors = existsSync(AUTHORS) ? JSON.parse(readFileSync(AUTHORS, 'utf8')) : {}
 
 const blank = (s) => (!s || s.trim() === '?' || /^(publication|year) \?$/.test(s.trim()) ? null : s.trim())
 
@@ -26,11 +30,13 @@ for (const line of readFileSync(SRC, 'utf8').split('\n')) {
   theme.items.push({
     title,
     author: author.trim(),
+    authorKey: authors[author.trim()]?.key ?? null,
+    authorSlug: authors[author.trim()]?.slug ?? null,
     publication: blank(publication),
     year: Number.isFinite(y) ? y : null,
     link,
     note,
-    ...(theme.name === 'Found via Read Something Great' ? { via: 'Read Something Great' } : {}),
+    ...(theme.name === 'Picks' ? { via: 'Read Something Great' } : {}),
   })
 }
 
