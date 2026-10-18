@@ -86,6 +86,10 @@ p { text-wrap: pretty; }
 .seg[data-vt]::before { view-transition-name: seg-thumb; }
 @media (prefers-reduced-motion: reduce) { .seg[data-ready]::before, .kinds[data-ready]::before { transition: none; } }
 
+/* the dense poster grid on Films, Books and the lists: posters only, 8 across at full width, 4 on a phone */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 18px 14px; }
+@media (max-width: 780px) { .pgrid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 8px; } }
+
 /* header */
 .site { height: 76px; padding: 0 var(--gut); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--line); max-width: var(--max); width: 100%; margin: 0 auto; }
 .site-wrap .site { border-bottom: 0; }

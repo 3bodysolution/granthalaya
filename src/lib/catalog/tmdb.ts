@@ -236,6 +236,15 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0 };
 }
 
+/** the browse grids show 40 to a page: two of TMDB's pages of 20 at once */
+export async function discoverWide(f: Filters): Promise<{ items: Card[]; pages: number; total: number }> {
+  const p = Math.max(f.page ?? 1, 1);
+  const [a, b] = await Promise.all([discover({ ...f, page: 2 * p - 1 }), discover({ ...f, page: 2 * p })]);
+  const seen = new Set<number>();
+  const items = [...a.items, ...b.items].filter((c) => !seen.has(c.id) && seen.add(c.id));
+  return { items, pages: Math.ceil(a.pages / 2), total: a.total };
+}
+
 /** streaming services in India, most used first */
 export async function services(): Promise<Provider[]> {
   if (!key()) return [];

@@ -103,8 +103,8 @@ const fields = [
         <a href="/add/?type=book" class="btn">Add a book by hand</a>
       </div>
     ) : (
-      <div class="grid">
-        {list.items.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
+      <div class="pgrid">
+        {list.items.map((b) => <PosterTile bare href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
       </div>
     )}
     <Pager page={page} pages={list.pages} />
@@ -114,7 +114,6 @@ const fields = [
 </Base>
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
   .lede { margin: 0 0 28px; max-width: 60ch; font-size: 16px; }
   .empty { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; font-size: 16px; }
   .empty p { margin: 0; }
@@ -127,5 +126,5 @@ const fields = [
   .chips .gchip:hover { color: var(--ink); }
   .rows .credit-line { margin-top: -16px; }
   @media (max-width: 780px) { .browse { grid-template-columns: 1fr; } .rows { gap: 36px; } }
-  @media (max-width: 780px) { .head { padding-top: 28px; } .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 12px; } }
+  @media (max-width: 780px) { .head { padding-top: 28px; } }
 </style>

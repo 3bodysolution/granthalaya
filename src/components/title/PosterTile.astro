@@ -12,8 +12,11 @@ interface Props {
   status?: string; save?: Record<string, unknown>; search?: string;
   /** the log behind a plain save: its filled bookmark takes the save back */
   logId?: string;
+  /** poster only (the dense grids): the name shows when you point at it; a tile with no cover still shows its title and author on the placeholder */
+  bare?: boolean;
 }
-const { href, title, year, poster, kind, sub, status, save, search, logId } = Astro.props;
+const { href, title, year, poster, kind, sub, status, save, search, logId, bare } = Astro.props;
+const by = (Array.isArray(sub) ? sub[0] : sub) || '';
 const me = Astro.locals.me;
 const p = paletteFor(title);
 const pic = poster ? tileImage(poster) : null;
@@ -21,12 +24,13 @@ const pic = poster ? tileImage(poster) : null;
 const Link = href || search ? 'a' : 'span';
 const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefined);
 ---
-<div class="pt">
+<div class:list={['pt', bare && 'bare']}>
   <Link href={to} class="pt-link" data-search-open={search ? '' : undefined} data-search-q={search}>
     <span class:list={['pt-cover', kind === 'book' ? 'book' : 'film', poster ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
       {pic && <img src={pic.src} srcset={pic.srcset} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-      <i class="sun"></i><i class="hill"></i><span class="serif pt-w">{title}</span>
+      <i class="sun"></i><i class="hill"></i><span class="serif pt-w">{title}{kind === 'book' && by && <small class="pt-wa">{by}</small>}</span>
     </span>
+    {bare && <span class="pt-tip" aria-hidden="true"><b>{title}</b>{(year || by) && <span>{[year, by].filter(Boolean).join(' | ')}</span>}</span>}
     <span class="pt-t">{title}</span>
     <span class="pt-s"><Bars parts={[year, ...(Array.isArray(sub) ? sub : [sub])]} /></span>
   </Link>
@@ -60,4 +64,20 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
   .pt-save:active { transform: scale(.92); }
   .pt-save:global(.is-saved) :global(.mk-edge) { stroke: #fff; }
   @media (hover: none) { .pt-save { opacity: 1; } }
+  .pt-wa { display: none; margin-top: 4px; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 11px; font-weight: 500; opacity: .85; }
+  /* poster only: the text under it stays for screen readers, and the name shows over the foot of the poster on hover or focus */
+  .bare .pt-link { gap: 0; }
+  .bare .pt-t, .bare .pt-s { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bare .pt-w { font-size: 13px; left: 8px; right: 8px; bottom: 10px; }
+  .bare.pt .pt-wa, .bare .pt-wa { display: block; }
+  .bare .real .pt-wa { display: none; }
+  .bare .pt-save { width: 28px; height: 28px; top: 5px; right: 5px; }
+  .bare :global(.pt-badge) { top: 5px; right: 5px; }
+  .pt-tip { position: absolute; z-index: 3; left: 6px; right: 6px; bottom: 6px; display: flex; flex-direction: column; gap: 1px; padding: 7px 9px; border-radius: 5px; background: rgba(12, 14, 18, .86); color: #F6EEDF; font-size: 12.5px; line-height: 1.25; pointer-events: none; opacity: 0; transform: translateY(4px); transition: opacity .15s ease, transform .2s var(--spring); }
+  .pt-tip b { font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .pt-tip span { font-size: 11.5px; opacity: .8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+  @media (hover: hover) { .pt:hover .pt-tip { opacity: 1; transform: none; } }
+  .pt-link:focus-visible .pt-tip { opacity: 1; transform: none; }
+  @media (max-width: 780px) { .bare .pt-save { width: 24px; height: 24px; top: 4px; right: 4px; } .bare .pt-w { font-size: 11px; left: 6px; right: 6px; bottom: 8px; } }
+  @media (prefers-reduced-motion: reduce) { .pt-tip { transition: opacity .15s ease; transform: none; } }
 </style>

@@ -240,14 +240,14 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
   const popular = (code && INDIAN.has(code)) || subject === 'drama' ? 'editions' : 'readinglog';
   const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : popular;
   const page = Math.min(Math.max(f.page ?? 1, 1), 100);
-  const run = (q: string) => getJSON(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=36&page=${page}`), { ttl: 21600, ms: 9000 });
+  const run = (q: string) => getJSON(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=48&page=${page}`), { ttl: 21600, ms: 9000 });
   let j = await run(parts.join(' '));
   // a subject from a book page ("mahabharata", "indic-fiction") may not be a subject key: try it as words
   if (subject && j && !j.numFound) j = await run(parts.join(' ').replace(/\(subject_key:[^)]*\)|subject_key:[a-z0-9_]+/, `subject:"${subject.replace(/-/g, ' ')}"`));
   const total = j?.numFound ?? 0;
   // books with a cover first, keeping Open Library's order within each group
   const items: BookCard[] = (j?.docs ?? []).map(card).filter((b: BookCard) => b.key);
-  return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 36) };
+  return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 48) };
 }
 
 export async function searchBooks(text: string): Promise<{ books: BookCard[]; authors: { key: string; name: string; href: string; works?: number }[] }> {
