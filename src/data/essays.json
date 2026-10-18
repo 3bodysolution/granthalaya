@@ -13,7 +13,7 @@
           "publication": null,
           "year": null,
           "link": "https://www.pbs.org/johngardner/sections/writings_speech_1.html",
-          "note": "Speech by the founder of Common Cause.",
+          "note": "Why growing people keep renewing themselves instead of settling.",
           "via": "Read Something Great"
         },
         {
@@ -22,7 +22,7 @@
           "publication": "Stripe Atlas guide",
           "year": null,
           "link": "https://stripe.com/es-us/atlas/guides/andrew-chen-marketplaces",
-          "note": "Guide to starting a two-sided marketplace.",
+          "note": "How to get a two sided marketplace off the ground.",
           "via": "Read Something Great"
         },
         {
@@ -31,7 +31,7 @@
           "publication": "Ribbonfarm",
           "year": 2009,
           "link": "https://ribbonfarm.com/2009/07/07/the-epic-story-of-container-shipping/",
-          "note": "Posted 7 July 2009; the site lists the author as Venkat.",
+          "note": "How the shipping container quietly reshaped world trade.",
           "via": "Read Something Great"
         },
         {
@@ -40,7 +40,7 @@
           "publication": "Experimental History",
           "year": null,
           "link": "https://www.experimental-history.com/p/the-illusion-of-moral-decline",
-          "note": "Argues people wrongly think morals are worsening.",
+          "note": "Why people keep believing that morals are getting worse.",
           "via": "Read Something Great"
         },
         {
@@ -49,7 +49,7 @@
           "publication": "Simon Sarris (Substack)",
           "year": null,
           "link": "https://simonsarris.substack.com/p/in-praise-of-the-gods",
-          "note": "Essay on the gods and the modern world.",
+          "note": "What the old gods still offer a modern, disenchanted world.",
           "via": "Read Something Great"
         }
       ]
@@ -63,7 +63,7 @@
           "publication": "Gangrel",
           "year": 1946,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/why-i-write/",
-          "note": "Orwell lists four motives for writing and his own history."
+          "note": "Orwell on what drives him to write, and how he began."
         },
         {
           "title": "Politics and the English Language",
@@ -71,7 +71,7 @@
           "publication": "Horizon",
           "year": 1946,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/politics-and-the-english-language/",
-          "note": "Six rules for clear writing, with examples of bad prose."
+          "note": "How lazy language spoils thought, and how to write plainly."
         },
         {
           "title": "Of Studies",
@@ -79,7 +79,7 @@
           "publication": "Essays",
           "year": 1625,
           "link": "https://www.gutenberg.org/ebooks/575",
-          "note": "Short essay on what study is for; full Essays at Gutenberg."
+          "note": "What reading and study are good for, and how to use them."
         },
         {
           "title": "Of Books",
@@ -87,7 +87,7 @@
           "publication": "Essays",
           "year": 1580,
           "link": "https://www.gutenberg.org/ebooks/3600",
-          "note": "Montaigne on his reading habits; Cotton translation, essay II.10."
+          "note": "Montaigne on how he reads, what he enjoys and what he skips."
         },
         {
           "title": "The Age of the Essay",
@@ -95,7 +95,7 @@
           "publication": "paulgraham.com",
           "year": 2004,
           "link": "https://paulgraham.com/essay.html",
-          "note": "Traces the essay from school exercise to a way of finding things out."
+          "note": "How the essay grew from schoolwork into a way to think."
         },
         {
           "title": "Putting Ideas into Words",
@@ -103,7 +103,7 @@
           "publication": "paulgraham.com",
           "year": 2012,
           "link": "https://paulgraham.com/words.html",
-          "note": "On writing as the way to find out what you think."
+          "note": "Why writing is how you find out what you think."
         },
         {
           "title": "The Philosophy of Composition",
@@ -111,7 +111,7 @@
           "publication": "Graham's Magazine",
           "year": 1846,
           "link": "https://en.wikisource.org/wiki/The_Philosophy_of_Composition",
-          "note": "Poe describes writing \"The Raven\" step by step."
+          "note": "Poe explains, step by step, how he wrote his famous poem."
         },
         {
           "title": "A Defence of Poetry",
@@ -119,7 +119,7 @@
           "publication": "published posthumously",
           "year": 1840,
           "link": "https://www.poetryfoundation.org/articles/69388/a-defence-of-poetry",
-          "note": "Written 1821; includes the line about poets as legislators."
+          "note": "Why poetry matters to a society and what poets give it."
         },
         {
           "title": "Tradition and the Individual Talent",
@@ -127,7 +127,7 @@
           "publication": "The Egoist",
           "year": 1919,
           "link": "https://www.poetryfoundation.org/articles/69400/tradition-and-the-individual-talent",
-          "note": "Eliot argues a poet is judged against the whole tradition."
+          "note": "Why a poet has to know the whole literary past."
         },
         {
           "title": "On the Pleasure of Hating",
@@ -135,7 +135,7 @@
           "publication": "The Plain Speaker",
           "year": 1826,
           "link": "https://en.wikisource.org/wiki/On_the_Pleasure_of_Hating",
-          "note": "Hazlitt examines his own capacity for hatred."
+          "note": "Why people enjoy hating, and what it says about them."
         },
         {
           "title": "Fenimore Cooper's Literary Offenses",
@@ -143,7 +143,7 @@
           "publication": "North American Review",
           "year": 1895,
           "link": "https://en.wikisource.org/wiki/Fenimore_Cooper%27s_Literary_Offenses",
-          "note": "Twain lists 18 rules Cooper's novels break."
+          "note": "A funny list of the rules a bad novel breaks."
         }
       ]
     },
@@ -156,7 +156,7 @@
           "publication": "Essays: First Series",
           "year": 1841,
           "link": "https://en.wikisource.org/wiki/Essays:_First_Series/Self-Reliance",
-          "note": "Contains \"a foolish consistency is the hobgoblin of little minds\"."
+          "note": "Trust your own mind rather than the crowd."
         },
         {
           "title": "Nature",
@@ -164,7 +164,7 @@
           "publication": "self-published",
           "year": 1836,
           "link": "https://en.wikisource.org/wiki/Nature_(Emerson)",
-          "note": "Founding text of American Transcendentalism."
+          "note": "Emerson on finding meaning and renewal in the natural world."
         },
         {
           "title": "The American Scholar",
@@ -172,7 +172,7 @@
           "publication": "Harvard address",
           "year": 1837,
           "link": "https://en.wikisource.org/wiki/The_American_Scholar",
-          "note": "Phi Beta Kappa address on independent thinking."
+          "note": "A call for thinkers to trust their own minds, not borrowed books."
         },
         {
           "title": "Life Without Principle",
@@ -180,7 +180,7 @@
           "publication": "The Atlantic",
           "year": 1863,
           "link": "https://en.wikisource.org/wiki/Life_Without_Principle",
-          "note": "Thoreau on work, money and how to spend a life."
+          "note": "Thoreau on work, money and spending a life well."
         },
         {
           "title": "Some Thoughts on the Common Toad",
@@ -188,7 +188,7 @@
           "publication": "Tribune",
           "year": 1946,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/some-thoughts-on-the-common-toad/",
-          "note": "Orwell on spring and noticing nature in London."
+          "note": "Orwell on the joy of noticing spring, even in a city."
         },
         {
           "title": "The Book of Tea",
@@ -196,7 +196,7 @@
           "publication": "Putnam",
           "year": 1906,
           "link": "https://www.gutenberg.org/ebooks/769",
-          "note": "Short book on tea and Japanese aesthetics, written in English."
+          "note": "Tea as a way into Japanese ideas of beauty and calm."
         },
         {
           "title": "Why Procrastinators Procrastinate",
@@ -204,7 +204,7 @@
           "publication": "Wait But Why",
           "year": 2013,
           "link": "https://waitbutwhy.com/2013/10/why-procrastinators-procrastinate.html",
-          "note": "Illustrated account of the Instant Gratification Monkey."
+          "note": "A funny look at what happens inside a procrastinating mind."
         }
       ]
     },
@@ -217,7 +217,7 @@
           "publication": "paulgraham.com",
           "year": 2023,
           "link": "https://paulgraham.com/greatwork.html",
-          "note": "Long guide to choosing and pursuing ambitious work."
+          "note": "How to find work you love and do it well."
         },
         {
           "title": "Do Things That Don't Scale",
@@ -225,7 +225,7 @@
           "publication": "paulgraham.com",
           "year": 2013,
           "link": "https://paulgraham.com/ds.html",
-          "note": "Advice to startup founders on early manual effort."
+          "note": "Why early startups should win customers by hand."
         },
         {
           "title": "How to Do What You Love",
@@ -233,7 +233,7 @@
           "publication": "paulgraham.com",
           "year": 2006,
           "link": "https://paulgraham.com/love.html",
-          "note": "On the trouble with finding work you enjoy."
+          "note": "Why loving your work is hard, and how to start."
         },
         {
           "title": "Hackers and Painters",
@@ -241,7 +241,7 @@
           "publication": "paulgraham.com",
           "year": 2003,
           "link": "https://paulgraham.com/hp.html",
-          "note": "Compares programmers to painters, as makers."
+          "note": "Why programmers have more in common with painters than scientists."
         },
         {
           "title": "Maker's Schedule, Manager's Schedule",
@@ -249,7 +249,7 @@
           "publication": "paulgraham.com",
           "year": 2009,
           "link": "https://paulgraham.com/makersschedule.html",
-          "note": "Why meetings cost makers more than managers."
+          "note": "Why one meeting can ruin a creative person's whole day."
         },
         {
           "title": "Beating the Averages",
@@ -257,7 +257,7 @@
           "publication": "paulgraham.com",
           "year": 2001,
           "link": "https://paulgraham.com/avg.html",
-          "note": "On using Lisp for a startup and why it helped."
+          "note": "How an unusual choice of tools gave one startup an edge."
         },
         {
           "title": "You and Your Research",
@@ -265,7 +265,7 @@
           "publication": "Bell Communications Research talk",
           "year": 1986,
           "link": "https://www.cs.virginia.edu/~robins/YouAndYourResearch.html",
-          "note": "Hamming on why some scientists do important work."
+          "note": "Why some scientists do great work and most do not."
         },
         {
           "title": "A Mathematician's Lament",
@@ -273,7 +273,7 @@
           "publication": "self-published, later a book",
           "year": 2002,
           "link": "https://www.maa.org/external_archive/devlin/LockhartsLament.pdf",
-          "note": "Argues school mathematics hides what mathematics is. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "How school takes the wonder out of mathematics."
         },
         {
           "title": "1,000 True Fans",
@@ -281,7 +281,7 @@
           "publication": "The Technium",
           "year": 2008,
           "link": "https://kk.org/thetechnium/1000-true-fans/",
-          "note": "Argues a creator can live on a thousand devoted fans."
+          "note": "A creator can make a living from a thousand devoted fans."
         },
         {
           "title": "The Cathedral and the Bazaar",
@@ -289,7 +289,7 @@
           "publication": "self-published",
           "year": 1997,
           "link": "http://www.catb.org/~esr/writings/cathedral-bazaar/cathedral-bazaar/",
-          "note": "Compares two ways of building open source software."
+          "note": "Two ways of building software, one planned and one open."
         },
         {
           "title": "The Rise of \"Worse Is Better\"",
@@ -297,7 +297,7 @@
           "publication": "Lisp: Good News, Bad News",
           "year": 1991,
           "link": "https://www.dreamsongs.com/WIB.html",
-          "note": "Argues simple software often beats the more correct kind."
+          "note": "Why simple software often wins over the more correct kind."
         },
         {
           "title": "Reflections on Trusting Trust",
@@ -305,7 +305,7 @@
           "publication": "Communications of the ACM",
           "year": 1984,
           "link": "https://www.cs.cmu.edu/~rdriley/487/papers/Thompson_1984_ReflectionsonTrustingTrust.pdf",
-          "note": "Turing Award lecture on a hidden compiler backdoor."
+          "note": "How a program can hide a flaw you can never find."
         },
         {
           "title": "The Gervais Principle",
@@ -313,7 +313,7 @@
           "publication": "Ribbonfarm",
           "year": 2009,
           "link": "https://ribbonfarm.com/2009/10/07/the-gervais-principle-or-the-office-according-to-the-office/",
-          "note": "Reads office life through the TV show The Office."
+          "note": "What a sitcom set in an office teaches about how work runs."
         },
         {
           "title": "Cargo Cult Science",
@@ -321,7 +321,7 @@
           "publication": "Caltech commencement address",
           "year": 1974,
           "link": "https://calteches.library.caltech.edu/51/2/CargoCult.htm",
-          "note": "Feynman on scientific integrity and fooling yourself."
+          "note": "Why scientists must never fool themselves, starting with honesty."
         },
         {
           "title": "As We May Think",
@@ -329,7 +329,7 @@
           "publication": "The Atlantic",
           "year": 1945,
           "link": "https://www.theatlantic.com/magazine/archive/1945/07/as-we-may-think/303881/",
-          "note": "Describes the \"memex\", an early idea of linked information. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "An early vision of a machine that links all knowledge."
         },
         {
           "title": "Computing Machinery and Intelligence",
@@ -337,7 +337,7 @@
           "publication": "Mind",
           "year": 1950,
           "link": "https://academic.oup.com/mind/article/LIX/236/433/986238",
-          "note": "Poses \"Can machines think?\" and the imitation game. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "Can machines think? Turing tests the question with a game."
         },
         {
           "title": "The Tragedy of the Commons",
@@ -345,7 +345,7 @@
           "publication": "Science",
           "year": 1968,
           "link": "https://www.science.org/doi/10.1126/science.162.3859.1243",
-          "note": "Shared resources get overused when each user gains alone. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "Why shared resources get ruined when everyone acts for themselves."
         },
         {
           "title": "Meditations on Moloch",
@@ -353,7 +353,7 @@
           "publication": "Slate Star Codex",
           "year": 2014,
           "link": "https://slatestarcodex.com/2014/07/30/meditations-on-moloch/",
-          "note": "On competition forcing outcomes nobody chose."
+          "note": "How competition can push everyone toward results nobody wants."
         },
         {
           "title": "I Can Tolerate Anything Except the Outgroup",
@@ -361,7 +361,7 @@
           "publication": "Slate Star Codex",
           "year": 2014,
           "link": "https://slatestarcodex.com/2014/09/30/i-can-tolerate-anything-except-the-outgroup/",
-          "note": "Argues tribal dislike targets the nearest group."
+          "note": "We dislike the group nearest to us most."
         },
         {
           "title": "Slow Ideas",
@@ -369,7 +369,7 @@
           "publication": "The New Yorker",
           "year": 2013,
           "link": "https://www.newyorker.com/magazine/2013/07/29/slow-ideas",
-          "note": "Why some medical practices spread slowly and others fast."
+          "note": "Why some good medical ideas spread slowly while others race ahead."
         }
       ]
     },
@@ -382,7 +382,7 @@
           "publication": "written in jail, widely printed",
           "year": 1963,
           "link": "https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html",
-          "note": "Reply to clergymen who called his protests untimely. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "King answers critics who told him to wait for justice."
         },
         {
           "title": "Civil Disobedience",
@@ -390,7 +390,7 @@
           "publication": "Aesthetic Papers (as \"Resistance to Civil Government\")",
           "year": 1849,
           "link": "https://en.wikisource.org/wiki/Civil_Disobedience_(Thoreau)",
-          "note": "Thoreau explains why he refused to pay a tax."
+          "note": "Why Thoreau refused to obey a law he thought unjust."
         },
         {
           "title": "A Modest Proposal",
@@ -398,7 +398,7 @@
           "publication": "pamphlet",
           "year": 1729,
           "link": "https://www.gutenberg.org/ebooks/1080",
-          "note": "Satire proposing the Irish poor sell their children as food."
+          "note": "A savage joke about solving poverty by eating the poor's children."
         },
         {
           "title": "Shooting an Elephant",
@@ -406,7 +406,7 @@
           "publication": "New Writing",
           "year": 1936,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/shooting-an-elephant/",
-          "note": "Orwell as a colonial policeman in Burma."
+          "note": "A colonial officer is pushed into an act he knows is wrong."
         },
         {
           "title": "A Hanging",
@@ -414,7 +414,7 @@
           "publication": "The Adelphi",
           "year": 1931,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/a-hanging/",
-          "note": "Orwell describes witnessing an execution in Burma."
+          "note": "Orwell watches a prisoner walk to his death."
         },
         {
           "title": "Reflections on Gandhi",
@@ -422,7 +422,7 @@
           "publication": "Partisan Review",
           "year": 1949,
           "link": "https://www.orwellfoundation.com/the-orwell-foundation/orwell/essays-and-other-works/reflections-on-gandhi/",
-          "note": "Orwell weighs Gandhi's saintliness against his politics."
+          "note": "Orwell asks whether Gandhi was a saint or a shrewd politician."
         },
         {
           "title": "Why Socialism?",
@@ -430,7 +430,7 @@
           "publication": "Monthly Review",
           "year": 1949,
           "link": "https://monthlyreview.org/2009/05/01/why-socialism/",
-          "note": "Einstein's essay on the economy and individual freedom."
+          "note": "Einstein on what a planned economy could do for freedom."
         },
         {
           "title": "The Case for Reparations",
@@ -438,7 +438,7 @@
           "publication": "The Atlantic",
           "year": 2014,
           "link": "https://www.theatlantic.com/magazine/archive/2014/06/the-case-for-reparations/361631/",
-          "note": "Traces housing discrimination in the US from the 1930s on. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "How decades of housing policy took wealth from Black families."
         },
         {
           "title": "What to the Slave Is the Fourth of July?",
@@ -446,7 +446,7 @@
           "publication": "speech in Rochester",
           "year": 1852,
           "link": "https://teachingamericanhistory.org/document/what-to-the-slave-is-the-fourth-of-july/",
-          "note": "Douglass addresses a July 4 audience about slavery. ✓ exists (checked by search; the site blocks scripts)"
+          "note": "Douglass tells a free nation what its holiday means to the enslaved."
         },
         {
           "title": "Of Our Spiritual Strivings",
@@ -454,7 +454,7 @@
           "publication": "The Souls of Black Folk",
           "year": 1903,
           "link": "https://www.gutenberg.org/ebooks/408",
-          "note": "Opening chapter; introduces \"double consciousness\". Full book at Gutenberg."
+          "note": "Du Bois on living as a Black American, seen by two worlds."
         },
         {
           "title": "The Soul of Man under Socialism",
@@ -462,7 +462,7 @@
           "publication": "The Fortnightly Review",
           "year": 1891,
           "link": "https://www.gutenberg.org/ebooks/1017",
-          "note": "Wilde argues socialism would free people to develop individually."
+          "note": "Wilde argues that shared wealth would free people to be themselves."
         },
         {
           "title": "Why I Am Not a Christian",
@@ -470,7 +470,7 @@
           "publication": "lecture, London",
           "year": 1927,
           "link": "https://users.drew.edu/jlenz/whynot.html",
-          "note": "Russell's argument against belief and the church."
+          "note": "Russell lays out his reasons for rejecting religion."
         },
         {
           "title": "The Subjection of Women",
@@ -478,7 +478,7 @@
           "publication": "book-length essay",
           "year": 1869,
           "link": "https://www.gutenberg.org/ebooks/27083",
-          "note": "Mill argues for legal equality of the sexes."
+          "note": "Mill argues that women should have equal rights under the law."
         },
         {
           "title": "A Room of One's Own",
@@ -486,7 +486,7 @@
           "publication": "book-length essay",
           "year": 1929,
           "link": "https://gutenberg.net.au/ebooks02/0200791h.html",
-          "note": "Woolf on women, money and writing; public domain in Australia."
+          "note": "Why a woman needs money and a room to write."
         },
         {
           "title": "The Will to Believe",
@@ -494,7 +494,7 @@
           "publication": "The New World",
           "year": 1896,
           "link": "https://en.wikisource.org/wiki/The_Will_to_Believe",
-          "note": "James argues belief can be justified without proof."
+          "note": "When it is fair to believe something without proof."
         }
       ]
     },
@@ -507,7 +507,7 @@
           "publication": "Macmillan",
           "year": 1913,
           "link": "https://www.gutenberg.org/ebooks/2549",
-          "note": "Lectures on the self and the infinite, given at Harvard."
+          "note": "Tagore on the self and its search for the infinite."
         },
         {
           "title": "Why I Am an Atheist",
@@ -515,7 +515,7 @@
           "publication": "written in prison",
           "year": 1930,
           "link": "https://www.marxists.org/archive/bhagat-singh/1930/10/05.htm",
-          "note": "Written in Lahore jail, October 1930."
+          "note": "Bhagat Singh explains his lack of faith from a prison cell."
         }
       ]
     },
@@ -528,7 +528,7 @@
           "publication": "Scribner's Magazine",
           "year": 1888,
           "link": "https://www.gutenberg.org/ebooks/614",
-          "note": "How his stories came to him through dreams and night visions."
+          "note": "Stevenson on how his stories arrive while he sleeps."
         },
         {
           "title": "Gossip on Romance",
@@ -536,7 +536,7 @@
           "publication": "Longman's Magazine",
           "year": 1882,
           "link": "https://www.gutenberg.org/ebooks/381",
-          "note": "Argues that romance is the oldest and most lasting form of story."
+          "note": "Why tales of adventure grip us more than realistic ones."
         },
         {
           "title": "A Humble Remonstrance",
@@ -544,7 +544,7 @@
           "publication": "Longman's Magazine",
           "year": 1884,
           "link": "https://www.gutenberg.org/ebooks/381",
-          "note": "A reply to Henry James defending romance against the psychological novel."
+          "note": "Stevenson replies to Henry James on what a novel should do."
         },
         {
           "title": "A Note on Realism",
@@ -552,7 +552,7 @@
           "publication": "The Magazine of Art",
           "year": 1883,
           "link": "https://www.gutenberg.org/ebooks/492",
-          "note": "Argues realism in fiction depends on selection and form."
+          "note": "Why even realistic fiction must choose and shape what it shows."
         },
         {
           "title": "Books Which Have Influenced Me",
@@ -560,7 +560,7 @@
           "publication": "British Weekly",
           "year": 1887,
           "link": "https://www.gutenberg.org/ebooks/492",
-          "note": "Stevenson lists the books that shaped his own style."
+          "note": "The books that shaped Stevenson's way of writing."
         },
         {
           "title": "The Decay of Lying",
@@ -568,7 +568,7 @@
           "publication": "The Nineteenth Century",
           "year": 1889,
           "link": "https://www.gutenberg.org/ebooks/887",
-          "note": "A dialogue arguing that art, not life, should model fiction."
+          "note": "Wilde argues that art shapes life, not the other way round."
         },
         {
           "title": "The Critic as Artist",
@@ -576,7 +576,7 @@
           "publication": "The Nineteenth Century",
           "year": 1890,
           "link": "https://www.gutenberg.org/ebooks/887",
-          "note": "A dialogue treating criticism as a creative art."
+          "note": "Wilde on why criticism is a creative act."
         },
         {
           "title": "How to Tell a Story",
@@ -584,7 +584,7 @@
           "publication": "Youth's Companion",
           "year": 1895,
           "link": "https://www.gutenberg.org/ebooks/142",
-          "note": "Twain on the humour and timing of a told tale."
+          "note": "Twain on the timing and pauses that make a tale funny."
         },
         {
           "title": "Modern Fiction",
@@ -592,7 +592,7 @@
           "publication": "The Common Reader",
           "year": 1919,
           "link": "https://www.gutenberg.org/ebooks/64457",
-          "note": "Woolf argues that novels should capture life as it is felt."
+          "note": "Woolf asks novelists to write life as it feels, not as plotted."
         },
         {
           "title": "Mr Bennett and Mrs Brown",
@@ -600,7 +600,7 @@
           "publication": "Hogarth Essays",
           "year": 1923,
           "link": "https://www.gutenberg.org/ebooks/63022",
-          "note": "Woolf's lecture on how character changed in the modern novel."
+          "note": "Woolf on how the novel's idea of character was changing."
         },
         {
           "title": "Preface to The Nigger of the Narcissus",
@@ -608,7 +608,7 @@
           "publication": "Book preface",
           "year": 1897,
           "link": "https://www.gutenberg.org/ebooks/17731",
-          "note": "Conrad says the writer's task is to make readers see."
+          "note": "Conrad says a writer's job is to make you see."
         },
         {
           "title": "The Writing of Fiction",
@@ -616,7 +616,7 @@
           "publication": "Charles Scribner's Sons",
           "year": 1925,
           "link": "https://www.gutenberg.org/ebooks/72446",
-          "note": "Wharton's practical guide to plot, character and the short story."
+          "note": "Practical advice on plot, character and the short story."
         },
         {
           "title": "Introduction to Frankenstein (1831)",
@@ -624,7 +624,7 @@
           "publication": "Frankenstein, 1831 edition",
           "year": 1831,
           "link": "https://www.gutenberg.org/ebooks/84",
-          "note": "Shelley on how the story came to her in a dream."
+          "note": "Shelley recalls the dream that gave her the story."
         },
         {
           "title": "A Defence of Detective Stories",
@@ -632,7 +632,7 @@
           "publication": "The Defendant",
           "year": 1901,
           "link": "https://www.gutenberg.org/ebooks/12245",
-          "note": "Chesterton defends detective fiction as a moral and imaginative form."
+          "note": "Why Chesterton thinks crime fiction is more serious than it looks."
         },
         {
           "title": "Of King's Treasuries",
@@ -640,7 +640,7 @@
           "publication": "Sesame and Lilies",
           "year": 1865,
           "link": "https://www.gutenberg.org/ebooks/1293",
-          "note": "Ruskin on reading good books slowly and choosing them with care."
+          "note": "Ruskin on why to read good books slowly and with care."
         },
         {
           "title": "Style",
@@ -648,7 +648,7 @@
           "publication": "The Fortnightly Review",
           "year": 1888,
           "link": "https://www.gutenberg.org/ebooks/4037",
-          "note": "Pater on prose craft and choosing each word."
+          "note": "Pater on how care over each word shapes good prose."
         },
         {
           "title": "The Rambler, No. 4",
@@ -656,7 +656,7 @@
           "publication": "The Rambler",
           "year": 1750,
           "link": "https://www.gutenberg.org/ebooks/43656",
-          "note": "Johnson defends the novel and asks whether it teaches useful truths."
+          "note": "Johnson asks what the new kind of novel does to young readers."
         },
         {
           "title": "Preface to Joseph Andrews",
@@ -664,7 +664,7 @@
           "publication": "Joseph Andrews",
           "year": 1742,
           "link": "https://www.gutenberg.org/ebooks/9611",
-          "note": "Fielding calls his novel a comic epic in prose."
+          "note": "Fielding explains what he means by a comic novel."
         },
         {
           "title": "An Autobiography",
@@ -672,7 +672,7 @@
           "publication": "Blackwood",
           "year": 1883,
           "link": "https://www.gutenberg.org/ebooks/5978",
-          "note": "Trollope on his daily writing routine and the novel."
+          "note": "Trollope on writing a set number of words every morning."
         },
         {
           "title": "Preface to Cromwell",
@@ -680,7 +680,7 @@
           "publication": "Cromwell",
           "year": 1827,
           "link": "https://en.wikisource.org/wiki/Preface_to_Cromwell",
-          "note": "Hugo's manifesto for mixing the grotesque with the sublime in drama."
+          "note": "Hugo argues that drama should mix the ugly with the lofty."
         },
         {
           "title": "Sahitya ka Uddeshya",
@@ -688,7 +688,7 @@
           "publication": "Progressive Writers' address",
           "year": 1936,
           "link": "https://hi.wikisource.org/wiki/%E0%A4%95%E0%A5%81%E0%A4%9B_%E0%A4%B5%E0%A4%BF%E0%A4%9A%E0%A4%BE%E0%A4%B0_-_%E0%A5%A7/%E0%A4%B8%E0%A4%BE%E0%A4%B9%E0%A4%BF%E0%A4%A4%E0%A5%8D%E0%A4%AF_%E0%A4%95%E0%A4%BE_%E0%A4%89%E0%A4%A6%E0%A5%8D%E0%A4%A6%E0%A5%87%E0%A4%B6%E0%A5%8D%E0%A4%AF",
-          "note": "Premchand on literature's purpose and the writer's duty to society."
+          "note": "Premchand on what literature is for and what writers owe society."
         },
         {
           "title": "The Necklace",
@@ -696,7 +696,7 @@
           "publication": "Le Gaulois",
           "year": 1884,
           "link": "https://en.wikisource.org/wiki/The_Necklace",
-          "note": "A woman borrows a necklace that turns out to be paste."
+          "note": "A borrowed necklace is lost, and a couple pays for years."
         },
         {
           "title": "The Story of an Hour",
@@ -704,7 +704,7 @@
           "publication": "Vogue",
           "year": 1894,
           "link": "https://en.wikisource.org/wiki/The_Story_of_an_Hour",
-          "note": "A woman learns her husband is dead and feels a sudden freedom."
+          "note": "News of a death brings a woman an unexpected feeling of freedom."
         },
         {
           "title": "The Yellow Wallpaper",
@@ -712,7 +712,7 @@
           "publication": "The New England Magazine",
           "year": 1892,
           "link": "https://en.wikisource.org/wiki/The_Yellow_Wallpaper",
-          "note": "A woman confined to a room by her husband's rest cure."
+          "note": "A woman, shut in a room to rest, begins to unravel."
         },
         {
           "title": "The Open Window",
@@ -720,7 +720,7 @@
           "publication": "Westminster Gazette",
           "year": 1911,
           "link": "https://en.wikisource.org/wiki/The_Open_Window",
-          "note": "A lie told to a nervous visitor drives the story."
+          "note": "A girl's tall tale frightens a nervous visitor."
         },
         {
           "title": "The Lady with the Dog",
@@ -728,7 +728,7 @@
           "publication": "Russian Thought",
           "year": 1899,
           "link": "https://en.wikisource.org/wiki/The_Lady_with_the_Dog",
-          "note": "A married man and a woman fall in love at a resort."
+          "note": "Two married strangers fall in love on holiday."
         },
         {
           "title": "The Death of Ivan Ilyich",
@@ -736,7 +736,7 @@
           "publication": "Russkaya Mysl",
           "year": 1886,
           "link": "https://en.wikisource.org/wiki/The_Death_of_Ivan_Ilyich",
-          "note": "A magistrate faces his own death and the emptiness of his life."
+          "note": "A judge faces dying and sees how empty his life has been."
         },
         {
           "title": "A Defence of Penny Dreadfuls",
@@ -744,7 +744,7 @@
           "publication": "The Defendant",
           "year": 1901,
           "link": "https://www.gutenberg.org/ebooks/12245",
-          "note": "Chesterton defends cheap popular fiction as honest and imaginative."
+          "note": "Why Chesterton thinks cheap thrilling stories deserve respect."
         },
         {
           "title": "Literary Taste: How to Form It",
@@ -752,7 +752,7 @@
           "publication": "Literary Taste",
           "year": 1909,
           "link": "https://www.gutenberg.org/ebooks/13852",
-          "note": "Bennett on how a reader can learn to judge good books."
+          "note": "Bennett on how any reader can learn to choose good books."
         },
         {
           "title": "Idgah",
@@ -760,7 +760,7 @@
           "publication": "Mansarovar",
           "year": null,
           "link": "https://hi.wikisource.org/wiki/%E0%A4%AE%E0%A4%BE%E0%A4%A8%E0%A4%B8%E0%A4%B0%E0%A5%8B%E0%A4%B5%E0%A4%B0_%E0%A5%A7/%E0%A4%88%E0%A4%A6%E0%A4%97%E0%A4%BE%E0%A4%B9",
-          "note": "A boy buys tongs for his grandmother instead of sweets."
+          "note": "A poor boy buys a gift for his grandmother at the fair."
         },
         {
           "title": "The Literature of Knowledge and the Literature of Power",
@@ -768,7 +768,7 @@
           "publication": "North British Review",
           "year": 1848,
           "link": "https://www.gutenberg.org/ebooks/23788",
-          "note": "De Quincey separates books that inform from books that move us."
+          "note": "De Quincey on books that teach and books that move."
         }
       ]
     }

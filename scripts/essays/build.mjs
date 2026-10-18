@@ -21,7 +21,7 @@ for (const line of readFileSync(SRC, 'utf8').split('\n')) {
   const m = line.match(/^- \[x\] \*\*(.+?)\*\* · (.+?) · (.+?) · (.+?) · <(https?:\/\/[^>]+)> · (.*)$/)
   if (!m || !theme) continue
   const [, title, author, publication, year, link, rest] = m
-  const note = rest.replace(/ ⚠ (DEAD|CHECK) \([^)]*\)$/, '').replace(/ \(check\)$/, '').trim()
+  const note = rest.replace(/ ✓ exists.*$/, '').replace(/ ⚠ (DEAD|CHECK) \([^)]*\)$/, '').replace(/ \(check\)$/, '').trim()
   const y = parseInt(year, 10)
   theme.items.push({
     title,
