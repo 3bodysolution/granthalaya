@@ -5,6 +5,7 @@
 import Base from '../../layouts/Base.astro';
 import PosterTile from '../../components/title/PosterTile.astro';
 import Filters from '../../components/title/Filters.astro';
+import YearStrip from '../../components/title/YearStrip.astro';
 import Pager from '../../components/title/Pager.astro';
 import FrontRows from '../../components/title/FrontRows.astro';
 import { bookRows, markRows } from '../../lib/catalog/rows';
@@ -66,9 +67,7 @@ const fields = [
   { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][], clears: resets },
   picked
     ? { name: 'decade', label: 'Year', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
-    : year
-      ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
-      : { name: 'decade', label: 'Year', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+    : { name: 'when', label: 'Year', value: year ? `year=${year}` : decade ? `decade=${decade}` : '', text: year ? String(year) : decade ? `${decade}s` : undefined, options: [['', 'Any year'], ...decades.map(([d, n]) => [`decade=${d}`, n])] as [string, string][] },
   { name: 'list', label: 'Lists', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...bookLists.map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
   { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
 ];
@@ -78,6 +77,7 @@ const fields = [
     {!front && <p class="eyebrow" style="color: var(--book)">Books</p>}
     <h1 class="title">{title}</h1>
     <Filters fields={fields} />
+    {!picked && !front && <YearStrip decade={decade} year={year} min={1800} total={list.total} line={`There are ${list.total.toLocaleString('en-US')} ${langName ? langName + ' ' : ''}books${known ? ' in ' + known.toLowerCase() : subject ? ' about ' + subjectName.toLowerCase() : ''} first published in ${year ? year : `the ${decade}s`}.`} />}
   </section>
   {front ? (
     <section class="pad rows">

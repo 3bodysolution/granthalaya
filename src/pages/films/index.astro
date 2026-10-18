@@ -5,6 +5,7 @@
 import Base from '../../layouts/Base.astro';
 import PosterTile from '../../components/title/PosterTile.astro';
 import Filters from '../../components/title/Filters.astro';
+import YearStrip from '../../components/title/YearStrip.astro';
 import Pager from '../../components/title/Pager.astro';
 import FrontRows from '../../components/title/FrontRows.astro';
 import { filmRows, markRows } from '../../lib/catalog/rows';
@@ -58,9 +59,7 @@ const fields = [
   { name: 'genre', label: 'Genre', value: picked ? '' : genre?.slug ?? '', options: [['', 'Any genre'], ...(kind === 'tv' ? TV_GENRES : FILM_GENRES).map(([, n]) => [genreSlug(n), n])] as [string, string][], clears: resets },
   picked
     ? { name: 'decade', label: 'Year', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
-    : year
-      ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
-      : { name: 'decade', label: 'Year', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+    : { name: 'when', label: 'Year', value: year ? `year=${year}` : decade ? `decade=${decade}` : '', text: year ? String(year) : decade ? `${decade}s` : undefined, options: [['', 'Any year'], ...decades.map(([d, n]) => [`decade=${d}`, n])] as [string, string][] },
   { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...langs] as [string, string][], clears: resets },
   ...(svc.length ? [{ name: 'service', label: 'Service', value: picked ? '' : service ? String(service) : '', options: [['', 'Any service'], ...svc.slice(0, 16).map((s) => [String(s.id), s.name])] as [string, string][], clears: resets }] : []),
   // film lists only: there are none for TV
@@ -83,6 +82,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
     </div>
     <h1 class="title">{title}</h1>
     <Filters fields={fields} keep={kind === 'tv' ? { kind: 'tv' } : {}} />
+    {!picked && !front && <YearStrip decade={decade} year={year} total={list.total} line={`There are ${list.total.toLocaleString('en-US')} ${head}${when}${where}.`} />}
   </section>
   {picked ? (
     <section class="pad">

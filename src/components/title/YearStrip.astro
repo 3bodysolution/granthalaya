@@ -1,0 +1,56 @@
+---
+// Under the filter bar once a decade or a year is chosen: the decade, then each of its years, with arrows to the
+// decade before and after, and a line with how many titles match. Every cell is a link that keeps the other filters.
+interface Props { decade?: number; year?: number; total: number; line: string; min?: number }
+const { decade: d, year, total, line, min = 1900 } = Astro.props;
+const dec = year ? year - (year % 10) : d;
+const now = new Date().getUTCFullYear();
+const to = (k: 'decade' | 'year', n: number) => {
+  const u = new URL(Astro.url);
+  for (const x of ['page', 'year', 'decade']) u.searchParams.delete(x);
+  u.searchParams.set(k, String(n));
+  return u.pathname + u.search;
+};
+const years = dec === undefined ? [] : Array.from({ length: 10 }, (_, i) => dec + i).filter((y) => y <= now);
+const prev = dec !== undefined && dec - 10 >= min ? dec - 10 : undefined;
+const next = dec !== undefined && dec + 10 <= now ? dec + 10 : undefined;
+---
+{dec !== undefined && (
+  <div class="ys">
+    <nav class="ys-bar" aria-label="Years">
+      {prev !== undefined ? <a class="ys-arrow" href={to('decade', prev)} aria-label={`${prev}s`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg></a> : <span class="ys-arrow off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg></span>}
+      <div class="ys-list" data-ys>
+        <a href={to('decade', dec)} aria-current={!year ? 'true' : undefined}>{dec}s</a>
+        {years.map((y) => <a href={to('year', y)} aria-current={y === year ? 'true' : undefined}>{y}</a>)}
+      </div>
+      {next !== undefined ? <a class="ys-arrow" href={to('decade', next)} aria-label={`${next}s`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></a> : <span class="ys-arrow off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6" /></svg></span>}
+    </nav>
+    {total > 0 && <p class="ys-count num">{line}</p>}
+  </div>
+)}
+<style>
+  .ys { align-self: stretch; display: flex; flex-direction: column; gap: 14px; }
+  .ys-bar { display: flex; align-items: center; justify-content: center; gap: 10px; }
+  .ys-list { display: flex; border: 1px solid var(--line); border-radius: 6px; background: var(--card); overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .ys-list::-webkit-scrollbar { display: none; }
+  .ys-list a { flex: none; display: inline-flex; align-items: center; height: 38px; padding: 0 17px; font-size: 13.5px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; transition: background-color .2s ease, color .2s ease, transform .2s var(--spring); }
+  .ys-list a + a { border-left: 1px solid var(--line); }
+  .ys-list a:hover { color: var(--ink); background: var(--soft); }
+  .ys-list a:active { transform: scale(.96); }
+  .ys-list a[aria-current] { color: var(--ink); background: var(--soft); font-weight: 600; }
+  .ys-arrow { flex: none; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 6px; color: var(--muted); transition: color .2s ease, background-color .2s ease, transform .2s var(--spring); }
+  a.ys-arrow:hover { color: var(--ink); background: var(--soft); }
+  a.ys-arrow:active { transform: scale(.94); }
+  .ys-arrow.off { opacity: .3; }
+  .ys-arrow svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .ys-count { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
+  @media (max-width: 780px) { .ys-bar { gap: 2px; } .ys-list a { padding: 0 13px; } .ys-arrow { width: 34px; } }
+</style>
+<script>
+  // on a phone the strip scrolls: bring the chosen cell into view
+  const show = () => document.querySelectorAll<HTMLElement>('[data-ys]').forEach((l) => {
+    const on = l.querySelector<HTMLElement>('[aria-current]');
+    if (on) l.scrollLeft = on.offsetLeft - l.clientWidth / 2 + on.clientWidth / 2;
+  });
+  document.addEventListener('astro:page-load', show);
+</script>

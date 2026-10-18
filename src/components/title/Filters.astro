@@ -5,7 +5,9 @@
 // A field with `clears` resets the named fields when it changes (choosing a list resets the filters that don't apply to it).
 // A change keeps the page where it is: no jump to the top and no loader flash (see Base.astro).
 // The empty option ("Any genre") isn't listed: an unchosen part just shows its name, and a chosen one shows "Remove".
-interface Props { fields: { name: string; label: string; value: string; options: [string, string][]; clears?: string[] }[]; keep?: Record<string, string> }
+// An option or value written "decade=1980" sets that address part instead of the field's own name, so one Year part can hold decades and years.
+// `text` is what the part shows when that isn't one of its options (a chosen year).
+interface Props { fields: { name: string; label: string; value: string; text?: string; options: [string, string][]; clears?: string[] }[]; keep?: Record<string, string> }
 const { fields, keep = {} } = Astro.props;
 const path = Astro.url.pathname;
 
@@ -13,7 +15,9 @@ const hrefFor = (f: Props['fields'][number], v: string) => {
   const u = new URLSearchParams(keep);
   for (const g of fields) {
     const val = g === f ? v : f.clears?.includes(g.name) ? '' : g.value;
-    if (val) u.set(g.name, val);
+    if (!val) continue;
+    const [k, x] = val.includes('=') ? val.split('=') : [g.name, val];
+    u.set(k, x);
   }
   const s = u.toString();
   return path + (s ? '?' + s : '');
@@ -22,7 +26,7 @@ const isSort = (f: Props['fields'][number]) => f.name === 'sort';
 const shown = (f: Props['fields'][number]) => f.options.find(([v]) => v === f.value)?.[1];
 const parts = fields.map((f, i) => ({
   f, i, sort: isSort(f),
-  text: f.value || isSort(f) ? shown(f) ?? f.label : f.label,
+  text: f.value || isSort(f) ? f.text ?? shown(f) ?? f.label : f.label,
   items: f.options.filter(([v]) => v || isSort(f)),
   cols: f.options.length > 24 ? 3 : f.options.length > 11 ? 2 : 1,
 }));
