@@ -2,11 +2,13 @@
 // The frame shared by film, TV and book pages: a still from the film (or one of our paintings) across the top,
 // the poster on the left, the facts in the middle, your log on the right, and fuller sections below.
 // On a phone the order is: poster, title and summary, your log, where to watch (or find it), then cast and details.
+import { stillImage } from '../../lib/images';
 interface Props { backdrop?: string; painting?: 'library' | 'home' }
 const { backdrop, painting = 'library' } = Astro.props;
+const still = backdrop ? stillImage(backdrop) : null;
 ---
 {backdrop ? (
-  <div class="still bleed" aria-hidden="true"><img src={backdrop} alt="" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('gone')" /></div>
+  <div class="still bleed" aria-hidden="true"><img src={still!.src} srcset={still!.srcset} sizes={still!.sizes} alt="" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('gone')" /></div>
 ) : (
   <div class="art melt under-header settle banner bleed" style={`--day: url(/art/${painting}-day.webp); --night: url(/art/${painting}-night.webp)`} aria-hidden="true"></div>
 )}

@@ -5,6 +5,7 @@ import Mark from '../ui/Mark.astro';
 import Bars from '../ui/Bars.astro';
 import StatusIcon from '../ui/StatusIcon.astro';
 import { paletteFor } from '../../lib/data';
+import { tileImage } from '../../lib/images';
 import { statusLabel, type Kind, type Status } from '../../lib/kinds';
 interface Props {
   href: string; // empty for a title with no page title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string | (string | undefined)[];
@@ -15,6 +16,7 @@ interface Props {
 const { href, title, year, poster, kind, sub, status, save, search, logId } = Astro.props;
 const me = Astro.locals.me;
 const p = paletteFor(title);
+const pic = poster ? tileImage(poster) : null;
 // list items we couldn't match have no page of their own: the tile opens the search with the title in it
 const Link = href || search ? 'a' : 'span';
 const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefined);
@@ -22,7 +24,7 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
 <div class="pt">
   <Link href={to} class="pt-link" data-search-open={search ? '' : undefined} data-search-q={search}>
     <span class:list={['pt-cover', kind === 'book' ? 'book' : 'film', poster ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
-      {poster && <img src={poster} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
+      {pic && <img src={pic.src} srcset={pic.srcset} alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
       <i class="sun"></i><i class="hill"></i><span class="serif pt-w">{title}</span>
     </span>
     <span class="pt-t">{title}</span>
