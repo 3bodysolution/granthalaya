@@ -164,8 +164,10 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
   #add .between { display: flex; justify-content: space-between; align-items: center; }
   #add .grow { flex: 1; min-width: 0; }
   #add .kinds { display: grid; grid-template-columns: repeat(4, 1fr); padding: 4px; border-radius: 12px; background: var(--soft); }
-  #add .kinds button { height: 38px; border: 0; border-radius: 9px; background: transparent; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; }
-  #add .kinds button[aria-selected="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  #add .kinds::before { border-radius: 9px; background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  #add .kinds button { position: relative; z-index: 1; height: 38px; border: 0; border-radius: 9px; background: transparent; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; transition: color .25s ease, transform .25s var(--spring); }
+  #add .kinds button[aria-selected="true"] { color: var(--ink); }
+  #add .kinds:not([data-thumb]) button[aria-selected="true"] { background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
   #add .findbox { position: relative; margin: 0; }
   #add .findbox svg { position: absolute; left: 16px; top: 17px; color: var(--muted); }
   #add .findbox .field { padding-left: 46px; height: 54px; }

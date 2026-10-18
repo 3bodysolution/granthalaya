@@ -72,7 +72,16 @@ p { text-wrap: pretty; }
 .chip.on { border-color: var(--lat); color: var(--lat); }
 .seg { display: inline-flex; gap: 4px; padding: 4px; border-radius: 24px; border: 1px solid var(--line); background: var(--card); }
 .seg button { height: 36px; padding: 0 16px; border-radius: 18px; border: 0; background: transparent; color: var(--ink); font-size: 13px; font-weight: 600; cursor: pointer; }
-.seg button[aria-pressed="true"], .seg button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.seg button[aria-pressed="true"], .seg button[aria-selected="true"], .seg > a[aria-current] { color: var(--bg); }
+/* the dark pill is one thing that slides to the chosen option (placed by Base.astro); until that script has run, the chosen option carries it */
+.seg > * { position: relative; z-index: 1; transition: color .25s ease, transform .25s var(--spring); }
+.seg:not([data-thumb]) button[aria-pressed="true"], .seg:not([data-thumb]) button[aria-selected="true"], .seg:not([data-thumb]) > a[aria-current] { background: var(--ink); }
+.seg, .kinds { position: relative; isolation: isolate; }
+.seg::before, .kinds::before { content: ""; position: absolute; left: 0; top: 0; z-index: 0; width: var(--tw, 0); height: var(--th, 0); border-radius: 18px; background: var(--ink); opacity: 0; pointer-events: none; transform: translate(var(--tx, 0), var(--ty, 0)); }
+.seg[data-thumb]::before, .kinds[data-thumb]::before { opacity: 1; }
+.seg[data-ready]::before, .kinds[data-ready]::before { transition: transform .38s var(--spring), width .38s var(--spring), height .38s var(--spring); }
+.seg[data-vt]::before { view-transition-name: seg-thumb; }
+@media (prefers-reduced-motion: reduce) { .seg[data-ready]::before, .kinds[data-ready]::before { transition: none; } }
 
 /* header */
 .site { height: 76px; padding: 0 var(--gut); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--line); max-width: var(--max); width: 100%; margin: 0 auto; }
@@ -269,7 +278,7 @@ textarea.field { height: auto; padding: 12px 14px; line-height: 1.5; resize: ver
 .gchip { display: inline-flex; align-items: center; height: 30px; padding: 0 11px; border-radius: 6px; border: 0; background: var(--soft); font-size: 13px; color: var(--muted); cursor: pointer; transition: background-color .2s ease, color .2s ease, transform .25s var(--spring); }
 @media (pointer: coarse) { .gchip { height: 36px; padding: 0 13px; } }
 .gchip:hover { color: var(--ink); }
-.gchip.on, .gchip[aria-pressed="true"] { background: var(--ink); color: var(--bg); font-weight: 600; }
+.gchip.on, .gchip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .chip[aria-pressed="true"] { border-color: var(--lat); color: var(--lat); }
 
 /* dialogs open in the middle of the screen (Tailwind's reset takes away the browser's own centring) */

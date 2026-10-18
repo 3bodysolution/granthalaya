@@ -269,6 +269,36 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       }, { once: true }));
     }
     const reload = () => navigate(location.pathname + location.search, { history: 'replace' });
+    // segmented controls (.seg, and the Add page's kinds): one pill that slides to the chosen option instead of each option lighting up on its own
+    const SLIDERS = '.seg, .kinds';
+    function slide(box: HTMLElement, to?: HTMLElement | null) {
+      const on = to ?? box.querySelector<HTMLElement>(':scope > [aria-pressed="true"], :scope > [aria-selected="true"], :scope > [aria-current]');
+      if (!on || !on.offsetWidth) return;
+      box.style.setProperty('--tx', on.offsetLeft + 'px');
+      box.style.setProperty('--ty', on.offsetTop + 'px');
+      box.style.setProperty('--tw', on.offsetWidth + 'px');
+      box.style.setProperty('--th', on.offsetHeight + 'px');
+      if (!box.dataset.thumb) {
+        box.dataset.thumb = '1';
+        // the first placing is a jump, never a slide
+        requestAnimationFrame(() => requestAnimationFrame(() => { box.dataset.ready = '1'; }));
+      }
+    }
+    const watched = new WeakSet<Element>();
+    const slideAll = () => document.querySelectorAll<HTMLElement>(SLIDERS).forEach((b) => {
+      slide(b);
+      if (!watched.has(b)) { watched.add(b); new ResizeObserver(() => slide(b)).observe(b); } // also when it first becomes visible
+    });
+    document.addEventListener('astro:page-load', () => { slideAll(); document.fonts?.ready.then(slideAll); });
+    new MutationObserver((list) => {
+      for (const m of list) { const box = (m.target as Element).parentElement?.closest<HTMLElement>(SLIDERS); if (box) slide(box); }
+    }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ['aria-pressed', 'aria-selected', 'aria-current'] });
+    window.addEventListener('resize', slideAll);
+    // a link in one (Films | TV): the pill starts sliding at the tap, while the next page loads
+    document.addEventListener('click', (ev) => {
+      const a = (ev.target as Element).closest<HTMLElement>('.seg > a');
+      if (a && !(ev as MouseEvent).metaKey && !(ev as MouseEvent).ctrlKey && !(ev as MouseEvent).shiftKey) slide(a.parentElement as HTMLElement, a);
+    });
     // the log panel changes where it stands: the page is not reloaded. The panel is fetched again quietly and its inside swapped,
     // and while that is going on it takes no second click, so one tap can never make two entries.
     async function refreshPanel(panel: HTMLElement) {

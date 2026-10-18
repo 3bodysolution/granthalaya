@@ -79,7 +79,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
 ---
 <Base title={title} active="films" description={`${title} on Granthalaya: browse, save and log.`}>
   <section class="pad head">
-    <div class="seg" role="group" aria-label="Films or TV">
+    <div class="seg" data-vt role="group" aria-label="Films or TV">
       <a href={switchTo('film')} aria-current={kind === 'film' ? 'page' : undefined} class:list={['sw', kind === 'film' && 'on']}>Films</a>
       <a href={switchTo('tv')} aria-current={kind === 'tv' ? 'page' : undefined} class:list={['sw', kind === 'tv' && 'on']}>TV</a>
     </div>
@@ -120,7 +120,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 18px; }
   .sw { display: inline-flex; align-items: center; height: 36px; padding: 0 18px; border-radius: 18px; font-size: 13px; font-weight: 600; }
-  .sw.on { background: var(--ink); color: var(--bg); }
+  .sw.on { color: var(--bg); }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 28px 20px; }
   .lede { margin: 0 0 28px; max-width: 60ch; font-size: 16px; }
   .empty { font-size: 16px; }
