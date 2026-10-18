@@ -3,14 +3,19 @@
 import Base from '../../layouts/Base.astro';
 import Mark from '../../components/ui/Mark.astro';
 import data from '../../data/essays.json';
+import { essayMarks } from '../../lib/catalog/onsite';
+import { statusLabel } from '../../lib/kinds';
 export const prerender = false;
 const me = Astro.locals.me;
+const sb = Astro.locals.supabase;
 const via = data.themes.find((t) => t.name.startsWith('Found via'));
 const themes = data.themes.filter((t) => t !== via);
 const total = data.themes.reduce((n, t) => n + t.items.length, 0);
 const slug = (n: string) => n.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, '');
 const chips = [...themes.map((t) => ({ id: slug(t.name), name: t.name })), ...(via ? [{ id: 'read-something-great', name: 'Found via Read Something Great' }] : [])];
 const groups = [...themes.map((t) => ({ id: slug(t.name), t, credit: false })), ...(via ? [{ id: 'read-something-great', t: via, credit: true }] : [])];
+// which of these are already on your shelf: one lookup for the whole page
+const marks = await essayMarks(sb, me, data.themes.flatMap((t) => t.items.map((e) => e.link))).catch(() => new Map<string, string>());
 // what the bookmark sends: the essay joins the shared catalogue the first time someone saves it
 const hit = (e: (typeof themes)[number]['items'][number]) => ({ kind: 'essay', title: e.title, creator: e.author, year: e.year ?? undefined, link: e.link, source: e.publication ?? undefined });
 ---
@@ -33,7 +38,9 @@ const hit = (e: (typeof themes)[number]['items'][number]) => ({ kind: 'essay', t
                 <a class="serif et" href={e.link} target="_blank" rel="noopener noreferrer">{e.title.slice(0, e.title.lastIndexOf(' ') + 1)}<span class="nw">{e.title.slice(e.title.lastIndexOf(' ') + 1)}<span class="out" aria-hidden="true"> ↗</span></span></a>
                 <span class="by"> by {e.author}</span>
                 <p class="en">{e.note}</p>
-                {me && <button type="button" class="es-save" data-quick-add={JSON.stringify({ hit: hit(e), status: 'want' })} aria-label={`Save ${e.title}`} title="Save to your shelf"><Mark size={16} /></button>}
+                {me && (marks.has(e.link)
+                  ? <span class="es-save is-saved" role="img" title={statusLabel('essay', marks.get(e.link) as any)} aria-label={`${e.title}: ${statusLabel('essay', marks.get(e.link) as any)}`}><Mark size={16} /></span>
+                  : <button type="button" class="es-save" data-quick-add={JSON.stringify({ hit: hit(e), status: 'want' })} aria-label={`Save ${e.title}`} title="Save to your shelf"><Mark size={16} /></button>)}
               </li>
             ))}
           </ul>

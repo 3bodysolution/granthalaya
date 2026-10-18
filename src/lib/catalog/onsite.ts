@@ -113,6 +113,18 @@ export async function myMarks(sb: SupabaseClient, me: { id: string } | null, key
   return out;
 }
 
+/** essays on the visitor's shelf, by link, in two lookups for the whole page: { link → status } */
+export async function essayMarks(sb: SupabaseClient, me: { id: string } | null, links: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (!me || !links.length) return out;
+  const { data: titles } = await sb.from('titles').select('id, link').eq('kind', 'essay').in('link', links);
+  const byId = new Map((titles ?? []).map((t: any) => [t.id, t.link as string]));
+  if (!byId.size) return out;
+  const { data: logs } = await sb.from('logs').select('title_id, status').eq('user_id', me.id).in('title_id', [...byId.keys()]).order('logged_on', { ascending: true });
+  for (const l of (logs ?? []) as any[]) out.set(byId.get(l.title_id)!, l.status); // the newest wins
+  return out;
+}
+
 /* ——— older catalogue rows (copied from the markdown library) have no TMDB or Open Library id yet.
    The first time someone opens one, we look it up and, if the match is clear, remember the id. ——— */
 const same = (a?: string | null, b?: string | null) => !!a && !!b && slugOf(a.split(/[:(]/)[0]) === slugOf(b.split(/[:(]/)[0]);
