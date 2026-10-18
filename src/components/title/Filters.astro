@@ -1,55 +1,161 @@
 ---
-// The filter bar on Films and Books: each choice reloads the list, and the address keeps them all.
-// A field with `clears` resets the named fields to Any when it changes (choosing a list resets the filters that don't apply to it).
+// The filter bar on Films, Books and Essays: one joined strip, "Browse by" then a part for each filter.
+// Pointing at a part opens its list (a tap or Enter does on touch and keyboard). Every choice is a plain link
+// that keeps the other choices, so the address holds them all and it works without scripts.
+// A field with `clears` resets the named fields when it changes (choosing a list resets the filters that don't apply to it).
 // A change keeps the page where it is: no jump to the top and no loader flash (see Base.astro).
+// The empty option ("Any genre") isn't listed: an unchosen part just shows its name, and a chosen one shows "Remove".
 interface Props { fields: { name: string; label: string; value: string; options: [string, string][]; clears?: string[] }[]; keep?: Record<string, string> }
 const { fields, keep = {} } = Astro.props;
+const path = Astro.url.pathname;
+
+const hrefFor = (f: Props['fields'][number], v: string) => {
+  const u = new URLSearchParams(keep);
+  for (const g of fields) {
+    const val = g === f ? v : f.clears?.includes(g.name) ? '' : g.value;
+    if (val) u.set(g.name, val);
+  }
+  const s = u.toString();
+  return path + (s ? '?' + s : '');
+};
+const isSort = (f: Props['fields'][number]) => f.name === 'sort';
+const shown = (f: Props['fields'][number]) => f.options.find(([v]) => v === f.value)?.[1];
+const parts = fields.map((f, i) => ({
+  f, i, sort: isSort(f),
+  text: f.value || isSort(f) ? shown(f) ?? f.label : f.label,
+  items: f.options.filter(([v]) => v || isSort(f)),
+  cols: f.options.length > 24 ? 3 : f.options.length > 11 ? 2 : 1,
+}));
+const main = parts.filter((p) => !p.sort);
+const sort = parts.find((p) => p.sort);
+const clearHref = path + (keep.kind ? `?kind=${keep.kind}` : '');
+const anyOn = fields.some((f) => f.value && f.name !== 'sort');
 ---
-<form class="filters" method="get" data-filters>
-  {Object.entries(keep).map(([k, v]) => <input type="hidden" name={k} value={v} />)}
-  {fields.map((f) => (
-    <label class:list={['fl', f.value && 'on']}>
-      <span class="sr">{f.label}</span>
-      <select name={f.name} data-clears={f.clears?.join(',')}>
-        {f.options.map(([v, t]) => <option value={v} selected={v === f.value}>{t}</option>)}
-      </select>
-    </label>
-  ))}
-  <noscript><button class="btn" type="submit">Show</button></noscript>
-  <a href={Astro.url.pathname + (keep.kind ? `?kind=${keep.kind}` : '')} class="clear" hidden={!fields.some((f) => f.value && f.name !== 'sort')}>Clear</a>
-</form>
+<div class="filters" data-filters role="group" aria-label="Filters">
+  <span class="fby" aria-hidden="true">Browse by</span>
+  <div class="fbar">
+    {main.map((p) => (
+      <div class:list={['fpart', p.f.value && 'on']} data-fpart>
+        <button type="button" class="fbtn" aria-haspopup="true" aria-expanded="false"><span>{p.text}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg></button>
+        <div class="fmenu" role="menu" aria-label={p.f.label} data-cols={p.cols}>
+          {p.f.value && <a class="frm" role="menuitem" href={hrefFor(p.f, '')}>Remove</a>}
+          {p.items.map(([v, t]) => <a role="menuitem" href={hrefFor(p.f, v)} aria-current={v === p.f.value ? 'true' : undefined}>{t}</a>)}
+        </div>
+      </div>
+    ))}
+  </div>
+  {anyOn && <a href={clearHref} class="clear">Clear</a>}
+  {sort && (
+    <div class="fpart sort" data-fpart>
+      <button type="button" class="fbtn" aria-haspopup="true" aria-expanded="false"><em>Sort by</em><span>{sort.text}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg></button>
+      <div class="fmenu" role="menu" aria-label="Sort by" data-cols="1">
+        {sort.items.map(([v, t]) => <a role="menuitem" href={hrefFor(sort.f, v)} aria-current={v === sort.f.value ? 'true' : undefined}>{t}</a>)}
+      </div>
+    </div>
+  )}
+</div>
 <style>
-  .filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .fl select { height: 38px; padding: 0 34px 0 14px; border-radius: 19px; border: 1px solid var(--line); background-color: var(--card); color: var(--ink); font: inherit; font-size: 13.5px; font-weight: 600; cursor: pointer; transition: border-color .2s ease; }
-  .fl select:hover { border-color: var(--lat); }
-  .fl.on select { border-color: var(--lat); color: var(--lat); }
+  .filters { display: flex; flex-wrap: wrap; align-items: center; align-self: stretch; gap: 10px 14px; position: relative; z-index: 5; }
+  .fby { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .fbar { display: flex; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+  .fbar .fpart + .fpart { border-left: 1px solid var(--line); }
+  .fpart { position: relative; }
+  .fbar .fpart:first-child .fbtn { border-radius: 5px 0 0 5px; }
+  .fbar .fpart:last-child .fbtn { border-radius: 0 5px 5px 0; }
+  .fbtn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color .2s ease, background-color .2s ease, transform .2s var(--spring); }
+  .fbtn em { font-style: normal; font-weight: 500; opacity: .75; }
+  .fbtn svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .fbtn:hover, .fpart.open .fbtn { color: var(--ink); background: var(--soft); }
+  .fbtn:active { transform: scale(.97); }
+  .fpart.on .fbtn { color: var(--ink); }
+  .sort { margin-left: auto; }
+  .sort .fbtn { padding: 0 6px 0 0; }
+  .sort .fbtn:hover, .sort.open .fbtn { background: transparent; }
+  .fmenu { position: absolute; top: 100%; left: 0; z-index: 6; min-width: 190px; max-height: min(70vh, 460px); overflow-y: auto; padding: 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--card); box-shadow: 0 18px 34px -14px var(--shadow); opacity: 0; visibility: hidden; transition: opacity .12s ease, visibility 0s linear .12s; }
+  .fmenu[data-cols="2"] { column-count: 2; column-gap: 4px; width: 400px; }
+  .fmenu[data-cols="3"] { column-count: 3; column-gap: 4px; width: 570px; }
+  .sort .fmenu { left: auto; right: 0; }
+  .fmenu a { display: block; break-inside: avoid; padding: 9px 12px; border-radius: 4px; font-size: 13.5px; font-weight: 500; color: var(--ink); transition: background-color .15s ease, color .15s ease; }
+  .fmenu a:hover, .fmenu a:focus-visible { background: var(--soft); }
+  .fmenu a[aria-current] { font-weight: 600; background: var(--soft); }
+  .fmenu a[aria-current]::after { content: "✓"; margin-left: 8px; color: var(--muted); }
+  .fmenu .frm { color: var(--muted); font-size: 12.5px; }
+  .fpart.open > .fmenu { opacity: 1; visibility: visible; transition-delay: 0s; }
+  @media (hover: hover) {
+    .fpart:hover { z-index: 7; }
+    .fpart:hover > .fmenu { opacity: 1; visibility: visible; transition-delay: 0s; }
+    /* just after a choice the new page appears under the pointer: keep the list shut until the pointer moves off */
+    .filters.shut .fpart:hover > .fmenu { opacity: 0; visibility: hidden; }
+  }
   .clear { font-size: 13px; font-weight: 600; color: var(--muted); padding: 0 6px; }
   .clear:hover { color: var(--lat); }
-  /* on a phone the choices sit in one line that scrolls sideways, so the list starts sooner */
   @media (max-width: 780px) {
-    .filters { position: relative; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gut, 20px) * -1); padding: 2px var(--gut, 20px); width: calc(100% + var(--gut, 20px) * 2); }
+    /* on a phone the parts scroll sideways and a tapped one opens as a sheet above the bottom bar */
+    .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gut, 20px) * -1); padding: 2px var(--gut, 20px); width: calc(100% + var(--gut, 20px) * 2); }
     .filters::-webkit-scrollbar { display: none; }
-    .fl, .clear { flex: none; }
+    .fby, .clear, .fbar, .sort { flex: none; }
+    .sort { margin-left: 0; }
+    .sort .fbtn { padding: 0 14px; }
+    .fmenu, .fmenu[data-cols] { position: fixed; z-index: 40; left: 12px; right: 12px; top: auto; bottom: 88px; width: auto; column-count: 1; max-height: 55vh; box-shadow: 0 -10px 40px -10px var(--shadow); }
+    .fmenu a { padding: 13px 14px; }
   }
+  @media (prefers-reduced-motion: reduce) { .fmenu { transition: none; } }
 </style>
 <script>
-  document.addEventListener('change', (ev) => {
-    const sel = (ev.target as Element).closest('select');
-    const form = sel?.closest<HTMLFormElement>('[data-filters]');
-    if (!sel || !form) return;
-    for (const n of (sel.dataset.clears ?? '').split(',').filter(Boolean)) {
-      const el = form.elements.namedItem(n);
-      if (el instanceof HTMLSelectElement) el.value = '';
-    }
-    (window as any).__keepPlace = scrollY; // Base.astro puts the page back where it was
-    setTimeout(() => { (window as any).__keepPlace = null; }, 15000); // in case the visit never happens
-    form.requestSubmit();
+  const closeAll = (except?: Element | null) => document.querySelectorAll<HTMLElement>('[data-fpart].open').forEach((p) => {
+    if (p === except) return;
+    p.classList.remove('open');
+    p.querySelector('.fbtn')?.setAttribute('aria-expanded', 'false');
   });
-  // drop empty choices from the address, so it stays short
-  document.addEventListener('submit', (ev) => {
-    const f = ev.target as HTMLFormElement;
-    if (!f.matches('[data-filters]')) return;
-    f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input[type=hidden]').forEach((el) => { el.disabled = !el.value; });
-    setTimeout(() => f.querySelectorAll<HTMLSelectElement | HTMLInputElement>('select, input').forEach((el) => (el.disabled = false)), 0);
-  }, true);
+  const canHover = () => window.matchMedia('(hover: hover)').matches;
+
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as Element;
+    const btn = t.closest<HTMLElement>('.fbtn');
+    const part = btn?.closest<HTMLElement>('[data-fpart]');
+    if (btn && part) {
+      // with a mouse the list is already open from pointing at it; a tap or Enter opens and closes it
+      if (canHover() && (ev as MouseEvent).detail > 0) return;
+      const open = !part.classList.contains('open');
+      closeAll(part);
+      part.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      if (open && (ev as MouseEvent).detail === 0) part.querySelector<HTMLElement>('.fmenu a')?.focus();
+      return;
+    }
+    const link = t.closest<HTMLAnchorElement>('.fmenu a');
+    if (link) {
+      (window as any).__keepPlace = scrollY; // Base.astro puts the page back where it was
+      setTimeout(() => { (window as any).__keepPlace = null; }, 15000); // in case the visit never happens
+      (window as any).__fshut = true;
+      closeAll();
+      return;
+    }
+    closeAll();
+  });
+
+  document.addEventListener('keydown', (ev) => {
+    const part = (ev.target as Element).closest<HTMLElement>('[data-fpart]');
+    if (!part) return;
+    if (ev.key === 'Escape') { closeAll(); part.querySelector<HTMLElement>('.fbtn')?.focus(); return; }
+    if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp') return;
+    const items = [...part.querySelectorAll<HTMLElement>('.fmenu a')];
+    if (!items.length) return;
+    ev.preventDefault();
+    if (!part.classList.contains('open')) { closeAll(part); part.classList.add('open'); part.querySelector('.fbtn')?.setAttribute('aria-expanded', 'true'); }
+    const at = items.indexOf(document.activeElement as HTMLElement);
+    const next = ev.key === 'ArrowDown' ? (at + 1) % items.length : (at <= 0 ? items.length - 1 : at - 1);
+    items[next].focus();
+  });
+
+  // after a choice, the new page's list stays shut until the pointer leaves the bar
+  document.addEventListener('astro:page-load', () => {
+    if (!(window as any).__fshut) return;
+    (window as any).__fshut = false;
+    document.querySelector('[data-filters]')?.classList.add('shut');
+  });
+  document.addEventListener('pointerout', (ev) => {
+    const from = (ev.target as Element).closest?.('[data-fpart]');
+    if (from && !from.contains(ev.relatedTarget as Node | null)) document.querySelector('[data-filters].shut')?.classList.remove('shut');
+  });
 </script>

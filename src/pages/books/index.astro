@@ -65,11 +65,11 @@ const fields = [
   { name: 'subject', label: 'Subject', value: picked ? '' : subject ?? '', options: subjects, clears: resets },
   { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][], clears: resets },
   picked
-    ? { name: 'decade', label: 'Decade', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
+    ? { name: 'decade', label: 'Year', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
     : year
       ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
-      : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
-  { name: 'list', label: 'Prizes and classics', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...bookLists.map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
+      : { name: 'decade', label: 'Year', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+  { name: 'list', label: 'Lists', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...bookLists.map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
   { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
 ];
 ---

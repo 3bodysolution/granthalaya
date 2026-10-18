@@ -57,14 +57,14 @@ const resets = picked ? ['list'] : undefined; // changing any other filter leave
 const fields = [
   { name: 'genre', label: 'Genre', value: picked ? '' : genre?.slug ?? '', options: [['', 'Any genre'], ...(kind === 'tv' ? TV_GENRES : FILM_GENRES).map(([, n]) => [genreSlug(n), n])] as [string, string][], clears: resets },
   picked
-    ? { name: 'decade', label: 'Decade', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
+    ? { name: 'decade', label: 'Year', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
     : year
       ? { name: 'year', label: 'Year', value: String(year), options: [[String(year), String(year)], ['', 'Any year']] as [string, string][] }
-      : { name: 'decade', label: 'Decade', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
+      : { name: 'decade', label: 'Year', value: decade ? String(decade) : '', options: [['', 'Any year'], ...decades] as [string, string][] },
   { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...langs] as [string, string][], clears: resets },
   ...(svc.length ? [{ name: 'service', label: 'Service', value: picked ? '' : service ? String(service) : '', options: [['', 'Any service'], ...svc.slice(0, 16).map((s) => [String(s.id), s.name])] as [string, string][], clears: resets }] : []),
   // film lists only: there are none for TV
-  ...(kind === 'film' ? [{ name: 'list', label: 'Prizes and classics', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...listsOfKind('film').map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: ['genre', 'language', 'service', 'decade', 'year', 'sort'] }] : []),
+  ...(kind === 'film' ? [{ name: 'list', label: 'Lists', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...listsOfKind('film').map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: ['genre', 'language', 'service', 'decade', 'year', 'sort'] }] : []),
   { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
 ];
 
