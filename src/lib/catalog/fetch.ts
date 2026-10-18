@@ -27,8 +27,8 @@ export class SourceUnavailable extends Error {
   constructor(what = 'catalogue') { super(`${what} is not answering right now`); }
 }
 
-/** JSON from a URL and how it went. Remembered for `ttl` seconds (answers only). A slow or busy answer
- *  (timeout, 429, 5xx) is asked once more; "not found" (404, 410) is final and not retried. */
+/** JSON from a URL and how it went. Remembered for `ttl` seconds (answers only). A busy answer (429, 5xx) is
+ *  asked once more; a timeout is not (it would only double the wait), and "not found" (404, 410) is final. */
 export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 6000 }: { ttl?: number; ms?: number } = {}): Promise<{ data: T | null; state: Source }> {
   const hit = memory.get(url);
   const t0 = performance.now();
@@ -51,7 +51,8 @@ export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 600
       note(attempt + 1, 'ok');
       return { data: value, state: 'ok' };
     } catch {
-      if (attempt === 1) { note(2, 'failed'); return { data: null, state: 'failed' }; }
+      note(attempt + 1, 'failed');
+      return { data: null, state: 'failed' }; // a timeout or a dropped connection: not asked again
     } finally {
       clearTimeout(timer);
     }

@@ -19,7 +19,9 @@ export interface RowItem {
 export interface Row { title: string; href?: string; tone?: 'film' | 'book' | 'essay'; items: RowItem[] }
 
 const daysAgo = (n: number) => new Date(Date.now() - n * 86400000).toISOString().slice(0, 10);
-const safe = <T>(p: Promise<T>, empty: T) => p.catch(() => empty);
+/** a row that hasn't answered in this long is left out (the lookup carries on and is remembered for next time) */
+const ROW_MS = 2500;
+const safe = <T>(p: Promise<T>, empty: T) => Promise.race([p.catch(() => empty), new Promise<T>((r) => setTimeout(() => r(empty), ROW_MS))]);
 const MAX = 20;
 
 export const filmItem = (c: Card): RowItem => ({
