@@ -351,15 +351,25 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       const favBox = document.getElementById('favourites')!;
       let favs: string[] = JSON.parse(slots.dataset.favs || '[]');
       const items = [...picker.querySelectorAll<HTMLButtonElement>('[data-pick]')];
-      const coverOf = (id: string) => picker.querySelector(`[data-pick="${id}"] .pk-cover`)?.innerHTML ?? '';
-      const titleOf = (id: string) => picker.querySelector(`[data-pick="${id}"] .pk-t`)?.textContent ?? '';
+      const coverOf = (id: string) => [...(picker.querySelector(`[data-pick="${CSS.escape(id)}"] .pk-cover`)?.childNodes ?? [])].map((n) => n.cloneNode(true));
+      const titleOf = (id: string) => picker.querySelector(`[data-pick="${CSS.escape(id)}"] .pk-t`)?.textContent ?? '';
       const count = picker.querySelector<HTMLElement>('.pk-n')!;
       const paint = () => {
         slots.querySelectorAll<HTMLElement>('[data-slot]').forEach((s, i) => {
           const id = favs[i];
-          s.innerHTML = id
-            ? `<span class="slot-cover">${coverOf(id)}</span><button type="button" class="slot-x" data-unfav="${id}" aria-label="Remove ${titleOf(id).replace(/"/g, '')}">×</button>`
-            : '<button type="button" class="slot-add" data-open-picker aria-label="Choose a favourite">+</button>';
+          // built from DOM pieces, so nothing from a title or an id is ever read as HTML
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          if (id) {
+            const cover = document.createElement('span');
+            cover.className = 'slot-cover';
+            cover.replaceChildren(...coverOf(id));
+            btn.className = 'slot-x'; btn.dataset.unfav = id; btn.setAttribute('aria-label', `Remove ${titleOf(id)}`); btn.textContent = '×';
+            s.replaceChildren(cover, btn);
+          } else {
+            btn.className = 'slot-add'; btn.dataset.openPicker = ''; btn.setAttribute('aria-label', 'Choose a favourite'); btn.textContent = '+';
+            s.replaceChildren(btn);
+          }
         });
         items.forEach((b) => {
           const on = favs.includes(b.dataset.pick!);

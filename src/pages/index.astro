@@ -235,9 +235,10 @@ const features = [
     if (!hits.length) return;
     const x = hits[0];
     const yrs = now.getFullYear() - +x.d.slice(0, 4);
-    const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]!);
     el.href = x.h;
-    el.innerHTML = `On this day ${yrs === 1 ? 'last year' : yrs + ' years ago'}, you ${x.v} <em>${esc(x.t)}</em> →`;
+    const em = document.createElement('em');
+    em.textContent = x.t;
+    el.replaceChildren(`On this day ${yrs === 1 ? 'last year' : yrs + ' years ago'}, you ${x.v} `, em, ' →');
     el.hidden = false;
   }
   document.addEventListener('astro:page-load', onThisDay);

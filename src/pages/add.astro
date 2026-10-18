@@ -337,6 +337,11 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
 
     // search
     let timer = 0, seq = 0;
+    // a cover address comes from outside, so it goes on through the DOM and only if it is a plain web address (never into a style attribute string)
+    const paintCovers = (box: HTMLElement) => box.querySelectorAll<HTMLElement>('.sw[data-cover]').forEach((sw) => {
+      const u = sw.dataset.cover ?? '';
+      if (/^https?:\/\/[^\s"'()\\]+$/.test(u)) sw.style.backgroundImage = `url("${u}")`;
+    });
     async function search() {
       const q = ($('q') as HTMLInputElement).value.trim();
       const hits = $('hits'), err = $('finderr');
@@ -350,8 +355,9 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       if (r.error) { hits.innerHTML = ''; err.textContent = r.error; err.hidden = false; return; }
       const list: any[] = r.hits ?? [];
       if (!list.length) { hits.innerHTML = `<li class="muted small" style="padding: 6px 2px">Nothing found. Try other words, or fill it in by hand.</li>`; return; }
-      hits.innerHTML = list.map((h, i) => `<li><button type="button" data-hit="${i}"><span class="sw" style="background:#46525E${h.cover ? `;background-image:url('${esc(h.cover)}')` : ''}"></span>
+      hits.innerHTML = list.map((h, i) => `<li><button type="button" data-hit="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(h.cover ?? '')}"></span>
         <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(h.title)}</span><span class="hm">${esc([h.creator, h.year, h.kind !== kind ? ({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[h.kind] : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+      paintCovers(hits);
       hits.querySelectorAll<HTMLButtonElement>('[data-hit]').forEach((b) => b.addEventListener('click', () => choose(list[+b.dataset.hit!])));
     }
     async function choose(h: any) {
@@ -363,7 +369,8 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         const r = await fetch(`/api/lookup?show=${h.tmdbId}`).then((x) => x.json()).catch(() => ({}));
         const seasons: any[] = r.show?.seasons ?? [];
         if (!seasons.length) { hits.innerHTML = '<li class="muted small">Couldn’t find its seasons. Fill it in by hand instead.</li>'; return; }
-        hits.innerHTML = `<li class="lbl" style="padding: 2px">${esc(r.show.title)}: which season?</li>` + seasons.map((s, i) => `<li><button type="button" data-season="${i}"><span class="sw" style="background:#46525E${s.cover ? `;background-image:url('${esc(s.cover)}')` : ''}"></span><span class="stack" style="gap:3px"><span class="ht">${esc(s.name)}</span><span class="hm">${esc([s.year, s.episodes ? s.episodes + ' episodes' : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+        hits.innerHTML = `<li class="lbl" style="padding: 2px">${esc(r.show.title)}: which season?</li>` + seasons.map((s, i) => `<li><button type="button" data-season="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(s.cover ?? '')}"></span><span class="stack" style="gap:3px"><span class="ht">${esc(s.name)}</span><span class="hm">${esc([s.year, s.episodes ? s.episodes + ' episodes' : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+        paintCovers(hits);
         hits.querySelectorAll<HTMLButtonElement>('[data-season]').forEach((b) => b.addEventListener('click', () => {
           const s = seasons[+b.dataset.season!];
           pick = { ...r.show, seasons: undefined, season: s.n, episodes: s.episodes, year: s.year ?? r.show.year, cover: s.cover ?? r.show.cover };

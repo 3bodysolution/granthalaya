@@ -466,12 +466,12 @@ const avatar = me?.avatar_url;
       const label = b.getAttribute('aria-label');
       if (b.classList.contains('copied')) return;
       b.classList.add('copied');
-      const old = b.innerHTML;
+      const old = [...b.childNodes].map((n) => n.cloneNode(true));
       // a tick for a moment, like copying in a chat
       if (b.querySelector('svg')) b.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
       else b.textContent = 'Copied';
       b.setAttribute('aria-label', 'Copied');
-      setTimeout(() => { b.innerHTML = old; b.classList.remove('copied'); if (label) b.setAttribute('aria-label', label); }, 1500);
+      setTimeout(() => { b.replaceChildren(...old); b.classList.remove('copied'); if (label) b.setAttribute('aria-label', label); }, 1500);
     });
 
     // ——— search (⌘K): your shelf, then films, TV, books, people and members ———
