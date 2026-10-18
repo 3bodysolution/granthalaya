@@ -28,8 +28,8 @@ export class SourceUnavailable extends Error {
 }
 
 /** JSON from a URL and how it went. Remembered for `ttl` seconds (answers only). A busy answer (429, 5xx) is
- *  asked once more; a timeout is not (it would only double the wait), and "not found" (404, 410) is final. */
-export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 6000 }: { ttl?: number; ms?: number } = {}): Promise<{ data: T | null; state: Source }> {
+ *  asked once more; a timeout is not unless `retry` is set (it would only double the wait), and "not found" (404, 410) is final. */
+export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 6000, retry = false }: { ttl?: number; ms?: number; retry?: boolean } = {}): Promise<{ data: T | null; state: Source }> {
   const hit = memory.get(url);
   const t0 = performance.now();
   const note = (tries: number, how: string) => mark(source(url), performance.now() - t0, `${shortPath(url)} ${how}${tries > 1 ? ` (${tries} tries)` : ''}`);
@@ -51,6 +51,7 @@ export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 600
       note(attempt + 1, 'ok');
       return { data: value, state: 'ok' };
     } catch {
+      if (retry && attempt === 0) continue; // only for answers that decide a whole page
       note(attempt + 1, 'failed');
       return { data: null, state: 'failed' }; // a timeout or a dropped connection: not asked again
     } finally {
@@ -68,7 +69,7 @@ export async function getJSON<T = any>(url: string, opts: { ttl?: number; ms?: n
 
 /** the answer that decides a whole page: null only when the source says it doesn't exist; a failure throws SourceUnavailable */
 export async function getJSONOrThrow<T = any>(url: string, opts: { ttl?: number; ms?: number } = {}, what?: string): Promise<T | null> {
-  const { data, state } = await getJSONResult<T>(url, opts);
+  const { data, state } = await getJSONResult<T>(url, { ...opts, retry: true }); // a page waits for this, so a timeout is tried once more
   if (state === 'failed') throw new SourceUnavailable(what);
   return data;
 }
