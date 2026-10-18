@@ -76,10 +76,18 @@ const LOG_SELECT = 'id, user_id, title_id, status, rating, loved, started_on, fi
 
 /* ——— loading ——— */
 
-/** a profile by its username; follows old usernames to the new address */
-export async function loadProfile(sb: SupabaseClient, username: string):
+/** the extra profile details (bio, links, favourites, pinned line) */
+export async function loadDetails(sb: SupabaseClient, id: string): Promise<Details | null> {
+  const { data } = await sb.from('profile_details').select('*').eq('id', id).maybeSingle<Details>();
+  return data ?? null;
+}
+
+/** a profile by its username; follows old usernames to the new address. `known` is a profile already loaded
+ *  for this visit (the visitor's own, from the middleware), so it isn't fetched again. */
+export async function loadProfile(sb: SupabaseClient, username: string, known?: Profile | null):
   Promise<{ profile: Profile; details: Details | null } | { redirect: string } | null> {
   const u = username.toLowerCase();
+  if (known && known.username === u) return { profile: known, details: await loadDetails(sb, known.id) };
   const { data: profile } = await sb.from('profiles').select('*').eq('username', u).maybeSingle<Profile>();
   if (!profile) {
     const { data: old } = await sb.from('username_history').select('user_id').eq('old_username', u).maybeSingle();
@@ -87,8 +95,7 @@ export async function loadProfile(sb: SupabaseClient, username: string):
     const { data: now } = await sb.from('profiles').select('username').eq('id', old.user_id).maybeSingle();
     return now ? { redirect: now.username } : null;
   }
-  const { data: details } = await sb.from('profile_details').select('*').eq('id', profile.id).maybeSingle<Details>();
-  return { profile, details: details ?? null };
+  return { profile, details: await loadDetails(sb, profile.id) };
 }
 
 /** everything on a shelf that the visitor is allowed to see, newest first */

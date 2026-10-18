@@ -12,7 +12,7 @@ export async function openShelf(Astro: AstroGlobal, rest = '/'): Promise<Opened>
   const sb = Astro.locals.supabase;
   if (!sb) return { out: await Astro.rewrite('/404') };
   if (raw !== username) return { out: Astro.redirect(`/@${username}${rest}${Astro.url.search}`, 301) };
-  const found = await loadProfile(sb, username);
+  const found = await loadProfile(sb, username, Astro.locals.me); // your own profile is already loaded by the middleware
   if (!found) { Astro.response.status = 404; return { out: await Astro.rewrite('/404') }; }
   if ('redirect' in found) return { out: Astro.redirect(`/@${found.redirect}${rest}${Astro.url.search}`, 301) };
   const me = Astro.locals.me;

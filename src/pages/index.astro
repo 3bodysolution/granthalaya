@@ -5,7 +5,7 @@ import Tile from '../components/Tile.astro';
 import Face from '../components/Face.astro';
 import GoogleButton from '../components/ui/GoogleButton.astro';
 import StatusTag from '../components/ui/StatusTag.astro';
-import { loadShelf, loadFeatured, loadProfile, href, short, fullTitle, profileHref, linesHref, pickLine } from '../lib/data';
+import { loadShelf, loadFeatured, loadDetails, href, short, fullTitle, profileHref, linesHref, pickLine } from '../lib/data';
 import { statusLabel } from '../lib/kinds';
 import { supabaseReady } from '../lib/supabase';
 import PosterRow from '../components/title/PosterRow.astro';
@@ -14,19 +14,15 @@ export const prerender = false;
 
 const me = Astro.locals.me;
 const sb = Astro.locals.supabase;
-let featured: Awaited<ReturnType<typeof loadFeatured>> = [];
 // what's popular this week, for everyone (the rows load alongside the visitor's own shelf)
 const rowsP = homeRows();
-try { if (sb) featured = await loadFeatured(sb, 6); } catch (e) { console.error('Home: featured shelves could not be loaded', e); }
-
-// signed in: your own home
-let shelf: Awaited<ReturnType<typeof loadShelf>> = [];
-let details: any = null;
-if (me && sb) {
-  const [s, p] = await Promise.all([loadShelf(sb, me), loadProfile(sb, me.username)]);
-  shelf = s;
-  if (p && !('redirect' in p)) details = p.details;
-}
+// the shelves to visit, the visitor's own shelf and their details are independent, so they load together
+const featuredP = sb ? loadFeatured(sb, 6).catch((e) => { console.error('Home: featured shelves could not be loaded', e); return []; }) : Promise.resolve([]);
+const [featured, shelf, details] = await Promise.all([
+  featuredP,
+  me && sb ? loadShelf(sb, me) : Promise.resolve([] as Awaited<ReturnType<typeof loadShelf>>),
+  me && sb ? loadDetails(sb, me.id) : Promise.resolve(null),
+]);
 const rows = await markRows(sb, me, await rowsP);
 const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
 const wants = shelf.filter((e) => e.data.status === 'want');

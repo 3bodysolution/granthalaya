@@ -87,8 +87,7 @@ export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: str
     name: t.name, href: `/@${t.profile.username}/collections/${t.slug}/`, by: t.profile.display_name || t.profile.username, count: t.thread_items?.[0]?.count ?? 0,
   })).filter((c) => (colSeen.has(c.href) ? false : (colSeen.add(c.href), true))).slice(0, 6);
   const mineRows = (mine.data ?? []) as any[];
-  const plain = await plainOf(sb, mineRows as LogRow[]);
-  const bare = await bareOf(sb, mineRows as LogRow[]);
+  const [plain, bare] = await Promise.all([plainOf(sb, mineRows as LogRow[]), bareOf(sb, mineRows as LogRow[])]);
   return {
     done: done.count ?? 0, saved: saved.count ?? 0, ratings: rs.length,
     average: rs.length >= 2 ? Math.round((rs.reduce((a, b) => a + b, 0) / rs.length) * 10) / 10 : null,
