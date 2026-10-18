@@ -3,6 +3,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { serverClient, supabaseReady } from './lib/supabase';
 import { site } from './data/site';
 import type { Profile } from './lib/data';
+import { withTiming, timingOn, header } from './lib/timing';
 
 // Addresses from the days when this was one person's site keep working.
 function oldAddress(path: string): string | null {
@@ -27,7 +28,9 @@ function oldAddress(path: string): string | null {
 // Pages someone without a username yet may still open.
 const OPEN = /^\/(welcome|signin|auth\/|api\/|privacy|terms|about)/;
 
-export const onRequest = defineMiddleware(async (ctx, next) => {
+export const onRequest = defineMiddleware((ctx, next) => withTiming(() => handle(ctx, next)));
+
+const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
   const path = ctx.url.pathname;
   const old = oldAddress(path);
   if (old) return ctx.redirect(old, 301);
@@ -64,5 +67,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   const res = await next();
   // pages change with who's looking, so browsers and the CDN shouldn't keep copies
   try { if (!res.headers.has('Cache-Control')) res.headers.set('Cache-Control', 'private, no-store'); } catch { /* some responses can't be changed */ }
+  // dev and preview copies say where the time went (see the Timing tab in the browser's Network panel)
+  try { if (timingOn()) res.headers.set('Server-Timing', header()); } catch { /* some responses can't be changed */ }
   return res;
-});
+};

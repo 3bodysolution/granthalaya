@@ -2,6 +2,11 @@
 // memory of recent answers, so a busy page doesn't ask the same question twice in a few minutes.
 // Server only. The base addresses can be pointed elsewhere for testing (TMDB_API_BASE and friends).
 import { env } from '../supabase';
+import { mark } from '../timing';
+
+// for the Server-Timing header: which catalogue answered and a short form of the address (no keys)
+const source = (url: string) => (url.includes('themoviedb') || url.includes('/3/') ? 'tmdb' : url.includes('openlibrary') ? 'ol' : url.includes('googleapis') ? 'gb' : 'ext');
+const shortPath = (url: string) => { try { return new URL(url).pathname.replace(/^\/3\//, '').slice(0, 40); } catch { return ''; } };
 
 export const UA = 'Mozilla/5.0 (compatible; Granthalaya/1.0; +https://granthalaya-sarthak.vercel.app)';
 export const base = {
@@ -26,27 +31,32 @@ export class SourceUnavailable extends Error {
  *  (timeout, 429, 5xx) is asked once more; "not found" (404, 410) is final and not retried. */
 export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 6000 }: { ttl?: number; ms?: number } = {}): Promise<{ data: T | null; state: Source }> {
   const hit = memory.get(url);
-  if (hit && Date.now() - hit.at < hit.ttl * 1000) return { data: hit.value as T, state: 'ok' };
+  const t0 = performance.now();
+  const note = (tries: number, how: string) => mark(source(url), performance.now() - t0, `${shortPath(url)} ${how}${tries > 1 ? ` (${tries} tries)` : ''}`);
+  if (hit && Date.now() - hit.at < hit.ttl * 1000) { note(0, 'memory'); return { data: hit.value as T, state: 'ok' }; }
   for (let attempt = 0; attempt < 2; attempt++) {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), ms);
     try {
       const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': UA, Accept: 'application/json' } });
       if (!r.ok) {
-        if (r.status === 404 || r.status === 410) return { data: null, state: 'notfound' };
+        if (r.status === 404 || r.status === 410) { note(attempt + 1, String(r.status)); return { data: null, state: 'notfound' }; }
         if (attempt === 0 && (r.status === 429 || r.status >= 500)) { await new Promise((x) => setTimeout(x, 500)); continue; }
+        note(attempt + 1, String(r.status));
         return { data: null, state: 'failed' }; // busy, down, or a refused key: not the same as "no such thing"
       }
       const value = (await r.json()) as T;
       if (memory.size >= MAX) memory.delete(memory.keys().next().value!);
       memory.set(url, { at: Date.now(), ttl, value });
+      note(attempt + 1, 'ok');
       return { data: value, state: 'ok' };
     } catch {
-      if (attempt === 1) return { data: null, state: 'failed' };
+      if (attempt === 1) { note(2, 'failed'); return { data: null, state: 'failed' }; }
     } finally {
       clearTimeout(timer);
     }
   }
+  note(2, 'failed');
   return { data: null, state: 'failed' };
 }
 
