@@ -18,7 +18,7 @@ const groups = GROUPS.map((g) => ({ name: g.name, lists: g.slugs.map(getList).fi
           {g.lists.map((l) => (
             <li><a class="card" href={listHref(l!.slug)}>
               <span class="ct">{l!.title}</span>
-              <span class="cs">{l!.kind === 'film' ? 'Films' : 'Books'} · {l!.items.length}</span>
+              <span class="cs">{l!.kind === 'film' ? 'Films' : 'Books'} | {l!.items.length}</span>
             </a></li>
           ))}
         </ul>

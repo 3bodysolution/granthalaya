@@ -11,7 +11,7 @@ const open = d.status !== 'done';
 const label = statusLabel(d.type, d.status);
 ---
 <a href={href(entry)} class:list={['tile lift', cls]} style={delay ? `animation-delay:${delay}` : undefined}
-   data-type={d.type} data-status={d.status} title={open ? `${d.title} · ${label}` : undefined}>
+   data-type={d.type} data-status={d.status} title={open ? `${d.title} | ${label}` : undefined}>
   <span class="tile-cover">
     <Cover entry={entry} vt={vt} />
     {open && <StatusIcon status={d.status as any} label={label} class="tile-status" />}

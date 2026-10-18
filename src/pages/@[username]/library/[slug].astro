@@ -98,7 +98,7 @@ const shown = pickLine(all, details, name);
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 const pinnedId = shown?.pinned ? shown.id : null;
 ---
-<Base title={`${fullTitle(entry)} · @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private}>
+<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private}>
   {d.type !== 'essay' ? (
     <>
       <div class="art melt banner settle bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
@@ -110,19 +110,19 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <div class:list={['hc', cover ? 'real' : 'wash']} style={`background: ${p.bg}`}>
                 {cover && <img class="pic" src={cover} alt={`${d.title} poster`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
                 <i class="sun" style={`background: ${p.accent}`}></i><i class="hill" style={`background: ${p.hill}`}></i>
-                <span class="hk">{kind(entry)}{d.year ? ` · ${d.year}` : ''}</span>
+                <span class="hk">{kind(entry)}{d.year ? ` | ${d.year}` : ''}</span>
                 <span class="serif ht">{d.title}</span>
               </div>
               <div class="type stub lg ticket">
                 <div class="tr"><b>{d.type === 'tv' ? 'NOW SHOWING' : 'ADMIT ONE'}</b>{filmNo > 0 && <span class="num">FILM {filmNo} / {year}</span>}{d.type === 'tv' && d.season && <span class="num">SEASON {d.season}</span>}</div>
-                <span>{ticketDate(d.date)}{d.where ? ` · ${d.where.toUpperCase()}` : ''}</span>
+                <span>{ticketDate(d.date)}{d.where ? ` | ${d.where.toUpperCase()}` : ''}</span>
               </div>
             </div>
           ) : (
             <div class:list={['hc hero-book', cover ? 'real' : 'wash']} style={`background: ${p.bg}`} transition:name={tname}>
               {cover && <img class="pic" src={cover} alt={`${d.title} cover`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
               <i class="spine"></i><i class="sun" style={`background: ${p.accent}`}></i><i class="hill" style={`background: ${p.hill}`}></i>
-              <span class="hk">Book{d.year ? ` · ${d.year}` : ''}</span>
+              <span class="hk">Book{d.year ? ` | ${d.year}` : ''}</span>
               <span class="bt"><span class="serif ht">{d.title}</span><span class="hb">{d.creator}</span></span>
             </div>
           )}
@@ -139,8 +139,8 @@ const pinnedId = shown?.pinned ? shown.id : null;
           <h1 class="title bigtitle rise d3">{fullTitle(entry)}</h1>
           <p class="rise d3 meta">
             {isFilm
-              ? [d.year, d.type === 'tv' ? (d.creator ? `Created by ${d.creator}` : '') : `Directed by ${d.creator}`, d.type === 'tv' && d.episodes ? `${d.episodes} episodes` : ''].filter(Boolean).join(' · ')
-              : [d.creator, d.year, d.pages && `about ${Math.round(d.pages / 10) * 10} pages`].filter(Boolean).join(' · ')}
+              ? [d.year, d.type === 'tv' ? (d.creator ? `Created by ${d.creator}` : '') : `Directed by ${d.creator}`].filter(Boolean).join(' | ')
+              : [d.creator, d.year].filter(Boolean).join(' | ')}
           </p>
           <div class="stats rise d4 num">
             <div class="stat"><span class="sub">{done ? 'Rating' : 'Status'}</span>
@@ -160,7 +160,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
           {inCols.length > 0 && (
             <div class="chips rise d6">
               <span class="sub" style="margin-right: 4px">In collections</span>
-              {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
+              {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} | {t.pos} of {t.of}</a>)}
             </div>
           )}
           {visits.length > 1 && (
@@ -168,7 +168,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <p class="sub">Every time</p>
               <ol class="visits">
                 {visits.map((v) => (
-                  <li><span class="num">{long(v.data.date)}</span><span>{statusLabel(v.data.type, v.data.status)}{v.data.again ? ' · again' : ''}{stars(v) ? ` · ${stars(v)}` : ''}</span><span class="muted">{excerpt(v, 80)}</span></li>
+                  <li><span class="num">{long(v.data.date)}</span><span>{statusLabel(v.data.type, v.data.status)}{v.data.again ? ' | again' : ''}{stars(v) ? ` | ${stars(v)}` : ''}</span><span class="muted">{excerpt(v, 80)}</span></li>
                 ))}
               </ol>
             </div>
@@ -196,7 +196,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <p class="lp-head">Your shelf</p>
               {mine.length ? (
                 <>
-                  <p class="lp-note">It’s on your shelf: <b>{statusLabel(mine[0].data.type, mine[0].data.status)}</b>{stars(mine[0]) ? ` · ${stars(mine[0])}` : ''}.</p>
+                  <p class="lp-note">It’s on your shelf: <b>{statusLabel(mine[0].data.type, mine[0].data.status)}</b>{stars(mine[0]) ? ` | ${stars(mine[0])}` : ''}.</p>
                   <a class="lrow2" href={href(mine[0])}><Eye /><span>Open your entry</span></a>
                   {mine[0].data.status === 'done' && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
                 </>
@@ -257,10 +257,10 @@ const pinnedId = shown?.pinned ? shown.id : null;
   ) : (
     <article class="essay-page">
       <a href={`/@${profile.username}/library/`} class="owner rise"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
-      <p class="sub rise d1" style="color: var(--moss)">Essay · {d.source ?? 'on the web'} · {d.creator}</p>
+      <p class="sub rise d1" style="color: var(--moss)">Essay | {d.source ?? 'on the web'} | {d.creator}</p>
       <h1 class="serif rise d2 et" transition:name={tname}>{d.title}</h1>
       <p class="rise d2 num muted" style="margin: 0; font-size: 15px">
-        {mins}-minute read · {d.status === 'want' ? 'saved for later' : 'read'} {long(d.date)}{s && <> · <span style="color: var(--lat)">{s}</span></>}
+        {mins}-minute read | {d.status === 'want' ? 'saved for later' : 'read'} {long(d.date)}{s && <> | <span style="color: var(--lat)">{s}</span></>}
       </p>
       <div class="rise d3 inline">
         {d.link && <a href={d.link} class="btn primary big" target="_blank" rel="noopener">Read the original on {d.source ?? new URL(d.link).hostname} <span aria-hidden="true">↗</span></a>}
@@ -281,7 +281,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
             <button class="chip" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}>Add to a collection</button>
           </>
         ) : me ? (
-          mine.length ? <a class="chip" href={href(mine[0])}>On your shelf · {statusLabel('essay', mine[0].data.status)}</a>
+          mine.length ? <a class="chip" href={href(mine[0])}>On your shelf | {statusLabel('essay', mine[0].data.status)}</a>
             : <button class="chip" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })} data-saved-label="Saved"><Mark size={15} /><span data-label>Save for later</span></button>
         ) : (
           <a class="chip" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname)}`} data-astro-prefetch="false">Sign in to save it</a>
@@ -291,7 +291,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
       {inCols.length > 0 && (
         <div class="chips rise d5">
           <span class="sub" style="margin-right: 4px">In collections</span>
-          {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} · {t.pos} of {t.of}</a>)}
+          {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} | {t.pos} of {t.of}</a>)}
         </div>
       )}
       {(prev || next) && (
@@ -310,7 +310,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
         {rel.map((e) => (
           <a href={href(e)} class="lift stack" style="gap: 10px">
             <Cover entry={e} variant="mini" />
-            <span class="muted" style="font-size: 12px">{kind(e)} · {e.data.creator}</span>
+            <span class="muted" style="font-size: 12px">{kind(e)} | {e.data.creator}</span>
           </a>
         ))}
       </div>

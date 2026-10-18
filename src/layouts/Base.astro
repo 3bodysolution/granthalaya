@@ -23,7 +23,7 @@ interface Props {
 const { title, description = site.description, active, image = '/img/og.jpg', line, noindex = false } = Astro.props;
 const me = Astro.locals.me;
 const shelf = Astro.props.shelf ?? me?.username;
-const fullTitle = title ? `${title} · ${site.name}` : `${site.name} · a shelf for everything you read and watch`;
+const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | a shelf for everything you read and watch`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 // Site-wide links only. A shelf's own pages (Library, Diary, Collections, Stats) live in its tabs.
 const nav: { key: string; label: string; href: string }[] = [
@@ -614,7 +614,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     function shelfRows(q: string, n: number) {
       const all = mine || [];
       const found = q ? all.filter((x) => (x.title + ' ' + x.creator + ' ' + x.year).toLowerCase().includes(q)) : all;
-      return found.slice(0, n).map((x) => row(x.href, `<span class="sthumb" style="background:${x.bg};border-radius:${x.r}"></span>`, x.title, `${x.creator} · ${x.year}`, x.kind, q));
+      return found.slice(0, n).map((x) => row(x.href, `<span class="sthumb" style="background:${x.bg};border-radius:${x.r}"></span>`, x.title, `${x.creator} | ${x.year}`, x.kind, q));
     }
     function renderEmpty() {
       const add = dialog().dataset.mode === 'add';
@@ -636,11 +636,11 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (wait) wait.hidden = true;
       if (asked !== q || !dialog().open) return;
       if (!r) { paint(group('On your shelf', local) + '<li class="search-empty">Search isn’t answering right now. Try again in a moment.</li>'); return; }
-      const titles = (r.titles ?? []).map((t: any) => row(t.href, thumb(t.poster), t.title, [t.year, t.kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' · '), '', q));
-      const books = (r.books ?? []).map((b: any) => row(b.href, thumb(b.cover), b.title, [b.author, b.year].filter(Boolean).join(' · '), '', q));
+      const titles = (r.titles ?? []).map((t: any) => row(t.href, thumb(t.poster), t.title, [t.year, t.kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), '', q));
+      const books = (r.books ?? []).map((b: any) => row(b.href, thumb(b.cover), b.title, [b.author, b.year].filter(Boolean).join(' | '), '', q));
       const people = [
         ...(r.people ?? []).map((p: any) => row(p.href, thumb(p.photo, true), p.name, p.known ?? 'Films and TV', '', q)),
-        ...(r.authors ?? []).map((a: any) => row(a.href, thumb(undefined, true), a.name, `Author${a.works ? ` · ${a.works} works` : ''}`, '', q)),
+        ...(r.authors ?? []).map((a: any) => row(a.href, thumb(undefined, true), a.name, `Author${a.works ? ` | ${a.works} works` : ''}`, '', q)),
       ];
       const members = (r.members ?? []).map((m: any) => row(m.href, thumb(m.avatar, true), m.name, `@${m.username}`, '', q));
       const html = group('On your shelf', local) + group('Films and TV', titles) + group('Books', books) + group('People', people) + group('On Granthalaya', members);

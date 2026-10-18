@@ -1,0 +1,6 @@
+---
+// Pieces of information on one line, told apart by a thin vertical bar (never a dot). Empty pieces are left out.
+interface Props { parts: (string | number | false | null | undefined)[] }
+const list = Astro.props.parts.filter((x) => x !== false && x != null && x !== '');
+---
+{list.map((p, i) => <>{i > 0 && <span class="vbar" aria-hidden="true"></span>}{p}</>)}

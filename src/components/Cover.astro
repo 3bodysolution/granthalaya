@@ -1,6 +1,6 @@
 ---
 // A cover: the real book cover or film poster when there is one (see coverSrc), otherwise one painted from the title.
-// variant: tile (library grid) · poster (Start here) · mini (Sits well next to) · swatch (small thumbnails)
+// variant: tile (library grid) | poster (Start here) | mini (Sits well next to) | swatch (small thumbnails)
 import { palette, radius, kind, excerpt, short, coverSrc, type Entry } from '../lib/data';
 
 interface Props {
@@ -18,8 +18,8 @@ const vars = `--c-bg:${p.bg};--c-accent:${p.accent};--c-hill:${p.hill};--c-r:${r
 const tname = vt ? `cover-${entry.id.replace(/[^a-z0-9-]/gi, '')}` : undefined;
 const src = coverSrc(entry);
 const stub = d.type === 'tv' && d.season
-  ? `SEASON ${d.season} · ${short(d.date).toUpperCase()}`
-  : `${short(d.date).toUpperCase()}${d.where ? ' · ' + d.where.toUpperCase() : ''}`;
+  ? `SEASON ${d.season} | ${short(d.date).toUpperCase()}`
+  : `${short(d.date).toUpperCase()}${d.where ? ' | ' + d.where.toUpperCase() : ''}`;
 const isFilm = d.type === 'film' || d.type === 'tv';
 ---
 {variant === 'tile' && d.type === 'book' && (
@@ -36,7 +36,7 @@ const isFilm = d.type === 'film' || d.type === 'tv';
       {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
       <i class="sun" /><i class="hill" />
       <span class="k">{kind(entry)}</span>
-      <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}{d.year ? ` · ${d.year}` : ''}</span></span>
+      <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}{d.year ? ` | ${d.year}` : ''}</span></span>
     </div>
     <div class="type stub ticket"><b>{d.type === 'tv' ? 'NOW SHOWING' : 'ADMIT ONE'}</b><span>{stub}</span></div>
   </div>

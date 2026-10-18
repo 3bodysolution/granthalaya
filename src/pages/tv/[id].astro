@@ -55,9 +55,7 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
     <h1 class="title tt">{t.title}</h1>
     <p class="meta">
       {t.year && <a href={`/films/?kind=tv&year=${t.year}`} class="ul">{years}</a>}
-      {t.creators.length > 0 && <span> · Created by {t.creators.map((c, i) => <>{i > 0 && ', '}<a href={c.href} class="ul">{c.name}</a></>)}</span>}
-      {t.seasons.length > 0 && <span> · {t.seasons.length} season{t.seasons.length > 1 ? 's' : ''}</span>}
-      {t.networks[0] && <span> · {t.networks[0]}</span>}
+      {t.creators.length > 0 && <span><span class="vbar" aria-hidden="true"></span>Created by {t.creators.map((c, i) => <>{i > 0 && ', '}<a href={c.href} class="ul">{c.name}</a></>)}</span>}
     </p>
     {t.tagline && <p class="tagline">{t.tagline}</p>}
     {t.overview && <p class="overview">{t.overview}</p>}
@@ -111,7 +109,7 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
                   <span class="sp">{s.poster ? <img src={s.poster} alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" /> : null}</span>
                   <span class="stack" style="gap: 6px; min-width: 0">
                     <b class="serif sn">{s.name}</b>
-                    <span class="muted small">{[s.year, s.episodes && `${s.episodes} episodes`].filter(Boolean).join(' · ')}</span>
+                    <span class="muted small">{[s.year, s.episodes && `${s.episodes} episodes`].filter(Boolean).join(' | ')}</span>
                     {m && <StatusTag status={(m.status === 'done' ? 'watched' : m.status) as any} label={statusLabel('tv', m.status as Status)} />}
                     {s.overview && <span class="so">{s.overview}</span>}
                   </span>

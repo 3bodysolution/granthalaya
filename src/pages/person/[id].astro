@@ -37,7 +37,7 @@ const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted i
       <h1 class="title">{p.name}</h1>
       <p class="muted lifeline">
         {p.born && <span>Born {day(p.born)}{p.place ? ` in ${p.place}` : ''}</span>}
-        {p.died && <span> · Died {day(p.died)}</span>}
+        {p.died && <span><span class="vbar" aria-hidden="true"></span>Died {day(p.died)}</span>}
       </p>
       {bioParas.length > 0 && (
         <details class="bio">

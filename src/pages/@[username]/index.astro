@@ -127,7 +127,7 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
                   <div class="flex flex-col gap-2 items-start min-w-0">
                     <StatusTag status={e.data.status as any} label={statusLabel(e.data.type, e.data.status)} />
                     <span class="serif nt">{fullTitle(e)}</span>
-                    <span class="small muted">{e.data.creator}{e.data.status === 'want' ? ` · added ${short(e.data.date)}` : ` · since ${short(e.data.started ?? e.data.date)}`}</span>
+                    <span class="small muted">{e.data.creator}{e.data.status === 'want' ? ` | added ${short(e.data.date)}` : ` | since ${short(e.data.started ?? e.data.date)}`}</span>
                   </div>
                 </a>
               ))}
@@ -156,20 +156,20 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
             <SectionHead title={shown.pinned ? 'Pinned line' : 'Latest line'} more="All" href={linesHref(profile.username)} />
             <a href={shown.href} class="lotw">
               <span class:list={['serif q', shown.mine && 'own']}>{shown.mine ? shown.text : `“${shown.text}”`}</span>
-              <span class="hint">{shown.mine ? `${isMe ? 'My' : 'Their'} line` : shown.by} · {shown.source}</span>
+              <span class="hint">{shown.mine ? `${isMe ? 'My' : 'Their'} line` : shown.by} | {shown.source}</span>
             </a>
           </section>
         )}
         <section class="flex flex-col gap-4">
           <SectionHead title="Diary" more="All" href={`${base}/diary/`} />
           <ol class="diary">
-            {diary.map((e) => <li><span class="dd">{dm(e.data.date)}</span><a href={href(e)}>{fullTitle(e)}</a>{e.data.status !== 'done' && <span class="hint"> · {statusLabel(e.data.type, e.data.status)}</span>}</li>)}
+            {diary.map((e) => <li><span class="dd">{dm(e.data.date)}</span><a href={href(e)}>{fullTitle(e)}</a>{e.data.status !== 'done' && <span class="hint"> | {statusLabel(e.data.type, e.data.status)}</span>}</li>)}
           </ol>
         </section>
         {collections.length > 0 && (
           <section class="flex flex-col gap-4">
             <SectionHead title="Collections" more="All" href={`${base}/collections/`} />
-            {collections.slice(0, 4).map((t) => <a href={collectionHref(t)} class="tl">{t.data.title} <span class="muted">· {t.data.items.length}</span></a>)}
+            {collections.slice(0, 4).map((t) => <a href={collectionHref(t)} class="tl">{t.data.title} <span class="muted"> | {t.data.items.length}</span></a>)}
           </section>
         )}
       </aside>

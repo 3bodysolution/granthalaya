@@ -6,7 +6,7 @@ const bySlug = new Map(entries.map((e) => [e.id, e]));
 const list = collection.data.items.map((i) => bySlug.get(i.slug) ?? (i.title ? titleAsEntry(i.title, collection.owner) : null)).filter(Boolean) as Entry[];
 const c = [0, 1, 2].map((i) => (list[i] ? palette(list[i]).bg : '#46525E'));
 const n = (t: string) => list.filter((e) => e.data.type === t).length;
-const meta = [`${list.length} things`, n('film') && `${n('film')} film${n('film') > 1 ? 's' : ''}`, n('book') && `${n('book')} book${n('book') > 1 ? 's' : ''}`, n('tv') && `${n('tv')} season${n('tv') > 1 ? 's' : ''} of TV`, n('essay') && `${n('essay')} essay${n('essay') > 1 ? 's' : ''}`].filter(Boolean).join(' · ');
+const meta = [`${list.length} things`, n('film') && `${n('film')} film${n('film') > 1 ? 's' : ''}`, n('book') && `${n('book')} book${n('book') > 1 ? 's' : ''}`, n('tv') && `${n('tv')} season${n('tv') > 1 ? 's' : ''} of TV`, n('essay') && `${n('essay')} essay${n('essay') > 1 ? 's' : ''}`].filter(Boolean).join(' | ');
 ---
 <a href={collectionHref(collection)} class="card ccard">
   <div class="fanwrap" aria-hidden="true">

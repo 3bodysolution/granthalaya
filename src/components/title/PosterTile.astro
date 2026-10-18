@@ -2,11 +2,12 @@
 // One title in a grid (lists, a person's films, an author's books): poster, title, year.
 // Signed in, a bookmark in the corner saves it to your shelf; if it's already there, its status shows instead.
 import Mark from '../ui/Mark.astro';
+import Bars from '../ui/Bars.astro';
 import StatusIcon from '../ui/StatusIcon.astro';
 import { paletteFor } from '../../lib/data';
 import { statusLabel, type Kind, type Status } from '../../lib/kinds';
 interface Props {
-  href: string; // empty for a title with no page title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
+  href: string; // empty for a title with no page title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string | (string | undefined)[];
   status?: string; save?: Record<string, unknown>; search?: string;
   /** the log behind a plain save: its filled bookmark takes the save back */
   logId?: string;
@@ -25,7 +26,7 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
       <i class="sun"></i><i class="hill"></i><span class="serif pt-w">{title}</span>
     </span>
     <span class="pt-t">{title}</span>
-    <span class="pt-s">{[year, sub].filter(Boolean).join(' · ')}</span>
+    <span class="pt-s"><Bars parts={[year, ...(Array.isArray(sub) ? sub : [sub])]} /></span>
   </Link>
   {me && logId && status === 'want' ? (
     <button type="button" class="pt-save is-saved" data-unsave={logId} data-quick-add={save ? JSON.stringify({ hit: save, status: 'want' }) : undefined} aria-label={`Saved: ${title}. Tap to remove`} title="Saved. Tap to remove"><Mark size={16} /></button>

@@ -73,7 +73,7 @@ const features = [
         <div class="shelves">
           {featured.map((f) => (
             <a class="card shelfcard" href={profileHref(f.profile.username)}>
-              <div class="who"><Face name={f.profile.display_name || f.profile.username} src={f.profile.avatar_url} size={40} /><div class="stack"><span class="serif" style="font-size: 19px">{f.profile.display_name || f.profile.username}</span><span class="small muted">@{f.profile.username} · {f.count} on the shelf</span></div></div>
+              <div class="who"><Face name={f.profile.display_name || f.profile.username} src={f.profile.avatar_url} size={40} /><div class="stack"><span class="serif" style="font-size: 19px">{f.profile.display_name || f.profile.username}</span><span class="small muted">@{f.profile.username} | {f.count} on the shelf</span></div></div>
               <div class="covers">{f.covers.map((e) => <Cover entry={e} variant="swatch" w={56} h={84} />)}</div>
               {f.bio && <p class="small muted" style="margin: 0">{f.bio}</p>}
             </a>
@@ -115,7 +115,7 @@ const features = [
                 <div class="stack grow" style="gap: 8px">
                   <StatusTag status={e.data.status as any} label={statusLabel(e.data.type, e.data.status)} />
                   <span class="serif nt">{fullTitle(e)}</span>
-                  <span class="small muted">{e.data.creator}{e.data.year ? ` · ${e.data.year}` : ''}</span>
+                  <span class="small muted">{e.data.creator}{e.data.year ? ` | ${e.data.year}` : ''}</span>
                   <span class="small muted" style="margin-top: auto">{e.data.status === 'want' ? `Saved ${short(e.data.date)}` : `Since ${short(e.data.started ?? e.data.date)}`}</span>
                 </div>
               </a>
@@ -130,7 +130,7 @@ const features = [
               <a href={linesHref(me.username)} class="card lift nowcard stack" style="gap: 10px">
                 <p class="eyebrow" style="color: var(--moss)">{shown.pinned ? 'Pinned line' : 'Latest line'}</p>
                 <p class="serif" style={`margin: 0; font-size: 19px; line-height: 1.45${shown.mine ? '' : '; font-style: italic'}`}>{shown.mine ? shown.text : `“${shown.text}”`}</p>
-                <span class="small muted" style="margin-top: auto">{shown.by}, <em>{shown.source}</em> · all lines →</span>
+                <span class="small muted" style="margin-top: auto">{shown.by}, <em>{shown.source}</em> | all lines →</span>
               </a>
             )}
           </div>
@@ -157,7 +157,7 @@ const features = [
         <div class="shelves">
           {others.slice(0, 3).map((f) => (
             <a class="card shelfcard" href={profileHref(f.profile.username)}>
-              <div class="who"><Face name={f.profile.display_name || f.profile.username} src={f.profile.avatar_url} size={40} /><div class="stack"><span class="serif" style="font-size: 19px">{f.profile.display_name || f.profile.username}</span><span class="small muted">@{f.profile.username} · {f.count} on the shelf</span></div></div>
+              <div class="who"><Face name={f.profile.display_name || f.profile.username} src={f.profile.avatar_url} size={40} /><div class="stack"><span class="serif" style="font-size: 19px">{f.profile.display_name || f.profile.username}</span><span class="small muted">@{f.profile.username} | {f.count} on the shelf</span></div></div>
               <div class="covers">{f.covers.map((e) => <Cover entry={e} variant="swatch" w={56} h={84} />)}</div>
             </a>
           ))}

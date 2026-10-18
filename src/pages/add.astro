@@ -320,16 +320,16 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       const p = $('pc'), img = $('pcimg') as HTMLImageElement;
       p.style.background = t.bg || '#46525E';
       if (t.cover || t.cover_url) { img.src = t.cover || t.cover_url; img.hidden = false; img.onerror = () => (img.hidden = true); } else img.hidden = true;
-      $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[t.kind]}${t.from && t.from !== 'you' ? ' · from ' + t.from : ''}`;
+      $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[t.kind]}${t.from && t.from !== 'you' ? ' | from ' + t.from : ''}`;
       $('ptitle').textContent = t.kind === 'tv' && t.season ? `${t.title}, season ${t.season}` : t.title;
-      $('pmeta').textContent = [t.creator, t.year, t.pages ? `${t.pages} pages` : '', t.runtime && t.kind === 'film' ? `${t.runtime} min` : '', t.episodes ? `${t.episodes} episodes` : '', t.source && t.kind === 'essay' ? t.source : ''].filter(Boolean).join(' · ');
+      $('pmeta').textContent = [t.creator, t.year, t.pages ? `${t.pages} pages` : '', t.runtime && t.kind === 'film' ? `${t.runtime} min` : '', t.episodes ? `${t.episodes} episodes` : '', t.source && t.kind === 'essay' ? t.source : ''].filter(Boolean).join(' | ');
       $('fixed').hidden = false; $('editable').hidden = true;
     }
     function toForm(t: any, isManual = false) {
       manual = isManual;
       if (isManual) {
         $('pc').style.background = '#46525E'; ($('pcimg') as HTMLImageElement).hidden = true;
-        $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[kind]} · by hand`;
+        $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[kind]} | by hand`;
         $('fixed').hidden = true; $('editable').hidden = false;
         f('title').value = t?.title ?? ''; f('creator').value = t?.creator ?? '';
       } else showPick(t);
@@ -358,7 +358,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       const list: any[] = r.hits ?? [];
       if (!list.length) { hits.innerHTML = `<li class="muted small" style="padding: 6px 2px">Nothing found. Try other words, or fill it in by hand.</li>`; return; }
       hits.innerHTML = list.map((h, i) => `<li><button type="button" data-hit="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(h.cover ?? '')}"></span>
-        <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(h.title)}</span><span class="hm">${esc([h.creator, h.year, h.kind !== kind ? ({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[h.kind] : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+        <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(h.title)}</span><span class="hm">${esc([h.creator, h.year, h.kind !== kind ? ({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[h.kind] : ''].filter(Boolean).join(' | '))}</span></span></button></li>`).join('');
       paintCovers(hits);
       hits.querySelectorAll<HTMLButtonElement>('[data-hit]').forEach((b) => b.addEventListener('click', () => choose(list[+b.dataset.hit!])));
     }
@@ -371,7 +371,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         const r = await fetch(`/api/lookup?show=${h.tmdbId}`).then((x) => x.json()).catch(() => ({}));
         const seasons: any[] = r.show?.seasons ?? [];
         if (!seasons.length) { hits.innerHTML = '<li class="muted small">Couldn’t find its seasons. Fill it in by hand instead.</li>'; return; }
-        hits.innerHTML = `<li class="lbl" style="padding: 2px">${esc(r.show.title)}: which season?</li>` + seasons.map((s, i) => `<li><button type="button" data-season="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(s.cover ?? '')}"></span><span class="stack" style="gap:3px"><span class="ht">${esc(s.name)}</span><span class="hm">${esc([s.year, s.episodes ? s.episodes + ' episodes' : ''].filter(Boolean).join(' · '))}</span></span></button></li>`).join('');
+        hits.innerHTML = `<li class="lbl" style="padding: 2px">${esc(r.show.title)}: which season?</li>` + seasons.map((s, i) => `<li><button type="button" data-season="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(s.cover ?? '')}"></span><span class="stack" style="gap:3px"><span class="ht">${esc(s.name)}</span><span class="hm">${esc([s.year, s.episodes ? s.episodes + ' episodes' : ''].filter(Boolean).join(' | '))}</span></span></button></li>`).join('');
         paintCovers(hits);
         hits.querySelectorAll<HTMLButtonElement>('[data-season]').forEach((b) => b.addEventListener('click', () => {
           const s = seasons[+b.dataset.season!];

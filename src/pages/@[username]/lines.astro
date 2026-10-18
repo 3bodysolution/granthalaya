@@ -38,7 +38,7 @@ const mineCount = notes.filter((n) => n.h.mine).length;
       <figure class="art lotw settle" style="--day: url(/art/lotw-day.webp); --night: url(/art/lotw-night.webp)">
         <span class="lk">Pinned line</span>
         <blockquote class="serif">{q.mine ? q.text : `“${q.text}”`}</blockquote>
-        <figcaption>{q.by} · <em>{q.source}</em></figcaption>
+        <figcaption>{q.by} | <em>{q.source}</em></figcaption>
       </figure>
     </section>
   )}
@@ -54,7 +54,7 @@ const mineCount = notes.filter((n) => n.h.mine).length;
       {notes.map(({ e, h }, i) => (
         <article class="card rise nc" data-kind={h.mine ? 'mine' : 'quote'} style={`animation-delay: ${(0.3 + Math.min(i, 8) * 0.06).toFixed(2)}s`}>
           <div class="ntop">
-            <span class="eyebrow" style={`font-size: 11px; color: ${h.mine ? 'var(--moss)' : typeColor(e.data.type)}`}>{h.mine ? `${isMe ? 'My' : 'Their'} line · ${kind(e)}` : 'Highlight'}</span>
+            <span class="eyebrow" style={`font-size: 11px; color: ${h.mine ? 'var(--moss)' : typeColor(e.data.type)}`}>{h.mine ? `${isMe ? 'My' : 'Their'} line | ${kind(e)}` : 'Highlight'}</span>
             <span class="acts">
               {isMe && (
                 <button class:list={['mini', shown?.pinned && shown.id === h.id && 'pinned']} data-pin={JSON.stringify({ id: h.id, on: !(shown?.pinned && shown.id === h.id) })}

@@ -16,7 +16,7 @@ const status = new Map(marked.items.map((t) => [t.href, t]));
     {tiles.map((t, n) => (
       <div class="cell">
         {shown[n].year ? <span class="yr">{shown[n].circa ? 'c. ' : ''}{shown[n].year}</span> : null}
-        <PosterTile {...t} year={undefined} sub={[t.sub, shown[n].note].filter(Boolean).join(' · ') || undefined} status={status.get(t.href)?.status} logId={status.get(t.href)?.logId} />
+        <PosterTile {...t} year={undefined} sub={[...(Array.isArray(t.sub) ? t.sub : [t.sub]), shown[n].note]} status={status.get(t.href)?.status} logId={status.get(t.href)?.logId} />
       </div>
     ))}
   </div>

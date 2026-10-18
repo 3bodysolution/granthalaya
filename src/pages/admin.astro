@@ -26,11 +26,11 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
     <div class="list">
       {(reports ?? []).map((r: any) => (
         <article class="card rep">
-          <div class="between"><b>{REASON[r.reason] ?? r.reason}</b><span class="muted small">{when(r.created_at)} · {r.status}</span></div>
+          <div class="between"><b>{REASON[r.reason] ?? r.reason}</b><span class="muted small">{when(r.created_at)} | {r.status}</span></div>
           <p class="small">
             {r.target ? <>About <a class="accent" href={`/@${r.target.username}/`}>@{r.target.username}</a>{r.target.featured ? ' (featured)' : ''}</> : 'About a removed account'}
-            {r.log?.title && <> · entry <a class="accent" href={`/@${r.target?.username}/library/${r.log.title.slug}/`}>{r.log.title.title}</a>{r.log.only_me ? ' (hidden)' : ''}</>}
-            {' '}· from {r.reporter ? `@${r.reporter.username}` : 'a removed account'}
+            {r.log?.title && <> | entry <a class="accent" href={`/@${r.target?.username}/library/${r.log.title.slug}/`}>{r.log.title.title}</a>{r.log.only_me ? ' (hidden)' : ''}</>}
+            {' '}| from {r.reporter ? `@${r.reporter.username}` : 'a removed account'}
           </p>
           {r.details && <p class="quote">“{r.details}”</p>}
           {r.log?.notes && <p class="small muted">Their note: {r.log.notes.slice(0, 280)}</p>}
@@ -51,7 +51,7 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
     <ul class="plist">
       {(picks ?? []).map((k: any) => (
         <li class:list={['pick', k.hidden && 'off']}>
-          <span class="pt">{k.title ? <a class="accent" href={`/book/${k.title.slug}/`}>{k.title.title}</a> : 'Removed book'}<span class="muted"> · {k.title?.creator} · {k.language === 'mr' ? 'Marathi' : 'Hindi'} · checked with {k.checked_with} · {when(k.created_at)}</span></span>
+          <span class="pt">{k.title ? <a class="accent" href={`/book/${k.title.slug}/`}>{k.title.title}</a> : 'Removed book'}<span class="muted"> | {k.title?.creator} | {k.language === 'mr' ? 'Marathi' : 'Hindi'} | checked with {k.checked_with} | {when(k.created_at)}</span></span>
           <button class="btn sm" data-admin={JSON.stringify({ id: k.id, action: k.hidden ? 'show_book' : 'hide_book' })}>{k.hidden ? 'Show again' : 'Hide'}</button>
         </li>
       ))}

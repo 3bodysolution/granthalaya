@@ -85,7 +85,6 @@ p { text-wrap: pretty; }
 
 /* header */
 .site { height: 76px; padding: 0 var(--gut); display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 1px solid var(--line); max-width: var(--max); width: 100%; margin: 0 auto; }
-.site-wrap { border-bottom: 1px solid var(--line); }
 .site-wrap .site { border-bottom: 0; }
 .brand { display: flex; align-items: center; gap: 10px; justify-self: start; }
 .brand span { font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
@@ -345,3 +344,6 @@ html[data-theme="dark"] :is(.c.real > .pic, .hc .pic) { outline-color: rgba(255,
   .ink { background-position: 0 50%; }
   .mk-fill { transition: none; }
 }
+
+/* a thin vertical bar between pieces of information on one line (see ui/Bars.astro) */
+.vbar { display: inline-block; width: 1px; height: .95em; margin: 0 .65em; background: currentColor; opacity: .32; vertical-align: -.12em; }

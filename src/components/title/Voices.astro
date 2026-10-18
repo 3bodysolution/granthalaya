@@ -29,7 +29,7 @@ const { site, facts } = Astro.props;
 {site.collections.length > 0 && (
   <section class="pad block">
     <div class="rule"><h2 class="eyebrow">In collections</h2></div>
-    <div class="cols">{site.collections.map((c) => <a href={c.href} class="chip">{c.name} <span class="muted">· {c.by}</span></a>)}</div>
+    <div class="cols">{site.collections.map((c) => <a href={c.href} class="chip">{c.name} <span class="muted"> | {c.by}</span></a>)}</div>
   </section>
 )}
 <style>

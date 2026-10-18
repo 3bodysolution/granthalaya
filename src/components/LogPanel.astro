@@ -70,7 +70,7 @@ const film = kind !== 'book';
             </div>
             {m ? (
               <>
-                <a class="lp-row" href={`/@${me.username}/library/${m.slug}/`}><Eye aria-hidden="true" /><span>Your entry · {statusLabel(kind, m.status as Status)}</span></a>
+                <a class="lp-row" href={`/@${me.username}/library/${m.slug}/`}><Eye aria-hidden="true" /><span>Your entry | {statusLabel(kind, m.status as Status)}</span></a>
                 <a class="lp-row" href={`/add/?log=${m.id}`}><Notes aria-hidden="true" /><span>Notes, lines and dates</span></a>
                 {m.status === 'done' && <a class="lp-row" href={`/add/?title=${m.titleId}&again=1`}><Repeat aria-hidden="true" /><span>{film ? 'Watch it again' : 'Read it again'}</span></a>}
               </>

@@ -80,8 +80,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
     {b.subtitle && <p class="sub">{b.subtitle}</p>}
     <p class="meta">
       {b.authors.length > 0 && <span>by {b.authors.map((a, i) => <>{i > 0 && ', '}{a.href ? <a href={a.href} class="ul">{a.name}</a> : a.name}</>)}</span>}
-      {b.year && <span> · first published <a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></span>}
-      {b.pages && <span> · {b.pages} pages</span>}
+      {b.year && <span><span class="vbar" aria-hidden="true"></span><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></span>}
     </p>
     {paras.length > 0 && <div class="desc">{paras.map((p) => <p>{p}</p>)}</div>}
 

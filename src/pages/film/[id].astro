@@ -62,7 +62,7 @@ const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${
     <h1 class="title tt">{f.title}</h1>
     <p class="meta">
       {f.year && <a href={`/films/?year=${f.year}`} class="ul">{f.year}</a>}
-      {f.directors.length > 0 && <span> · Directed by {f.directors.map((d, i) => <>{i > 0 && ', '}{d.href ? <a href={d.href} class="ul">{d.name}</a> : d.name}</>)}</span>}
+      {f.directors.length > 0 && <span><span class="vbar" aria-hidden="true"></span>Directed by {f.directors.map((d, i) => <>{i > 0 && ', '}{d.href ? <a href={d.href} class="ul">{d.name}</a> : d.name}</>)}</span>}
     </p>
     {f.tagline && <p class="tagline">{f.tagline}</p>}
     {f.overview && <p class="overview">{f.overview}</p>}

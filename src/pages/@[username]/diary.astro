@@ -40,11 +40,11 @@ for (const e of all) {
               <Cover entry={e} variant="swatch" w={36} h={52} />
               <span class="stack grow" style="gap: 3px">
                 <span class="serif t">{fullTitle(e)}</span>
-                <span class="muted s">{e.data.creator}{e.data.year ? ` · ${e.data.year}` : ''}{e.data.highlights.length > 0 && ` · ${e.data.highlights.length} line${e.data.highlights.length > 1 ? 's' : ''}`}</span>
+                <span class="muted s">{e.data.creator}{e.data.year ? ` | ${e.data.year}` : ''}{e.data.highlights.length > 0 && ` | ${e.data.highlights.length} line${e.data.highlights.length > 1 ? 's' : ''}`}</span>
                 {e.body && <span class="ex">{excerpt(e, 140)}</span>}
               </span>
               <span class="k" style={`color: ${typeColor(e.data.type)}`}>{kind(e)}</span>
-              <span class="r">{e.data.status === 'done' ? <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || '·'}</span> : <span class="muted">{statusLabel(e.data.type, e.data.status)}</span>}{e.data.again && <span class="again" title="Again">↻</span>}</span>
+              <span class="r">{e.data.status === 'done' ? <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || ''}</span> : <span class="muted">{statusLabel(e.data.type, e.data.status)}</span>}{e.data.again && <span class="again" title="Again">↻</span>}</span>
             </a>
           </li>
         ))}

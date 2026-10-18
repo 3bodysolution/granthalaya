@@ -8,7 +8,7 @@ const p = paletteFor(title);
 <div class:list={['poster', kind === 'book' ? 'book' : 'film', src ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
   {src && <img src={src} alt={`${title} ${kind === 'book' ? 'cover' : 'poster'}`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
   <i class="sun"></i><i class="hill"></i>
-  <span class="k">{kind === 'book' ? 'Book' : kind === 'tv' ? 'TV' : 'Film'}{year ? ` · ${year}` : ''}</span>
+  <span class="k">{kind === 'book' ? 'Book' : kind === 'tv' ? 'TV' : 'Film'}{year ? ` | ${year}` : ''}</span>
   <span class="t"><span class="serif">{title}</span>{by && <span class="by">{by}</span>}</span>
 </div>
 <style>

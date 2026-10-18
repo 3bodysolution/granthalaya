@@ -46,7 +46,7 @@ export function listTile(l: CatalogList, i: ListItem): RowItem {
   return {
     href, search: href ? undefined : i.title, title: i.title, poster: i.cover, kind: film ? 'film' : 'book', save,
     year: i.circa || !shown ? undefined : shown,
-    sub: [i.circa ? `c. ${shown}` : '', i.creator].filter(Boolean).join(' · ') || undefined,
+    sub: [i.circa ? `c. ${shown}` : '', i.creator].filter(Boolean),
   };
 }
 

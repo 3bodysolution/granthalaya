@@ -108,7 +108,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
   <section class="pad head">
     <div class="rise d1" style="margin-bottom: 30px"><ShelfStrip shelf={o.shelf} current="stats" /></div>
     <div class="rise stack" style="gap: 10px">
-      <p class="eyebrow" style="color: var(--lat)">Stats · {year}</p>
+      <p class="eyebrow" style="color: var(--lat)">Stats | {year}</p>
       <h1 class="title"><span class="num">{hours(total)}</span> hours {year === thisYear ? 'so far this year' : `in ${year}`}</h1>
       <p class="lede">About {duration(perDay, 'words').replace(/ min$/, ' minutes')} a day, counting finished things. Worked out from runtimes, pages and word counts.</p>
     </div>
@@ -133,9 +133,9 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
       <div class="wash growX" style={`animation-delay: 1s; width: ${Math.max(pct(T.essay), 1)}%; background: var(--moss)`}></div>
     </div>
     <div class="num keys">
-      <span class="key"><i style="background: var(--book)"></i>Books · {hours(T.book)}h · {pct(T.book)}%</span>
-      <span class="key"><i style="background: var(--sky)"></i>Films and TV · {hours(T.film)}h · {pct(T.film)}%</span>
-      <span class="key"><i style="background: var(--moss)"></i>Essays · {hours(T.essay)}h · {pct(T.essay)}%</span>
+      <span class="key"><i style="background: var(--book)"></i>Books | {hours(T.book)}h | {pct(T.book)}%</span>
+      <span class="key"><i style="background: var(--sky)"></i>Films and TV | {hours(T.film)}h | {pct(T.film)}%</span>
+      <span class="key"><i style="background: var(--moss)"></i>Essays | {hours(T.essay)}h | {pct(T.essay)}%</span>
     </div>
   </section>
 
@@ -183,7 +183,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
                   {wk.map((d) => (
                     <span class:list={['cell', d.out && 'out', d.t > endOfPeriod && 'future']}
                           style={d.out ? '' : `background: ${LV[d.lvl].c}; opacity: ${d.t > endOfPeriod ? 0.35 : LV[d.lvl].o}`}
-                          title={d.out || d.t > endOfPeriod ? undefined : `${label(d.t)} · ${d.m > 0 ? duration(d.m) : 'nothing'}`}></span>
+                          title={d.out || d.t > endOfPeriod ? undefined : `${label(d.t)} | ${d.m > 0 ? duration(d.m) : 'nothing'}`}></span>
                   ))}
                 </div>
               ))}
@@ -209,8 +209,8 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
         <div class="stack"><span class="serif" style="font-size: 34px">{sc('essay')}</span><span style="font-size: 12px; color: #C9C2B4">essays</span></div>
       </div>
       <div class="stack" style="gap: 6px; font-size: 14px; color: #E9E1D1">
-        {loved && <span>Most loved · <span class="serif" style="font-style: italic">{loved.data.title}</span></span>}
-        {busiest && ids.size > 0 && busiest.data.items.some((i) => ids.has(i.slug)) && <span>Busiest collection · <a href={collectionHref(busiest)} class="serif" style="font-style: italic">{busiest.data.title}</a></span>}
+        {loved && <span>Most loved | <span class="serif" style="font-style: italic">{loved.data.title}</span></span>}
+        {busiest && ids.size > 0 && busiest.data.items.some((i) => ids.has(i.slug)) && <span>Busiest collection | <a href={collectionHref(busiest)} class="serif" style="font-style: italic">{busiest.data.title}</a></span>}
       </div>
     </div>
 
