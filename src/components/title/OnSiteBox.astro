@@ -1,6 +1,7 @@
 ---
 // Small numbers about a title on Granthalaya, under the log panel.
 import type { OnSite } from '../../lib/catalog/onsite';
+import Star from '@tabler/icons/filled/star.svg';
 interface Props { site: OnSite; film: boolean }
 const { site, film } = Astro.props;
 ---
@@ -8,7 +9,7 @@ const { site, film } = Astro.props;
   <div class="osb">
     <p class="osb-h">On Granthalaya</p>
     <div class="osb-row num">
-      {site.average != null && <span><b class="avg">★ {site.average.toFixed(1)}</b>{` from ${site.ratings} ratings`}</span>}
+      {site.average != null && <span><b class="avg"><Star class="avg-i" aria-hidden="true" /> {site.average.toFixed(1)}</b>{` from ${site.ratings} ratings`}</span>}
       <span><b>{site.done}</b>{film ? ' watched' : ' read'}</span>
       <span><b>{site.saved}</b>{' saved'}</span>
     </div>
@@ -19,5 +20,6 @@ const { site, film } = Astro.props;
   .osb-h { margin: 0 0 6px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
   .osb-row { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
   .osb-row b { color: var(--ink); font-weight: 600; }
-  .avg { color: var(--haldi) !important; }
+  .osb-row .avg { color: var(--haldi); }
+  .avg :global(.avg-i) { width: 1em; height: 1em; vertical-align: -2px; }
 </style>

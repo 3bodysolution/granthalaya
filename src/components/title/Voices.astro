@@ -1,11 +1,11 @@
 ---
 // What people on Granthalaya wrote about this title (only shelves the visitor may see), and the collections it's in.
 import Face from '../Face.astro';
+import Stars from '../ui/Stars.astro';
 import type { OnSite } from '../../lib/catalog/onsite';
 import { excerpt } from '../../lib/data';
 interface Props { site: OnSite; facts?: { list: string[]; source?: string | null; label: string } }
 const { site, facts } = Astro.props;
-const stars = (r: number | null) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r % 1 >= 0.5 ? '½' : ''));
 ---
 {facts && facts.list.length > 0 && (
   <section class="pad block">
@@ -19,7 +19,7 @@ const stars = (r: number | null) => (r == null ? '' : '★'.repeat(Math.floor(r)
     <div class="voices">
       {site.voices.map((v) => (
         <a href={v.href} class="card voice">
-          <span class="who"><Face name={v.name} src={v.avatar} size={30} /><b>{v.name}</b>{v.rating != null && <span class="vst">{stars(v.rating)}</span>}{v.again && <span class="muted vs">again</span>}</span>
+          <span class="who"><Face name={v.name} src={v.avatar} size={30} /><b>{v.name}</b>{v.rating != null && <span class="vst"><Stars rating={v.rating} /></span>}{v.again && <span class="muted vs">again</span>}</span>
           <span class="vt">{excerpt({ body: v.notes }, 260)}</span>
         </a>
       ))}

@@ -14,10 +14,10 @@ const filled = items.length > 0 || Astro.slots.has('default');
       <h2 class="prow-t" id={id} data-tone={tone}>{title}</h2>
       {href && <a class="prow-all" href={href}>{all} <span aria-hidden="true">→</span></a>}
       <div class="prow-nav" aria-hidden="true">
-        <button type="button" class="prow-btn" data-row="-1" tabindex="-1" disabled>
+        <button type="button" class="prow-btn" data-row="-1" tabindex="-1" aria-label="Scroll back" disabled>
           <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6" /></svg>
         </button>
-        <button type="button" class="prow-btn" data-row="1" tabindex="-1">
+        <button type="button" class="prow-btn" data-row="1" tabindex="-1" aria-label="Scroll forward">
           <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" /></svg>
         </button>
       </div>

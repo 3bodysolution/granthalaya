@@ -1,0 +1,16 @@
+---
+// A rating as small star icons (whole stars, and a half star when it ends in .5). The words are in the label.
+import Star from '@tabler/icons/filled/star.svg';
+import StarHalf from '@tabler/icons/filled/star-half.svg';
+interface Props { rating: number }
+const { rating } = Astro.props;
+const whole = Math.floor(rating);
+---
+<span class="stars" role="img" aria-label={`${rating} out of 5`}>
+  {Array.from({ length: whole }, () => <Star aria-hidden="true" />)}
+  {rating % 1 >= 0.5 && <StarHalf aria-hidden="true" />}
+</span>
+<style>
+  .stars { display: inline-flex; gap: 1px; vertical-align: -2px; }
+  .stars :global(svg) { width: 1em; height: 1em; }
+</style>
