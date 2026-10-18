@@ -3,7 +3,6 @@ import { ClientRouter } from 'astro:transitions';
 import Logo from '../components/Logo.astro';
 import Valley from '../components/Valley.astro';
 import Drawn from '../components/ui/Drawn.astro';
-import Books from '@tabler/icons/outline/books.svg';
 import { site } from '../data/site';
 import { initial } from '../lib/data';
 import '../styles/starwind.css';
@@ -91,7 +90,6 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         </button>
         {me ? (
           <>
-            <a class="shelflink" href={shelfHref} aria-current={onMyShelf ? 'page' : undefined} aria-label="My shelf" title="My shelf"><Books aria-hidden="true" /><span>My shelf</span></a>
             <a href="/add/" class="btn primary addbtn" aria-label="Add a book, film or essay" data-search-open="add"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></a>
             <details class="menu">
               <summary class="avatar" aria-label="Your account">

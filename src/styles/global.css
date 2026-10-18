@@ -67,6 +67,9 @@ p { text-wrap: pretty; }
 .btn[aria-busy="true"], .chip[aria-busy="true"] { opacity: 1; cursor: progress; }
 .iconbtn { width: 44px; height: 44px; border-radius: 22px; border: 1px solid var(--line); background: var(--card); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
 .iconbtn:hover { border-color: var(--lat); color: var(--lat); }
+/* in the top bar, search and the theme switch are plain icons: a soft background only on hover */
+.actions .iconbtn { border-color: transparent; background: transparent; }
+.actions .iconbtn:hover { background: var(--soft); border-color: transparent; color: var(--ink); }
 .chip { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
 .chip:hover { border-color: var(--lat); color: var(--ink); }
 .chip.on { border-color: var(--lat); color: var(--lat); }
@@ -100,13 +103,6 @@ body:has(main > .still:not(.gone)) .menu-list { --card:#1F2227; }
 .nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.5px; background: var(--lat); transform: scaleX(0); transform-origin: left; transition: transform .45s var(--spring); }
 .nav a:hover::after, .nav a[aria-current="page"]::after { transform: scaleX(1); }
 .nav a[aria-current="page"] { color: var(--lat); }
-/* "My shelf" sits with the account controls, plain and normal-case, apart from the uppercase browse links on the left */
-.shelflink { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 12px; border-radius: 20px; font-size: 14px; font-weight: 600; color: var(--ink); transition: background-color .2s ease, color .2s ease, transform .25s var(--spring); }
-.shelflink svg { width: 18px; height: 18px; flex: none; }
-.shelflink:hover { background: var(--soft); color: var(--ink); }
-.shelflink:active { transform: scale(.96); }
-.shelflink[aria-current="page"] { color: var(--lat); background: var(--soft); }
-.nav .nav-shelf { display: none; } /* the phone's bottom bar gets it as a tab */
 .actions { grid-column: -2; display: flex; gap: 8px; align-items: center; justify-self: end; }
 .theme-sun { display: none; }
 html[data-theme="dark"] .theme-sun { display: block; }
@@ -223,8 +219,6 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
   :root { --gut: 36px; }
   .shelf { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .nav { gap: 22px; }
-  .shelflink { width: 40px; padding: 0; justify-content: center; }
-  .shelflink span { display: none; }
   /* the three columns no longer have to be equal, so the browse links never run into the account buttons */
   .site { grid-template-columns: auto 1fr auto; }
   .nav { justify-self: center; }
@@ -236,8 +230,6 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
   .brand span { font-size: 21px; }
   .nav { position: fixed; z-index: 30; left: 12px; right: 12px; bottom: 12px; justify-content: space-around; gap: 0; padding: 6px; border-radius: 22px; background: color-mix(in srgb, var(--card) 88%, transparent); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid var(--line); box-shadow: 0 16px 30px -12px var(--shadow); font-size: 11px; letter-spacing: .08em; }
   .nav a { padding: 12px 10px; }
-  .nav .nav-shelf { display: block; }
-  .shelflink { display: none; }
   .nav a::after { left: 10px; right: 10px; bottom: 6px; }
   .shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; row-gap: 28px; }
   .foot { padding-bottom: 92px; }
