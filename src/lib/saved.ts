@@ -25,3 +25,21 @@ export async function isPlainSave(sb: SupabaseClient, userId: string, logId: str
 
 /** the log to take back when its bookmark is tapped: only for a title that is just saved */
 export const savedId = (m?: { plain: boolean; id: string }) => (m?.plain ? m.id : undefined);
+
+/** which of these logs have nothing on them but a status (any status): no rating, heart, note, place or lines, and no other visit */
+export async function bareOf(sb: SupabaseClient, logs: LogRow[]): Promise<Set<string>> {
+  const visits = new Map<string, number>();
+  for (const l of logs) visits.set(l.title_id, (visits.get(l.title_id) ?? 0) + 1);
+  const maybe = logs.filter((l) => l.rating == null && !l.loved && !l.notes && !l.where_seen && visits.get(l.title_id) === 1);
+  if (!maybe.length) return new Set();
+  const { data } = await sb.from('highlights').select('log_id').in('log_id', maybe.map((l) => l.id));
+  const withLines = new Set((data ?? []).map((h: { log_id: string }) => h.log_id));
+  return new Set(maybe.filter((l) => !withLines.has(l.id)).map((l) => l.id));
+}
+
+export async function isBareEntry(sb: SupabaseClient, userId: string, logId: string): Promise<boolean> {
+  const { data: one } = await sb.from('logs').select('title_id').eq('id', logId).eq('user_id', userId).maybeSingle();
+  if (!one) return false;
+  const { data } = await sb.from('logs').select(LOG_COLS).eq('user_id', userId).eq('title_id', one.title_id);
+  return (await bareOf(sb, (data ?? []) as LogRow[])).has(logId);
+}

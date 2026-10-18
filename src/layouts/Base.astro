@@ -269,6 +269,42 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       }, { once: true }));
     }
     const reload = () => navigate(location.pathname + location.search, { history: 'replace' });
+    // the log panel changes where it stands: the page is not reloaded. The panel is fetched again quietly and its inside swapped,
+    // and while that is going on it takes no second click, so one tap can never make two entries.
+    async function refreshPanel(panel: HTMLElement) {
+      try {
+        const r = await fetch(location.pathname + location.search, { headers: { Accept: 'text/html' }, cache: 'no-store' });
+        const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+        const next = doc.querySelector<HTMLElement>('.logpanel');
+        if (!r.ok || !next) { reload(); return; }
+        const season = panel.querySelector<HTMLSelectElement>('[data-season-pick]')?.value;
+        const spot = Array.from(panel.querySelectorAll('button, a, select')).indexOf(document.activeElement as Element);
+        panel.replaceChildren(...Array.from(next.childNodes));
+        const pick = panel.querySelector<HTMLSelectElement>('[data-season-pick]');
+        if (pick && season) {
+          pick.value = season;
+          panel.querySelectorAll<HTMLElement>('[data-season-panel]').forEach((p) => (p.hidden = p.dataset.seasonPanel !== season));
+        }
+        panel.querySelectorAll<HTMLElement>('.stars-in').forEach((b) => paintStars(b, Number(b.dataset.rating || 0)));
+        if (spot >= 0) (panel.querySelectorAll<HTMLElement>('button, a, select')[spot])?.focus({ preventScroll: true });
+        // the small numbers under the panel
+        const osb = panel.parentElement?.querySelector('.osb'), fresh = doc.querySelector('.osb');
+        if (osb && fresh) osb.replaceWith(document.importNode(fresh, true));
+        else if (osb) osb.remove();
+        else if (fresh) panel.after(document.importNode(fresh, true));
+      } catch { reload(); }
+    }
+    async function inPanel(panel: HTMLElement, work: () => Promise<{ msg: string; mark?: boolean } | null>) {
+      if (panel.dataset.working) return;
+      panel.dataset.working = '1';
+      try {
+        const done = await work();
+        await refreshPanel(panel);
+        if (done) toast(done.msg, { mark: done.mark });
+      } finally { delete panel.dataset.working; }
+    }
+    // show a status button as chosen straight away; the swap that follows confirms it
+    const choose = (b: HTMLElement) => b.parentElement?.querySelectorAll<HTMLElement>(':scope > [aria-pressed]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     document.addEventListener('click', async (ev) => {
       const el = ev.target as Element;
       // a filled bookmark that's only a save: tapping it takes the save back (the server refuses if there's more on it)
@@ -291,13 +327,36 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const st = el.closest<HTMLButtonElement>('[data-set-status]');
       if (st) {
         const v = JSON.parse(st.dataset.setStatus!);
-        if (st.getAttribute('aria-pressed') === 'true') return;
-        busy(st, true);
-        if (await send('/api/log', 'PATCH', v)) reload(); else busy(st, false);
+        const panel = st.closest<HTMLElement>('.logpanel');
+        if (panel?.dataset.working) return;
+        if (st.getAttribute('aria-pressed') === 'true') {
+          // tapped again: the status comes off. An entry with nothing else on it goes at once; one with a rating or notes asks first
+          const bare = st.dataset.bare === '1';
+          if (!bare && !(await ask('Take it off your shelf?', 'Your rating, notes and lines on it will go too.', 'Remove'))) return;
+          const away = async () => {
+            const r = await send('/api/log', 'DELETE', { id: v.id, onlyBare: bare });
+            if (!r) return null;
+            if (st.dataset.unsaveGo) { later({ msg: 'Removed from your shelf', redo: bare ? st.dataset.redo : undefined }); navigate(st.dataset.unsaveGo); return null; } // this page is gone
+            return { msg: 'Removed from your shelf', mark: true };
+          };
+          if (panel) await inPanel(panel, away); else await away();
+          return;
+        }
+        const was = st.parentElement?.querySelector<HTMLElement>(':scope > [aria-pressed="true"]');
+        choose(st);
+        if (panel) await inPanel(panel, async () => { await send('/api/log', 'PATCH', v); return null; });
+        else if (!(await send('/api/log', 'PATCH', v))) { if (was) choose(was); else st.setAttribute('aria-pressed', 'false'); }
         return;
       }
       // Save (want to read / watch): the bookmark fills in, with a way to take it back
       const qa = el.closest<HTMLButtonElement>('[data-quick-add]');
+      if (qa && qa.closest('.logpanel')) {
+        const panel = qa.closest<HTMLElement>('.logpanel')!;
+        if (qa.getAttribute('aria-pressed') === 'true') return;
+        choose(qa);
+        await inPanel(panel, async () => ((await send('/api/log', 'POST', JSON.parse(qa.dataset.quickAdd!))) ? { msg: 'Saved to your shelf', mark: true } : null));
+        return;
+      }
       if (qa) {
         if (qa.classList.contains('is-saved')) return;
         const label = qa.querySelector<HTMLElement>('[data-label]');
@@ -369,13 +428,23 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         const src = JSON.parse(box.dataset.rateSrc!);
         if (!v && !src.id) return;
         if (src.id && v === Number(box.dataset.rating)) return;
+        const panel = box.closest<HTMLElement>('.logpanel');
+        if (panel?.dataset.working) return;
         box.dataset.rating = String(v); paintStars(box, v);
-        const r = src.id ? await send('/api/log', 'PATCH', { id: src.id, rating: v || null }) : await send('/api/log', 'POST', { ...src, status: 'done', rating: v });
-        if (r) reload();
+        const save = async () => (src.id ? await send('/api/log', 'PATCH', { id: src.id, rating: v || null }) : await send('/api/log', 'POST', { ...src, status: 'done', rating: v }));
+        if (panel) await inPanel(panel, async () => { await save(); return null; });
+        else if (await save()) reload();
         return;
       }
       const lognew = el.closest<HTMLButtonElement>('[data-log-new]');
       if (lognew) {
+        const panel = lognew.closest<HTMLElement>('.logpanel');
+        if (panel) {
+          if (panel.dataset.working) return;
+          choose(lognew);
+          await inPanel(panel, async () => { await send('/api/log', 'POST', JSON.parse(lognew.dataset.logNew!)); return null; });
+          return;
+        }
         busy(lognew, true);
         if (await send('/api/log', 'POST', JSON.parse(lognew.dataset.logNew!))) reload(); else busy(lognew, false);
         return;

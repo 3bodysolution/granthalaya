@@ -6,7 +6,7 @@ import { filmHref, showHref } from './tmdb';
 import { bookHref } from './books';
 import { adminClient, env } from '../supabase';
 import { base, getJSON, slug as slugOf } from './fetch';
-import { plainOf, LOG_COLS, type LogRow } from '../saved';
+import { plainOf, bareOf, LOG_COLS, type LogRow } from '../saved';
 
 export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string;
   /** only loaded by rowBySlug */ source?: string | null; original_title?: string | null; language?: string | null; note?: string | null }
@@ -53,7 +53,7 @@ export interface OnSite {
   done: number; saved: number; average: number | null; ratings: number;
   voices: Voice[];
   collections: { name: string; href: string; by: string; count: number }[];
-  mine: { id: string; status: string; rating: number | null; titleId: string; slug: string; season: number | null; logged: string; again: boolean; plain: boolean }[];
+  mine: { id: string; status: string; rating: number | null; titleId: string; slug: string; season: number | null; logged: string; again: boolean; plain: boolean; bare: boolean }[];
 }
 /** counts, people's notes and collections for one or more catalogue rows (a TV show has one per season) */
 export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: string } | null): Promise<OnSite> {
@@ -88,11 +88,12 @@ export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: str
   })).filter((c) => (colSeen.has(c.href) ? false : (colSeen.add(c.href), true))).slice(0, 6);
   const mineRows = (mine.data ?? []) as any[];
   const plain = await plainOf(sb, mineRows as LogRow[]);
+  const bare = await bareOf(sb, mineRows as LogRow[]);
   return {
     done: done.count ?? 0, saved: saved.count ?? 0, ratings: rs.length,
     average: rs.length >= 2 ? Math.round((rs.reduce((a, b) => a + b, 0) / rs.length) * 10) / 10 : null,
     voices: oneEach, collections,
-    mine: mineRows.map((l) => ({ plain: plain.has(l.id), id: l.id, status: l.status, rating: l.rating == null ? null : Number(l.rating), titleId: l.title_id, slug: byId.get(l.title_id)?.slug ?? '', season: byId.get(l.title_id)?.season ?? null, logged: l.logged_on, again: l.again })),
+    mine: mineRows.map((l) => ({ plain: plain.has(l.id), bare: bare.has(l.id), id: l.id, status: l.status, rating: l.rating == null ? null : Number(l.rating), titleId: l.title_id, slug: byId.get(l.title_id)?.slug ?? '', season: byId.get(l.title_id)?.season ?? null, logged: l.logged_on, again: l.again })),
   };
 }
 

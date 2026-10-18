@@ -50,7 +50,7 @@ const film = kind !== 'book';
                 const I = ICON[k];
                 const on = m?.status === k;
                 const attrs = m
-                  ? { 'data-set-status': JSON.stringify({ id: m.id, status: k }), ...(k === 'want' && on && m.plain ? { 'data-unsave': m.id } : {}) }
+                  ? { 'data-set-status': JSON.stringify({ id: m.id, status: k }), 'data-bare': m.bare ? '1' : '0' }
                   : k === 'want' ? { 'data-quick-add': JSON.stringify({ ...src, status: 'want' }), 'data-saved-label': 'Saved' } : { 'data-log-new': JSON.stringify({ ...src, status: k }) };
                 return <button class="tg" type="button" aria-pressed={on ? 'true' : 'false'} {...attrs}>{I ? <I aria-hidden="true" /> : <Mark size={24} />}<span data-label>{label}</span></button>;
               })}
@@ -106,9 +106,9 @@ const film = kind !== 'book';
   .st .fg { fill: var(--haldi); clip-path: inset(0 100% 0 0); transition: clip-path .15s ease; }
   .st:global(.half) .fg { clip-path: inset(0 50% 0 0); }
   .st:global(.full) .fg { clip-path: inset(0); }
-  .half { position: absolute; top: 0; bottom: 0; width: 50%; padding: 0; border: 0; background: transparent; cursor: pointer; }
-  .half.l { left: 0; } .half.r { right: 0; }
-  .half:focus-visible { outline-offset: 0; }
+  .st button.half { position: absolute; top: 0; bottom: 0; width: 50%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .st button.half.l { left: 0; } .st button.half.r { right: 0; }
+  .st button.half:focus-visible { outline-offset: 0; }
   .lp-clear { margin-left: auto; width: 28px; height: 28px; border-radius: 50%; border: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer; }
   .lp-clear:hover { background: var(--soft); color: var(--ink); }
   .lp-row { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 12px 16px; font: inherit; font-size: 14px; color: var(--ink); border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; cursor: pointer; transition: background-color .2s ease; }
