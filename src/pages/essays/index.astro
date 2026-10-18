@@ -1,9 +1,10 @@
 ---
 // Essays chosen by Granthalaya. Each one links to the original; nothing is copied here.
-// Front page: one sideways row per theme. A row's "See all" opens that theme as a grid (/essays/?theme=fiction).
+// Front page: one sideways row per theme. Pick a theme in the filter bar and it becomes a grid of that theme.
 import Base from '../../layouts/Base.astro';
 import PosterRow from '../../components/title/PosterRow.astro';
 import EssayCard from '../../components/title/EssayCard.astro';
+import Filters from '../../components/title/Filters.astro';
 import { themes, allEssays, total, source } from '../../lib/essays';
 import { essayMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
@@ -13,6 +14,7 @@ const picked = themes.find((t) => t.slug === pick);
 // which of these are already on your shelf: one lookup for the whole page
 const sb = Astro.locals.supabase;
 const marks = await essayMarks(sb, Astro.locals.me, (picked ? picked.items : allEssays).map((e) => e.link)).catch(() => new Map());
+const fields = [{ name: 'theme', label: 'Theme', value: picked?.slug ?? '', options: [['', 'All themes'], ...themes.map((t) => [t.slug, t.label])] as [string, string][] }];
 const heading = !picked ? 'Essays' : picked.name === 'Picks' ? 'Picks' : `Essays ${picked.label.replace('On ', 'on ')}`;
 const hasPicks = !picked || picked.name === 'Picks';
 ---
@@ -20,7 +22,7 @@ const hasPicks = !picked || picked.name === 'Picks';
   <section class="pad head">
     <h1 class="title">{heading}</h1>
     <p class="muted lede">{picked ? `${picked.items.length} essays` : `${total} essays`} worth an afternoon, chosen by us. Each opens at its original home.</p>
-    {picked && <a class="back" href="/essays/">← All essays</a>}
+    <Filters fields={fields} />
   </section>
   {picked ? (
     <section class="pad">
@@ -42,8 +44,6 @@ const hasPicks = !picked || picked.name === 'Picks';
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
   .lede { margin: 0; max-width: 56ch; font-size: 16px; }
-  .back { font-size: 13px; font-weight: 600; color: var(--muted); transition: color .2s ease; }
-  .back:hover { color: var(--lat); }
   .rows { display: flex; flex-direction: column; gap: 48px; padding-bottom: 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
   .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }
