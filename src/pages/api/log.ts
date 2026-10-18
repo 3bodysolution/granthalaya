@@ -4,6 +4,7 @@ import { json, oops, body, str, isoDate, needMe, sameOrigin } from '../../lib/ht
 import { dbMessage } from '../../lib/supabase';
 import { cleanHit, titleFor } from '../../lib/titles';
 import { statusFits, type Kind, type Status } from '../../lib/kinds';
+import { isPlainSave } from '../../lib/saved';
 export const prerender = false;
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -134,6 +135,8 @@ export const DELETE: APIRoute = async (ctx) => {
   if (res) return res;
   const b = await body<Record<string, any>>(ctx.request);
   if (!b || typeof b.id !== 'string') return oops('Nothing to remove.');
+  // a bookmark tap takes back a plain save only; anything with more on it stays
+  if (b.onlySaved === true && !(await isPlainSave(ctx.locals.supabase, me.id, b.id))) return oops('That has more than a save on it, so it stays on your shelf.', 409);
   const { error, count } = await ctx.locals.supabase.from('logs').delete({ count: 'exact' }).eq('id', b.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
   if (!count) return oops('Couldn’t find that entry.', 404);

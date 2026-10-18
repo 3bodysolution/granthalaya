@@ -12,6 +12,7 @@ import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog
 import ListGrid from '../../components/title/ListGrid.astro';
 import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists } from '../../lib/lists';
 import { myMarks } from '../../lib/catalog/onsite';
+import { savedId } from '../../lib/saved';
 export const prerender = false;
 
 const SUBJECTS: [string, string][] = [
@@ -106,7 +107,7 @@ const fields = [
       </div>
     ) : (
       <div class="grid">
-        {list.items.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
+        {list.items.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
       </div>
     )}
     <Pager page={page} pages={list.pages} />

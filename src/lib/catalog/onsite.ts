@@ -6,6 +6,7 @@ import { filmHref, showHref } from './tmdb';
 import { bookHref } from './books';
 import { adminClient, env } from '../supabase';
 import { base, getJSON, slug as slugOf } from './fetch';
+import { plainOf, LOG_COLS, type LogRow } from '../saved';
 
 export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string;
   /** only loaded by rowBySlug */ source?: string | null; original_title?: string | null; language?: string | null; note?: string | null }
@@ -52,7 +53,7 @@ export interface OnSite {
   done: number; saved: number; average: number | null; ratings: number;
   voices: Voice[];
   collections: { name: string; href: string; by: string; count: number }[];
-  mine: { id: string; status: string; rating: number | null; titleId: string; slug: string; season: number | null; logged: string; again: boolean }[];
+  mine: { id: string; status: string; rating: number | null; titleId: string; slug: string; season: number | null; logged: string; again: boolean; plain: boolean }[];
 }
 /** counts, people's notes and collections for one or more catalogue rows (a TV show has one per season) */
 export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: string } | null): Promise<OnSite> {
@@ -67,7 +68,7 @@ export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: str
     sb.from('logs').select('id, title_id, status, rating, loved, notes, logged_on, again, user_id, profile:profiles(username, display_name, avatar_url)')
       .in('title_id', ids).neq('notes', '').order('logged_on', { ascending: false }).limit(12),
     sb.from('thread_items').select('title_id, thread:threads(name, slug, user_id, thread_items(count), profile:profiles(username, display_name))').in('title_id', ids).limit(20),
-    me ? sb.from('logs').select('id, status, rating, title_id, logged_on, again').eq('user_id', me.id).in('title_id', ids).order('logged_on', { ascending: false }).order('created_at', { ascending: false }) : Promise.resolve({ data: [] as any[] }),
+    me ? sb.from('logs').select(`${LOG_COLS}, logged_on, again`).eq('user_id', me.id).in('title_id', ids).order('logged_on', { ascending: false }).order('created_at', { ascending: false }) : Promise.resolve({ data: [] as any[] }),
   ]);
   const rs = ((rated.data ?? []) as { rating: number }[]).map((r) => Number(r.rating));
   const voices: Voice[] = ((notes.data ?? []) as any[]).filter((l) => l.profile && l.user_id !== me?.id).map((l) => {
@@ -85,17 +86,33 @@ export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: str
   const collections = ((cols.data ?? []) as any[]).map((c) => c.thread).filter((t) => t?.profile).map((t) => ({
     name: t.name, href: `/@${t.profile.username}/collections/${t.slug}/`, by: t.profile.display_name || t.profile.username, count: t.thread_items?.[0]?.count ?? 0,
   })).filter((c) => (colSeen.has(c.href) ? false : (colSeen.add(c.href), true))).slice(0, 6);
+  const mineRows = (mine.data ?? []) as any[];
+  const plain = await plainOf(sb, mineRows as LogRow[]);
   return {
     done: done.count ?? 0, saved: saved.count ?? 0, ratings: rs.length,
     average: rs.length >= 2 ? Math.round((rs.reduce((a, b) => a + b, 0) / rs.length) * 10) / 10 : null,
     voices: oneEach, collections,
-    mine: ((mine.data ?? []) as any[]).map((l) => ({ id: l.id, status: l.status, rating: l.rating == null ? null : Number(l.rating), titleId: l.title_id, slug: byId.get(l.title_id)?.slug ?? '', season: byId.get(l.title_id)?.season ?? null, logged: l.logged_on, again: l.again })),
+    mine: mineRows.map((l) => ({ plain: plain.has(l.id), id: l.id, status: l.status, rating: l.rating == null ? null : Number(l.rating), titleId: l.title_id, slug: byId.get(l.title_id)?.slug ?? '', season: byId.get(l.title_id)?.season ?? null, logged: l.logged_on, again: l.again })),
   };
 }
 
-/** your status for each title in a list, keyed "film:370755", "tv:1396" or "book:OL45883W" */
-export async function myMarks(sb: SupabaseClient, me: { id: string } | null, keys: { kind: string; tmdb?: number; ol?: string }[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
+/** what the visitor has on their shelf for one title: its newest status, the log, and whether it's only a save (see lib/saved.ts) */
+export interface Mark { status: string; id: string; plain: boolean }
+
+/** your newest log for each of these titles, in one lookup: { title id → Mark } */
+async function shelfMarks(sb: SupabaseClient, me: { id: string }, titleIds: string[]): Promise<Map<string, Mark>> {
+  const out = new Map<string, Mark>();
+  if (!titleIds.length) return out;
+  const { data } = await sb.from('logs').select(`${LOG_COLS}, logged_on`).eq('user_id', me.id).in('title_id', titleIds).order('logged_on', { ascending: true });
+  const logs = (data ?? []) as (LogRow & { logged_on: string })[];
+  const plain = await plainOf(sb, logs);
+  for (const l of logs) out.set(l.title_id, { status: l.status, id: l.id, plain: plain.has(l.id) }); // the newest wins
+  return out;
+}
+
+/** your mark for each title in a list, keyed "film:370755", "tv:1396" or "book:OL45883W" */
+export async function myMarks(sb: SupabaseClient, me: { id: string } | null, keys: { kind: string; tmdb?: number; ol?: string }[]): Promise<Map<string, Mark>> {
+  const out = new Map<string, Mark>();
   if (!me || !keys.length) return out;
   const tmdb = [...new Set(keys.filter((k) => k.tmdb).map((k) => k.tmdb!))];
   const ol = [...new Set(keys.filter((k) => k.ol).map((k) => k.ol!))];
@@ -103,25 +120,22 @@ export async function myMarks(sb: SupabaseClient, me: { id: string } | null, key
   if (!ors) return out;
   const { data: titles } = await sb.from('titles').select('id, kind, tmdb_id, ol_key').or(ors);
   const byId = new Map((titles ?? []).map((t: any) => [t.id, t]));
-  if (!byId.size) return out;
-  const { data: logs } = await sb.from('logs').select('title_id, status, logged_on').eq('user_id', me.id).in('title_id', [...byId.keys()]).order('logged_on', { ascending: true });
-  for (const l of (logs ?? []) as any[]) {
-    const t = byId.get(l.title_id);
-    const key = t.kind === 'book' ? `book:${t.ol_key}` : `${t.kind}:${t.tmdb_id}`;
-    out.set(key, l.status); // the newest wins
+  const marks = await shelfMarks(sb, me, [...byId.keys()]);
+  for (const [id, m] of marks) {
+    const t = byId.get(id)!;
+    out.set(t.kind === 'book' ? `book:${t.ol_key}` : `${t.kind}:${t.tmdb_id}`, m);
   }
   return out;
 }
 
-/** essays on the visitor's shelf, by link, in two lookups for the whole page: { link → status } */
-export async function essayMarks(sb: SupabaseClient, me: { id: string } | null, links: string[]): Promise<Map<string, string>> {
-  const out = new Map<string, string>();
+/** essays on the visitor's shelf, by link: { link → Mark } */
+export async function essayMarks(sb: SupabaseClient, me: { id: string } | null, links: string[]): Promise<Map<string, Mark>> {
+  const out = new Map<string, Mark>();
   if (!me || !links.length) return out;
   const { data: titles } = await sb.from('titles').select('id, link').eq('kind', 'essay').in('link', links);
   const byId = new Map((titles ?? []).map((t: any) => [t.id, t.link as string]));
-  if (!byId.size) return out;
-  const { data: logs } = await sb.from('logs').select('title_id, status').eq('user_id', me.id).in('title_id', [...byId.keys()]).order('logged_on', { ascending: true });
-  for (const l of (logs ?? []) as any[]) out.set(byId.get(l.title_id)!, l.status); // the newest wins
+  const marks = await shelfMarks(sb, me, [...byId.keys()]);
+  for (const [id, m] of marks) out.set(byId.get(id)!, m);
   return out;
 }
 

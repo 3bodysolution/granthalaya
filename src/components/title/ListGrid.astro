@@ -9,14 +9,14 @@ const { list, decade } = Astro.props;
 const shown = list.items.filter((i) => !decade || (i.year >= decade && i.year < decade + 10));
 const tiles = shown.map((i) => listTile(list, i));
 const [marked] = await markRows(Astro.locals.supabase, Astro.locals.me, [{ title: list.title, items: tiles.filter((t) => t.href) }]);
-const status = new Map(marked.items.map((t) => [t.href, t.status]));
+const status = new Map(marked.items.map((t) => [t.href, t]));
 ---
 {shown.length === 0 ? <p class="muted none">Nothing from that decade in this list.</p> : (
   <div class="lg">
     {tiles.map((t, n) => (
       <div class="cell">
         {shown[n].year ? <span class="yr">{shown[n].circa ? 'c. ' : ''}{shown[n].year}</span> : null}
-        <PosterTile {...t} year={undefined} sub={[t.sub, shown[n].note].filter(Boolean).join(' · ') || undefined} status={status.get(t.href)} />
+        <PosterTile {...t} year={undefined} sub={[t.sub, shown[n].note].filter(Boolean).join(' · ') || undefined} status={status.get(t.href)?.status} logId={status.get(t.href)?.logId} />
       </div>
     ))}
   </div>

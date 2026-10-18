@@ -212,12 +212,15 @@ const avatar = me?.avatar_url;
       setTimeout(close, opts.action ? 5000 : 3200);
     }
     // a message to show once the page has reloaded (with Undo for something just saved)
-    function later(note: { msg: string; undo?: string }) { try { sessionStorage.setItem('toastNext', JSON.stringify(note)); } catch (e) {} }
+    function later(note: { msg: string; undo?: string; redo?: string }) { try { sessionStorage.setItem('toastNext', JSON.stringify(note)); } catch (e) {} }
     document.addEventListener('astro:page-load', () => {
-      let note: { msg: string; undo?: string } | null = null;
+      let note: { msg: string; undo?: string; redo?: string } | null = null;
       try { note = JSON.parse(sessionStorage.getItem('toastNext') || 'null'); sessionStorage.removeItem('toastNext'); } catch (e) {}
       if (!note) return;
-      toast(note.msg, { mark: true, action: note.undo ? { label: 'Undo', run: async () => { if (await send('/api/log', 'DELETE', { id: note!.undo })) reload(); } } : undefined });
+      // Undo of a save deletes it again; Undo of a removal puts the save back
+      const redo = note.redo;
+      toast(note.msg, { mark: true, action: note.undo ? { label: 'Undo', run: async () => { if (await send('/api/log', 'DELETE', { id: note!.undo })) reload(); } }
+        : redo ? { label: 'Undo', run: async () => { const r = await send('/api/log', 'POST', JSON.parse(redo)); if (r) navigate(r.href); } } : undefined });
     });
     // a button that's waiting: its icon becomes the Ink loader
     function busy(b: HTMLElement, on: boolean) {
@@ -263,6 +266,23 @@ const avatar = me?.avatar_url;
     const reload = () => navigate(location.pathname + location.search, { history: 'replace' });
     document.addEventListener('click', async (ev) => {
       const el = ev.target as Element;
+      // a filled bookmark that's only a save: tapping it takes the save back (the server refuses if there's more on it)
+      const un = el.closest<HTMLButtonElement>('[data-unsave]');
+      if (un && (un.classList.contains('is-saved') || un.getAttribute('aria-pressed') === 'true')) {
+        un.disabled = true;
+        const r = await send('/api/log', 'DELETE', { id: un.dataset.unsave, onlySaved: true });
+        un.disabled = false;
+        if (!r) return;
+        if (un.dataset.unsaveGo) { later({ msg: 'Removed from your shelf', redo: un.dataset.redo }); navigate(un.dataset.unsaveGo); return; } // this page is gone, so keep an Undo
+        if (un.closest('.logpanel')) { later({ msg: 'Removed from your shelf' }); reload(); return; }
+        if (!un.dataset.quickAdd) { un.remove(); toast('Removed from your shelf', { mark: true }); return; }
+        un.classList.remove('is-saved'); delete un.dataset.unsave;
+        const lab = un.querySelector<HTMLElement>('[data-label]');
+        if (lab && un.dataset.before) lab.textContent = un.dataset.before;
+        un.title = 'Save to your shelf';
+        toast('Removed from your shelf', { mark: true });
+        return;
+      }
       const st = el.closest<HTMLButtonElement>('[data-set-status]');
       if (st) {
         const v = JSON.parse(st.dataset.setStatus!);
@@ -281,10 +301,12 @@ const avatar = me?.avatar_url;
         const r = await send('/api/log', 'POST', JSON.parse(qa.dataset.quickAdd!));
         if (!r) { qa.classList.remove('is-saved'); qa.disabled = false; return; }
         if (label) label.textContent = qa.dataset.savedLabel || 'Saved';
+        // the filled bookmark now takes the save back when tapped
+        qa.dataset.unsave = r.id; qa.dataset.before = before; qa.title = 'Saved. Tap to remove'; qa.disabled = false;
         // in a log panel the rest of the panel changes too, so reload it and say so afterwards
         if (qa.closest('.logpanel')) { later({ msg: 'Saved to your shelf', undo: r.id }); reload(); return; }
         toast('Saved to your shelf', { mark: true, action: { label: 'Undo', run: async () => {
-          if (await send('/api/log', 'DELETE', { id: r.id })) { qa.classList.remove('is-saved'); qa.disabled = false; if (label) label.textContent = before; }
+          if (await send('/api/log', 'DELETE', { id: r.id })) { qa.classList.remove('is-saved'); delete qa.dataset.unsave; qa.disabled = false; if (label) label.textContent = before; qa.title = 'Save to your shelf'; }
         } } });
         return;
       }

@@ -6,6 +6,7 @@ import PosterTile from '../../components/title/PosterTile.astro';
 import { author, authorKey, authorHref } from '../../lib/catalog/books';
 import { slug } from '../../lib/catalog/fetch';
 import { myMarks } from '../../lib/catalog/onsite';
+import { savedId } from '../../lib/saved';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -42,7 +43,7 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
     <div class="rule"><h2 class="eyebrow">Books <span class="num">{a.books.length}</span></h2></div>
     {a.books.length === 0 ? <p class="muted">No books listed yet.</p> : (
       <div class="grid">
-        {a.books.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" status={marks.get(`book:${b.key}`)} save={{ kind: 'book', olKey: b.key, title: b.title, creator: a.name, year: b.year, cover: b.cover }} />)}
+        {a.books.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: a.name, year: b.year, cover: b.cover }} />)}
       </div>
     )}
   </section>

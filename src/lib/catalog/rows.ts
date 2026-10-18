@@ -4,12 +4,15 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks } from './onsite';
+import { savedId } from '../saved';
 import { getList, listTile, listBrowseHref, type CatalogList } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
 export interface RowItem {
   href: string; title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
   status?: string; save?: Record<string, unknown>;
+  /** set when it's only saved: tapping the filled bookmark takes the save back */
+  logId?: string;
   /** no page of our own: the tile opens the site search with this filled in */
   search?: string;
 }
@@ -135,7 +138,8 @@ export async function markRows(sb: SupabaseClient | null | undefined, me: { id: 
     ...r,
     items: r.items.map((i) => {
       const k = i.kind === 'book' ? `book:${(i.save as any)?.olKey}` : `${i.kind}:${i.href.match(/\/(\d+)-/)?.[1]}`;
-      return marks.has(k) ? { ...i, status: marks.get(k) } : i;
+      const m = marks.get(k);
+      return m ? { ...i, status: m.status, logId: savedId(m) } : i;
     }),
   }));
 }

@@ -8,8 +8,10 @@ import { statusLabel, type Kind, type Status } from '../../lib/kinds';
 interface Props {
   href: string; // empty for a title with no page title: string; year?: number; poster?: string; kind: 'film' | 'tv' | 'book'; sub?: string;
   status?: string; save?: Record<string, unknown>; search?: string;
+  /** the log behind a plain save: its filled bookmark takes the save back */
+  logId?: string;
 }
-const { href, title, year, poster, kind, sub, status, save, search } = Astro.props;
+const { href, title, year, poster, kind, sub, status, save, search, logId } = Astro.props;
 const me = Astro.locals.me;
 const p = paletteFor(title);
 // list items we couldn't match have no page of their own: the tile opens the search with the title in it
@@ -25,7 +27,9 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
     <span class="pt-t">{title}</span>
     <span class="pt-s">{[year, sub].filter(Boolean).join(' · ')}</span>
   </Link>
-  {status ? (
+  {me && logId && status === 'want' ? (
+    <button type="button" class="pt-save is-saved" data-unsave={logId} data-quick-add={save ? JSON.stringify({ hit: save, status: 'want' }) : undefined} aria-label={`Saved: ${title}. Tap to remove`} title="Saved. Tap to remove"><Mark size={16} /></button>
+  ) : status ? (
     <StatusIcon status={(status === 'done' ? 'done' : status) as any} label={statusLabel(kind as Kind, status as Status)} class="pt-badge" />
   ) : me && save ? (
     <button type="button" class="pt-save" data-quick-add={JSON.stringify({ hit: save, status: 'want' })} aria-label={`Save ${title}`} title="Save to your shelf"><Mark size={16} /></button>

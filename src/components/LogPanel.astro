@@ -50,7 +50,7 @@ const film = kind !== 'book';
                 const I = ICON[k];
                 const on = m?.status === k;
                 const attrs = m
-                  ? { 'data-set-status': JSON.stringify({ id: m.id, status: k }) }
+                  ? { 'data-set-status': JSON.stringify({ id: m.id, status: k }), ...(k === 'want' && on && m.plain ? { 'data-unsave': m.id } : {}) }
                   : k === 'want' ? { 'data-quick-add': JSON.stringify({ ...src, status: 'want' }), 'data-saved-label': 'Saved' } : { 'data-log-new': JSON.stringify({ ...src, status: k }) };
                 return <button class="tg" type="button" aria-pressed={on ? 'true' : 'false'} {...attrs}>{I ? <I aria-hidden="true" /> : <Mark size={24} />}<span data-label>{label}</span></button>;
               })}

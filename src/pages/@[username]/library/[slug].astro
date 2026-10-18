@@ -25,6 +25,7 @@ import {
 } from '../../../lib/data';
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
 import { titlePageHref } from '../../../lib/catalog/onsite';
+import { isPlainSave } from '../../../lib/saved';
 import Stack from '@tabler/icons/outline/stack-2.svg';
 export const prerender = false;
 
@@ -69,6 +70,9 @@ const aboutLabel = d.type === 'tv' ? 'About the show' : isFilm ? 'About the film
 const s = stars(entry);
 const mins = minutes(entry);
 const done = d.status === 'done';
+// a plain save can be taken back with the same tap that made it; the page is gone afterwards, so the message keeps an Undo
+const unsave = isMe && me && d.status === 'want' && await isPlainSave(sb, me.id, entry.logId!)
+  ? { 'data-unsave': entry.logId, 'data-unsave-go': `/@${profile.username}/library/`, 'data-redo': JSON.stringify({ title: entry.titleId, status: 'want' }) } : {};
 const nav = inCols[0];
 const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : undefined;
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
@@ -178,7 +182,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <div class="toggles" role="group" aria-label="Status">
                 {STATUSES[d.type].map(([k, label]) => {
                   const I = ICON[k];
-                  return <button class="tg" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })}>{I ? <I aria-hidden="true" /> : <Mark size={24} />}<span>{label}</span></button>;
+                  return <button class="tg" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })} {...(k === 'want' ? unsave : {})}>{I ? <I aria-hidden="true" /> : <Mark size={24} />}<span>{label}</span></button>;
                 })}
               </div>
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Calendar /><span>{dateRow}</span></a>
@@ -272,7 +276,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
       <div class="rise d4 inline">
         {isMe ? (
           <>
-            {STATUSES.essay.map(([k, label]) => <button class="chip" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })}>{label}</button>)}
+            {STATUSES.essay.map(([k, label]) => <button class="chip" type="button" aria-pressed={k === d.status ? 'true' : 'false'} data-set-status={JSON.stringify({ id: entry.logId, status: k })} {...(k === 'want' ? unsave : {})}>{label}</button>)}
             <a class="chip" href={`/add/?log=${entry.logId}`}>Edit</a>
             <button class="chip" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}>Add to a collection</button>
           </>
