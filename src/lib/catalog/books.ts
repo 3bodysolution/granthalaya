@@ -192,6 +192,19 @@ const SHELF_CATEGORY: Record<string, string> = {
   'historical-fiction': 'fiction, historical, general', 'short-stories': 'fiction, short stories (single author)',
   humor: 'fiction, humorous, general', 'graphic-novels': 'comics & graphic novels, general',
 };
+/* Factual subjects have no second tag to ask for, so they are kept honest the other way round: a book tagged with a neighbouring
+   subject as well (a self-help book is not Philosophy, a biography is not History, the Bible is not History) is left out. */
+const NEIGHBOURS: Record<string, string[]> = {
+  history: ['biography', 'self_help', 'self-help', 'self-help_techniques', 'religion', 'business', 'philosophy', 'juvenile_literature'],
+  biography: ['self_help', 'self-help', 'self-help_techniques', 'religion', 'business', 'history', 'juvenile_literature'],
+  autobiography: ['self_help', 'self-help', 'self-help_techniques', 'religion', 'business', 'juvenile_literature'],
+  philosophy: ['self_help', 'self-help', 'self-help_techniques', 'business', 'biography', 'religion', 'juvenile_literature'],
+  psychology: ['self_help', 'self-help', 'self-help_techniques', 'business', 'biography', 'religion'],
+  science: ['self_help', 'self-help', 'self-help_techniques', 'religion', 'biography', 'philosophy', 'juvenile_literature'],
+  politics: ['self_help', 'self-help', 'self-help_techniques', 'biography', 'religion', 'juvenile_literature'],
+  religion: ['self_help', 'self-help', 'self-help_techniques', 'biography', 'business', 'history'],
+  travel: ['romance', 'juvenile_fiction', 'self_help', 'self-help', 'self-help_techniques'],
+};
 const INDIAN = new Set(['mar', 'hin', 'ben', 'tam', 'tel', 'mal', 'kan', 'guj', 'pan', 'urd', 'ori', 'asm', 'san']);
 const ENGLISH_LIT = ['English fiction', 'American fiction', 'English literature', 'American literature', 'English drama', 'English poetry'];
 
@@ -203,6 +216,7 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
     const key = subject.replace(/-/g, '_');
     parts.push(subject.includes('-') ? `(subject_key:${key} OR subject_key:${subject})` : `subject_key:${key}`);
     if (NON_FICTION.has(subject)) parts.push('-subject_key:fiction');
+    if (NEIGHBOURS[subject] && !f.language) parts.push(NEIGHBOURS[subject].map((k) => `-subject_key:${k}`).join(' '));
     if (SHELF_CATEGORY[subject] && !f.language) parts.push(`subject:"${SHELF_CATEGORY[subject]}"`);
   }
   if (code) {

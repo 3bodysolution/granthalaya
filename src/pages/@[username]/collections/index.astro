@@ -15,7 +15,7 @@ const [entries, collections] = await Promise.all([loadShelf(sb, profile), loadCo
 const name = profile.display_name || profile.username;
 ---
 <Base title={isMe ? 'Your collections' : `${name}’s collections`} shelf={profile.username} description={`Hand-picked paths through ${name}’s library.`}>
-  <div class="art melt settle banner bleed" style="--day: url(/art/threads-day.webp); --night: url(/art/threads-night.webp)" aria-hidden="true"></div>
+  <div class="art melt under-header settle banner bleed" style="--day: url(/art/threads-day.webp); --night: url(/art/threads-night.webp)" aria-hidden="true"></div>
   <section class="pad head rise">
     <h1 class="title">Collections</h1>
     <p class="lede">Books and films that go well together, in the order {isMe ? 'I’d' : 'they’d'} take them.</p>
