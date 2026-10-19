@@ -83,6 +83,20 @@ const lifeDate = (v: unknown) => (typeof v === 'string' && /\d{3,4}/.test(v) ? v
 const SEARCH_FIELDS = 'key,title,subtitle,author_name,author_key,first_publish_year,number_of_pages_median,language,subject,cover_i,edition_count,ebook_access,publisher,isbn';
 const ol = (path: string) => base.ol() + path;
 
+/** Open Library's cover for a work is whichever edition came first, and that can be a translation (a German Prophet Song).
+ *  If it comes from an edition in another language, take an English edition's cover instead. */
+async function ownCover(olid: string, title: string, id?: number): Promise<number | undefined> {
+  if (!id) return id;
+  const eds: any[] = (await getJSON(ol(`/works/${olid}/editions.json?limit=100`), { ttl: 43200, ms: 3000 }))?.entries ?? [];
+  const fold = (t: string) => slug(t).replace(/-/g, ' ');
+  const t = fold(title);
+  const langs = (e: any): string[] => (e.languages ?? []).map((l: any) => String(l.key).replace('/languages/', ''));
+  const fine = (e: any) => (langs(e).length ? langs(e).includes('eng') : fold(e.title ?? '').includes(t));
+  const mine = eds.find((e) => e.covers?.includes(id));
+  if (!mine || fine(mine)) return id;
+  return eds.find((e) => fine(e) && e.covers?.some((c: number) => c > 0))?.covers.find((c: number) => c > 0) ?? id;
+}
+
 /* ——— one book ——— */
 export async function olBook(olid: string): Promise<BookPage | null> {
   const [w, s] = await Promise.all([
@@ -98,13 +112,14 @@ export async function olBook(olid: string): Promise<BookPage | null> {
     authorNames = found.map((a) => a?.name).filter(Boolean);
   }
   const langs = [...new Set<string>(d.language ?? [])].slice(0, 6);
+  const coverId = await ownCover(olid, w.title, d.cover_i ?? w.covers?.find((c: number) => c > 0));
   return {
     kind: 'book', key: olid, title: w.title, subtitle: w.subtitle || d.subtitle || undefined,
     authors: authorNames.slice(0, 4).map((name, i) => ({ key: authorKeys[i], name, href: authorKeys[i] ? authorHref(authorKeys[i], name) : undefined })),
     year: d.first_publish_year ?? yearOf(w.first_publish_date?.match(/\d{4}/)?.[0]), pages: d.number_of_pages_median || undefined,
     languages: langs.map((c) => ({ code: c, name: bookLanguageName(c)! })),
     subjects: subjects([...(w.subjects ?? []), ...(d.subject ?? [])]),
-    description: plain(w.description, 2000), cover: cover(d.cover_i ?? w.covers?.find((c: number) => c > 0)),
+    description: plain(w.description, 2000), cover: cover(coverId),
     publishers: publishers(d.publisher), editions: d.edition_count || undefined,
     readOnline: d.ebook_access === 'public' || d.ebook_access === 'borrowable' ? `https://openlibrary.org/works/${olid}` : undefined,
     source: 'Open Library', sourceLink: `https://openlibrary.org/works/${olid}`, isbn: d.isbn?.[0],
