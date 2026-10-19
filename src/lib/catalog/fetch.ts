@@ -19,6 +19,19 @@ type Saved = { at: number; ttl: number; value: unknown };
 const memory = new Map<string, Saved>();
 const MAX = 400;
 
+/** Open Library (and others) sometimes send letters with the accent as a separate mark ("a" + macron), which
+ *  some fonts draw as a loose mark after the letter. Every string we take in is joined up (NFC). */
+export function nfc<T>(v: T): T {
+  if (typeof v === 'string') return v.normalize('NFC') as T;
+  if (Array.isArray(v)) return v.map(nfc) as T;
+  if (v && typeof v === 'object') {
+    const o: Record<string, unknown> = {};
+    for (const k of Object.keys(v)) o[k] = nfc((v as Record<string, unknown>)[k]);
+    return o as T;
+  }
+  return v;
+}
+
 /** how a catalogue answered: it has the thing, it says there is no such thing, or it just failed (slow, busy, down, or refused us) */
 export type Source = 'ok' | 'notfound' | 'failed';
 
@@ -45,7 +58,7 @@ export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 600
         note(attempt + 1, String(r.status));
         return { data: null, state: 'failed' }; // busy, down, or a refused key: not the same as "no such thing"
       }
-      const value = (await r.json()) as T;
+      const value = nfc(await r.json()) as T;
       if (memory.size >= MAX) memory.delete(memory.keys().next().value!);
       memory.set(url, { at: Date.now(), ttl, value });
       note(attempt + 1, 'ok');

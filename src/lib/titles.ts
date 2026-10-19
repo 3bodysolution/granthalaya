@@ -12,7 +12,7 @@ export const slugify = (s: string) =>
 
 // Covers are only taken from places we trust to serve real covers.
 const COVER_HOSTS = /^https:\/\/(image\.tmdb\.org\/|covers\.openlibrary\.org\/|books\.google\.com\/books\/content\?)/;
-const clip = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : undefined);
+const clip = (v: unknown, max: number) => (typeof v === 'string' && v.trim() ? v.normalize('NFC').trim().slice(0, max) : undefined);
 const num = (v: unknown, min: number, max: number) => {
   const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() ? Number(v) : NaN;
   return Number.isFinite(n) && n >= min && n <= max ? Math.round(n) : undefined;
