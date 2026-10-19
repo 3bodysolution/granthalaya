@@ -104,6 +104,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
   ) : (
   <section class="pad">
     {!tmdbReady() ? <p class="muted">Film search isn’t set up on this copy of the site yet.</p>
+      : list.items.length === 0 && list.failed ? <p class="muted empty">The film catalogue couldn’t be reached just now. Please try again shortly.</p>
       : list.items.length === 0 ? <p class="muted empty">Nothing matches all of that. Try fewer filters.</p>
       : (
         <div class="pgrid">

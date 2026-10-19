@@ -1,7 +1,7 @@
 // Films, TV and the people who make them, from TMDB (The Movie Database). Where-to-watch data comes
 // through TMDB from JustWatch, and must be credited to JustWatch wherever it's shown.
 import { env } from '../supabase';
-import { base, getJSON, getJSONOrThrow, SourceUnavailable, plain, slug, yearOf } from './fetch';
+import { base, getJSON, getJSONResult, getJSONOrThrow, SourceUnavailable, plain, slug, yearOf } from './fetch';
 
 const key = () => env('TMDB_API_KEY');
 export const tmdbReady = () => !!key();
@@ -209,7 +209,7 @@ export async function trending(kind: 'film' | 'tv'): Promise<Card[]> {
 /** `language` may list several with "|" ("ml|ta|te"); `since` keeps titles released after a date;
     `streaming` keeps titles on any subscription service in India */
 export interface Filters { kind: 'film' | 'tv'; genre?: number; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean; minVotes?: number }
-export async function discover(f: Filters): Promise<{ items: Card[]; pages: number; total: number }> {
+export async function discover(f: Filters): Promise<{ items: Card[]; pages: number; total: number; failed?: boolean }> {
   if (!key()) return { items: [], pages: 0, total: 0 };
   const tv = f.kind === 'tv';
   const date = tv ? 'first_air_date' : 'primary_release_date';
@@ -231,18 +231,18 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   if (f.since && !params[`${date}.gte`]) { params[`${date}.gte`] = f.since; params[`${date}.lte`] ??= today; }
   if (f.service) { params.watch_region = REGION; params.with_watch_providers = f.service; params.with_watch_monetization_types = 'flatrate|free|ads'; }
   else if (f.streaming) { params.watch_region = REGION; params.with_watch_monetization_types = 'flatrate'; }
-  const j = await getJSON(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600 });
+  const { data: j, state } = await getJSONResult(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600 });
   const items = (j?.results ?? []).map((m: any) => toCard(f.kind, m));
-  return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0 };
+  return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0, failed: state === 'failed' };
 }
 
 /** the browse grids show 40 to a page: two of TMDB's pages of 20 at once */
-export async function discoverWide(f: Filters): Promise<{ items: Card[]; pages: number; total: number }> {
+export async function discoverWide(f: Filters): Promise<{ items: Card[]; pages: number; total: number; failed?: boolean }> {
   const p = Math.max(f.page ?? 1, 1);
   const [a, b] = await Promise.all([discover({ ...f, page: 2 * p - 1 }), discover({ ...f, page: 2 * p })]);
   const seen = new Set<number>();
   const items = [...a.items, ...b.items].filter((c) => !seen.has(c.id) && seen.add(c.id));
-  return { items, pages: Math.ceil(a.pages / 2), total: a.total };
+  return { items, pages: Math.ceil(a.pages / 2), total: a.total, failed: items.length === 0 && !!a.failed };
 }
 
 /** streaming services in India, most used first */

@@ -1,7 +1,7 @@
 // Books and authors: Open Library first (free, open data), Google Books when Open Library doesn't have it.
 // Open Library is thin on Marathi and Hindi books, so search tries both, and anyone can add a book by hand.
 import { env } from '../supabase';
-import { base, getJSON, getJSONOrThrow, plain, slug, yearOf } from './fetch';
+import { base, getJSON, getJSONOrThrow, getJSONResult, plain, slug, yearOf } from './fetch';
 
 /* ——— languages: Open Library uses library (MARC) codes like "mar" and "fre" ——— */
 const MARC_TO_ISO: Record<string, string> = {
@@ -84,21 +84,31 @@ const SEARCH_FIELDS = 'key,title,subtitle,author_name,author_key,first_publish_y
 const ol = (path: string) => base.ol() + path;
 
 /** Open Library's cover for a work is whichever edition came first, and that can be a translation (a German Prophet Song).
- *  If it comes from an edition in another language, take an English edition's cover instead. */
-async function ownCover(olid: string, title: string, id?: number): Promise<number | undefined> {
-  if (!id) return id;
-  const eds: any[] = (await getJSON(ol(`/works/${olid}/editions.json?limit=100`), { ttl: 43200, ms: 3000 }))?.entries ?? [];
-  const fold = (t: string) => slug(t).replace(/-/g, ' ');
-  const t = fold(title);
+ *  Look at the editions: take a cover from one in the book's own language (the language of the earliest edition), then
+ *  English, then Open Library's default. The lookup starts with the page's other lookups and gives up after a second. */
+const editionsOf = (olid: string): Promise<any[]> =>
+  getJSON(ol(`/works/${olid}/editions.json?limit=100`), { ttl: 43200, ms: 1000 }).then((j) => j?.entries ?? []);
+
+function ownCover(eds: any[], title: string, id?: number): number | undefined {
+  if (!id || !eds.length) return id;
+  const t = slug(title);
   const langs = (e: any): string[] => (e.languages ?? []).map((l: any) => String(l.key).replace('/languages/', ''));
-  const fine = (e: any) => (langs(e).length ? langs(e).includes('eng') : fold(e.title ?? '').includes(t));
+  const year = (e: any) => +(String(e.publish_date ?? '').match(/\d{4}/)?.[0] ?? 9999);
+  const original = eds.filter((e) => langs(e).length).sort((a, b) => year(a) - year(b))[0];
+  const own = original ? langs(original)[0] : 'eng';
+  const coverOf = (e: any): number | undefined => e.covers?.find((c: number) => c > 0);
+  // an edition with no language tag only counts if it carries the book's title
+  const inLang = (e: any, l: string) => (langs(e).length ? langs(e).includes(l) : slug(e.title ?? '').includes(t));
   const mine = eds.find((e) => e.covers?.includes(id));
-  if (!mine || fine(mine)) return id;
-  return eds.find((e) => fine(e) && e.covers?.some((c: number) => c > 0))?.covers.find((c: number) => c > 0) ?? id;
+  if (mine && inLang(mine, own)) return id;
+  const pick = (l: string) => eds.find((e) => coverOf(e) && inLang(e, l));
+  const best = pick(own) ?? pick('eng');
+  return best ? coverOf(best) : id;
 }
 
 /* ——— one book ——— */
 export async function olBook(olid: string): Promise<BookPage | null> {
+  const edsP = editionsOf(olid);
   const [w, s] = await Promise.all([
     getJSONOrThrow(ol(`/works/${olid}.json`), { ttl: 43200 }, 'Open Library'),
     getJSON(ol(`/search.json?q=${encodeURIComponent(`key:/works/${olid}`)}&fields=${SEARCH_FIELDS}&limit=1`), { ttl: 43200 }),
@@ -112,7 +122,7 @@ export async function olBook(olid: string): Promise<BookPage | null> {
     authorNames = found.map((a) => a?.name).filter(Boolean);
   }
   const langs = [...new Set<string>(d.language ?? [])].slice(0, 6);
-  const coverId = await ownCover(olid, w.title, d.cover_i ?? w.covers?.find((c: number) => c > 0));
+  const coverId = ownCover(await edsP, w.title, d.cover_i ?? w.covers?.find((c: number) => c > 0));
   return {
     kind: 'book', key: olid, title: w.title, subtitle: w.subtitle || d.subtitle || undefined,
     authors: authorNames.slice(0, 4).map((name, i) => ({ key: authorKeys[i], name, href: authorKeys[i] ? authorHref(authorKeys[i], name) : undefined })),
@@ -223,7 +233,7 @@ const NEIGHBOURS: Record<string, string[]> = {
 const INDIAN = new Set(['mar', 'hin', 'ben', 'tam', 'tel', 'mal', 'kan', 'guj', 'pan', 'urd', 'ori', 'asm', 'san']);
 const ENGLISH_LIT = ['English fiction', 'American fiction', 'English literature', 'American literature', 'English drama', 'English poetry'];
 
-export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; total: number; pages: number }> {
+export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; total: number; pages: number; failed?: boolean }> {
   const parts: string[] = [];
   const subject = f.subject?.replace(/[^a-z0-9-]/g, '');
   const code = f.language?.replace(/[^a-z]/g, '');
@@ -255,14 +265,15 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
   const popular = (code && INDIAN.has(code)) || subject === 'drama' ? 'editions' : 'readinglog';
   const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : popular;
   const page = Math.min(Math.max(f.page ?? 1, 1), 100);
-  const run = (q: string) => getJSON(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=48&page=${page}`), { ttl: 21600, ms: 9000 });
+  let failed = false;
+  const run = async (q: string) => { const r = await getJSONResult(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=48&page=${page}`), { ttl: 21600, ms: 9000 }); failed = r.state === 'failed'; return r.data; };
   let j = await run(parts.join(' '));
   // a subject from a book page ("mahabharata", "indic-fiction") may not be a subject key: try it as words
   if (subject && j && !j.numFound) j = await run(parts.join(' ').replace(/\(subject_key:[^)]*\)|subject_key:[a-z0-9_]+/, `subject:"${subject.replace(/-/g, ' ')}"`));
   const total = j?.numFound ?? 0;
   // books with a cover first, keeping Open Library's order within each group
   const items: BookCard[] = (j?.docs ?? []).map(card).filter((b: BookCard) => b.key);
-  return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 48) };
+  return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 48), failed: failed && !items.length };
 }
 
 export async function searchBooks(text: string): Promise<{ books: BookCard[]; authors: { key: string; name: string; href: string; works?: number }[] }> {

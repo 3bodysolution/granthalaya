@@ -97,7 +97,11 @@ const fields = [
     </section>
   ) : (
   <section class="pad">
-    {list.items.length === 0 ? (
+    {list.items.length === 0 && list.failed ? (
+      <div class="empty">
+        <p class="muted">The book catalogue couldn’t be reached just now. Please try again shortly.</p>
+      </div>
+    ) : list.items.length === 0 ? (
       <div class="empty">
         <p class="muted">Nothing matches all of that{language ? ', and Open Library has few books in some Indian languages' : ''}. Try fewer filters.</p>
         <a href="/add/?type=book" class="btn">Add a book by hand</a>
