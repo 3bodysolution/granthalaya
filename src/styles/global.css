@@ -36,13 +36,17 @@ a:hover { color: var(--lat); }
 button { font-family: inherit; }
 [hidden] { display: none !important; }
 
-.serif { font-family: Fraunces, Georgia, serif; }
+/* Fraunces from Google Fonts draws the macron letters (ā ī ū, as in romanised Marathi and Hindi titles) with the bar loose
+   to the right of the letter. "Fraunces Fix" is put first in every serif stack and takes only those letters, from a system serif. */
+@font-face { font-family: 'Fraunces Fix'; font-weight: 100 900; font-style: normal; unicode-range: U+0100-017F, U+1E00-1EFF; src: local('Georgia'), local('Times New Roman'), local('Noto Serif'), local('Liberation Serif'); }
+@font-face { font-family: 'Fraunces Fix'; font-weight: 100 900; font-style: italic; unicode-range: U+0100-017F, U+1E00-1EFF; src: local('Georgia Italic'), local('Times New Roman Italic'), local('Noto Serif Italic'), local('Liberation Serif Italic'); }
+.serif { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; }
 .type { font-family: 'Courier Prime', ui-monospace, monospace; }
 .num { font-variant-numeric: tabular-nums lining-nums; }
 .muted { color: var(--muted); }
 .sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
-.title { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 400; font-size: clamp(38px, 5vw, 56px); line-height: 1.05; letter-spacing: -.02em; }
+.title { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-weight: 400; font-size: clamp(38px, 5vw, 56px); line-height: 1.05; letter-spacing: -.02em; }
 h1, h2, h3, .title { text-wrap: balance; }
 p { text-wrap: pretty; }
 .title em, .accent { color: var(--lat); }
@@ -101,7 +105,7 @@ body:has(main > .still:not(.gone)) :is(.brand, .actions) { --bg:#15171B; --card:
 body:has(main > .still:not(.gone)) .menu-list { --card:#1F2227; }
 @media (min-width: 781px) { body:has(main > .still:not(.gone)) .nav { --ink:#ECE5D6; --lat:#6CC9BF; color: #ECE5D6; } }
 .brand { display: flex; align-items: center; gap: 10px; justify-self: start; }
-.brand span { font-family: Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
+.brand span { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
 .nav { display: flex; gap: 32px; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
 .nav a { position: relative; padding: 8px 0; }
 .nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.5px; background: var(--lat); transform: scaleX(0); transform-origin: left; transition: transform .45s var(--spring); }
@@ -186,7 +190,7 @@ body, .card, .btn, .chip, .iconbtn, .site-wrap, .foot-wrap, .rule { transition: 
 .search[open] { display: flex; flex-direction: column; animation: settle .5s var(--spring); }
 .search::backdrop { background: var(--scrim); backdrop-filter: blur(3px); animation: fade .3s ease; }
 .search-top { display: flex; align-items: center; gap: 12px; padding: 0 18px; border-bottom: 1px solid var(--line); }
-.search-top input { flex: 1; height: 64px; border: 0; background: transparent; color: var(--ink); font-family: Fraunces, Georgia, serif; font-size: 22px; outline: none; }
+.search-top input { flex: 1; height: 64px; border: 0; background: transparent; color: var(--ink); font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 22px; outline: none; }
 .search-top input:focus { box-shadow: none; }
 .search-top kbd { font-family: inherit; font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
 .search-list { list-style: none; margin: 0; padding: 8px; overflow-y: auto; }
@@ -254,7 +258,7 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
 .menu { position: relative; }
 .menu > summary { list-style: none; cursor: pointer; }
 .menu > summary::-webkit-details-marker { display: none; }
-.avatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: var(--lat); color: var(--bg); font-family: Fraunces, Georgia, serif; font-size: 18px; border: 1px solid var(--line); }
+.avatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: var(--lat); color: var(--bg); font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 18px; border: 1px solid var(--line); }
 .avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .menu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; min-width: 220px; padding: 6px; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 40px -18px var(--shadow); animation: rise .25s var(--spring); }
 .menu-list a, .menu-list button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: 9px; border: 0; background: transparent; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; }
@@ -265,7 +269,7 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
 .menu-who span { font-size: 13px; color: var(--muted); }
 
 /* round photos and letters for people */
-.face { border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--lat); color: var(--bg); font-family: Fraunces, Georgia, serif; }
+.face { border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--lat); color: var(--bg); font-family: 'Fraunces Fix', Fraunces, Georgia, serif; }
 .face { position: relative; }
 .face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 
@@ -300,7 +304,7 @@ dialog.box::backdrop { background: var(--scrim); }
 dialog.box[open] { animation: pop .22s var(--spring); }
 dialog.box[open]::backdrop { animation: fade .2s ease; }
 @keyframes pop { from { opacity: 0; transform: translateY(8px) scale(.98); } }
-dialog.box h2 { margin: 0 0 6px; font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: 22px; }
+dialog.box h2 { margin: 0 0 6px; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-weight: 500; font-size: 22px; }
 dialog.box p { margin: 0 0 14px; font-size: 14.5px; line-height: 1.5; color: var(--muted); }
 dialog.box .reasons { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 14px; }
 dialog.box .reasons label { display: flex; gap: 10px; align-items: center; font-size: 15px; cursor: pointer; }
