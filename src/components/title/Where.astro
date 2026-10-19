@@ -1,6 +1,8 @@
 ---
 // Where to watch it in India: streaming, free, rent and buy. Data from JustWatch, through TMDB.
+// Each icon opens that service's own search for the title (services.ts), else JustWatch's page for it.
 import type { Where } from '../../lib/catalog/tmdb';
+import { serviceHref } from '../../lib/catalog/services';
 interface Props { where: Where | null; title: string }
 const { where, title } = Astro.props;
 const rows = where ? ([['Stream', where.stream], ['Free', where.free], ['Rent', where.rent], ['Buy', where.buy]] as const).filter(([, l]) => l.length) : [];
@@ -11,7 +13,7 @@ const jw = `https://www.justwatch.com/in/search?q=${encodeURIComponent(title)}`;
   {rows.length ? rows.map(([label, list]) => (
     <div class="w-row">
       <span class="w-k">{label}</span>
-      <span class="w-logos">{list.slice(0, 6).map((p) => <a href={where!.link ?? jw} target="_blank" rel="noopener" title={p.name} aria-label={`${label} on ${p.name}`}>{p.logo ? <img src={p.logo} alt="" loading="lazy" referrerpolicy="no-referrer" /> : <span class="w-n">{p.name}</span>}</a>)}</span>
+      <span class="w-logos">{list.slice(0, 6).map((p) => <a href={serviceHref(p.id, title) ?? where!.link ?? jw} target="_blank" rel="noopener" title={p.name} aria-label={`${label} on ${p.name}`}>{p.logo ? <img src={p.logo} alt="" loading="lazy" referrerpolicy="no-referrer" /> : <span class="w-n">{p.name}</span>}</a>)}</span>
     </div>
   )) : <p class="w-none">Not streaming in India right now.</p>}
   <a class="w-jw" href={where?.link ?? jw} target="_blank" rel="noopener">All services <span aria-hidden="true">↗</span><span class="w-src">JustWatch</span></a>
