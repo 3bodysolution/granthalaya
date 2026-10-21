@@ -237,7 +237,10 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
   .nav a { padding: 12px 10px; }
   .nav a::after { left: 10px; right: 10px; bottom: 6px; }
   .shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; row-gap: 28px; }
-  .foot { padding-bottom: 92px; }
+  /* the floating bottom bar (about 76px with its margin) never covers the end of a page: the footer links sit above it, and anything scrolled to or focused stops short of it */
+  html { scroll-padding-bottom: 96px; }
+  .foot { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
   .foot-in { flex-direction: column; align-items: flex-start; gap: 10px; }
   .foot nav { gap: 18px; flex-wrap: wrap; }
   .foot-wrap { margin-top: 32px; }
