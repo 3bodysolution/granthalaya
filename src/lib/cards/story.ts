@@ -21,9 +21,9 @@ export interface StoryData {
   color?: string;          // painted cover colour when there's no image
 }
 
-const W = 1080, H = 1920;
+export const W = 1080, H = 1920;
 export const SITE = 'granthalaya-sarthak.vercel.app';   // printed small on the card; Instagram can't link a story
-const BG = '#121316', CREAM = '#F4ECDD', GOLD = '#E4BE94', TEAL = '#6CC9BF', GREY = '#A39D92', DIM = '#8D877D';
+export const BG = '#121316', CREAM = '#F4ECDD', GOLD = '#E4BE94', TEAL = '#6CC9BF', GREY = '#A39D92', DIM = '#8D877D';
 
 /* ——— fonts and the painting are built into the function (?inline makes them part of the code), so nothing is fetched at run time ——— */
 import fraunces700 from '../../assets/cards/fraunces-latin-700-normal.woff?inline';
@@ -34,9 +34,10 @@ import sans400 from '../../assets/cards/instrument-sans-latin-400-normal.woff?in
 import sans400x from '../../assets/cards/instrument-sans-latin-ext-400-normal.woff?inline';
 import deva700 from '../../assets/cards/noto-serif-devanagari-devanagari-700-normal.woff?inline';
 import deva400 from '../../assets/cards/noto-serif-devanagari-devanagari-400-normal.woff?inline';
-import paintingNight from '../../assets/cards/painting-night.jpg?inline';
+import paintingNightUri from '../../assets/cards/painting-night.jpg?inline';
+export const paintingNight = paintingNightUri;
 const bytes = (dataUri: string) => Buffer.from(dataUri.slice(dataUri.indexOf(',') + 1), 'base64');
-const FONTS = [
+export const FONTS = [
   { name: 'Fraunces', data: bytes(fraunces700), weight: 700, style: 'normal' },
   { name: 'Fraunces Ext', data: bytes(fraunces700x), weight: 700, style: 'normal' },
   { name: 'Fraunces', data: bytes(fraunces400i), weight: 400, style: 'italic' },
@@ -50,14 +51,14 @@ const FONTS = [
 ];
 
 /** a cover image as a data address satori can draw; only our two cover hosts, and only PNG or JPEG */
-async function coverData(src?: string) {
+export async function coverData(src?: string, big = true) {
   if (!src) return undefined;
   try {
     const u = new URL(src, 'https://x.invalid');
     if (!['image.tmdb.org', 'covers.openlibrary.org'].includes(u.hostname)) return undefined;
     // the card is big: ask for the larger picture
-    if (u.hostname === 'image.tmdb.org') u.pathname = u.pathname.replace(/\/t\/p\/w\d+\//, '/t/p/w500/');
-    if (u.hostname === 'covers.openlibrary.org') u.pathname = u.pathname.replace(/-[SM]\.jpg$/, '-L.jpg');
+    if (u.hostname === 'image.tmdb.org') u.pathname = u.pathname.replace(/\/t\/p\/w\d+\//, big ? '/t/p/w500/' : '/t/p/w342/');
+    if (u.hostname === 'covers.openlibrary.org') u.pathname = u.pathname.replace(/-[SML]\.jpg$/, big ? '-L.jpg' : '-M.jpg');
     const r = await fetch(u, { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Granthalaya/1.0 (share card)' } });
     if (!r.ok) return undefined;
     const b = Buffer.from(await r.arrayBuffer());
@@ -68,8 +69,8 @@ async function coverData(src?: string) {
 }
 
 /* ——— tiny element helpers (satori takes plain objects) ——— */
-type Node = { type: string; props: Record<string, unknown> };
-const h = (type: string, style: Record<string, unknown>, children?: unknown, extra: Record<string, unknown> = {}): Node =>
+export type Node = { type: string; props: Record<string, unknown> };
+export const h = (type: string, style: Record<string, unknown>, children?: unknown, extra: Record<string, unknown> = {}): Node =>
   ({ type, props: { ...extra, style: { display: 'flex', ...style }, children } });
 const star = (fill: 0 | 0.5 | 1, color: string) => ({
   type: 'svg', props: {
@@ -84,9 +85,9 @@ const star = (fill: 0 | 0.5 | 1, color: string) => ({
   },
 });
 // each family is tried letter by letter: Latin, then Latin with marks (macrons, dots), then Devanagari
-const SERIF = 'Fraunces, Fraunces Ext, Noto Serif Devanagari';
-const SANS = 'Instrument Sans, Instrument Sans Ext, Noto Serif Devanagari';
-const cut = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s);
+export const SERIF = 'Fraunces, Fraunces Ext, Noto Serif Devanagari';
+export const SANS = 'Instrument Sans, Instrument Sans Ext, Noto Serif Devanagari';
+export const cut = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s);
 
 export async function drawStory(d: StoryData): Promise<Buffer> {
   const film = d.kind === 'film' || d.kind === 'tv';
