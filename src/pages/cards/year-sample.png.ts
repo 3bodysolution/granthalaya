@@ -10,7 +10,7 @@ export const GET: APIRoute = async ({ url }) => {
   const bg = isBackground(asked) ? asked : undefined;
   const png = await drawYear({ bg,
     year: 2026, owner: 'sarthak', books: 48, films: 121, essays: 0,
-    months: names.map((title, i) => (i === 10 ? null : { title })), favourite: 8,
+    months: names.map((title, i) => (i === 10 ? null : { title })), favourite: 8, fav: { title: names[8], cover: url.searchParams.get('cover') ?? undefined },
   });
   return new Response(png, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' } });
 };

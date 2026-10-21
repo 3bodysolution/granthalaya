@@ -49,6 +49,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
       books: kind('book'), films: kind('film'), essays: kind('essay'),
       months: months.map((e) => e && { title: e.data.title, cover: e.data.cover, color: e.data.color }),
       favourite: favourite >= 0 ? favourite : undefined,
+      fav: fav && { title: fav.data.title, cover: fav.data.cover, color: fav.data.color },
     });
     if (rendered.size > 20) rendered.delete(rendered.keys().next().value!);
     rendered.set(key, png);
