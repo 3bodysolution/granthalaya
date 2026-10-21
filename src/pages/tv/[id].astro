@@ -47,7 +47,7 @@ const tabs = [
 const first = tabs[0]?.key;
 const facts = rows.find((r) => (r.trivia ?? []).length);
 ---
-<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} image={t.poster}>
+<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} image={`/og/tv/${id}.png`}>
   <TitleLayout backdrop={t.backdrop}>
     <Poster slot="poster" src={t.poster} title={t.title} by={t.creators[0]?.name} kind="tv" year={t.year} />
     <Fragment slot="side"><Where where={t.where} title={t.title} /></Fragment>

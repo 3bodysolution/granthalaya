@@ -35,7 +35,8 @@ const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film
 const fan = path.slice(0, 3).map((x) => palette(x.e));
 const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
 ---
-<Base title={`${col.data.title} | @${profile.username}`} shelf={profile.username} description={`A collection by ${name}: ${col.data.title}. ${meta}.`}>
+<Base title={`${col.data.title} | @${profile.username}`} shelf={profile.username} description={`A collection by ${name}: ${col.data.title}. ${meta}.`}
+  image={profile.is_private ? undefined : `/og/c/${profile.username}/${slug}.png`}>
   <section class="pad head">
     <div class="fan" aria-hidden="true">
       {fan[1] && <div class="wash f l" style={`background: ${fan[1].bg}`}></div>}

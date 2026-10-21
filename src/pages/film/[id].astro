@@ -52,7 +52,7 @@ const tabs = [
 const first = tabs[0]?.key;
 const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${f.year})` : ''} on Granthalaya.`;
 ---
-<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} image={f.poster}>
+<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} image={id && f.id ? `/og/film/${id}.png` : f.poster}>
   <TitleLayout backdrop={f.backdrop}>
     <Poster slot="poster" src={f.poster} title={f.title} by={f.directors[0]?.name} kind="film" year={f.year} />
     <Fragment slot="side">

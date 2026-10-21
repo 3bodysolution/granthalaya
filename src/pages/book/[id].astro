@@ -66,7 +66,7 @@ const manyEditions = (b.editions ?? 0) >= 2;
 const paras = b.description ? b.description.split(/\n{2,}/) : [];
 const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
 ---
-<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={b.description ? b.description.slice(0, 180) : `${b.title} on Granthalaya.`} image={b.cover}>
+<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={b.description ? b.description.slice(0, 180) : `${b.title} on Granthalaya.`} image={`/og/book/${param}.png`}>
   <TitleLayout>
     <Poster slot="poster" src={b.cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
     <Fragment slot="side">

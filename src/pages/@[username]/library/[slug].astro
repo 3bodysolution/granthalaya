@@ -98,7 +98,8 @@ const shown = pickLine(all, details, name);
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 const pinnedId = shown?.pinned ? shown.id : null;
 ---
-<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private}>
+<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private}
+  image={d.private || profile.is_private ? undefined : `/og/e/${profile.username}/${slug}.png`}>
   {d.type !== 'essay' ? (
     <>
       <div class="art melt banner settle bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>

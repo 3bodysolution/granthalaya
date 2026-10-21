@@ -47,7 +47,8 @@ const since = new Date(profile.created_at).toLocaleString('en-GB', { month: 'sho
 const shown = visible ? pickLine(shelf, details, name) : null;
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 ---
-<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} line={line} noindex={profile.is_private}>
+<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} line={line} noindex={profile.is_private}
+  image={profile.is_private ? undefined : `/og/u/${profile.username}.png`}>
   <div class="art banner bleed" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
 
   <section class="pad">
