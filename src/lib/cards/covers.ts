@@ -34,16 +34,67 @@ export function coverAddress(src: string, big: boolean): URL | null {
   } catch { return null; }
 }
 
-const asData = (b: Buffer) => {
-  if (b.length > 4_000_000) return undefined;
-  const type = b[0] === 0xff && b[1] === 0xd8 ? 'jpeg' : b[0] === 0x89 && b[1] === 0x50 ? 'png' : undefined;
-  return type ? `data:image/${type};base64,${b.toString('base64')}` : undefined;
-};
+const MAX_BYTES = 4_000_000;
+const ARCHIVE = /(^|\.)archive\.org$/;
+/** an address we may fetch an image from: a cover source, or (only when reached by a redirect) archive.org, which Open Library hands its covers to */
+const allowedHop = (u: URL, hop: number) =>
+  u.protocol === 'https:' && !u.username && !u.password && !u.port && (coverAllowed(u) || (hop > 0 && ARCHIVE.test(u.hostname)));
+
+/**
+ * Fetch an image safely: only from allowed addresses, redirects followed by hand (at most 4, each one checked, so an allowed site
+ * cannot send us somewhere else), only a JPEG or PNG (checked by its first bytes, not just its label), at most 4 MB (counted as it arrives).
+ */
+export async function safeImage(start: URL | string, ms: number): Promise<{ type: 'image/jpeg' | 'image/png'; body: Buffer } | undefined> {
+  try {
+    let u = new URL(start);
+    const deadline = AbortSignal.timeout(ms);
+    for (let hop = 0; hop < 5; hop++) {
+      if (!allowedHop(u, hop)) return undefined;
+      const r = await fetch(u, { signal: deadline, redirect: 'manual', headers: { 'User-Agent': 'Granthalaya/1.0 (share card)' } });
+      if (r.status >= 300 && r.status < 400) {
+        const to = r.headers.get('location');
+        if (!to) return undefined;
+        u = new URL(to, u);
+        continue;
+      }
+      if (!r.ok || !r.body) return undefined;
+      if (Number(r.headers.get('content-length') ?? 0) > MAX_BYTES) return undefined;
+      const chunks: Uint8Array[] = [];
+      let size = 0;
+      for await (const c of r.body as unknown as AsyncIterable<Uint8Array>) {
+        size += c.length;
+        if (size > MAX_BYTES) { return undefined; }
+        chunks.push(c);
+      }
+      const body = Buffer.concat(chunks);
+      const type = body[0] === 0xff && body[1] === 0xd8 ? 'image/jpeg' : body[0] === 0x89 && body[1] === 0x50 ? 'image/png' : undefined;
+      return type ? { type, body } : undefined;
+    }
+  } catch { /* too slow, or not an address */ }
+  return undefined;
+}
 
 async function get(u: URL | string, ms: number): Promise<string | undefined> {
   try {
-    const r = await fetch(u, { signal: AbortSignal.timeout(ms), redirect: 'follow', headers: { 'User-Agent': 'Granthalaya/1.0 (share card)' } });
-    return r.ok ? asData(Buffer.from(await r.arrayBuffer())) : undefined;
+    const url = new URL(u);
+    // our own old covers are plain files on this site; everything else goes through the safe fetch
+    if (OLD.test(url.pathname) && origin && url.origin === new URL(origin).origin) {
+      const r = await fetch(url, { signal: AbortSignal.timeout(ms) });
+      const body = r.ok ? Buffer.from(await r.arrayBuffer()) : null;
+      if (!body || body.length > MAX_BYTES) return undefined;
+      const type = body[0] === 0xff && body[1] === 0xd8 ? 'jpeg' : body[0] === 0x89 && body[1] === 0x50 ? 'png' : undefined;
+      return type ? `data:image/${type};base64,${body.toString('base64')}` : undefined;
+    }
+    // the copy route on this site answers with an image we already checked
+    if (url.pathname === '/api/cover' && origin && url.origin === new URL(origin).origin) {
+      const r = await fetch(url, { signal: AbortSignal.timeout(ms) });
+      const body = r.ok ? Buffer.from(await r.arrayBuffer()) : null;
+      if (!body || body.length > MAX_BYTES) return undefined;
+      const type = body[0] === 0xff && body[1] === 0xd8 ? 'jpeg' : body[0] === 0x89 && body[1] === 0x50 ? 'png' : undefined;
+      return type ? `data:image/${type};base64,${body.toString('base64')}` : undefined;
+    }
+    const img = await safeImage(url, ms);
+    return img ? `data:${img.type};base64,${img.body.toString('base64')}` : undefined;
   } catch { return undefined; }
 }
 
