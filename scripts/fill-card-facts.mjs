@@ -5,6 +5,13 @@
 //   node scripts/fill-card-facts.mjs                dry run: counts the titles it would change, asks no AI, writes nothing
 //   node scripts/fill-card-facts.mjs --write        does it (only when Sarthak asks for it in that message)
 //   --limit=N                                       stops after N titles (a free AI allowance is limited; run it again to carry on)
+//   --repick=slug,slug                              picks the painting again for those titles (replaces the saved one; with --write)
+//
+// Where the words come from:
+//   · a real summary (TMDB, Open Library): TMDB's tagline, else a short AI line from it; the AI picks the painting;
+//   · no summary but a note (a record made from one of our lists, src/data/lists): the note is the line, exactly as written (no AI);
+//     the AI picks the painting from the note;
+//   · neither: nothing is written (the genre rules choose the painting when a card is drawn, and there is no line).
 //
 // Needs PUBLIC_SUPABASE_URL, SUPABASE_SECRET_KEY, TMDB_API_KEY and an AI key in .env. Nothing from .env is printed.
 import fs from 'node:fs';
@@ -62,32 +69,65 @@ async function sourceOf(r) {
   }
   if (r.kind === 'book' && r.ol_key) {
     const w = await getJSON(`https://openlibrary.org/works/${r.ol_key}.json`);
-    return { summary: text(w?.description) || r.note, genres: (w?.subjects ?? []).slice(0, 10) };
+    return { summary: text(w?.description), genres: (w?.subjects ?? []).slice(0, 10) };
   }
-  return { summary: r.note, genres: [] };
+  return { genres: [] };
 }
 
+const keep = (v) => (v && String(v).trim().length > 40 ? String(v).trim() : null);
+const ask = (r, summary, genres, needLine) => askFacts({ title: r.title, kind: r.kind, genres, summary, needLine }, keys).catch(() => null);
+
+// the painting again, for titles whose pick looked wrong
+const repick = (process.argv.find((a) => a.startsWith('--repick='))?.slice(9) ?? '').split(',').filter(Boolean);
+for (const slug of repick) {
+  const { data: r } = await db.from('titles').select('id, kind, slug, title, note, tmdb_id, ol_key, tagline, card_bg').eq('slug', slug).maybeSingle();
+  if (!r) { console.log(`  ${slug}: not found`); continue; }
+  const src = await sourceOf(r);
+  const text = keep(src.summary) ?? r.note;
+  if (!text) { console.log(`  ${r.title}: nothing to go on`); continue; }
+  const ai = await ask(r, text, src.genres, false);
+  if (ai?.bg) { await db.from('titles').update({ card_bg: ai.bg }).eq('id', r.id); console.log(`  ${r.title}: [${r.card_bg ?? 'none'}] -> [${ai.bg}]`); }
+  else console.log(`  ${r.title}: no answer, kept [${r.card_bg ?? 'none'}]`);
+  await sleep(3500);
+}
+if (repick.length && !process.argv.includes('--all')) process.exit(0);
+
 let changed = 0, done = 0, stopped = false;
+const tally = { line: 0, paintingOnly: 0, nothing: 0 };
 for (const r of rows) {
   if (done >= limit) break;
   done++;
   const src = await sourceOf(r);
+  const summary = keep(src.summary);
   let line = r.tagline || (src.tagline && src.tagline.trim().length <= 90 ? src.tagline.trim() : null);
   let bg = r.card_bg || null;
-  if ((!line || !bg) && src.summary && src.summary.length > 40) {
-    const ai = await askFacts({ title: r.title, kind: r.kind, genres: src.genres, summary: src.summary }, keys).catch(() => null);
-    if (!ai) { console.log(`  no AI answer for "${r.title}": stopping (the allowance may be used up; run it again later)`); stopped = true; break; }
-    line ||= ai.line;
-    bg ||= ai.bg;
-    await sleep(3500);   // a free allowance is a few calls a minute
+  if (summary) {
+    if (!line || !bg) {
+      const ai = await ask(r, summary, src.genres, true);
+      if (!ai) { console.log(`  no AI answer for "${r.title}": stopping (the allowance may be used up; run it again later)`); stopped = true; break; }
+      line ||= ai.line;
+      bg ||= ai.bg;
+      await sleep(3500);   // a free allowance is a few calls a minute
+    }
+  } else if (r.note) {
+    if (!line && r.note.length <= 140) line = r.note;   // exactly as written
+    if (!bg) {
+      const ai = await ask(r, r.note, [], false);
+      if (!ai) { console.log(`  no AI answer for "${r.title}": stopping (the allowance may be used up; run it again later)`); stopped = true; break; }
+      bg ||= ai.bg;
+      await sleep(3500);
+    }
   }
   const set = {};
   if (line && !r.tagline) set.tagline = line;
   if (bg && !r.card_bg) set.card_bg = bg;
-  if (Object.keys(set).length) {
-    const q = db.from('titles').update(set).eq('id', r.id);
-    const { error } = await (set.tagline ? q.is('tagline', null) : q.is('card_bg', null));
-    if (!error) { changed++; console.log(`  ${r.title}: ${set.tagline ? `"${set.tagline}"` : ''} ${set.card_bg ? `[${set.card_bg}]` : ''}`); }
+  if (!Object.keys(set).length) { tally.nothing++; continue; }
+  const { error: e1 } = set.tagline ? await db.from('titles').update({ tagline: set.tagline }).eq('id', r.id).is('tagline', null) : { error: null };
+  const { error: e2 } = set.card_bg ? await db.from('titles').update({ card_bg: set.card_bg }).eq('id', r.id).is('card_bg', null) : { error: null };
+  if (!e1 && !e2) {
+    changed++;
+    tally[set.tagline ? 'line' : 'paintingOnly']++;
+    console.log(`  ${r.title}: ${set.tagline ? `"${set.tagline}"` : '(no line)'} ${set.card_bg ? `[${set.card_bg}]` : ''}`);
   }
 }
-console.log(`Done: ${changed} titles changed, ${done} looked at${stopped ? ', stopped early' : ''}. Titles still missing something can be filled by running it again.`);
+console.log(`Done: ${changed} titles changed (${tally.line} got a line, ${tally.paintingOnly} only a painting), ${tally.nothing} nothing to write, ${done} looked at${stopped ? ', stopped early' : ''}.`);

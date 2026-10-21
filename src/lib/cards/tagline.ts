@@ -60,15 +60,25 @@ async function doFill(s: Subject) {
     const admin = adminClient();
     const saved = await savedFacts(admin, s.titleId);
     if (saved.line && (saved.bg || !saved.bgColumn)) return;
-    const { tagline, summary, genres } = await sourceOf(s, saved.note);
+    const { tagline, summary, genres } = await sourceOf(s, null);   // a real summary: TMDB's or Open Library's
     let line = saved.line ?? (tagline ? tagline.replace(/\s+/g, ' ').trim() : null);
     if (line && line.length > 90) line = null;
     let bg: Background | null = saved.bg ?? null;
-    if ((!line || !bg) && summary && summary.length > 40) {
-      const keys = { gemini: env('GEMINI_API_KEY'), geminiModel: env('GEMINI_MODEL'), groq: env('GROQ_API_KEY'), groqModel: env('GROQ_MODEL') };
-      const ai = await askFacts({ title: s.title, kind: s.type, genres, summary }, keys);
-      line ||= ai?.line ?? null;
-      bg ||= isBackground(ai?.bg) ? (ai!.bg as Background) : null;   // anything but one of the 11 names is ignored
+    const keys = { gemini: env('GEMINI_API_KEY'), geminiModel: env('GEMINI_MODEL'), groq: env('GROQ_API_KEY'), groqModel: env('GROQ_MODEL') };
+    if (summary && summary.length > 40) {
+      if (!line || !bg) {
+        const ai = await askFacts({ title: s.title, kind: s.type, genres, summary }, keys);
+        line ||= ai?.line ?? null;
+        bg ||= isBackground(ai?.bg) ? (ai!.bg as Background) : null;   // anything but one of the 11 names is ignored
+      }
+    } else if (saved.note) {
+      // no summary (a record made from one of our lists): the list's own note is the line, exactly as written (no AI, no guessing from
+      // the title), and the AI only picks the painting from that note. No note at all: no line, and the genre rules choose the painting.
+      if (!line && saved.note.length <= 140) line = saved.note;
+      if (!bg) {
+        const ai = await askFacts({ title: s.title, kind: s.type, genres: [], summary: saved.note, needLine: false }, keys);
+        bg = isBackground(ai?.bg) ? (ai!.bg as Background) : null;
+      }
     }
     if (line && !saved.line) await admin.from('titles').update({ tagline: line }).eq('id', s.titleId).is('tagline', null);
     if (bg && !saved.bg && saved.bgColumn) await admin.from('titles').update({ card_bg: bg }).eq('id', s.titleId).is('card_bg', null);
