@@ -3,6 +3,7 @@
 //
 //   node scripts/fill-runtimes.mjs            dry run: looks everything up, prints what it would change, writes nothing
 //   node scripts/fill-runtimes.mjs --write    saves the changes (only when Sarthak asks for it in that message)
+//   --skip=slug,slug                          leaves those titles alone (e.g. a number that looks wrong)
 //
 // Only empty `runtime` / `pages` are filled; a number already there is never replaced. Needs PUBLIC_SUPABASE_URL,
 // SUPABASE_SECRET_KEY and TMDB_API_KEY in .env. Nothing from .env is printed.
@@ -17,6 +18,7 @@ try {
 } catch { /* no .env */ }
 if (!process.env.PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) { console.log('Add PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to .env first.'); process.exit(1); }
 const write = process.argv.includes('--write');
+const skip = new Set((process.argv.find((a) => a.startsWith('--skip='))?.slice(7) ?? '').split(',').filter(Boolean));
 const tmdb = process.env.TMDB_API_KEY;
 const db = createClient(process.env.PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -51,7 +53,7 @@ async function bookPages(olKey) {
 const { data: rows, error } = await db.from('titles').select('id, slug, kind, title, season, runtime, pages, tmdb_id, ol_key, source').order('created_at');
 if (error) { console.log('Couldn’t read the titles:', error.message); process.exit(1); }
 
-const need = rows.filter((t) => (t.kind === 'book' ? t.pages == null : t.kind === 'film' || t.kind === 'tv' ? t.runtime == null : false));
+const need = rows.filter((t) => !skip.has(t.slug)).filter((t) => (t.kind === 'book' ? t.pages == null : t.kind === 'film' || t.kind === 'tv' ? t.runtime == null : false));
 const out = { film: 0, tv: 0, book: 0, noId: 0, notFound: 0 };
 const would = [];
 for (const t of need) {

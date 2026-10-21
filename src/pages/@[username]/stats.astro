@@ -80,17 +80,26 @@ const langCount = new Map<string, number>();
 for (const e of inYear) if (e.data.language) langCount.set(e.data.language, (langCount.get(e.data.language) ?? 0) + 1);
 const topLang = [...langCount.entries()].sort((a, b) => b[1] - a[1])[0];
 
+// most read author and most watched director, from the saved creator; only when someone comes up more than once
+const topOf = (list: Entry[]) => {
+  const n = new Map<string, number>();
+  for (const e of list) { const c = e.data.creator?.trim(); if (c) n.set(c, (n.get(c) ?? 0) + 1); }
+  const t = [...n.entries()].sort((a, b) => b[1] - a[1])[0];
+  return t && t[1] > 1 ? t : undefined;
+};
+const topAuthor = topOf(inYear.filter((e) => e.data.type === 'book' || e.data.type === 'essay'));
+const topDirector = topOf(inYear.filter((e) => e.data.type === 'film'));
+const opts = [
+  topLang && { label: 'Top language', value: langName(topLang[0]), note: `${plural(topLang[1], 'title')}, where a language is saved`, color: 'var(--moss)' },
+  topAuthor && { label: 'Most read author', value: topAuthor[0], note: `${plural(topAuthor[1], 'book or essay', 'books and essays')}`, color: 'var(--book)' },
+  topDirector && { label: 'Most watched director', value: topDirector[0], note: `${plural(topDirector[1], 'film')}`, color: 'var(--sky)' },
+].filter(Boolean) as { label: string; value: string; note: string; color: string }[];
+
 // how you rate: half-star steps
 const steps = Array.from({ length: 10 }, (_, i) => (i + 1) / 2);
 const rateCount = steps.map((s) => inYear.filter((e) => e.data.rating === s).length);
 const maxRate = Math.max(1, ...rateCount);
 const stepLabel = (s: number) => (s % 1 ? `${Math.floor(s) || ''}½` : String(s));
-const RATE = [
-  'var(--sky)', 'var(--lat)', 'var(--moss)', 'var(--book)',
-  'color-mix(in srgb, var(--sky) 55%, var(--moss))', 'color-mix(in srgb, var(--lat) 55%, var(--book))',
-  'color-mix(in srgb, var(--moss) 55%, var(--book))', 'color-mix(in srgb, var(--sky) 60%, var(--book))',
-  'color-mix(in srgb, var(--lat) 55%, var(--sky))', 'color-mix(in srgb, var(--moss) 55%, var(--lat))',
-];
 
 // the calendar
 const firstMon = jan1 - ((new Date(jan1).getUTCDay() + 6) % 7) * DAY;
@@ -111,7 +120,7 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
 // the year in covers: up to three a month, best rated first
 const monthCovers = months.filter((m) => m.sum > 0).map((m) => ({
   name: m.name, total: m.sum,
-  picks: [...m.list].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0) || b.data.date.getTime() - a.data.date.getTime()).slice(0, 3),
+  picks: [...m.list].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0) || b.data.date.getTime() - a.data.date.getTime()),
 }));
 const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '' : `?year=${y}`}`;
 ---
@@ -123,15 +132,15 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
       <p class="eyebrow">Your year | {year}</p>
       {inYear.length ? (
         <h1 class="title num">
-          In {year} {who} {read.length > 0 && <>read {read.map((r, i) => <>{i > 0 && ' and '}<b class="nb">{r.split(' ')[0]}</b> {r.split(' ').slice(1).join(' ')}</>)}</>}
-          {read.length > 0 && nFilms > 0 && ' and '}
-          {nFilms > 0 && <>watched <b class="nf">{nFilms}</b> {nFilms === 1 ? (hasTv ? 'film or show' : 'film') : (hasTv ? 'films and shows' : 'films')}</>}.
+          In {year} {who} {read.length > 0 && <>read {read.map((r, i) => <>{i > 0 && ' and '}<b class="nb">{r.split(' ')[0]}</b> {r.split(' ').slice(1).join(' ')}</>)}</>}{read.length > 0 && nFilms > 0 && ', and '}{nFilms > 0 && <>{read.length > 0 ? '' : ' '}watched <b class="nf">{nFilms}</b> {nFilms === 1 ? (hasTv ? 'film or show' : 'film') : (hasTv ? 'films and shows' : 'films')}</>}.
         </h1>
       ) : (
         <h1 class="title">Nothing finished in {year} yet.</h1>
       )}
     </div>
   </section>
+
+  <section class="pad strip-row rise d1"><ShelfStrip shelf={o.shelf} current="stats" /></section>
 
   <section class="pad bars-wrap">
     <div class="bars num" role="img" aria-label={`Finished per month in ${year}: ` + months.filter((m) => !m.future).map((m) => `${m.name} ${m.sum}`).join(', ')}>
@@ -154,8 +163,6 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
     </div>
   </section>
 
-  <section class="pad strip-row"><ShelfStrip shelf={o.shelf} current="stats" /></section>
-
   {inYear.length > 0 && (
     <section class="pad tiles num">
       {fav && (
@@ -166,28 +173,35 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
           <span class="muted small">{fav.data.rating != null && `${fav.data.rating} stars`}</span>
         </a>
       )}
-      <div class="card tile"><span class="eyebrow">Hours of film</span>
-        {filmsKnown.length ? <><span class="serif big" style="color: var(--sky)">{filmHours < 1 ? '<1' : fmt(filmHours)}</span><span class="muted small">{missing(films, filmsKnown) ? `About, from ${plural(filmsKnown.length, 'title')} with a runtime` : 'Counted from each runtime'}</span></>
-          : <span class="muted small">No runtimes saved for these yet.</span>}</div>
-      <div class="card tile"><span class="eyebrow">Pages</span>
-        {booksKnown.length ? <><span class="serif big" style="color: var(--book)">{fmt(pageSum)}</span><span class="muted small">{missing(books, booksKnown) ? `About, from ${plural(booksKnown.length, 'book')} with a page count` : 'Counted from each book’s pages'}</span></>
-          : <span class="muted small">No page counts saved for these yet.</span>}</div>
-      <div class="card tile"><span class="eyebrow">Longest streak</span>
-        <span class="serif big">{best} {best === 1 ? 'day' : 'days'}</span><span class="muted small">{activeDays} of {daysSoFar} days had something finished</span></div>
-      {topLang && <div class="card tile"><span class="eyebrow">Top language</span>
-        <span class="serif big lang" style="color: var(--moss)">{langName(topLang[0])}</span><span class="muted small">{plural(topLang[1], 'title')}, where a language is saved</span></div>}
-      <div class="card tile wide"><span class="eyebrow">How you rate</span>
-        {rated.length ? (
-          <div class="rate" role="img" aria-label={'Ratings: ' + steps.map((s, i) => `${s} stars ${rateCount[i]}`).join(', ')}>
-            {steps.map((s, i) => (
-              <div class="rcol">
-                <span class="rn">{rateCount[i] || ''}</span>
-                <div class="rbar" style={`height: ${Math.max(rateCount[i] ? 6 : 2, (rateCount[i] / maxRate) * 96)}px; background: ${RATE[i]}; opacity: ${rateCount[i] ? 1 : .35}`}></div>
-                <span class="rl">{stepLabel(s)}</span>
-              </div>
-            ))}
+      <div class:list={['right', !fav && 'alone']}>
+        <div class="card tile t1"><span class="eyebrow">Hours of film</span>
+          {filmsKnown.length ? <><span class="serif big" style="color: var(--sky)">{filmHours < 1 ? '<1' : fmt(filmHours)}</span><span class="muted small">{missing(films, filmsKnown) ? `About, from ${plural(filmsKnown.length, 'title')} with a runtime` : 'Counted from each runtime'}</span></>
+            : <span class="muted small">No runtimes saved for these yet.</span>}</div>
+        <div class="card tile t1"><span class="eyebrow">Pages</span>
+          {booksKnown.length ? <><span class="serif big" style="color: var(--book)">{fmt(pageSum)}</span><span class="muted small">{missing(books, booksKnown) ? `About, from ${plural(booksKnown.length, 'book')} with a page count` : 'Counted from each book’s pages'}</span></>
+            : <span class="muted small">No page counts saved for these yet.</span>}</div>
+        <div class="card tile t1 t1last"><span class="eyebrow">Longest streak</span>
+          <span class="serif big">{best} {best === 1 ? 'day' : 'days'}</span><span class="muted small">{activeDays} of {daysSoFar} days had something finished</span></div>
+        {opts.map((t, i) => (
+          <div class:list={['card tile opt', i === opts.length - 1 && opts.length % 2 === 1 && 'oddlast']} style={`--span: ${6 / opts.length}`}>
+            <span class="eyebrow">{t.label}</span>
+            <span class="serif big lang" style={`color: ${t.color}`}>{t.value}</span>
+            <span class="muted small">{t.note}</span>
           </div>
-        ) : <span class="muted small">Nothing rated in {year} yet.</span>}
+        ))}
+        <div class="card tile wide"><span class="eyebrow">How you rate</span>
+          {rated.length ? (
+            <div class="rate" role="img" aria-label={'Ratings: ' + steps.map((s, i) => `${s} stars ${rateCount[i]}`).join(', ')}>
+              {steps.map((s, i) => (
+                <div class="rcol">
+                  <span class="rn">{rateCount[i] || ''}</span>
+                  <div class="rbar" style={`height: ${Math.max(rateCount[i] ? 6 : 2, (rateCount[i] / maxRate) * 96)}px; background: var(--haldi); opacity: ${rateCount[i] ? 1 : .35}`}></div>
+                  <span class="rl">{stepLabel(s)}</span>
+                </div>
+              ))}
+            </div>
+          ) : <span class="muted small">Nothing rated in {year} yet.</span>}
+        </div>
       </div>
     </section>
   )}
@@ -208,7 +222,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
 
   {inYear.length > 0 && (
     <section class="pad cal">
-      <div class="rule between">
+      <div class="between">
         <h2 class="eyebrow">Day by day</h2>
         <div class="legend">Less {LV.map((l) => <span style={`background: ${l.c}; opacity: ${l.o}`}></span>)} More</div>
       </div>
@@ -253,7 +267,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
   :global(html[data-theme="dark"]) .words .nf { color: #A9C8E2; }
 
   /* the bars rise from where the painting fades into the page */
-  .bars-wrap { position: relative; margin-top: calc(-1 * clamp(70px, 9vw, 150px)); display: flex; flex-direction: column; gap: 14px; }
+  .bars-wrap { position: relative; padding-top: 34px; display: flex; flex-direction: column; gap: 14px; }
   .bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(8px, 2vw, 22px); align-items: end; max-width: 760px; margin: 0 auto; width: 100%; }
   .mcol { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-height: 185px; }
   .mt { font-size: 12px; font-weight: 600; color: var(--muted); }
@@ -264,14 +278,18 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
   .keys { display: flex; gap: 10px 26px; flex-wrap: wrap; justify-content: center; align-items: center; font-size: 13px; }
   .yrs { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-left: 10px; }
   .yrs .gchip[aria-current="page"] { background: var(--lat); color: var(--bg); }
-  .strip-row { padding-top: 34px; }
+  .strip-row { padding-top: 26px; }
 
-  .tiles { padding-top: 28px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .tiles { padding-top: 28px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 3fr); gap: 20px; align-items: stretch; }
+  .right { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 20px; align-content: start; min-width: 0; }
+  .right.alone { grid-column: 1 / -1; }
+  .t1 { grid-column: span 2; }
+  .opt { grid-column: span var(--span); }
   .tile { padding: 22px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .tile .big { font-size: clamp(38px, 4.4vw, 56px); line-height: 1.05; }
   .tile .big.lang { font-size: clamp(30px, 3.4vw, 42px); }
   .small { font-size: 13px; }
-  .fav { grid-row: span 3; gap: 12px; }
+  .fav { gap: 12px; }
   .favcover { width: min(100%, 220px); margin: 4px auto; }
   .pic { position: relative; aspect-ratio: 2 / 3; border-radius: 6px; overflow: hidden; display: flex; align-items: flex-end; padding: 8px; background: linear-gradient(to top, var(--hill) 0 28%, var(--bg) 28%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .12), 0 10px 16px -10px var(--shadow); }
   .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -279,7 +297,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
   .favcover .pt { font-size: 22px; padding: 6px; }
   .favname { font-size: 20px; line-height: 1.2; text-align: center; }
   .fav .small { text-align: center; }
-  .wide { grid-column: 2 / -1; }
+  .wide { grid-column: 1 / -1; }
   .rate { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: clamp(6px, 1.2vw, 14px); align-items: end; height: 150px; padding-top: 10px; }
   .rcol { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; }
   .rbar { width: 100%; max-width: 34px; border-radius: 4px 4px 0 0; }
@@ -292,6 +310,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
   .cmonth { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .more { color: var(--muted); letter-spacing: .1em; }
   .crow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .ctile:nth-child(n+4) { display: none; }
   .ctile { display: block; min-width: 0; transition: transform .2s ease; }
   .ctile:hover { transform: translateY(-3px); }
   .ctile:active { transform: scale(.97); }
@@ -315,20 +334,28 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
 
   @media (prefers-reduced-motion: reduce) { .stackbar { animation: none; } }
   @media (max-width: 1100px) {
-    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .fav { grid-row: auto; grid-column: 1 / -1; }
-    .wide { grid-column: 1 / -1; }
+    .tiles { grid-template-columns: minmax(0, 1fr); }
     .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 780px) {
     .hero { aspect-ratio: auto; min-height: 400px; }
     .hero .bg { background-position: 60% bottom; }
     .words { padding-top: 30px; }
-    .bars-wrap { margin-top: -80px; }
     .favcover { width: 150px; }
-    .tiles { gap: 12px; }
+    .tiles, .right { gap: 12px; }
+    .right { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .t1 { grid-column: span 1; }
+    .t1last { grid-column: span 2; }
+    .opt { grid-column: span 1; }
+    .opt.oddlast { grid-column: span 2; }
     .tile { padding: 18px; }
-    .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+    .cgrid { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+    /* one month a row; its covers scroll sideways, big enough to read the names */
+    .crow { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none; margin: 0 calc(var(--gut) * -1); padding: 2px var(--gut) 6px; }
+    .crow::-webkit-scrollbar { display: none; }
+    .ctile { flex: 0 0 118px; scroll-snap-align: start; }
+    .ctile:nth-child(n+4) { display: block; }
+    .ctile .pt { font-size: 15px; -webkit-line-clamp: 5; }
     .rate { gap: 4px; }
   }
 </style>
