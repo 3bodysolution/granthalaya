@@ -100,7 +100,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         </button>
         {me ? (
           <>
-            <a href="/add/" class="btn primary addbtn" aria-label="Add a book, film or essay" data-search-open="add"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></a>
+            <a href="/add/" class="btn primary addbtn" aria-label="Add a book, film, show or essay"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></a>
             <details class="menu">
               <summary class="avatar" aria-label="Your account">
                 <Face name={me.display_name || me.username} src={avatar} size={40} />
@@ -138,7 +138,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   <dialog class="search" id="search" aria-label="Search" data-src={me ? `/api/search?u=${me.username}` : ''}>
     <div class="search-top">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input type="search" placeholder="Search films, TV, books and people" aria-label="Search" autocomplete="off" spellcheck="false" aria-controls="search-list" />
+      <input type="search" placeholder="Search films, books, people" aria-label="Search" autocomplete="off" spellcheck="false" aria-controls="search-list" />
       <span class="search-wait" hidden><span class="ink" aria-hidden="true"></span></span>
       <kbd>esc</kbd>
     </div>
@@ -590,7 +590,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     });
 
     // ——— search (⌘K): your shelf, then films, TV, books, people and members ———
-    type Mine = { title: string; creator: string; kind: string; href: string; bg: string; r: string; year: string };
+    type Mine = { title: string; creator: string; kind: string; href: string; bg: string; r: string; year: string; cover?: string };
     let mine: Mine[] | null = null;
     let mineFrom = '';
     let sel = 0;
@@ -624,7 +624,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     function shelfRows(q: string, n: number) {
       const all = mine || [];
       const found = q ? all.filter((x) => (x.title + ' ' + x.creator + ' ' + x.year).toLowerCase().includes(q)) : all;
-      return found.slice(0, n).map((x) => row(x.href, `<span class="sthumb" style="background:${x.bg};border-radius:${x.r}"></span>`, x.title, `${x.creator} | ${x.year}`, x.kind, q));
+      return found.slice(0, n).map((x) => row(x.href, thumb(x.cover || undefined, false, x.bg), x.title, `${x.creator} | ${x.year}`, x.kind, q));
     }
     function renderEmpty() {
       const add = dialog().dataset.mode === 'add';
@@ -669,7 +669,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       d.dataset.mode = mode;
       const input = d.querySelector('input')!;
       input.value = '';
-      input.placeholder = mode === 'add' ? 'Find a book, film or show to add' : 'Search films, TV, books and people';
+      input.placeholder = 'Search films, books, people';
       d.showModal();
       input.focus();
       await loadMine();

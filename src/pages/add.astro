@@ -39,9 +39,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
 
       <!-- 1. what kind, and find it -->
       <div class="step" data-step="find">
-        <div class="kinds" role="tablist" aria-label="Kind">
-          {kinds.map(([k, label]) => <button type="button" role="tab" data-kind={k} aria-selected={k === start.kind ? 'true' : 'false'}>{label}</button>)}
-        </div>
         <form class="findbox" id="find">
           <label class="sr" for="q">Search a title or paste a link</label>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
@@ -49,12 +46,15 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         </form>
         <ul class="hits" id="hits" aria-live="polite"></ul>
         <p class="notice bad" id="finderr" hidden></p>
+        <p class="hint center" id="findhint">One search for books, films, TV and essays. Or paste a link from Goodreads, Letterboxd, IMDb, Substack or any article.</p>
         <button type="button" class="linkbtn" id="manual">Fill it in by hand →</button>
-        <p class="hint center" id="findhint">Works with Goodreads, Letterboxd, IMDb, Substack and most article links.</p>
       </div>
 
       <!-- 2. the details -->
       <form class="step" data-step="form" id="entry" novalidate>
+        <div class="kinds" id="mkinds" role="tablist" aria-label="What is it" hidden>
+          {kinds.map(([k, label]) => <button type="button" role="tab" data-kind={k} aria-selected={k === start.kind ? 'true' : 'false'}>{label}</button>)}
+        </div>
         <div class="preview">
           <span class="pc wash" id="pc"><img id="pcimg" alt="" hidden referrerpolicy="no-referrer" /></span>
           <div class="stack grow" style="gap: 6px">
@@ -163,6 +163,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
   #add .center { text-align: center; align-items: center; }
   #add .between { display: flex; justify-content: space-between; align-items: center; }
   #add .grow { flex: 1; min-width: 0; }
+  #add .kinds[hidden] { display: none; }
   #add .kinds { display: grid; grid-template-columns: repeat(4, 1fr); padding: 4px; border-radius: 12px; background: var(--soft); }
   #add .kinds::before { border-radius: 9px; background: var(--card); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
   #add .kinds button { position: relative; z-index: 1; height: 38px; border: 0; border-radius: 9px; background: transparent; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; transition: color .25s ease, transform .25s var(--spring); }
@@ -176,9 +177,14 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
   #add .hits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
   #add .hits button { width: 100%; text-align: left; display: flex; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; font-family: inherit; transition: transform .4s var(--spring), border-color .3s ease; }
   #add .hits button:hover { border-color: var(--lat); transform: translateX(4px); }
-  #add .hits .sw { width: 40px; height: 58px; border-radius: 3px; flex-shrink: 0; overflow: hidden; display: block; background-size: cover; background-position: center; }
+  #add .hits .sw { width: 44px; height: 66px; border-radius: 4px; flex-shrink: 0; overflow: hidden; display: block; background-size: cover; background-position: center; outline: 1px solid rgba(0, 0, 0, .1); outline-offset: -1px; }
   #add .hits .ht { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 18px; line-height: 1.2; }
   #add .hits .hm { font-size: 13px; color: var(--muted); }
+  #add .hits .glabel { padding: 8px 2px 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  #add .hits a { width: 100%; display: flex; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); transition: transform .4s var(--spring), border-color .3s ease; }
+  #add .hits a:hover { border-color: var(--lat); transform: translateX(4px); }
+  #add .hits .stack { min-width: 0; }
+  #add .hits .ht, #add .hits .hm { overflow-wrap: anywhere; }
   #add .sk { height: 66px; border-radius: 14px; background: linear-gradient(90deg, var(--soft), var(--card), var(--soft)); background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
   @keyframes shimmer { to { background-position: -200% 0; } }
   #add .linkbtn { align-self: flex-start; height: 36px; padding: 0; border: 0; background: transparent; color: var(--lat); font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
@@ -201,12 +207,12 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
   #add .stars-in button { position: relative; width: 50px; height: 50px; border: 0; background: transparent; line-height: 1; color: var(--line); cursor: pointer; padding: 0; transition: transform .3s var(--spring), color .2s ease; }
   #add .stars-in button.on { color: var(--haldi); }
   /* a half star is the half-star icon in saffron laid over the grey whole one */
-  #add .stars-in button :global(svg) { position: absolute; inset: 6px; width: 38px; height: 38px; }
-  #add .stars-in button :global(.s-half) { display: none; color: var(--haldi); }
-  #add .stars-in button.half :global(.s-half) { display: block; }
+  #add .stars-in button svg { position: absolute; inset: 6px; width: 38px; height: 38px; }
+  #add .stars-in button .s-half { display: none; color: var(--haldi); }
+  #add .stars-in button.half .s-half { display: block; }
   #add .stars-in button:active { transform: scale(.85); }
   #add .heart { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 46px; padding: 0 22px; border-radius: 23px; border: 1px solid var(--line); background: var(--bg); color: var(--muted); font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer; }
-  #add .heart :global(svg) { width: 18px; height: 18px; }
+  #add .heart svg { width: 18px; height: 18px; }
   #add .heart[aria-pressed="true"] { background: var(--lat); border-color: var(--lat); color: var(--bg); }
   #add .dates { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   #add .quick { display: flex; gap: 6px; }
@@ -274,10 +280,8 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
     const at = (s: string) => { root.dataset.at = s; window.scrollTo({ top: 0, behavior: 'smooth' }); };
     const setKind = (k: Kind) => {
       kind = k; root.dataset.kind = k;
+      if (manual) $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[k]} | by hand`;
       root.querySelectorAll<HTMLElement>('[data-kind]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.kind === k)));
-      ($('q') as HTMLInputElement).placeholder = k === 'essay' ? 'Paste the link to the essay or article' : k === 'tv' ? 'Search a show' : 'Search a title, or paste a link';
-      ($('hits')).innerHTML = '';
-      $('findhint').textContent = k === 'tv' ? 'Find the show, then pick the season you watched.' : 'Works with Goodreads, Letterboxd, IMDb, Substack and most article links.';
       f('creator').placeholder = k === 'book' ? 'Author' : k === 'film' ? 'Director' : k === 'tv' ? 'Created by' : 'Writer';
       $('noteslbl').textContent = k === 'essay' ? 'Why you saved it' : 'A few lines to remember';
       $('againhint').textContent = k === 'book' || k === 'essay' ? 'A re-read. Your first time stays as its own entry.' : 'A re-watch. Your first time stays as its own entry.';
@@ -327,6 +331,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
     }
     function toForm(t: any, isManual = false) {
       manual = isManual;
+      $('mkinds').hidden = !isManual;
       if (isManual) {
         $('pc').style.background = '#46525E'; ($('pcimg') as HTMLImageElement).hidden = true;
         $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[kind]} | by hand`;
@@ -344,23 +349,46 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       const u = sw.dataset.cover ?? '';
       if (/^https?:\/\/[^\s"'()\\]+$/.test(u)) sw.style.backgroundImage = `url("${u}")`;
     });
+    const KIND: Record<string, string> = { book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' };
+    const hitRow = (h: any, i: number) => `<li><button type="button" data-hit="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(h.cover ?? '')}"></span>
+        <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(h.title)}</span><span class="hm">${esc([h.creator, h.year].filter(Boolean).join(' | '))}</span></span></button></li>`;
+    // what is already on your shelf, with covers, while the box is empty (a link to the entry, to log it again from there)
+    let recent: any[] | null = null;
+    async function showRecent() {
+      const hits = $('hits');
+      if (recent === null) recent = await fetch(`/api/search?u=${encodeURIComponent(root!.dataset.me!)}`).then((x) => x.json()).catch(() => []);
+      if (($('q') as HTMLInputElement).value.trim().length >= 2 || !recent!.length) return;
+      hits.innerHTML = '<li class="glabel">Recently on your shelf</li>' + recent!.slice(0, 6).map((x: any) => `<li><a href="${esc(x.href)}"><span class="sw" style="background:${esc(x.bg)}" data-cover="${esc(x.cover ?? '')}"></span>
+        <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(x.title)}</span><span class="hm">${esc([x.creator, x.kind].filter(Boolean).join(' | '))}</span></span></a></li>`).join('');
+      paintCovers(hits);
+    }
+    // one search for everything: films, TV and books side by side (a pasted link is looked up on its own)
     async function search() {
       const q = ($('q') as HTMLInputElement).value.trim();
       const hits = $('hits'), err = $('finderr');
       err.hidden = true;
-      if (q.length < 2) { hits.innerHTML = ''; return; }
-      if (kind === 'essay' && !/^https?:\/\//i.test(q)) { hits.innerHTML = ''; return; }
+      if (q.length < 2) { hits.innerHTML = ''; showRecent(); return; }
       const my = ++seq;
       hits.innerHTML = '<li class="sk"></li><li class="sk"></li>';
-      const r = await fetch(`/api/lookup?type=${kind}&q=${encodeURIComponent(q)}`).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
+      const ask = (type: string) => fetch(`/api/lookup?type=${type}&q=${encodeURIComponent(q)}`).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
+      const isLink = /^https?:\/\//i.test(q);
+      const answers = isLink ? [await ask('essay')] : await Promise.all(['film', 'tv', 'book'].map(ask));
       if (my !== seq) return;
-      if (r.error) { hits.innerHTML = ''; err.textContent = r.error; err.hidden = false; return; }
-      const list: any[] = r.hits ?? [];
-      if (!list.length) { hits.innerHTML = `<li class="muted small" style="padding: 6px 2px">Nothing found. Try other words, or fill it in by hand.</li>`; return; }
-      hits.innerHTML = list.map((h, i) => `<li><button type="button" data-hit="${i}"><span class="sw" style="background:#46525E" data-cover="${esc(h.cover ?? '')}"></span>
-        <span class="stack" style="gap:3px;min-width:0"><span class="ht">${esc(h.title)}</span><span class="hm">${esc([h.creator, h.year, h.kind !== kind ? ({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[h.kind] : ''].filter(Boolean).join(' | '))}</span></span></button></li>`).join('');
+      const failed = answers.every((a: any) => a.error);
+      if (failed) { hits.innerHTML = ''; err.textContent = answers[0].error; err.hidden = false; return; }
+      const flat: any[] = [];
+      let html = '';
+      const order = isLink ? [''] : ['Films', 'TV', 'Books'];
+      answers.forEach((a: any, n: number) => {
+        const list: any[] = (a.hits ?? []).slice(0, isLink ? 10 : 4);
+        if (!list.length) return;
+        if (order[n]) html += `<li class="glabel">${order[n]}</li>`;
+        html += list.map((h) => hitRow(h, flat.push(h) - 1)).join('');
+      });
+      if (!flat.length) { hits.innerHTML = `<li class="muted small" style="padding: 6px 2px">Nothing found. Try other words, or fill it in by hand.</li>`; return; }
+      hits.innerHTML = html;
       paintCovers(hits);
-      hits.querySelectorAll<HTMLButtonElement>('[data-hit]').forEach((b) => b.addEventListener('click', () => choose(list[+b.dataset.hit!])));
+      hits.querySelectorAll<HTMLButtonElement>('[data-hit]').forEach((bt) => bt.addEventListener('click', () => choose(flat[+bt.dataset.hit!])));
     }
     async function choose(h: any) {
       if (h.kind !== kind) setKind(h.kind);
@@ -386,8 +414,9 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
     }
 
     // wire up
-    root.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach((b) => b.addEventListener('click', () => { setKind(b.dataset.kind as Kind); ($('q') as HTMLInputElement).focus(); search(); }));
+    root.querySelectorAll<HTMLButtonElement>('[data-kind]').forEach((b) => b.addEventListener('click', () => setKind(b.dataset.kind as Kind)));
     $('q').addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(search, 400); });
+    if (start.mode === 'new') showRecent();
     $('find').addEventListener('submit', (ev) => { ev.preventDefault(); clearTimeout(timer); search(); });
     $('manual').addEventListener('click', () => { pick = null; titleId = null; toForm({ title: ($('q') as HTMLInputElement).value.trim() }, true); });
     $('change').addEventListener('click', () => { if (start.mode === 'edit') return; at('find'); ($('q') as HTMLInputElement).focus(); });

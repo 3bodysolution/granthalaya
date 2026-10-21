@@ -194,7 +194,7 @@ body, .card, .btn, .chip, .iconbtn, .site-wrap, .foot-wrap, .rule { transition: 
 .search-list a { display: flex; align-items: center; gap: 14px; padding: 10px 12px; border-radius: 12px; }
 .search-list a:hover, .search-list a[aria-selected="true"] { background: var(--soft); color: inherit; }
 .search-list .sw { width: 30px; height: 44px; flex-shrink: 0; }
-.sthumb { width: 32px; height: 46px; flex-shrink: 0; border-radius: 4px; overflow: hidden; display: block; }
+.sthumb { width: 36px; height: 54px; flex-shrink: 0; border-radius: 4px; overflow: hidden; display: block; outline: 1px solid rgba(0, 0, 0, .1); outline-offset: -1px; }
 .sthumb.round { width: 40px; height: 40px; border-radius: 50%; }
 .sthumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .stext { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -357,3 +357,12 @@ html[data-theme="dark"] :is(.cv.real > .pic, .hc .pic, .pt-cover img) { outline-
 
 /* a thin vertical bar between pieces of information on one line (see ui/Bars.astro) */
 .vbar { display: inline-block; width: 1px; height: .95em; margin: 0 .65em; background: currentColor; opacity: .32; vertical-align: -.12em; }
+
+/* the search panel on a phone: no keyboard hints, and the placeholder is never cut off */
+@media (max-width: 780px) {
+  .search-top kbd, .search-foot span { display: none; }
+  .search-top { padding: 0 14px; gap: 10px; }
+  .search-top input { min-width: 0; font-size: 16px; text-overflow: ellipsis; }
+  .search-foot { justify-content: flex-start; }
+  .search { margin-top: 8vh; }
+}
