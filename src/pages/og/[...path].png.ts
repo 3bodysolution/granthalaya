@@ -8,6 +8,7 @@ import { olBook, gbBook, bookKey } from '../../lib/catalog/books';
 import { rowBySlug } from '../../lib/catalog/onsite';
 import { loadProfile, loadDetails, loadVisits, loadCollections } from '../../lib/data';
 import { statusLabel } from '../../lib/kinds';
+import { credit, creditFor } from '../../lib/cards/credits';
 import { drawPreview, type PreviewData } from '../../lib/cards/preview';
 export const prerender = false;
 
@@ -27,7 +28,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       const p = id ? await (type === 'film' ? film(id) : show(id)) : null;
       if (p) card = {
         kicker: KIND[type], title: p.title, accent: 'film', line: p.tagline,
-        meta: meta(p.year, type === 'film' ? 'directed by' : 'created by', (p.kind === 'film' ? p.directors : p.creators)[0]?.name),
+        meta: meta(p.year, type === 'film' ? 'directed by' : 'created by', credit((p.kind === 'film' ? p.directors : p.creators).map((x) => x.name))),
         covers: [{ src: p.poster, title: p.title }],
       };
     } else if (type === 'book') {
@@ -39,7 +40,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         const row = await rowBySlug(sb, 'book', k.slug);
         if (row) card = { kicker: KIND.book, title: row.title, accent: 'book', meta: meta(row.year ?? undefined, 'by', row.creator), covers: [{ src: row.cover_url ?? undefined, title: row.title }] };
       }
-      if (bk) card = { kicker: KIND.book, title: bk.title, accent: 'book', meta: meta(bk.year, 'by', bk.authors[0]?.name), covers: [{ src: bk.cover, title: bk.title }] };
+      if (bk) card = { kicker: KIND.book, title: bk.title, accent: 'book', meta: meta(bk.year, 'by', credit(bk.authors.map((x) => x.name))), covers: [{ src: bk.cover, title: bk.title }] };
     } else if (sb && (type === 'u' || type === 'e' || type === 'c')) {
       shared = false;
       const found = await loadProfile(sb, String(a ?? '').toLowerCase(), locals.me);
@@ -62,7 +63,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         card = {
           kicker: `@${profile.username} | ${statusLabel(d.type, d.status)}`, title: d.title, rating: d.rating,
           accent: d.type === 'book' ? 'book' : d.type === 'essay' ? 'plain' : 'film',
-          meta: meta(d.year, d.type === 'film' ? 'directed by' : d.type === 'tv' ? 'created by' : 'by', d.creator),
+          meta: meta(d.year, d.type === 'film' ? 'directed by' : d.type === 'tv' ? 'created by' : 'by', await creditFor(e)),
           covers: [{ src: d.cover, title: d.title, color: d.color }],
         };
       } else {

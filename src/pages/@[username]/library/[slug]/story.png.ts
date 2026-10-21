@@ -6,6 +6,7 @@ import type { APIRoute } from 'astro';
 import { loadProfile, loadVisits } from '../../../../lib/data';
 import { statusLabel } from '../../../../lib/kinds';
 import { drawStory } from '../../../../lib/cards/story';
+import { creditFor } from '../../../../lib/cards/credits';
 import { titleLine } from '../../../../lib/cards/tagline';
 export const prerender = false;
 
@@ -41,7 +42,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     const d = entry.data;
     const line = custom || await titleLine(sb, entry);
     png = await drawStory({
-      kind: d.type, title: d.title, year: d.year, creator: d.creator || undefined, season: d.season,
+      kind: d.type, title: d.title, year: d.year, creator: (await creditFor(entry)) || undefined, season: d.season,
       rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line: line || undefined,
       owner: profile.username, cover: d.cover, color: d.color,
     });
