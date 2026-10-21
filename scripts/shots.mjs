@@ -32,6 +32,9 @@ for (const [label, viewport] of Object.entries(sizes)) {
     errors.length = 0;
     await page.goto(base + p, { waitUntil: 'networkidle', timeout: 45000 }).catch(() => { /* timeout: take the picture of what loaded */ });
     await page.waitForTimeout(600);
+    // the paper texture is fixed to the screen (so visitors never see an edge); a whole-page picture only has one screen of it,
+    // so for the picture only, stretch it over the whole page
+    if (!fold) await page.addStyleTag({ content: 'html[data-theme="light"] body { position: relative; } html[data-theme="light"] body::before { position: absolute !important; }' });
     const file = `${out}/${nameOf(p)}.${label}.png`;
     await page.screenshot({ path: file, fullPage: !fold });
     // sideways scroll on the page itself is a layout bug on a phone
