@@ -1,0 +1,24 @@
+---
+// "In 2 collections": one dropdown listing the collections an entry is in, each a link to that collection.
+interface Props { items: { title: string; href: string }[]; class?: string }
+const { items, class: cls } = Astro.props;
+---
+{items.length > 0 && (
+  <details class:list={['menu incol', cls]}>
+    <summary class="chip" aria-label={`In ${items.length} ${items.length === 1 ? 'collection' : 'collections'}`}>
+      {`In ${items.length} ${items.length === 1 ? 'collection' : 'collections'}`}
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+    </summary>
+    <div class="menu-list" role="menu">
+      {items.map((c) => <a role="menuitem" href={c.href}>{c.title}</a>)}
+    </div>
+  </details>
+)}
+<style>
+  .incol { display: inline-block; }
+  .incol > summary { display: inline-flex; align-items: center; gap: 8px; }
+  .incol .menu-list { left: 0; right: auto; min-width: min(280px, calc(100vw - 2 * var(--gut))); max-width: calc(100vw - 2 * var(--gut)); }
+  .incol .menu-list a { overflow-wrap: anywhere; }
+  .incol[open] > summary svg { transform: rotate(180deg); }
+  .incol > summary svg { transition: transform .2s ease; }
+</style>

@@ -17,6 +17,7 @@ import Plus from '@tabler/icons/outline/plus.svg';
 import Lock from '@tabler/icons/outline/lock.svg';
 import Route from '@tabler/icons/outline/route.svg';
 import Mark from '../../../components/ui/Mark.astro';
+import InCollections from '../../../components/InCollections.astro';
 import { openShelf } from '../../../lib/shelfpage';
 import { md } from '../../../lib/md';
 import {
@@ -156,12 +157,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <div class="note" set:html={notes} />
             </div>
           )}
-          {inCols.length > 0 && (
-            <div class="chips rise d6">
-              <span class="sub" style="margin-right: 4px">In collections</span>
-              {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} | {t.pos} of {t.of}</a>)}
-            </div>
-          )}
+          {inCols.length > 0 && <div class="chips rise d6"><InCollections items={inCols.map((t) => ({ title: t.title, href: collectionHref(t) }))} /></div>}
           {visits.length > 1 && (
             <div class="stack rise d6" style="gap: 10px; margin-top: 8px">
               <p class="sub">Every time</p>
@@ -287,12 +283,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
         )}
         {!isMe && me && <PersonMenu username={profile.username} id={profile.id} isMe={false} signedIn={true} blocked={false} logId={entry.logId} />}
       </div>
-      {inCols.length > 0 && (
-        <div class="chips rise d5">
-          <span class="sub" style="margin-right: 4px">In collections</span>
-          {inCols.map((t, i) => <a href={collectionHref(t)} class:list={['chip', i === 0 && 'on']}>{t.title} | {t.pos} of {t.of}</a>)}
-        </div>
-      )}
+      {inCols.length > 0 && <div class="chips rise d5"><InCollections items={inCols.map((t) => ({ title: t.title, href: collectionHref(t) }))} /></div>}
       {(prev || next) && (
         <div class="pn rise d5">
           {prev ? <a href={href(prev)} class="stack" style="gap: 4px"><span class="sub" style="font-size: 11px">← Previous in collection</span><span class="serif" style="font-size: 18px">{prev.data.title}</span></a> : <span></span>}

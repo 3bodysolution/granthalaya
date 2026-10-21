@@ -186,9 +186,10 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
   .phead { position: relative; margin-top: -56px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: end; gap: 22px; }
   .phead :global(.pface) { box-shadow: 0 0 0 5px var(--bg), 0 18px 30px -14px var(--shadow); }
   .pid { padding-bottom: 8px; min-width: 0; }
-  .pname { margin: 0; font-weight: 400; font-size: 34px; line-height: 1; }
+  .pname { margin: 0; font-weight: 400; font-size: 34px; line-height: 1; overflow-wrap: anywhere; }
   .lock { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--soft); color: var(--muted); }
   .pmeta { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; font-size: 14px; color: var(--muted); }
+  .pmeta > * { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
   .edit { margin-bottom: 12px; height: 38px; }
   .nums { display: flex; padding-bottom: 6px; }
   .num-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 18px; border-left: 1px solid var(--line); }
@@ -226,15 +227,17 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
   .private p { margin: 0 0 8px; }
   @media (max-width: 980px) {
     .phead { grid-template-columns: auto minmax(0, 1fr); }
-    .nums { grid-column: 1 / -1; justify-content: space-between; }
+    .nums { grid-column: 1 / -1; justify-content: space-between; order: 4; }
     .num-cell:first-child { padding-left: 0; }
-    .edit { position: absolute; right: 0; top: 64px; }
+    /* Edit profile sits on its own line under the name and links, never over them */
+    .edit { grid-column: 1 / -1; order: 3; justify-self: start; margin: 0; }
     .pbody { grid-template-columns: 1fr; }
     .recent { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 600px) {
     .phead :global(.pface) { width: 88px !important; height: 88px !important; font-size: 38px !important; }
     .pname { font-size: 28px; }
+    .phead { gap: 14px 16px; }
     .num-cell { padding: 0 10px; }
     .favs { gap: 10px; }
   }
