@@ -1,7 +1,9 @@
 ---
 // A cover: the real book cover or film poster when there is one (see coverSrc), otherwise one painted from the title.
-// variant: tile (library grid) | poster (Start here) | mini (Sits well next to) | swatch (small thumbnails)
-import { palette, radius, kind, excerpt, short, coverSrc, type Entry } from '../lib/data';
+// Every cover is a 2:3 frame and the picture fills it (object-fit: cover): no mat, no border, only the hairline outline from
+// global.css. A painted placeholder is for a title that truly has no cover.
+// variant: tile (library grid) | poster | mini (Sits well next to, favourites) | swatch (small thumbnails, sized by w and h)
+import { palette, radius, kind, excerpt, coverSrc, type Entry } from '../lib/data';
 
 interface Props {
   entry: Entry;
@@ -17,117 +19,52 @@ const d = entry.data;
 const vars = `--c-bg:${p.bg};--c-accent:${p.accent};--c-hill:${p.hill};--c-r:${radius(entry)}`;
 const tname = vt ? `cover-${entry.id.replace(/[^a-z0-9-]/gi, '')}` : undefined;
 const src = coverSrc(entry);
-const stub = d.type === 'tv' && d.season
-  ? `SEASON ${d.season} | ${short(d.date).toUpperCase()}`
-  : `${short(d.date).toUpperCase()}${d.where ? ' | ' + d.where.toUpperCase() : ''}`;
-const isFilm = d.type === 'film' || d.type === 'tv';
+const isEssay = d.type === 'essay';
 ---
-{variant === 'tile' && d.type === 'book' && (
-  <div class:list={['c book', src ? 'real' : 'wash']} style={vars} transition:name={tname}>
-    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-    <i class="spine" /><i class="sun" /><i class="hill" />
-    <span class="k">Book</span>
-    <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}</span></span>
-  </div>
-)}
-{variant === 'tile' && isFilm && (
-  <div class="film" style={vars} transition:name={tname}>
-    <div class:list={['c filmtop', src ? 'real' : 'wash']}>
-      {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-      <i class="sun" /><i class="hill" />
-      <span class="k">{kind(entry)}</span>
-      <span class="tt"><span class="serif">{d.title}</span><span class="by">{d.creator}{d.year ? ` | ${d.year}` : ''}</span></span>
-    </div>
-    <div class="type stub ticket"><b>{d.type === 'tv' ? 'NOW SHOWING' : 'ADMIT ONE'}</b><span>{stub}</span></div>
-  </div>
-)}
-{variant === 'tile' && d.type === 'essay' && (
+{variant === 'tile' && isEssay ? (
   <div class="essay" transition:name={tname}>
     <span class="type src">{(d.source ?? d.creator).toUpperCase()}</span>
     <span class="serif et">{d.title}</span>
     <span class="serif ex">{excerpt(entry, 96)}</span>
     <span class="go">{d.status === 'want' ? 'Saved for later ↗' : 'Note + link ↗'}</span>
   </div>
-)}
-{variant === 'poster' && (
-  <div class:list={['c poster', src ? 'real' : 'wash']} style={vars}>
+) : (
+  <span class:list={['cv', variant, src ? 'real' : 'wash']} style={variant === 'swatch' ? `${vars};width:${w}px;height:${h}px` : vars} transition:name={tname} aria-hidden={variant === 'swatch' ? 'true' : undefined}>
     {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-    <i class="sun" /><i class="hill" />
-    <span class="serif num pn">{n}</span>
-    <span class="tt"><span class="serif">{d.title}</span><span class="pk">{kind(entry)}</span></span>
-  </div>
-)}
-{variant === 'mini' && (
-  <div class:list={['c mini', src ? 'real' : 'wash']} style={vars}>
-    {src && <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-    <i class="sun" /><i class="hill" />
-    <span class="serif mt">{d.title}</span>
-  </div>
-)}
-{variant === 'swatch' && (
-  <span class:list={['c sw', src ? 'real' : 'wash']} style={`${vars};width:${w}px;height:${h}px`} aria-hidden="true">
-    {src ? <img class="pic" src={src} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" /> : w >= 60 && (<><i class="sun" /><i class="hill" /></>)}
+    {variant !== 'swatch' && <><i class="sun" /><i class="hill" /></>}
+    {variant === 'poster' && <span class="serif pn">{n}</span>}
+    {variant !== 'swatch' && (
+      <span class="tt">
+        <span class="serif">{d.title}</span>
+        {variant === 'tile' && d.creator && <span class="by">{d.creator}</span>}
+      </span>
+    )}
   </span>
 )}
 
 <style>
-  .c { background: var(--c-bg); border-radius: var(--c-r); box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #F6EEDF; }
-  .c > * { position: relative; }
-  .sun, .hill, .spine { position: absolute; display: block; }
-  .sun { border-radius: 50%; background: var(--c-accent); opacity: .78; }
-  .hill { left: -20%; width: 140%; border-radius: 50% 50% 0 0; background: var(--c-hill); }
-  .spine { left: 0; top: 0; bottom: 0; width: 12px; background: linear-gradient(90deg, rgba(0,0,0,.3), rgba(255,255,255,.08) 70%, rgba(0,0,0,0)); }
-  .k { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
-  .tt { display: flex; flex-direction: column; gap: 4px; }
-  .tt .serif { font-size: 20px; line-height: 1.1; overflow-wrap: anywhere; }
+  /* the frame: 2:3, the picture fills it. (A rule like `.cv > *` that makes children position: relative would pull the picture
+     back into the flow and leave a coloured mat around it: the picture is always absolutely placed.) */
+  .cv { position: relative; display: block; overflow: hidden; background: var(--c-bg); border-radius: var(--c-r); color: #F6EEDF; box-shadow: 0 10px 16px -12px var(--shadow); }
+  .tile, .poster, .mini { width: 100%; aspect-ratio: 2 / 3; }
+  .sw { flex-shrink: 0; }
+  .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; -webkit-user-select: none; user-select: none; }
+
+  /* the painted placeholder (no cover at all) */
+  .sun, .hill { position: absolute; display: block; }
+  .sun { width: 56%; aspect-ratio: 1; border-radius: 50%; right: -12%; top: 22%; background: var(--c-accent); opacity: .78; }
+  .hill { left: -20%; width: 140%; bottom: -8px; height: 32%; border-radius: 50% 50% 0 0; background: var(--c-hill); }
+  .tt { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .tt .serif { font-size: 18px; line-height: 1.12; overflow-wrap: anywhere; }
+  .mini .tt .serif { font-size: 15px; }
   .by { font-size: 11px; opacity: .85; }
-
-  .book { height: 250px; padding: 14px 14px 14px 22px; box-shadow: 3px 3px 0 -1px var(--card), 4px 4px 0 -1px var(--line), 6px 6px 0 -2px var(--card), 7px 7px 0 -2px var(--line), 8px 14px 20px -6px var(--shadow); }
-  .book .sun { width: 120px; height: 120px; right: -28px; top: 64px; }
-  .book .hill { bottom: -10px; height: 86px; }
-
-  .film { height: 250px; display: flex; flex-direction: column; filter: drop-shadow(0 12px 12px var(--shadow)); }
-  .filmtop { height: 192px; flex-shrink: 0; border-radius: 6px 6px 0 0; padding: 14px; }
-  .filmtop .sun { width: 110px; height: 110px; right: -24px; top: 40px; }
-  .filmtop .hill { bottom: -10px; height: 66px; }
-  .ticket { flex-grow: 1; background: var(--card); border-top: 2px dashed var(--line); border-radius: 0 0 6px 6px; padding: 8px 14px; display: flex; flex-direction: column; justify-content: center; gap: 2px; }
-  .ticket b { font-size: 12px; font-weight: 700; letter-spacing: .2em; color: var(--lat); }
-  .ticket span { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pn { position: absolute; left: 14px; top: 12px; font-size: 40px; line-height: 1; opacity: .9; }
+  .real > :not(.pic) { display: none; }
 
   .essay { height: 250px; background: var(--card); padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--line); border-top: 4px solid var(--sky); border-radius: 6px; box-shadow: 0 14px 22px -10px var(--shadow); overflow: hidden; }
   .src { font-size: 11px; letter-spacing: .08em; color: var(--sky); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .et { font-size: 20px; line-height: 1.15; }
   .ex { font-size: 13px; line-height: 1.5; color: var(--muted); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
   .go { margin-top: auto; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--lat); }
-
-  .poster { height: 300px; padding: 16px; box-shadow: 0 18px 28px -14px var(--shadow); }
-  .poster .sun { width: 150px; height: 150px; right: -34px; top: 80px; }
-  .poster .hill { bottom: -12px; height: 104px; }
-  .pn { font-size: 44px; line-height: 1; opacity: .9; }
-  .poster .tt .serif { font-size: 22px; }
-  .pk { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; opacity: .85; }
-
-  .mini { height: 200px; padding: 12px; justify-content: flex-end; box-shadow: 0 12px 20px -8px var(--shadow); }
-  .mini .sun { width: 90px; height: 90px; right: -20px; top: 44px; }
-  .mini .hill { bottom: -10px; height: 70px; }
-  .mt { font-size: 17px; line-height: 1.1; }
-
-  .sw { display: block; flex-shrink: 0; box-shadow: 0 8px 14px -8px var(--shadow); }
-  .sw .sun { width: 70%; aspect-ratio: 1; right: -16%; top: 26%; }
-  .sw .hill { bottom: -8%; height: 38%; }
-
-  /* real covers: the picture fills the shape; the painted sun, hill and title step aside */
-  .real { position: relative; overflow: hidden; }
-  .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-select: none; user-select: none; }
-  .real > :not(.pic):not(.spine) { visibility: hidden; }
-  .real .spine { z-index: 1; visibility: visible; }
-  .real.filmtop .k { visibility: visible; z-index: 1; align-self: flex-start; padding: 3px 7px; border-radius: 4px; background: rgba(12, 14, 18, .55); }
-  .real.poster .pn { visibility: visible; z-index: 1; text-shadow: 0 2px 10px rgba(0, 0, 0, .6); }
-
-  @media (max-width: 780px) {
-    .book, .film, .essay { height: 230px; }
-    .filmtop { height: 172px; }
-    .poster { height: 240px; }
-    .mini { height: 170px; }
-  }
+  @media (max-width: 780px) { .essay { height: 230px; } }
 </style>

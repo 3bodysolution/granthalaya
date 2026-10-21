@@ -20,7 +20,7 @@ import Mark from '../../../components/ui/Mark.astro';
 import { openShelf } from '../../../lib/shelfpage';
 import { md } from '../../../lib/md';
 import {
-  loadShelf, loadCollections, loadVisits, href, palette, coverSrc, stars, starsLabel, long, ticketDate, timesWord,
+  loadShelf, loadCollections, loadVisits, href, palette, coverSrc, stars, starsLabel, long, timesWord,
   minutes, duration, kind, collectionsFor, excerpt, fullTitle, collectionHref, linesHref, pickLine, type Entry,
 } from '../../../lib/data';
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
@@ -60,10 +60,7 @@ for (const t of inCols) for (const it of t.items) {
 for (const e of all) if (related.length < 6 && e.id !== entry.id && e.data.type === d.type && !related.includes(e)) related.push(e);
 const rel = related.slice(0, 6);
 
-// film number this year, for the ticket
 const year = d.date.getUTCFullYear();
-const filmNo = d.type === 'film' && d.status === 'done' ? all.filter((e) => e.data.type === 'film' && e.data.status === 'done' && e.data.date.getUTCFullYear() === year)
-  .sort((a, b) => a.data.date.getTime() - b.data.date.getTime()).findIndex((e) => e.logId === entry.logId) + 1 : 0;
 
 // the film or book's own page (cast, where to watch, what others thought)
 const about = titlePageHref({ kind: d.type, slug: entry.id, title: d.title, tmdb_id: d.tmdbId ?? null, ol_key: d.olKey ?? null, link: d.link ?? null });
@@ -94,6 +91,11 @@ const ICON: Record<Status, any> = { want: null, reading: BookOpen, watching: Pla
 let mine: Entry[] = [];
 if (me && !isMe) mine = await loadVisits(sb, me, slug);
 const dateRow = d.status === 'want' ? `Added ${long(d.date)}` : d.status === 'done' ? `${d.type === 'film' || d.type === 'tv' ? 'Watched' : 'Finished'} ${long(d.finished ?? d.date)}` : `Started ${long(d.started ?? d.date)}`;
+const longDay = (dt?: Date) => (dt ? dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '');
+const whenLine = d.status === 'done' ? `${isFilm ? 'Watched' : 'Read'} on ${longDay(d.finished ?? d.date)}`
+  : d.status === 'want' ? `Added on ${longDay(d.date)}`
+  : d.status === 'reading' || d.status === 'watching' ? `Started on ${longDay(d.started ?? d.date)}`
+  : `${statusLabel(d.type, d.status)} on ${longDay(d.date)}`;
 const againWord = isFilm ? 'Watch it again' : 'Read it again';
 const verb = isFilm ? 'watch' : 'read';
 const link = new URL(href(entry), Astro.url).href;
@@ -117,27 +119,12 @@ const pinnedId = shown?.pinned ? shown.id : null;
 
       <section class="pad top">
         <div class="side">
-          {isFilm ? (
-            <div class="hero-film" transition:name={tname}>
-              <div class:list={['hc', cover ? 'real' : 'wash']} style={`background: ${p.bg}`}>
-                {cover && <img class="pic" src={cover} alt={`${d.title} poster`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-                <i class="sun" style={`background: ${p.accent}`}></i><i class="hill" style={`background: ${p.hill}`}></i>
-                <span class="hk">{kind(entry)}{d.year ? ` | ${d.year}` : ''}</span>
-                <span class="serif ht">{d.title}</span>
-              </div>
-              <div class="type stub lg ticket">
-                <div class="tr"><b>{d.type === 'tv' ? 'NOW SHOWING' : 'ADMIT ONE'}</b>{filmNo > 0 && <span class="num">FILM {filmNo} / {year}</span>}{d.type === 'tv' && d.season && <span class="num">SEASON {d.season}</span>}</div>
-                <span>{ticketDate(d.date)}{d.where ? ` | ${d.where.toUpperCase()}` : ''}</span>
-              </div>
-            </div>
-          ) : (
-            <div class:list={['hc hero-book', cover ? 'real' : 'wash']} style={`background: ${p.bg}`} transition:name={tname}>
-              {cover && <img class="pic" src={cover} alt={`${d.title} cover`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-              <i class="spine"></i><i class="sun" style={`background: ${p.accent}`}></i><i class="hill" style={`background: ${p.hill}`}></i>
-              <span class="hk">Book{d.year ? ` | ${d.year}` : ''}</span>
-              <span class="bt"><span class="serif ht">{d.title}</span><span class="hb">{d.creator}</span></span>
-            </div>
-          )}
+          <div class:list={['hc hero', cover ? 'real' : 'wash']} style={`background: ${p.bg}`} transition:name={tname}>
+            {cover && <img class="pic" src={cover} alt={`${d.title} ${isFilm ? 'poster' : 'cover'}`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
+            <i class="sun" style={`background: ${p.accent}`}></i><i class="hill" style={`background: ${p.hill}`}></i>
+            <span class="bt"><span class="serif ht">{d.title}</span><span class="hb">{d.creator}</span></span>
+          </div>
+          <p class="when num">{whenLine}</p>
           <div class="counts" aria-label="On Granthalaya">
             <span title={`${isFilm ? 'Watched' : 'Read'} by ${seen ?? 0} ${seen === 1 ? 'person' : 'people'} here`}><Eye />{seen ?? 0}</span>
             <span title={`Saved by ${wanted ?? 0} ${wanted === 1 ? 'person' : 'people'} here`}><Mark solid size={15} />{wanted ?? 0}</span>
@@ -335,28 +322,17 @@ const pinnedId = shown?.pinned ? shown.id : null;
   .banner { height: 280px; background-position: center 62%; }
   .top { position: relative; margin-top: -170px; display: flex; gap: 56px; align-items: flex-start; }
   .side { flex-shrink: 0; width: 260px; display: flex; flex-direction: column; gap: 12px; }
-  .hero-film, .hero-book { animation: hero .95s var(--spring) backwards; }
-  .hero-film { display: flex; flex-direction: column; filter: drop-shadow(0 22px 22px var(--shadow)); }
-  .hc { color: #F6EEDF; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; }
-  .hc > * { position: relative; }
-  .hc.real { position: relative; overflow: hidden; }
-  .hc .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
-  .hc.real > :not(.pic):not(.spine) { visibility: hidden; }
-  .hc.real .spine { z-index: 1; }
-  .hc .sun, .hc .hill, .hc .spine { position: absolute; display: block; }
-  .hc .sun { width: 170px; height: 170px; border-radius: 50%; right: -40px; top: 90px; opacity: .78; }
-  .hc .hill { left: -20%; width: 140%; bottom: -12px; height: 125px; border-radius: 50% 50% 0 0; }
-  .hc .spine { left: 0; top: 0; bottom: 0; width: 16px; background: linear-gradient(90deg, rgba(0,0,0,.32), rgba(255,255,255,.08) 70%, rgba(0,0,0,0)); }
-  .hero-film .hc { height: 330px; border-radius: 8px 8px 0 0; padding: 20px; }
-  .hero-book { height: 375px; border-radius: 3px 8px 8px 3px; padding: 22px 20px 22px 30px; box-shadow: 4px 4px 0 -1px var(--card), 5px 5px 0 -1px var(--line), 8px 8px 0 -2px var(--card), 9px 9px 0 -2px var(--line), 12px 22px 30px -10px var(--shadow); }
-  .hk { font-size: 11px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
-  .ht { font-size: 34px; line-height: 1.02; overflow-wrap: anywhere; }
-  .bt { display: flex; flex-direction: column; gap: 6px; }
+  /* the cover: 2:3, the picture fills it; only the hairline outline from global.css */
+  .hero { position: relative; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; border-radius: 8px; color: #F6EEDF; animation: hero .95s var(--spring) backwards; box-shadow: 0 22px 30px -18px var(--shadow); }
+  .hc .pic { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .hc.real > :not(.pic) { display: none; }
+  .hc .sun, .hc .hill { position: absolute; display: block; }
+  .hc .sun { width: 56%; aspect-ratio: 1; border-radius: 50%; right: -12%; top: 22%; opacity: .78; }
+  .hc .hill { left: -20%; width: 140%; bottom: -12px; height: 32%; border-radius: 50% 50% 0 0; }
+  .hc .bt { position: absolute; left: 18px; right: 18px; bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .ht { font-size: 30px; line-height: 1.04; overflow-wrap: anywhere; }
   .hb { font-size: 12px; opacity: .85; }
-  .ticket { background: var(--card); border-top: 2px dashed var(--line); border-radius: 0 0 8px 8px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
-  .ticket .tr { display: flex; justify-content: space-between; gap: 8px; }
-  .ticket b { font-size: 14px; letter-spacing: .22em; color: var(--lat); }
-  .ticket span { font-size: 12px; color: var(--muted); }
+  .when { margin: 0; text-align: center; font-size: 14px; color: var(--muted); }
   .about { margin-top: 14px; justify-content: space-between; }
 
   .main { flex: 1; min-width: 0; padding-top: 176px; display: flex; flex-direction: column; gap: 18px; }
@@ -402,13 +378,8 @@ const pinnedId = shown?.pinned ? shown.id : null;
     .banner { height: 200px; }
     .top { flex-direction: column; margin-top: -150px; gap: 28px; }
     .side { width: 100%; align-items: center; }
-    .hero-film, .hero-book { width: 220px; }
-    .hero-film .hc { height: 280px; }
-    .hero-book { height: 320px; }
+    .hero { width: 220px; }
     .about { width: 100%; }
-    .ticket { padding: 14px 16px; }
-    .ticket b { font-size: 12px; letter-spacing: .16em; }
-    .ticket span { font-size: 11px; }
     .main { padding-top: 0; }
     .stats { gap: 18px 32px; }
     .hl { grid-template-columns: 1fr; }

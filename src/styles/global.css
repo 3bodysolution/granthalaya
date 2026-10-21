@@ -317,8 +317,8 @@ dialog.box .row { display: flex; justify-content: flex-end; gap: 10px; margin-to
 @media (max-width: 780px) { .toast { bottom: 96px; } }
 
 /* ——— covers: a hairline so a pale cover doesn't melt into the page ——— */
-.c.real > .pic, .hc .pic { outline: 1px solid rgba(0, 0, 0, .1); outline-offset: -1px; }
-html[data-theme="dark"] :is(.c.real > .pic, .hc .pic) { outline-color: rgba(255, 255, 255, .07); }
+.cv.real > .pic, .hc .pic, .pt-cover img { outline: 1px solid rgba(0, 0, 0, .1); outline-offset: -1px; }
+html[data-theme="dark"] :is(.cv.real > .pic, .hc .pic, .pt-cover img) { outline-color: rgba(255, 255, 255, .07); }
 
 /* ——— the mark as an icon: empty is an outline, saved fills from the top and becomes the logo ——— */
 .mk { flex: none; overflow: visible; }
