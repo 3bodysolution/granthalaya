@@ -25,6 +25,8 @@ import {
 } from '../../../lib/data';
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
 import { titlePageHref } from '../../../lib/catalog/onsite';
+import { entryOg } from '../../../lib/share';
+import { titleLine } from '../../../lib/cards/tagline';
 import { isBareEntry } from '../../../lib/saved';
 import Stack from '@tabler/icons/outline/stack-2.svg';
 export const prerender = false;
@@ -76,6 +78,7 @@ const off = (k: string) => ({ 'data-bare': bare ? '1' : '0', 'data-unsave-go': `
 const nav = inCols[0];
 const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : undefined;
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
+const og = entryOg(name, { kind: d.type, title: d.title, year: d.year, creator: d.creator }, d.status, d.rating, entry.body, !entry.body.trim() && !d.private && !profile.is_private ? await titleLine(sb, entry) : undefined);
 const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
 const notes = md(entry.body);
 const sLabel = statusLabel(d.type, d.status);
@@ -94,18 +97,19 @@ const dateRow = d.status === 'want' ? `Added ${long(d.date)}` : d.status === 'do
 const againWord = isFilm ? 'Watch it again' : 'Read it again';
 const verb = isFilm ? 'watch' : 'read';
 const link = new URL(href(entry), Astro.url).href;
-// sharing goes to the film or book's public page, never to your entry or shelf
-const publicPage = about ? new URL(about, Astro.site).href : new URL('/', Astro.site).href;
+// sharing goes to the film or book's public page (by its short address), never to your entry or shelf.
+// Your own entry shares your story card; someone else's entry shares the title's page.
+const [, aboutKind, aboutSeg] = about?.match(/^\/(film|tv|book)\/([^/]+)\/?$/) ?? [];
 const shareData = JSON.stringify({
-  url: publicPage, title: d.title,
-  preview: about ? new URL(about, Astro.site).pathname.replace(/^\/(film|tv|book)\/([^/]+)\/?$/, '/og/$1/$2.png') : undefined,
-  stories: { entry: { user: profile.username, slug: entry.id } },
+  title: d.title,
+  ...(isMe ? { stories: { entry: { user: profile.username, slug: entry.id } } }
+    : aboutKind ? { ref: `title=${aboutKind}:${aboutSeg}`, card: `/og/${aboutKind}/${aboutSeg}.png`, wide: true } : {}),
 });
 const shown = pickLine(all, details, name);
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 const pinnedId = shown?.pinned ? shown.id : null;
 ---
-<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private}
+<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private} og={d.private || profile.is_private ? undefined : og}
   image={d.private || profile.is_private ? undefined : `/og/e/${profile.username}/${slug}.png`}>
   {d.type !== 'essay' ? (
     <>

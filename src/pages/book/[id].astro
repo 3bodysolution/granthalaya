@@ -13,6 +13,8 @@ import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, LIST_SOURCE, t
 import { aboutHours } from '../../lib/data';
 import { site as siteConfig } from '../../data/site';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
+import { pageBits } from '../../lib/cards/titlepage';
+import { bookOg } from '../../lib/share';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -63,10 +65,12 @@ const find = [
 const tabs = [{ key: 'details', label: 'Details' }, b.subjects.length && { key: 'subjects', label: 'Subjects' }].filter(Boolean) as { key: string; label: string }[];
 const language = row?.language ? new Intl.DisplayNames(['en'], { type: 'language' }).of(row.language) : null;
 const manyEditions = (b.editions ?? 0) >= 2;
+const bits = await pageBits(sb, 'book', param);
+const og = bookOg(b, bits?.creator ?? b.authors.map((a) => a.name).join(', '), bits?.line);
 const paras = b.description ? b.description.split(/\n{2,}/) : [];
 const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
 ---
-<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={b.description ? b.description.slice(0, 180) : `${b.title} on Granthalaya.`} image={`/og/book/${param}.png`}>
+<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={b.description ? b.description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
     <Poster slot="poster" src={b.cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
     <Fragment slot="side">

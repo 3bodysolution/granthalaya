@@ -6,11 +6,14 @@ import Drawn from '../components/ui/Drawn.astro';
 import ShareDialog from '../components/ShareDialog.astro';
 import { site } from '../data/site';
 import { initial } from '../lib/data';
+import { DEFAULT_OG } from '../lib/share';
 import '../styles/starwind.css';
 import '../styles/global.css';
 
 interface Props {
   title?: string; description?: string; image?: string;
+  /** the link preview's own title and description (see src/lib/share.ts); without them it says "Granthalaya" */
+  og?: { title: string; description: string };
   /** which top-bar link is the current page (the top bar gets Films, Books and Collections with browse) */
   active?: string;
   /** whose shelf this page belongs to (for the menu and search); defaults to yours */
@@ -21,6 +24,7 @@ interface Props {
   noindex?: boolean;
 }
 const { title, description = site.description, active, image = '/img/og.jpg', line, noindex = false } = Astro.props;
+const og = Astro.props.og ?? DEFAULT_OG;
 const me = Astro.locals.me;
 const shelf = Astro.props.shelf ?? me?.username;
 const fullTitle = title ? `${title} | ${site.name}` : `${site.name} | a shelf for everything you read and watch`;
@@ -49,12 +53,14 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   {shelf && <link rel="alternate" type="application/rss+xml" title={`@${shelf} on ${site.name}`} href={`/@${shelf}/rss.xml`} />}
   {noindex && <meta name="robots" content="noindex" />}
   <meta property="og:type" content="website" />
-  <meta property="og:title" content={fullTitle} />
-  <meta property="og:description" content={description} />
+  <meta property="og:title" content={og.title} />
+  <meta property="og:description" content={og.description} />
   <meta property="og:image" content={new URL(image, Astro.url.origin)} />
   {image.startsWith('/og/') && <meta property="og:image:width" content="1200" />}
   {image.startsWith('/og/') && <meta property="og:image:height" content="630" />}
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={og.title} />
+  <meta name="twitter:description" content={og.description} />
   <meta name="theme-color" content="#15171B" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

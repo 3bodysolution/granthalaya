@@ -13,6 +13,8 @@ import { film, idFrom, filmHref, type FilmPage } from '../../lib/catalog/tmdb';
 import { slug } from '../../lib/catalog/fetch';
 import { rowsForFilm, rowBySlug, onSite, healFilm, type TitleRow } from '../../lib/catalog/onsite';
 import { duration } from '../../lib/data';
+import { pageBits } from '../../lib/cards/titlepage';
+import { filmOg } from '../../lib/share';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
@@ -50,9 +52,11 @@ const tabs = [
   f.genres.length && { key: 'genres', label: 'Genres' },
 ].filter(Boolean) as { key: string; label: string }[];
 const first = tabs[0]?.key;
+const bits = f.id ? await pageBits(sb, 'film', String(f.id)) : null;
+const og = filmOg('film', f, bits?.line, bits?.creator ?? f.directors.map((p) => p.name).join(', '));
 const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${f.year})` : ''} on Granthalaya.`;
 ---
-<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} image={id && f.id ? `/og/film/${id}.png` : f.poster}>
+<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} og={og} image={id && f.id ? `/og/film/${id}.png` : f.poster}>
   <TitleLayout backdrop={f.backdrop}>
     <Poster slot="poster" src={f.poster} title={f.title} by={f.directors[0]?.name} kind="film" year={f.year} />
     <Fragment slot="side">

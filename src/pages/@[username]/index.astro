@@ -10,6 +10,7 @@ import SocialLink from '../../components/ui/SocialLink.astro';
 import { openShelf } from '../../lib/shelfpage';
 import { loadShelf, loadCollections, href, short, fullTitle, collectionHref, linesHref, pickLine, type Entry } from '../../lib/data';
 import { statusLabel, socialLinks } from '../../lib/kinds';
+import { profileOg } from '../../lib/share';
 export const prerender = false;
 
 const o = await openShelf(Astro);
@@ -41,13 +42,15 @@ const wants = shelf.filter((e) => e.data.status === 'want');
 const now = [...going.slice(0, 2), ...wants.slice(0, Math.max(0, 2 - going.length))].slice(0, 2);
 const recent = done.slice(0, 6);
 const diary = shelf.slice(0, 6);
+const count = (...t: string[]) => shelf.filter((e) => t.includes(e.data.type)).length;
+const og = visible && !profile.is_private ? profileOg(name, count('book'), count('film', 'tv'), count('essay')) : undefined;
 const links = socialLinks(details?.links);
 const dm = (d: Date) => `${d.getUTCDate()} ${d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }).slice(0, 3)}`;
 const since = new Date(profile.created_at).toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
 const shown = visible ? pickLine(shelf, details, name) : null;
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 ---
-<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} line={line} noindex={profile.is_private}
+<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} line={line} noindex={profile.is_private} og={og}
   image={profile.is_private ? undefined : `/og/u/${profile.username}.png`}>
   <div class="art banner bleed" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
 

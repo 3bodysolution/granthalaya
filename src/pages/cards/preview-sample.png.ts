@@ -1,10 +1,13 @@
 // A link preview for a shelf, with made-up titles, to check the three-cover layout.
 import type { APIRoute } from 'astro';
+import { isBackground } from '../../lib/cards/backgrounds';
 import { drawPreview } from '../../lib/cards/preview';
 export const prerender = false;
 
-export const GET: APIRoute = async () => {
-  const png = await drawPreview({
+export const GET: APIRoute = async ({ url }) => {
+  const asked = url.searchParams.get('bg');
+  const bg = isBackground(asked) ? asked : undefined;
+  const png = await drawPreview({ bg,
     kicker: 'Shelf', title: 'Sarthak', meta: '@sarthak', line: 'Books, films and the lines I keep.',
     covers: [{ title: 'श्यामची आई' }, { title: 'ययाति' }, { title: 'Paterson' }],
   });

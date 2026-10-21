@@ -5,6 +5,7 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { paletteFor } from '../data';
 import type { Kind } from '../kinds';
+import { backgroundData, baseColor, type Background } from './backgrounds';
 
 export interface StoryData {
   kind: Kind;
@@ -19,6 +20,7 @@ export interface StoryData {
   owner: string;           // username
   cover?: string;          // address of the cover image
   color?: string;          // painted cover colour when there's no image
+  bg?: Background;         // the painting behind the card
 }
 
 export const W = 1080, H = 1920;
@@ -34,8 +36,6 @@ import sans400 from '../../assets/cards/instrument-sans-latin-400-normal.woff?in
 import sans400x from '../../assets/cards/instrument-sans-latin-ext-400-normal.woff?inline';
 import deva700 from '../../assets/cards/noto-serif-devanagari-devanagari-700-normal.woff?inline';
 import deva400 from '../../assets/cards/noto-serif-devanagari-devanagari-400-normal.woff?inline';
-import paintingNightUri from '../../assets/cards/painting-night.jpg?inline';
-export const paintingNight = paintingNightUri;
 const bytes = (dataUri: string) => Buffer.from(dataUri.slice(dataUri.indexOf(',') + 1), 'base64');
 export const FONTS = [
   { name: 'Fraunces', data: bytes(fraunces700), weight: 700, style: 'normal' },
@@ -96,46 +96,44 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
   const cover = await coverData(d.cover);
 
   const title = cut(d.title, 70);
-  const size = title.length <= 14 ? 84 : title.length <= 26 ? 70 : title.length <= 44 ? 58 : 48;
+  const size = title.length <= 14 ? 72 : title.length <= 26 ? 60 : title.length <= 44 ? 50 : 42;
   const by = ({ film: 'directed by', tv: 'created by', book: 'by', essay: 'by' } as Record<Kind, string>)[d.kind];
   const meta = [d.year, d.kind === 'tv' && d.season ? `season ${d.season}` : '', d.creator ? `${by} ${d.creator}` : ''].filter(Boolean).join(' | ');
   const full = d.rating == null ? 0 : Math.floor(d.rating), half = d.rating != null && d.rating % 1 >= 0.5;
 
-  // Text stays between 13% and 87% of the height (250 to 1670). Below the line there is a calm empty band
-  // (about 1480 to 1590) where Instagram's Link sticker can be placed, then the username.
+  // The top 30% (to 576) shows the painting uncovered; Instagram covers the top 13% with its own bar. The poster starts below that,
+  // and text stays above 87% (1670).
   const p = paletteFor(d.title, d.color);
-  const CW = 520, CH = 780;
+  const CW = 400, CH = 600, CT = 600;
   const coverBox = h('div', {
-    position: 'absolute', left: (W - CW) / 2, top: 270, width: CW, height: CH, borderRadius: 8, overflow: 'hidden',
+    position: 'absolute', left: (W - CW) / 2, top: CT, width: CW, height: CH, borderRadius: 8, overflow: 'hidden',
     border: '2px solid rgba(255,255,255,.2)', boxShadow: '0 30px 60px rgba(0,0,0,.55)', background: p.bg,
   }, cover
     ? { type: 'img', props: { src: cover, width: CW, height: CH, style: { width: CW, height: CH, objectFit: 'cover' } } }
     : [
-      h('div', { position: 'absolute', left: 0, right: 0, bottom: 0, height: 200, background: p.hill }),
-      h('div', { position: 'absolute', left: 40, right: 40, top: 70, fontSize: 58, lineHeight: 1.15, color: '#F6EEDF', fontFamily: SERIF, fontWeight: 700 }, cut(d.title, 40)),
+      h('div', { position: 'absolute', left: 0, right: 0, bottom: 0, height: 150, background: p.hill }),
+      h('div', { position: 'absolute', left: 32, right: 32, top: 56, fontSize: 46, lineHeight: 1.15, color: '#F6EEDF', fontFamily: SERIF, fontWeight: 700 }, cut(d.title, 40)),
     ]);
 
-  const root = h('div', { width: W, height: H, background: BG, flexDirection: 'column', alignItems: 'center', position: 'relative' }, [
-    { type: 'img', props: { src: paintingNight, width: W, height: 700, style: { position: 'absolute', left: 0, top: 0, width: W, height: 700 } } },
-    // melts the painting into the card, the way the site's paintings melt into the page
-    h('div', { position: 'absolute', left: 0, top: 380, width: W, height: 320, background: `linear-gradient(to bottom, rgba(18,19,22,0), ${BG})` }),
+  const root = h('div', { width: W, height: H, background: baseColor(d.bg), flexDirection: 'column', alignItems: 'center', position: 'relative' }, [
+    { type: 'img', props: { src: await backgroundData(d.bg ?? 'cinema'), width: W, height: 1620, style: { position: 'absolute', left: 0, top: 0, width: W, height: 1620 } } },
     coverBox,
-    h('div', { position: 'absolute', left: 60, right: 60, top: 1086, flexDirection: 'column', alignItems: 'center' }, [
+    h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 34, flexDirection: 'column', alignItems: 'center' }, [
       h('div', { fontSize: size, lineHeight: 1.12, color: titleColor, fontFamily: SERIF, fontWeight: 700, textAlign: 'center', justifyContent: 'center' }, title),
-      meta ? h('div', { marginTop: 16, fontSize: 32, color: GREY, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
-      h('div', { marginTop: 28, alignItems: 'center', gap: 22 }, [
+      meta ? h('div', { marginTop: 12, fontSize: 30, color: GREY, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
+      h('div', { marginTop: 22, alignItems: 'center', gap: 22 }, [
         d.loved && d.kind === 'essay'
-          ? h('div', { fontSize: 40, color: accent, fontFamily: SANS }, '♥ Loved')
+          ? h('div', { fontSize: 38, color: accent, fontFamily: SANS }, '♥ Loved')
           : full || half
             ? h('div', { gap: 6 }, [...Array(full).fill(1), ...(half ? [0.5] : [])].map((f) => star(f as 1 | 0.5, accent)))
             : null,
-        h('div', { padding: '8px 24px', borderRadius: 999, background: 'rgba(255,255,255,.1)', fontSize: 28, color: '#C9C2B4', fontFamily: SANS }, d.status),
+        h('div', { padding: '6px 22px', borderRadius: 999, background: 'rgba(255,255,255,.1)', fontSize: 26, color: '#C9C2B4', fontFamily: SANS }, d.status),
       ].filter(Boolean)),
-      d.line ? h('div', { marginTop: 32, fontSize: 40, lineHeight: 1.28, color: CREAM, fontStyle: 'italic', fontFamily: SERIF, textAlign: 'center', justifyContent: 'center' }, `“${cut(d.line, 110)}”`) : null,
+      d.line ? h('div', { marginTop: 22, fontSize: 36, lineHeight: 1.25, color: CREAM, fontStyle: 'italic', fontFamily: SERIF, textAlign: 'center', justifyContent: 'center' }, cut(d.line, 90)) : null,
     ].filter(Boolean)),
-    h('div', { position: 'absolute', left: 0, right: 0, top: 1604, flexDirection: 'column', alignItems: 'center' }, [
+    h('div', { position: 'absolute', left: 0, right: 0, top: 1722, flexDirection: 'column', alignItems: 'center' }, [
       h('div', { fontSize: 24, letterSpacing: 6, color: DIM, fontFamily: SANS }, `@${d.owner} ON GRANTHALAYA`.toUpperCase()),
-      h('div', { marginTop: 10, fontSize: 22, color: DIM, fontFamily: SANS }, SITE),
+      h('div', { marginTop: 8, fontSize: 22, color: DIM, fontFamily: SANS }, SITE),
     ]),
   ]);
 

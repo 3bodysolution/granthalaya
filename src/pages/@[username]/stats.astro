@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import ShelfStrip from '../../components/ShelfStrip.astro';
 import { openShelf } from '../../lib/shelfpage';
+import { yearOg } from '../../lib/share';
 import { loadShelf, monthNames, href, fullTitle, coverSrc, palette, type Entry } from '../../lib/data';
 export const prerender = false;
 
@@ -125,7 +126,8 @@ const monthCovers = months.filter((m) => m.sum > 0).map((m) => ({
 const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '' : `?year=${y}`}`;
 ---
 <Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username}
-  description={inYear.length ? `${plural(inYear.length, 'thing')} finished in ${year}.` : `Stats for ${year}.`}>
+  description={inYear.length ? `${plural(inYear.length, 'thing')} finished in ${year}.` : `Stats for ${year}.`}
+  og={inYear.length && !profile.is_private ? yearOg(name, year, nBooks, nFilms, Math.round(filmMin / 60), fav ? fav.data.title : undefined) : undefined}>
   <section class="hero bleed">
     <div class="art melt bg" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)" aria-hidden="true"></div>
     <div class="pad words">
@@ -159,7 +161,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
       ))}
     </div>
     <div class="keys"><span class="key"><i style="background: var(--book)"></i>Books</span><span class="key"><i style="background: var(--sky)"></i>Films and TV</span><span class="key"><i style="background: var(--moss)"></i>Essays</span>
-      {isMe && inYear.length > 0 && <button class="gchip" type="button" data-share={JSON.stringify({ url: new URL('/', Astro.site).href, title: `My ${year}`, year: { user: profile.username, year } })}>Share my year</button>}
+      {isMe && inYear.length > 0 && <button class="gchip" type="button" data-share={JSON.stringify({ title: `My ${year}`, ref: `year=${profile.username}/${year}`, card: `/@${profile.username}/year.png?year=${year}` })}>Share my year</button>}
       {years.length > 1 && <span class="yrs" aria-label="Year">{years.map((y) => <a class="gchip" href={yearUrl(y)} aria-current={y === year ? 'page' : undefined}>{y}</a>)}</span>}
     </div>
   </section>

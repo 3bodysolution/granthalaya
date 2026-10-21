@@ -2,7 +2,8 @@
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { paletteFor } from '../data';
-import { BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData, paintingNight } from './story';
+import { BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
+import { backgroundData, type Background } from './backgrounds';
 
 export interface PreviewData {
   kicker: string;                  // "Film", "Book", "Shelf" ...
@@ -10,6 +11,7 @@ export interface PreviewData {
   meta?: string;                   // "1953 | directed by ..."
   line?: string;                   // a short line under the meta
   rating?: number;
+  bg?: Background;
   accent?: 'film' | 'book' | 'plain';
   covers: { src?: string; title: string; color?: string }[];   // one poster, or up to 3 for a shelf or collection
 }
@@ -38,10 +40,9 @@ export async function drawPreview(d: PreviewData): Promise<Buffer> {
   };
 
   const root = h('div', { width: PW, height: PH, background: BG, position: 'relative' }, [
-    // the painting fills the right side and melts into the card on its left edge
-    { type: 'img', props: { src: paintingNight, width: 970, height: 629, style: { position: 'absolute', left: 230, top: 0, width: 970, height: 629 } } },
-    h('div', { position: 'absolute', left: 230, top: 0, width: 520, height: PH, background: `linear-gradient(to right, ${BG}, rgba(18,19,22,0))` }),
-    h('div', { position: 'absolute', left: 0, top: 0, width: 230, height: PH, background: BG }),
+    // the top of the painting fills the card
+    { type: 'img', props: { src: await backgroundData(d.bg ?? 'cinema'), width: PW, height: 1800, style: { position: 'absolute', left: 0, top: 0, width: PW, height: 1800 } } },
+    h('div', { position: 'absolute', left: 0, top: 0, width: 860, height: PH, background: `linear-gradient(to right, ${BG} 0%, ${BG} 30%, rgba(18,19,22,0) 100%)` }),
     ...covers.map(tile),
     h('div', { position: 'absolute', left: 64, top: 70, width: 640, height: 490, flexDirection: 'column' }, [
       h('div', { fontSize: 24, letterSpacing: 8, color: accent, fontFamily: SANS }, d.kicker.toUpperCase()),

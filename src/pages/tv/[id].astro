@@ -15,6 +15,8 @@ import { slug } from '../../lib/catalog/fetch';
 import { rowsForShow, onSite } from '../../lib/catalog/onsite';
 import { statusLabel, type Status } from '../../lib/kinds';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
+import { pageBits } from '../../lib/cards/titlepage';
+import { filmOg } from '../../lib/share';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -45,9 +47,11 @@ const tabs = [
   t.genres.length && { key: 'genres', label: 'Genres' },
 ].filter(Boolean) as { key: string; label: string }[];
 const first = tabs[0]?.key;
+const bits = await pageBits(sb, 'tv', String(id));
+const og = filmOg('tv', t, bits?.line, bits?.creator ?? t.creators.map((p) => p.name).join(', '));
 const facts = rows.find((r) => (r.trivia ?? []).length);
 ---
-<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} image={`/og/tv/${id}.png`}>
+<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} og={og} image={`/og/tv/${id}.png`}>
   <TitleLayout backdrop={t.backdrop}>
     <Poster slot="poster" src={t.poster} title={t.title} by={t.creators[0]?.name} kind="tv" year={t.year} />
     <Fragment slot="side"><Where where={t.where} title={t.title} /></Fragment>

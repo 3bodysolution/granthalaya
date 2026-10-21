@@ -1,179 +1,357 @@
 ---
-// The share window. Any button with `data-share` opens it (see the script below for the JSON it carries).
-// It shows the card that will be shared: your story card for a title on your shelf, your year card, or the
-// link preview for any other page. On a phone "Share" opens the phone's own share sheet with the picture.
+// The share window. Any button with `data-share` opens it. A bottom sheet on a phone, a small dialog on a computer.
+// Top: the card that will be shared, with the painting behind it changeable by swiping. Below: one row of round app buttons.
+// The card is drawn as soon as Share is pressed (or hovered with a mouse), and kept as a File so the phone's share sheet
+// can be opened straight from the tap.
+import { siInstagram, siWhatsapp, siX } from 'simple-icons';
+import Link from '@tabler/icons/outline/link.svg';
+import Download from '@tabler/icons/outline/download.svg';
+import Dots from '@tabler/icons/outline/dots.svg';
+import Left from '@tabler/icons/outline/chevron-left.svg';
+import Right from '@tabler/icons/outline/chevron-right.svg';
+import { BACKGROUNDS } from '../lib/cards/backgrounds';
+const brand = (i: { path: string; hex: string }) => ({ path: i.path, color: `#${i.hex}` });
+const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
 ---
-<dialog class="box share" id="share-box" aria-labelledby="share-h">
-  <h2 id="share-h">Share</h2>
-  <div class="share-pic" id="share-pic" data-wide="0">
-    <img id="share-img" alt="The card you are sharing" hidden />
-    <span class="share-wait" id="share-wait">Drawing the card…</span>
+<dialog class="sheet" id="share-box" aria-label="Share" data-bgs={BACKGROUNDS.join(',')}>
+  <div class="sh-in">
+    <div class="sh-grab" id="sh-grab" aria-hidden="true"><i></i></div>
+    <div class="sh-stage" id="sh-stage" data-wide="0">
+      <div class="sh-track" id="sh-track"></div>
+      <button class="sh-arrow l" type="button" id="sh-prev" aria-label="Previous background"><Left aria-hidden="true" /></button>
+      <button class="sh-arrow r" type="button" id="sh-next" aria-label="Next background"><Right aria-hidden="true" /></button>
+      <span class="sh-bar" aria-hidden="true"></span>
+    </div>
+    <div class="sh-dots" id="sh-dots" role="tablist" aria-label="Background"></div>
+    <div class="sh-apps">
+      <button class="sh-app" type="button" id="sh-ig"><span class="ic" style={`background:${apps.ig.color}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.ig.path} /></svg></span><span>Instagram</span></button>
+      <a class="sh-app" id="sh-wa" target="_blank" rel="noopener" aria-disabled="true"><span class="ic" style={`background:${apps.wa.color}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.wa.path} /></svg></span><span>WhatsApp</span></a>
+      <a class="sh-app" id="sh-x" target="_blank" rel="noopener" aria-disabled="true"><span class="ic x" style={`background:${apps.x.color}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.x.path} /></svg></span><span>X</span></a>
+      <button class="sh-app" type="button" id="sh-copy"><span class="ic plain"><Link aria-hidden="true" /></span><span>Copy link</span></button>
+      <button class="sh-app" type="button" id="sh-save"><span class="ic plain"><Download aria-hidden="true" /></span><span>Save image</span></button>
+      <button class="sh-app" type="button" id="sh-more" hidden><span class="ic plain"><Dots aria-hidden="true" /></span><span>More</span></button>
+    </div>
+    <div class="sh-toast" id="sh-toast" role="status" aria-live="polite"></div>
   </div>
-  <div class="share-line" id="share-line" hidden>
-    <label class="share-k" for="share-text">Line on the card</label>
-    <input class="field" id="share-text" maxlength="140" autocomplete="off" />
-    <select class="field" id="share-saved" aria-label="Or pick one of your saved Lines" hidden></select>
-  </div>
-  <div class="share-go">
-    <button class="btn primary" type="button" id="share-ig">Instagram</button>
-    <button class="btn" type="button" id="share-sheet" hidden>Share…</button>
-    <a class="btn" id="share-wa" target="_blank" rel="noopener">WhatsApp</a>
-    <a class="btn" id="share-x" target="_blank" rel="noopener">X</a>
-    <button class="btn" type="button" id="share-save">Download image</button>
-    <button class="btn" type="button" id="share-copy">Copy link</button>
-  </div>
-  <p class="share-note" id="share-note" role="status">Instagram can’t link a story to a website, so the page’s address is copied for you to paste with the Link sticker.</p>
-  <div class="row"><button class="btn" type="button" id="share-close">Close</button></div>
 </dialog>
 
-<style>
-  dialog.share { width: min(520px, calc(100vw - 32px)); }
-  .share-pic { display: grid; place-items: center; min-height: 160px; margin: 6px 0 14px; border-radius: 12px; background: var(--soft); overflow: hidden; }
-  .share-pic img { display: block; max-width: 100%; max-height: min(52vh, 460px); height: auto; width: auto; border-radius: 8px; box-shadow: 0 12px 30px -14px var(--shadow); }
-  .share-pic[data-wide="1"] img { max-height: 260px; }
-  .share-wait { font-size: 14px; color: var(--muted); padding: 40px 0; }
-  .share-line { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
-  .share-k { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
-  .share-line .field { height: 44px; font-size: 15px; }
-  .share-go { display: flex; flex-wrap: wrap; gap: 8px; }
-  .share-go .btn { height: 42px; text-decoration: none; }
-  .share-go [hidden] { display: none; }
-  dialog.box p.share-note { margin: 14px 0 0; font-size: 13.5px; min-height: 2.9em; }
-  dialog.box p.share-note.ok { color: var(--lat); }
+<style is:global>
+  dialog.sheet { padding: 0; border: 1px solid var(--line); background: var(--card); color: var(--ink); overflow: hidden;
+    width: min(420px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); border-radius: 22px; box-shadow: 0 30px 60px -20px var(--shadow); }
+  dialog.sheet::backdrop { background: var(--scrim); }
+  dialog.sheet[open] { animation: pop .22s var(--spring); }
+  dialog.sheet[open]::backdrop { animation: fade .2s ease; }
+  .sh-in { position: relative; padding: 18px 16px 18px; }
+  .sh-grab { display: none; justify-content: center; padding: 0 0 10px; touch-action: none; }
+  .sh-grab i { width: 38px; height: 4px; border-radius: 2px; background: var(--line); }
+
+  /* the card, a row of backgrounds you swipe through */
+  .sh-stage { position: relative; height: min(52dvh, 430px); border-radius: 14px; overflow: hidden; background: var(--soft); }
+  .sh-stage[data-wide="1"] { height: 230px; }
+  .sh-track { display: flex; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; touch-action: pan-x; }
+  .sh-track::-webkit-scrollbar { display: none; }
+  .sh-slide { flex: 0 0 100%; height: 100%; scroll-snap-align: center; display: grid; place-items: center; padding: 12px; box-sizing: border-box; }
+  .sh-slide img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; border-radius: 8px; box-shadow: 0 12px 30px -14px var(--shadow);
+    opacity: 0; transition: opacity .3s ease; -webkit-user-drag: none; user-select: none; }
+  .sh-slide.ready img { opacity: 1; }
+  .sh-slide.failed::after { content: 'Could not draw this one'; font-size: 13px; color: var(--muted); }
+
+  /* while a card is drawing: a thin glowing teal line moves along the bottom edge of the card area */
+  .sh-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; overflow: hidden; opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+  .sh-bar::before { content: ''; position: absolute; top: 0; bottom: 0; width: 38%; left: -38%; border-radius: 2px; background: linear-gradient(90deg, transparent, var(--lat), transparent); box-shadow: 0 0 12px 1px var(--lat); animation: shbar 1.3s ease-in-out infinite; }
+  .sh-stage[data-busy="1"] .sh-bar { opacity: 1; }
+  @keyframes shbar { to { left: 100%; } }
+  @media (prefers-reduced-motion: reduce) {
+    .sh-bar::before { animation: none; left: 0; width: 100%; background: var(--lat); box-shadow: 0 0 8px var(--lat); }
+    .sh-slide img { transition: none; }
+    dialog.sheet[open], dialog.sheet[open]::backdrop { animation: none; }
+  }
+
+  .sh-arrow { position: absolute; top: 50%; translate: 0 -50%; display: none; place-items: center; width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; box-shadow: 0 6px 14px -6px var(--shadow); }
+  .sh-arrow.l { left: 8px; } .sh-arrow.r { right: 8px; }
+  .sh-arrow svg { width: 20px; height: 20px; }
+  .sh-arrow[disabled] { opacity: .35; cursor: default; }
+  @media (hover: hover) and (pointer: fine) { .sh-arrow { display: grid; } }
+
+  .sh-dots { display: flex; justify-content: center; gap: 4px; margin: 10px 0 14px; }
+  .sh-dots button { width: 18px; height: 18px; padding: 0; border: 0; background: transparent; cursor: pointer; display: grid; place-items: center; }
+  .sh-dots button::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--line); transition: background-color .2s ease, transform .2s ease; }
+  .sh-dots button[aria-selected="true"]::before { background: var(--lat); transform: scale(1.35); }
+
+  /* one row of round app buttons */
+  .sh-apps { display: flex; justify-content: space-between; gap: 4px; }
+  .sh-app { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 11.5px; line-height: 1.2; text-align: center; text-decoration: none; cursor: pointer; transition: transform .2s ease, opacity .2s ease; }
+  .sh-app[hidden] { display: none; }
+  .sh-app:active { transform: scale(.94); }
+  .sh-app:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; border-radius: 12px; }
+  .sh-app[aria-disabled="true"] { opacity: .5; }
+  .sh-app .ic { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; transition: transform .2s ease, box-shadow .2s ease; }
+  .sh-app:hover .ic { transform: translateY(-2px); }
+  .sh-app .ic svg { width: 26px; height: 26px; fill: #fff; }
+  .sh-app .ic.x { box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
+  .sh-app .ic.plain { background: var(--soft); border: 1px solid var(--line); color: var(--ink); }
+  .sh-app .ic.plain svg { fill: none; stroke: currentColor; width: 24px; height: 24px; }
+
+  .sh-toast { position: absolute; left: 50%; bottom: 100px; translate: -50% 6px; padding: 9px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 13.5px; font-weight: 500; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .18s ease, translate .18s ease; }
+  .sh-toast.on { opacity: 1; translate: -50% 0; }
+
+  /* on a phone it is a sheet that slides up from the bottom */
+  @media (max-width: 640px) {
+    dialog.sheet { width: 100%; max-width: none; margin: auto 0 0; border-radius: 22px 22px 0 0; border-width: 1px 0 0; max-height: 94dvh; }
+    dialog.sheet[open] { animation: sheetup .3s cubic-bezier(.2, .8, .2, 1); }
+    .sh-in { padding: 8px 16px calc(18px + env(safe-area-inset-bottom)); }
+    .sh-grab { display: flex; padding-top: 4px; }
+    .sh-toast { bottom: calc(100px + env(safe-area-inset-bottom)); }
+  }
+  @keyframes sheetup { from { transform: translateY(100%); } }
 </style>
 
 <script>
-  // A button with data-share carries JSON: { url, title, preview?, stories?, year? }
-  //   url      the public page's address (what gets copied and sent as a link; never your entry or your shelf)
-  //   preview  the link-preview picture, shown when there is no card of your own
+  // A button with data-share carries JSON: { title, ref?, card?, wide?, stories? }
+  //   ref      what /api/share asks about: "title=film:123-name", "entry=user/slug", "year=user/2026", "col=<id>"
+  //   card     the card's address without a background (the link preview, or the year card)
   //   stories  { key: { user, slug } } your entries on this page; the visible season's key is used on TV pages
-  //   year     { user, year } for the My year card
-  type Opts = { url: string; title: string; preview?: string; stories?: Record<string, { user: string; slug: string }>; year?: { user: string; year: number } };
+  type Stories = Record<string, { user: string; slug: string }>;
+  type Opts = { title: string; ref?: string; card?: string; wide?: boolean; stories?: Stories };
+  type Meta = { link: string; text: string; bg?: string };
+  type Job = { key: string; base: string; wide: boolean; meta: Promise<Meta | null>; first: Promise<Blob | null>; at: number };
+
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
+  const mouse = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
+  const phone = () => typeof navigator.share === 'function' && (matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const warm = new Map<string, Job>();    // started by a hover or a press, reused when the window opens
+  let job: Job | null = null;
   let opts: Opts | null = null;
-  let src = '';                          // the picture's address, without a ?line=
-  let blob: Promise<Blob | null> = Promise.resolve(null);
-  let story: { user: string; slug: string; v: string } | null = null;
-  let asked = 0;                         // newest request wins
+  let order: string[] = [];               // the paintings
+  let slides: { el: HTMLElement; img: HTMLImageElement; blob?: Blob; file?: File; load?: Promise<Blob | null>; state: 'idle' | 'busy' | 'ready' | 'failed' }[] = [];
+  let current = 0;
+  let epoch = 0;                          // a newer opening cancels the older one's updates
 
-  const phone = () => typeof navigator.canShare === 'function' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const withBg = (base: string, bg: string) => `${base}${base.includes('?') ? '&' : '?'}bg=${bg}`;
   const fileName = () => `granthalaya-${(opts?.title ?? 'card').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'card'}.png`;
-  const say = (msg: string, ok = false) => { const n = $('share-note'); n.textContent = msg; n.classList.toggle('ok', ok); };
-  const DEFAULT_NOTE = 'Instagram can’t link a story to a website, so the page’s address is copied for you to paste with the Link sticker.';
 
-  async function copy(text: string) {
-    try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
-  }
-
-  function draw(address: string, wide: boolean) {
-    const n = ++asked;
-    const img = $<HTMLImageElement>('share-img'), wait = $('share-wait');
-    img.hidden = true; wait.hidden = false; wait.textContent = 'Drawing the card…';
-    $('share-pic').dataset.wide = wide ? '1' : '0';
-    blob = fetch(address, { credentials: 'same-origin' }).then(async (r) => {
-      if (!r.ok) throw new Error(String(r.status));
+  async function draw(address: string): Promise<Blob | null> {
+    try {
+      const r = await fetch(address, { credentials: 'same-origin' });
+      if (!r.ok) return null;
       const b = await r.blob();
-      if (n !== asked) return b;
-      img.src = URL.createObjectURL(b);
-      img.hidden = false; wait.hidden = true;
-      return b;
-    }).catch(() => { if (n === asked) { wait.hidden = false; wait.textContent = 'The card could not be drawn just now.'; } return null; });
+      return b.type === 'image/png' ? b : new Blob([b], { type: 'image/png' });   // a File for the phone's share sheet must say it is a PNG
+    } catch { return null; }
   }
 
-  function storyAddress(line: string) {
-    if (!story) return '';
-    return `/@${story.user}/library/${story.slug}/story.png?v=${story.v}${line ? `&line=${encodeURIComponent(line)}` : ''}`;
-  }
-
-  async function open(o: Opts) {
-    opts = o; story = null; src = '';
-    $('share-h').textContent = o.title ? `Share ${o.title}` : 'Share';
-    $('share-line').hidden = true; ($<HTMLSelectElement>('share-saved')).hidden = true;
-    say(DEFAULT_NOTE);
-    ($<HTMLAnchorElement>('share-wa')).href = `https://wa.me/?text=${encodeURIComponent(`${o.title} ${o.url}`)}`;
-    ($<HTMLAnchorElement>('share-x')).href = `https://x.com/intent/post?text=${encodeURIComponent(o.title)}&url=${encodeURIComponent(o.url)}`;
-    $('share-sheet').hidden = !phone();
-    const dlg = $<HTMLDialogElement>('share-box');
-    if (!dlg.open) dlg.showModal();
-
+  /** what to draw and ask for: your own entry's story card, else the page's own card */
+  function plan(o: Opts): { key: string; base: string; ref: string; wide: boolean } | null {
     const keys = Object.keys(o.stories ?? {});
     const pick = document.querySelector<HTMLSelectElement>('[data-season-pick]')?.value;
     const mine = o.stories?.[pick && o.stories[pick] ? pick : keys[0]];
-    if (o.year) {
-      src = `/@${o.year.user}/year.png?year=${o.year.year}`;
-      draw(src, false);
-    } else if (mine) {
-      try {
-        const r = await fetch(`/@${mine.user}/library/${mine.slug}/story.json`, { credentials: 'same-origin' });
-        if (!r.ok) throw new Error();
-        const j = await r.json() as { v: string; line: string; lines: string[] };
-        story = { ...mine, v: j.v };
-        const input = $<HTMLInputElement>('share-text'), saved = $<HTMLSelectElement>('share-saved');
-        input.value = j.line;
-        $('share-line').hidden = false;
-        saved.replaceChildren(new Option('Or pick one of your saved Lines', ''), ...j.lines.map((t) => new Option(t.length > 70 ? t.slice(0, 69) + '…' : t, t)));
-        saved.hidden = j.lines.length === 0;
-        src = storyAddress('');
-        draw(src, false);
-      } catch { story = null; }
+    if (mine) return { key: `entry:${mine.user}/${mine.slug}`, base: `/@${mine.user}/library/${mine.slug}/story.png`, ref: `entry=${mine.user}/${mine.slug}`, wide: false };
+    if (o.card) return { key: `${o.ref ?? ''}|${o.card}`, base: o.card, ref: o.ref ?? '', wide: !!o.wide };
+    return null;
+  }
+
+  /** start drawing the card and asking for its link and text; used by a hover, a press and the window itself */
+  function start(o: Opts): Job | null {
+    const p = plan(o);
+    if (!p) return null;
+    const old = warm.get(p.key);
+    if (old && Date.now() - old.at < 60_000) return old;
+    const meta = p.ref
+      ? fetch(`/api/share?${p.ref}`, { credentials: 'same-origin' }).then((r) => (r.ok ? (r.json() as Promise<Meta>) : null)).catch(() => null)
+      : Promise.resolve(null);
+    const j: Job = { key: p.key, base: p.base, wide: p.wide, meta, first: draw(p.base), at: Date.now() };
+    warm.set(p.key, j);
+    if (warm.size > 8) warm.delete(warm.keys().next().value!);
+    return j;
+  }
+
+  /* ——— the carousel ——— */
+  function build() {
+    const track = $('sh-track'), dots = $('sh-dots');
+    track.replaceChildren(); dots.replaceChildren();
+    slides = order.map((name, i) => {
+      const el = document.createElement('div'); el.className = 'sh-slide';
+      const img = document.createElement('img'); img.alt = `Card on the ${name} painting`; img.draggable = false;
+      el.appendChild(img); track.appendChild(el);
+      const d = document.createElement('button'); d.type = 'button'; d.setAttribute('role', 'tab'); d.setAttribute('aria-label', `Background ${i + 1} of ${order.length}`);
+      d.addEventListener('click', () => go(i)); dots.appendChild(d);
+      return { el, img, state: 'idle' as const };
+    });
+  }
+
+  function paint() {
+    $('sh-stage').dataset.busy = slides[current]?.state === 'busy' || slides[current]?.state === 'idle' ? '1' : '0';
+    $('sh-dots').querySelectorAll('button').forEach((d, i) => d.setAttribute('aria-selected', String(i === current)));
+    ($<HTMLButtonElement>('sh-prev')).disabled = current === 0;
+    ($<HTMLButtonElement>('sh-next')).disabled = current === slides.length - 1;
+  }
+
+  function load(i: number, first?: Promise<Blob | null>) {
+    const s = slides[i], j = job, n = epoch;
+    if (!s || !j || s.state === 'busy' || s.state === 'ready') return;
+    s.state = 'busy';
+    s.load = first ?? draw(withBg(j.base, order[i]));
+    s.load.then((b) => {
+      if (n !== epoch) return;
+      if (!b) { s.state = 'failed'; s.el.classList.add('failed'); }
+      else {
+        s.blob = b; s.file = new File([b], fileName(), { type: 'image/png' });
+        s.img.src = URL.createObjectURL(b);
+        s.img.decode().catch(() => {}).then(() => { s.state = 'ready'; s.el.classList.add('ready'); paint(); });
+        return;
+      }
+      paint();
+    });
+    paint();
+  }
+
+  function near(i: number) { for (const k of [i, i + 1, i - 1]) if (k >= 0 && k < slides.length) load(k); }
+
+  function go(i: number, instant = false) {
+    const track = $('sh-track');
+    track.scrollTo({ left: i * track.clientWidth, behavior: instant || reduced() ? 'auto' : 'smooth' });
+  }
+
+  function onScroll() {
+    const track = $('sh-track');
+    const i = Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / Math.max(1, track.clientWidth))));
+    if (i === current) return;
+    current = i; paint(); near(i);
+  }
+
+  /* ——— opening ——— */
+  const toastTimer: { t?: ReturnType<typeof setTimeout> } = {};
+  function say(msg: string) {
+    const t = $('sh-toast');
+    t.textContent = msg; t.classList.add('on');
+    clearTimeout(toastTimer.t); toastTimer.t = setTimeout(() => t.classList.remove('on'), 2200);
+  }
+
+  async function open(o: Opts) {
+    const dlg = $<HTMLDialogElement>('share-box');
+    const j = start(o);
+    if (!j) {   // nothing to draw: just copy the page's address
+      try { await navigator.clipboard.writeText(location.href); } catch { /* nothing to do */ }
+      return;
     }
-    if (!src && o.preview) { src = o.preview; draw(src, true); }
-    if (!src) { $('share-wait').textContent = 'No card for this page.'; }
+    opts = o; job = j; epoch++;
+    const n = epoch;
+    order = (dlg.dataset.bgs ?? '').split(',').filter(Boolean);
+    $('sh-stage').dataset.wide = j.wide ? '1' : '0';
+    $('sh-more').hidden = !phone();
+    for (const id of ['sh-wa', 'sh-x']) { const a = $<HTMLAnchorElement>(id); a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); }
+    build();
+    current = 0; $('sh-track').scrollLeft = 0; paint();
+    if (!dlg.open) dlg.showModal();
+
+    // the card that is already drawing belongs to the default painting, which /api/share names
+    const m = await j.meta;
+    if (n !== epoch) return;
+    const def = Math.max(0, order.indexOf(m?.bg ?? 'cinema'));
+    current = def; go(def, true); paint();
+    load(def, j.first);
+    near(def);
+    const text = encodeURIComponent(m?.text ?? `${o.title} ${location.href}`);
+    const wa = $<HTMLAnchorElement>('sh-wa'), x = $<HTMLAnchorElement>('sh-x');
+    wa.href = `https://wa.me/?text=${text}`; wa.removeAttribute('aria-disabled');
+    x.href = `https://x.com/intent/post?text=${text}`; x.removeAttribute('aria-disabled');
   }
 
-  // changing the line draws the card again after a short pause
-  let t: ReturnType<typeof setTimeout>;
-  function lineChanged() {
-    clearTimeout(t);
-    t = setTimeout(() => {
-      if (!story) return;
-      const text = $<HTMLInputElement>('share-text').value.replace(/\s+/g, ' ').trim();
-      draw(storyAddress(text), false);
-    }, 600);
-  }
-
-  async function asFile() {
-    const b = await blob;
-    return b ? new File([b], fileName(), { type: 'image/png' }) : null;
-  }
-  function download(b: Blob) {
+  /* ——— the buttons ——— */
+  const link = async () => (await job?.meta)?.link ?? location.href;
+  async function copy(text: string) { try { await navigator.clipboard.writeText(text); return true; } catch { return false; } }
+  function save(b: Blob) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(b); a.download = fileName();
     document.body.appendChild(a); a.click(); a.remove();
   }
-  async function sheet(file: File) {
-    try { await navigator.share({ files: [file] }); } catch { /* closed without sharing */ }
+  const ready = () => slides[current]?.file;
+
+  /** the phone's own share sheet with the card as a picture and nothing else; false when this browser can't do it */
+  function sheet(file: File) {
+    if (typeof navigator.share !== 'function' || !navigator.canShare?.({ files: [file] })) return null;
+    return navigator.share({ files: [file] }).then(() => true, (e) => (e?.name === 'AbortError' ? true : false));
   }
 
-  document.addEventListener('click', async (ev) => {
-    const b = (ev.target as Element).closest<HTMLElement>('[data-share]');
-    if (b) {
-      try { await open(JSON.parse(b.dataset.share!)); } catch { /* bad data: do nothing */ }
+  async function onApp(id: string) {
+    if (id === 'sh-copy') { say((await copy(await link())) ? 'Link copied' : 'Could not copy'); return; }
+    const file = ready();
+    if (!file) { say('Still drawing the card'); return; }
+    if (id === 'sh-save') { save(file); say('Image saved'); return; }
+    if (id === 'sh-more') {
+      // called straight from the tap, with the picture already in hand
+      const r = sheet(file);
+      if (!r) { save(file); say('Image saved'); } else if (!(await r)) { save(file); say('Image saved'); }
       return;
     }
-    if (!opts || !(ev.target as Element).closest('#share-box')) return;
-    const id = (ev.target as Element).closest('button')?.id;
-    if (id === 'share-close') $<HTMLDialogElement>('share-box').close();
-    else if (id === 'share-copy') say((await copy(opts.url)) ? 'Link copied.' : 'Could not copy. Select the address and copy it by hand.', true);
-    else if (id === 'share-save') { const f = await blob; if (f) download(f); }
-    else if (id === 'share-sheet') { const f = await asFile(); if (f && navigator.canShare({ files: [f] })) await sheet(f); else say('This phone can’t share a picture from here. Use Download image.'); }
-    else if (id === 'share-ig') {
-      // Instagram can't link a story back to a website: copy the public page's address for the Link sticker
-      const copied = await copy(opts.url);
-      const f = await asFile();
-      const msg = copied ? 'Link copied. In Instagram, add the Link sticker and paste it.' : `Copy this address for the Link sticker: ${opts.url}`;
-      if (f && phone() && navigator.canShare({ files: [f] })) { say(msg, copied); await sheet(f); }
-      else if (f) { download(f); say(`${msg} Instagram needs the phone, so the picture was downloaded to send there.`, copied); }
-      else say(msg, copied);
+    if (id === 'sh-ig') {
+      // a website can't open Instagram Stories. On a phone: copy the page's short link, then offer the picture alone, so
+      // Instagram is offered right away (and the Link sticker can paste the link). On a computer: save the picture and copy the link.
+      const known = (await Promise.race([job?.meta, Promise.resolve(undefined)]))?.link;
+      const copied = known ? navigator.clipboard.writeText(known).then(() => true, () => false) : link().then(copy);   // started in the tap, not waited for
+      const r = phone() ? sheet(file) : null;
+      if (r) { say('Link copied'); if (!(await r)) save(file); }
+      else { save(file); say((await copied) ? 'Image saved, link copied' : 'Image saved'); }
     }
+  }
+
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as Element;
+    const b = t.closest<HTMLElement>('[data-share]');
+    if (b) { try { void open(JSON.parse(b.dataset.share!)); } catch { /* bad data: do nothing */ } return; }
+    const dlg = document.getElementById('share-box') as HTMLDialogElement | null;
+    if (!dlg?.open) return;
+    if (t === dlg) { dlg.close(); return; }                       // a tap outside
+    if (!t.closest('#share-box')) return;
+    if (t.closest('#sh-prev')) { go(current - 1); return; }
+    if (t.closest('#sh-next')) { go(current + 1); return; }
+    const app = t.closest<HTMLElement>('.sh-app');
+    if (!app) return;
+    if (app.getAttribute('aria-disabled') === 'true') { ev.preventDefault(); say('One moment'); return; }
+    if (app.tagName === 'BUTTON') void onApp(app.id);
+    else say('Opening');
   });
-  document.addEventListener('input', (ev) => {
-    const el = ev.target as HTMLElement;
-    if (el.id === 'share-text') lineChanged();
-    if (el.id === 'share-saved') {
-      const v = (el as HTMLSelectElement).value;
-      if (v) { $<HTMLInputElement>('share-text').value = v; lineChanged(); }
-    }
+  // a mouse over a Share button starts the drawing early
+  document.addEventListener('pointerover', (ev) => {
+    if (!mouse()) return;
+    const b = (ev.target as Element).closest<HTMLElement>('[data-share]');
+    if (!b) return;
+    try { start(JSON.parse(b.dataset.share!)); } catch { /* bad data */ }
   });
-  document.addEventListener('close', (ev) => { if ((ev.target as HTMLElement).id === 'share-box') { asked++; opts = null; } }, true);
+  // a press starts it too (the click follows a moment later)
+  document.addEventListener('pointerdown', (ev) => {
+    const b = (ev.target as Element).closest<HTMLElement>('[data-share]');
+    if (!b) return;
+    try { start(JSON.parse(b.dataset.share!)); } catch { /* bad data */ }
+  });
+  document.addEventListener('scroll', (ev) => { if ((ev.target as HTMLElement).id === 'sh-track') onScroll(); }, true);
+  document.addEventListener('close', (ev) => { if ((ev.target as HTMLElement).id === 'share-box') { epoch++; opts = null; job = null; } }, true);
+
+  // a swipe down closes the sheet on a phone (from the handle or the app row; the card area scrolls sideways)
+  let drag: { y: number; id: number } | null = null;
+  document.addEventListener('pointerdown', (ev) => {
+    const dlg = document.getElementById('share-box') as HTMLDialogElement | null;
+    if (!dlg?.open || ev.pointerType === 'mouse' || !matchMedia('(max-width: 640px)').matches) return;
+    const t = ev.target as Element;
+    if (!t.closest('#share-box') || t.closest('#sh-stage')) return;
+    drag = { y: ev.clientY, id: ev.pointerId };
+  });
+  document.addEventListener('pointermove', (ev) => {
+    if (!drag || ev.pointerId !== drag.id) return;
+    const dlg = document.getElementById('share-box') as HTMLDialogElement;
+    const dy = Math.max(0, ev.clientY - drag.y);
+    dlg.style.transition = 'none'; dlg.style.transform = `translateY(${dy}px)`;
+  });
+  const endDrag = (ev: PointerEvent) => {
+    if (!drag || ev.pointerId !== drag.id) return;
+    const dlg = document.getElementById('share-box') as HTMLDialogElement;
+    const dy = Math.max(0, ev.clientY - drag.y);
+    drag = null;
+    dlg.style.transition = reduced() ? 'none' : 'transform .18s ease';
+    if (dy > 90) { dlg.style.transform = 'translateY(100%)'; setTimeout(() => { dlg.close(); dlg.style.transform = ''; dlg.style.transition = ''; }, reduced() ? 0 : 170); }
+    else { dlg.style.transform = ''; setTimeout(() => { dlg.style.transition = ''; }, 200); }
+  };
+  document.addEventListener('pointerup', endDrag);
+  document.addEventListener('pointercancel', endDrag);
 </script>

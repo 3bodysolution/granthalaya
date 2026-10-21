@@ -67,7 +67,13 @@ async function summaryOf(e: Entry, note?: string | null): Promise<{ tagline?: st
  * The line for this title, or undefined (essays, no summary, no AI key). Never throws.
  * `sb` is the visitor's connection: the shared catalogue is readable by everyone.
  */
-export async function titleLine(sb: SupabaseClient, e: Entry): Promise<string | undefined> {
+const inflight = new Map<string, Promise<string | undefined>>();   // the card and the share window ask together: write the line once
+export function titleLine(sb: SupabaseClient, e: Entry): Promise<string | undefined> {
+  let p = inflight.get(e.titleId);
+  if (!p) { p = makeLine(sb, e).finally(() => inflight.delete(e.titleId)); inflight.set(e.titleId, p); }
+  return p;
+}
+async function makeLine(sb: SupabaseClient, e: Entry): Promise<string | undefined> {
   try {
     // `tagline` is a column added by supabase/changes/005; before it exists, the select fails and we simply don't save
     const { data, error } = await sb.from('titles').select('tagline, note').eq('id', e.titleId).maybeSingle();

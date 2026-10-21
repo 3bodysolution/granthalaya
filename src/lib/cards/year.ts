@@ -3,13 +3,15 @@
 import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import { paletteFor } from '../data';
-import { W, H, BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData, paintingNight } from './story';
+import { W, H, BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
+import { backgroundData, baseColor, type Background } from './backgrounds';
 
 export interface YearTitle { title: string; cover?: string; color?: string }
 export interface YearData {
   year: number; owner: string;
   books: number; films: number; essays: number;
   months: (YearTitle | null)[];     // 12 entries: the month's best title, or null when nothing was finished
+  bg?: Background;
   favourite?: number;               // index (0 to 11) of the month holding the favourite of the year
 }
 
@@ -65,12 +67,12 @@ export async function drawYear(d: YearData): Promise<Buffer> {
     d.essays ? count(d.essays, d.essays === 1 ? 'essay' : 'essays', '#A9C79B') : null,
   ].filter(Boolean);
 
-  const root = h('div', { width: W, height: H, background: BG, position: 'relative' }, [
-    // a strip of the night painting at the top, melting into the card
-    h('div', { position: 'absolute', left: 0, top: 0, width: W, height: 250, overflow: 'hidden' }, [
-      { type: 'img', props: { src: paintingNight, width: W, height: 700, style: { position: 'absolute', left: 0, top: -330, width: W, height: 700 } } },
+  const root = h('div', { width: W, height: H, background: baseColor(d.bg), position: 'relative' }, [
+    // a strip of the painting at the top, melting into the card
+    h('div', { position: 'absolute', left: 0, top: 0, width: W, height: 310, overflow: 'hidden' }, [
+      { type: 'img', props: { src: await backgroundData(d.bg ?? 'cinema'), width: W, height: 1620, style: { position: 'absolute', left: 0, top: 0, width: W, height: 1620 } } },
     ]),
-    h('div', { position: 'absolute', left: 0, top: 110, width: W, height: 140, background: `linear-gradient(to bottom, rgba(18,19,22,0), ${BG})` }),
+    h('div', { position: 'absolute', left: 0, top: 150, width: W, height: 160, background: `linear-gradient(to bottom, rgba(18,19,22,0), ${baseColor(d.bg)})` }),
     h('div', { position: 'absolute', left: 60, top: 330, width: 400, flexDirection: 'column' }, [
       h('div', { fontSize: 128, lineHeight: 1, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, 'ROLL'),
       h('div', { fontSize: 128, lineHeight: 1.05, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, String(d.year)),

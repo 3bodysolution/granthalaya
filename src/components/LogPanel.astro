@@ -25,9 +25,10 @@ const pick = selected ?? parts[0]?.key;
 const next = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
 const film = kind !== 'book';
 // the share window: the public page's address and picture, and (signed in) your entry's story card
-const preview = new URL(share).pathname.replace(/^\/(film|tv|book)\/([^/]+)\/?$/, '/og/$1/$2.png');
+const [, pageKind, pageSeg] = new URL(share).pathname.match(/^\/(film|tv|book)\/([^/]+)\/?$/) ?? [];
+const preview = pageKind ? `/og/${pageKind}/${pageSeg}.png` : undefined;
 const stories = me ? Object.fromEntries(parts.filter((p) => p.mine).map((p) => [p.key, { user: me.username, slug: p.mine!.slug }])) : undefined;
-const shareData = JSON.stringify({ url: share, title: what, preview, stories });
+const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKind}:${pageSeg}` : undefined, card: preview, wide: true, stories });
 ---
 <aside class="logpanel" aria-label={me ? 'Your log' : 'Keep your own shelf'}>
   {!me ? (
