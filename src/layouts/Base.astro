@@ -3,6 +3,7 @@ import { ClientRouter } from 'astro:transitions';
 import Logo from '../components/Logo.astro';
 import Valley from '../components/Valley.astro';
 import Drawn from '../components/ui/Drawn.astro';
+import ShareDialog from '../components/ShareDialog.astro';
 import { site } from '../data/site';
 import { initial } from '../lib/data';
 import '../styles/starwind.css';
@@ -173,6 +174,8 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       <div class="row"><button class="btn" value="cancel">Cancel</button><button class="btn primary" value="ok" id="confirm-ok">OK</button></div>
     </form>
   </dialog>
+
+  <ShareDialog />
 
   <style>
     .skip:focus { position: fixed !important; left: 12px; top: 12px; width: auto; height: auto; clip: auto; z-index: 99; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; }

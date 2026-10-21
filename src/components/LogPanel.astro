@@ -24,12 +24,16 @@ const ICON: Record<Status, any> = { want: null, reading: BookOpen, watching: Pla
 const pick = selected ?? parts[0]?.key;
 const next = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
 const film = kind !== 'book';
+// the share window: the public page's address and picture, and (signed in) your entry's story card
+const preview = new URL(share).pathname.replace(/^\/(film|tv|book)\/([^/]+)\/?$/, '/og/$1/$2.png');
+const stories = me ? Object.fromEntries(parts.filter((p) => p.mine).map((p) => [p.key, { user: me.username, slug: p.mine!.slug }])) : undefined;
+const shareData = JSON.stringify({ url: share, title: what, preview, stories });
 ---
 <aside class="logpanel" aria-label={me ? 'Your log' : 'Keep your own shelf'}>
   {!me ? (
     <>
       <a class="lp-row lp-signin" href={next} data-astro-prefetch="false"><span>Sign in to log, rate or save</span></a>
-      <button class="lp-row" type="button" data-copy={share}><Share aria-hidden="true" /><span>Share</span></button>
+      <button class="lp-row" type="button" data-share={shareData}><Share aria-hidden="true" /><span>Share</span></button>
     </>
   ) : (
     <>
@@ -81,7 +85,7 @@ const film = kind !== 'book';
           </div>
         );
       })}
-      <button class="lp-row" type="button" data-copy={share}><Share aria-hidden="true" /><span>Share</span></button>
+      <button class="lp-row" type="button" data-share={shareData}><Share aria-hidden="true" /><span>Share</span></button>
     </>
   )}
 </aside>

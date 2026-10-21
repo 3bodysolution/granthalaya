@@ -94,6 +94,13 @@ const dateRow = d.status === 'want' ? `Added ${long(d.date)}` : d.status === 'do
 const againWord = isFilm ? 'Watch it again' : 'Read it again';
 const verb = isFilm ? 'watch' : 'read';
 const link = new URL(href(entry), Astro.url).href;
+// sharing goes to the film or book's public page, never to your entry or shelf
+const publicPage = about ? new URL(about, Astro.site).href : new URL('/', Astro.site).href;
+const shareData = JSON.stringify({
+  url: publicPage, title: d.title,
+  preview: about ? new URL(about, Astro.site).pathname.replace(/^\/(film|tv|book)\/([^/]+)\/?$/, '/og/$1/$2.png') : undefined,
+  stories: { entry: { user: profile.username, slug: entry.id } },
+});
 const shown = pickLine(all, details, name);
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 const pinnedId = shown?.pinned ? shown.id : null;
@@ -190,7 +197,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Notes /><span>Edit rating, notes and lines</span></a>
               {done && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
               <button class="lrow2" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}><Stack /><span>Add to a collection</span></button>
-              <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
+              <button class="lrow2" type="button" data-share={shareData}><Share /><span>Share</span></button>
             </>
           ) : me ? (
             <>

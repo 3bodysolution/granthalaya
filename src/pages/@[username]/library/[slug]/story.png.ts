@@ -30,7 +30,8 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   if (!row) return gone();
   const v = String(Math.floor(Date.parse(row.updated_at) / 1000));
   if (url.searchParams.get('v') !== v) {
-    return new Response(null, { status: 302, headers: { Location: `${url.pathname}?v=${v}`, 'Cache-Control': 'no-store' } });
+    const to = new URL(url); to.searchParams.set('v', v);
+    return new Response(null, { status: 302, headers: { Location: to.pathname + to.search, 'Cache-Control': 'no-store' } });
   }
 
   const custom = isMe ? (url.searchParams.get('line') ?? '').replace(/\s+/g, ' ').trim().slice(0, 140) : '';

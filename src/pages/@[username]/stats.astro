@@ -159,6 +159,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
       ))}
     </div>
     <div class="keys"><span class="key"><i style="background: var(--book)"></i>Books</span><span class="key"><i style="background: var(--sky)"></i>Films and TV</span><span class="key"><i style="background: var(--moss)"></i>Essays</span>
+      {isMe && inYear.length > 0 && <button class="gchip" type="button" data-share={JSON.stringify({ url: new URL('/', Astro.site).href, title: `My ${year}`, year: { user: profile.username, year } })}>Share my year</button>}
       {years.length > 1 && <span class="yrs" aria-label="Year">{years.map((y) => <a class="gchip" href={yearUrl(y)} aria-current={y === year ? 'page' : undefined}>{y}</a>)}</span>}
     </div>
   </section>
