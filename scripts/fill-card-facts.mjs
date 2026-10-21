@@ -110,7 +110,7 @@ for (const r of rows) {
       await sleep(3500);   // a free allowance is a few calls a minute
     }
   } else if (r.note) {
-    if (!line && r.note.length <= 140) line = r.note;   // exactly as written
+    if (!line && r.note.length <= 140 && !/^translated by/i.test(r.note)) line = r.note;   // exactly as written; "Translated by ..." is a credit, not a description
     if (!bg) {
       const ai = await ask(r, r.note, [], false);
       if (!ai) { console.log(`  no AI answer for "${r.title}": stopping (the allowance may be used up; run it again later)`); stopped = true; break; }

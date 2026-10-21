@@ -74,7 +74,7 @@ async function doFill(s: Subject) {
     } else if (saved.note) {
       // no summary (a record made from one of our lists): the list's own note is the line, exactly as written (no AI, no guessing from
       // the title), and the AI only picks the painting from that note. No note at all: no line, and the genre rules choose the painting.
-      if (!line && saved.note.length <= 140) line = saved.note;
+      if (!line && saved.note.length <= 140 && !/^translated by/i.test(saved.note)) line = saved.note;   // "Translated by ..." is a credit, not a description
       if (!bg) {
         const ai = await askFacts({ title: s.title, kind: s.type, genres: [], summary: saved.note, needLine: false }, keys);
         bg = isBackground(ai?.bg) ? (ai!.bg as Background) : null;
