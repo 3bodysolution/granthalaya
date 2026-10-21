@@ -125,6 +125,7 @@ create table public.titles (
   original_title text check (original_title is null or char_length(original_title) <= 300),  -- in its own script
   language text check (language is null or language ~ '^[a-z]{2,3}$'),  -- ISO 639-1, else 639-3
   note text check (note is null or char_length(note) <= 300),
+  tagline text check (tagline is null or char_length(tagline) <= 140),  -- the short line on share cards: TMDB's tagline, else one written once from the summary
   tmdb_id int,
   ol_key text,                                       -- Open Library work, like OL45883W
   trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),

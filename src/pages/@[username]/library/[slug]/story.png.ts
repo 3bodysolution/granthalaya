@@ -1,10 +1,12 @@
 // The story card for one title on someone's shelf, as a picture: /@username/library/<slug>/story.png
 // Drawn as the visitor, so the database's privacy rules apply: "Only me" entries, private accounts and blocks give a 404.
-// The address carries ?v=<when the entry last changed>, so a changed rating, status or line is a new card.
+// The address carries ?v=<when the entry last changed>, so a changed rating or status is a new card.
+// The line under the title is the title's own short line; the owner can swap it with ?line=<their text or a saved Line>.
 import type { APIRoute } from 'astro';
-import { loadProfile, loadVisits, excerpt } from '../../../../lib/data';
+import { loadProfile, loadVisits } from '../../../../lib/data';
 import { statusLabel } from '../../../../lib/kinds';
 import { drawStory } from '../../../../lib/cards/story';
+import { titleLine } from '../../../../lib/cards/tagline';
 export const prerender = false;
 
 const rendered = new Map<string, Buffer>();   // finished cards, checked against the database before every use
@@ -31,11 +33,12 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     return new Response(null, { status: 302, headers: { Location: `${url.pathname}?v=${v}`, 'Cache-Control': 'no-store' } });
   }
 
-  const key = `${entry.logId}:${v}`;
+  const custom = isMe ? (url.searchParams.get('line') ?? '').replace(/\s+/g, ' ').trim().slice(0, 140) : '';
+  const key = `${entry.logId}:${v}:${custom}`;
   let png = rendered.get(key);
   if (!png) {
     const d = entry.data;
-    const line = d.highlights.find((x) => x.mine)?.text ?? d.highlights[0]?.text ?? excerpt(entry, 120);
+    const line = custom || await titleLine(sb, entry);
     png = await drawStory({
       kind: d.type, title: d.title, year: d.year, creator: d.creator || undefined, season: d.season,
       rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line: line || undefined,

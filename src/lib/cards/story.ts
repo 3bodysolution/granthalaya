@@ -15,13 +15,14 @@ export interface StoryData {
   rating?: number;         // 0.5 to 5
   loved?: boolean;         // essays
   status: string;          // "Watched", "Read" ...
-  line?: string;           // a saved line or the start of a note
+  line?: string;           // the title's short line, or the owner's own line or a saved Line
   owner: string;           // username
   cover?: string;          // address of the cover image
   color?: string;          // painted cover colour when there's no image
 }
 
 const W = 1080, H = 1920;
+export const SITE = 'granthalaya-sarthak.vercel.app';   // printed small on the card; Instagram can't link a story
 const BG = '#121316', CREAM = '#F4ECDD', GOLD = '#E4BE94', TEAL = '#6CC9BF', GREY = '#A39D92', DIM = '#8D877D';
 
 /* ——— fonts and the painting are built into the function (?inline makes them part of the code), so nothing is fetched at run time ——— */
@@ -95,20 +96,22 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
 
   const title = cut(d.title, 70);
   const size = title.length <= 14 ? 84 : title.length <= 26 ? 70 : title.length <= 44 ? 58 : 48;
-  const by = d.kind === 'film' ? 'directed by' : d.kind === 'tv' ? 'created by' : 'by';
+  const by = ({ film: 'directed by', tv: 'created by', book: 'by', essay: 'by' } as Record<Kind, string>)[d.kind];
   const meta = [d.year, d.kind === 'tv' && d.season ? `season ${d.season}` : '', d.creator ? `${by} ${d.creator}` : ''].filter(Boolean).join(' | ');
   const full = d.rating == null ? 0 : Math.floor(d.rating), half = d.rating != null && d.rating % 1 >= 0.5;
 
+  // Text stays between 13% and 87% of the height (250 to 1670). Below the line there is a calm empty band
+  // (about 1480 to 1590) where Instagram's Link sticker can be placed, then the username.
   const p = paletteFor(d.title, d.color);
-  const CW = 420, CH = 630;
+  const CW = 520, CH = 780;
   const coverBox = h('div', {
-    position: 'absolute', left: (W - CW) / 2, top: 540, width: CW, height: CH, borderRadius: 8, overflow: 'hidden',
+    position: 'absolute', left: (W - CW) / 2, top: 270, width: CW, height: CH, borderRadius: 8, overflow: 'hidden',
     border: '2px solid rgba(255,255,255,.2)', boxShadow: '0 30px 60px rgba(0,0,0,.55)', background: p.bg,
   }, cover
     ? { type: 'img', props: { src: cover, width: CW, height: CH, style: { width: CW, height: CH, objectFit: 'cover' } } }
     : [
-      h('div', { position: 'absolute', left: 0, right: 0, bottom: 0, height: 170, background: p.hill }),
-      h('div', { position: 'absolute', left: 36, right: 36, top: 60, fontSize: 52, lineHeight: 1.15, color: '#F6EEDF', fontFamily: SERIF, fontWeight: 700 }, cut(d.title, 40)),
+      h('div', { position: 'absolute', left: 0, right: 0, bottom: 0, height: 200, background: p.hill }),
+      h('div', { position: 'absolute', left: 40, right: 40, top: 70, fontSize: 58, lineHeight: 1.15, color: '#F6EEDF', fontFamily: SERIF, fontWeight: 700 }, cut(d.title, 40)),
     ]);
 
   const root = h('div', { width: W, height: H, background: BG, flexDirection: 'column', alignItems: 'center', position: 'relative' }, [
@@ -116,10 +119,10 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
     // melts the painting into the card, the way the site's paintings melt into the page
     h('div', { position: 'absolute', left: 0, top: 380, width: W, height: 320, background: `linear-gradient(to bottom, rgba(18,19,22,0), ${BG})` }),
     coverBox,
-    h('div', { position: 'absolute', left: 60, right: 60, top: 1210, flexDirection: 'column', alignItems: 'center' }, [
+    h('div', { position: 'absolute', left: 60, right: 60, top: 1086, flexDirection: 'column', alignItems: 'center' }, [
       h('div', { fontSize: size, lineHeight: 1.12, color: titleColor, fontFamily: SERIF, fontWeight: 700, textAlign: 'center', justifyContent: 'center' }, title),
-      meta ? h('div', { marginTop: 18, fontSize: 34, color: GREY, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
-      h('div', { marginTop: 34, alignItems: 'center', gap: 22 }, [
+      meta ? h('div', { marginTop: 16, fontSize: 32, color: GREY, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
+      h('div', { marginTop: 28, alignItems: 'center', gap: 22 }, [
         d.loved && d.kind === 'essay'
           ? h('div', { fontSize: 40, color: accent, fontFamily: SANS }, '♥ Loved')
           : full || half
@@ -127,9 +130,12 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
             : null,
         h('div', { padding: '8px 24px', borderRadius: 999, background: 'rgba(255,255,255,.1)', fontSize: 28, color: '#C9C2B4', fontFamily: SANS }, d.status),
       ].filter(Boolean)),
-      d.line ? h('div', { marginTop: 40, fontSize: 46, lineHeight: 1.3, color: CREAM, fontStyle: 'italic', fontFamily: SERIF, textAlign: 'center', justifyContent: 'center' }, `“${cut(d.line, 120)}”`) : null,
-      h('div', { marginTop: 56, fontSize: 25, letterSpacing: 7, color: DIM, fontFamily: SANS }, `@${d.owner} ON GRANTHALAYA`.toUpperCase()),
+      d.line ? h('div', { marginTop: 32, fontSize: 40, lineHeight: 1.28, color: CREAM, fontStyle: 'italic', fontFamily: SERIF, textAlign: 'center', justifyContent: 'center' }, `“${cut(d.line, 110)}”`) : null,
     ].filter(Boolean)),
+    h('div', { position: 'absolute', left: 0, right: 0, top: 1604, flexDirection: 'column', alignItems: 'center' }, [
+      h('div', { fontSize: 24, letterSpacing: 6, color: DIM, fontFamily: SANS }, `@${d.owner} ON GRANTHALAYA`.toUpperCase()),
+      h('div', { marginTop: 10, fontSize: 22, color: DIM, fontFamily: SANS }, SITE),
+    ]),
   ]);
 
   const svg = await satori(root as never, { width: W, height: H, fonts: FONTS as never });
