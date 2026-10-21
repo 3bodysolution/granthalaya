@@ -27,7 +27,7 @@ const lines = shelf.reduce((n, e) => n + e.data.highlights.length, 0);
 const base = `/@${profile.username}`;
 const nums = [
   [done.length, 'Finished', `${base}/library/?status=done`],
-  [done.filter((e) => e.data.date.getUTCFullYear() === year).length, 'This year', `${base}/stats/`],
+  [done.filter((e) => e.data.date.getUTCFullYear() === year).length, String(year), `${base}/stats/`],
   [lines, 'Lines', linesHref(profile.username)],
   [collections.length, 'Collections', `${base}/collections/`],
 ] as const;
@@ -195,7 +195,7 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
   .num-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0 18px; border-left: 1px solid var(--line); }
   .num-cell:first-child { border-left: 0; }
   .num-cell b { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-weight: 500; font-size: 24px; line-height: 1.1; color: var(--ink); }
-  .num-cell span { font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .num-cell span { white-space: nowrap; font-size: 10.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
   .num-cell:hover b { color: var(--lat); }
   .bio { margin: 18px 0 0; max-width: 620px; font-size: 16px; line-height: 1.6; }
   .since { margin: 6px 0 0; font-size: 13px; color: var(--muted); }
@@ -238,7 +238,8 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
     .phead :global(.pface) { width: 88px !important; height: 88px !important; font-size: 38px !important; }
     .pname { font-size: 28px; }
     .phead { gap: 14px 16px; }
-    .num-cell { padding: 0 10px; }
+    .num-cell { padding: 0 8px; }
+    .num-cell span { letter-spacing: .1em; }
     .favs { gap: 10px; }
   }
 </style>

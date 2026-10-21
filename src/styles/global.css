@@ -369,3 +369,6 @@ html[data-theme="dark"] :is(.cv.real > .pic, .hc .pic, .pt-cover img) { outline-
   .search-foot { justify-content: flex-start; }
   .search { margin-top: 8vh; }
 }
+
+/* keyboard tips mean nothing on a touch screen */
+@media (hover: none) { .hide-touch { display: none !important; } }
