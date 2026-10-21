@@ -247,7 +247,7 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
   .brand span { font-size: 19px; }
   .actions { gap: 6px; }
   .actions .iconbtn, .actions .avatar { width: 40px; height: 40px; }
-  .addbtn { width: 40px; height: 40px; padding: 0; }
+  .addbtn { width: 40px; height: 40px; padding: 0; flex: 0 0 auto; }
   .addbtn span { display: none; }
 }
 
@@ -255,8 +255,9 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
 .menu { position: relative; }
 .menu > summary { list-style: none; cursor: pointer; }
 .menu > summary::-webkit-details-marker { display: none; }
-.avatar { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; background: var(--lat); color: var(--bg); font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 18px; border: 1px solid var(--line); }
-.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.actions > .menu { display: flex; align-items: center; }
+.avatar { width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; padding: 0; border: 1px solid var(--line); }
+.avatar .face { width: 100% !important; height: 100% !important; font-size: 18px !important; }
 .menu-list { position: absolute; right: 0; top: calc(100% + 8px); z-index: 40; min-width: 220px; padding: 6px; display: flex; flex-direction: column; background: var(--card); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 20px 40px -18px var(--shadow); animation: rise .25s var(--spring); }
 .menu-list a, .menu-list button { display: block; width: 100%; text-align: left; padding: 10px 12px; border-radius: 9px; border: 0; background: transparent; color: var(--ink); font-size: 14px; font-weight: 500; cursor: pointer; }
 .menu-list a:hover, .menu-list button:hover { background: var(--soft); color: var(--ink); }
@@ -266,7 +267,8 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
 .menu-who span { font-size: 13px; color: var(--muted); }
 
 /* round photos and letters for people */
-.face { border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--lat); color: var(--bg); font-family: 'Fraunces Fix', Fraunces, Georgia, serif; }
+.face { border-radius: 50%; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; background: hsl(var(--fh, 175) 40% 82%); color: hsl(var(--fh, 175) 45% 24%); font-family: 'Fraunces Fix', Fraunces, Georgia, serif; }
+html[data-theme="dark"] .face { background: hsl(var(--fh, 175) 24% 27%); color: hsl(var(--fh, 175) 55% 86%); }
 .face { position: relative; }
 .face img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 

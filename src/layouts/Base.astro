@@ -4,6 +4,7 @@ import Logo from '../components/Logo.astro';
 import Valley from '../components/Valley.astro';
 import Drawn from '../components/ui/Drawn.astro';
 import ShareDialog from '../components/ShareDialog.astro';
+import Face from '../components/Face.astro';
 import { site } from '../data/site';
 import { initial } from '../lib/data';
 import { DEFAULT_OG } from '../lib/share';
@@ -102,7 +103,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
             <a href="/add/" class="btn primary addbtn" aria-label="Add a book, film or essay" data-search-open="add"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></a>
             <details class="menu">
               <summary class="avatar" aria-label="Your account">
-                {avatar ? <img src={avatar} alt="" referrerpolicy="no-referrer" /> : <span>{initial(me.display_name || me.username)}</span>}
+                <Face name={me.display_name || me.username} src={avatar} size={40} />
               </summary>
               <div class="menu-list" role="menu">
                 <div class="menu-who"><b>{me.display_name || me.username}</b><span>@{me.username}</span></div>

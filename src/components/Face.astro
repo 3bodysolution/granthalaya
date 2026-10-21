@@ -3,8 +3,10 @@
 import { initial } from '../lib/data';
 interface Props { name: string; src?: string | null; size?: number; class?: string }
 const { name, src, size = 44, class: cls } = Astro.props;
+// a soft colour for the letter circle, the same for the same name
+const hue = [...name].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 360, 7);
 ---
-<span class:list={['face', cls]} style={`width:${size}px;height:${size}px;font-size:${Math.round(size * 0.44)}px`} aria-hidden="true">
+<span class:list={['face', cls]} style={`width:${size}px;height:${size}px;font-size:${Math.round(size * 0.44)}px;--fh:${hue}`} aria-hidden="true">
   <span class="face-l">{initial(name)}</span>
   {src && <img src={src} alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="this.remove()" />}
 </span>
