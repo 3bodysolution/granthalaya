@@ -178,7 +178,7 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
 </Base>
 
 <style>
-  .banner { height: clamp(220px, 24vw, 320px); background-position: center 70%; -webkit-mask-image: linear-gradient(to bottom, #000 62%, transparent); mask-image: linear-gradient(to bottom, #000 62%, transparent); }
+  .banner { height: clamp(220px, 24vw, 320px); background-position: center 70%; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 62%, transparent), linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 62%, transparent), linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); mask-composite: intersect; }
   .phead { position: relative; margin-top: -56px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: end; gap: 22px; }
   .phead :global(.pface) { box-shadow: 0 0 0 5px var(--bg), 0 18px 30px -14px var(--shadow); }
   .pid { padding-bottom: 8px; min-width: 0; }

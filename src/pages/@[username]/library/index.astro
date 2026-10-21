@@ -28,7 +28,7 @@ const filters = STATUS_FILTERS.map(([k, label, f]) => ({ k, label, n: all.filter
 const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s === 'dropped' ? 'dnf' : s);
 ---
 <Base title={isMe ? 'Your library' : `${name}’s library`} shelf={profile.username} description={`Everything on ${name}’s shelf, by year.`}>
-  <div class="art melt under-header settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
+  <div class="art melt settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
 
   <div id="lib" data-type="all" data-status="all">
     <section class="pad head rise">

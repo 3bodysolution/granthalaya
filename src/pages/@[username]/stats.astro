@@ -127,7 +127,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
 <Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username}
   description={inYear.length ? `${plural(inYear.length, 'thing')} finished in ${year}.` : `Stats for ${year}.`}>
   <section class="hero bleed">
-    <div class="art melt under-header bg" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)" aria-hidden="true"></div>
+    <div class="art melt bg" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)" aria-hidden="true"></div>
     <div class="pad words">
       <p class="eyebrow">Your year | {year}</p>
       {inYear.length ? (

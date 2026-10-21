@@ -10,7 +10,7 @@ const still = backdrop ? stillImage(backdrop) : null;
 {backdrop ? (
   <div class="still bleed" aria-hidden="true"><img src={still!.src} srcset={still!.srcset} sizes={still!.sizes} alt="" decoding="async" fetchpriority="high" referrerpolicy="no-referrer" onerror="this.parentElement.classList.add('gone')" /></div>
 ) : (
-  <div class="art melt under-header settle banner bleed" style={`--day: url(/art/${painting}-day.webp); --night: url(/art/${painting}-night.webp)`} aria-hidden="true"></div>
+  <div class="art melt settle banner bleed" style={`--day: url(/art/${painting}-day.webp); --night: url(/art/${painting}-night.webp)`} aria-hidden="true"></div>
 )}
 <section class:list={['pad top', backdrop ? 'over-still' : 'over-art']}>
   <div class="side"><div class="tl-pz"><slot name="poster" /></div><div class="tl-sd"><slot name="side" /></div></div>

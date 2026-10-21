@@ -29,7 +29,7 @@ const essayOn = essays.length ? await essayMarks(sb, Astro.locals.me, essays.map
 const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
 ---
 <Base title={a.name} description={a.bio ? a.bio.slice(0, 180) : `Books by ${a.name} on Granthalaya.`} image={a.photo}>
-  <div class="art melt under-header settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
+  <div class="art melt settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
   <section class="pad head">
     <div class="ph">{a.photo ? <img src={a.photo} alt="" referrerpolicy="no-referrer" onerror="this.remove()" /> : <Face name={a.name} size={140} />}</div>
     <div class="stack" style="gap: 10px; min-width: 0">

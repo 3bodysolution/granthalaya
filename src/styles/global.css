@@ -135,9 +135,6 @@ html[data-theme="dark"] .art { background-image: var(--night); }
 /* full-width paintings melt into the page on every side */
 .melt { -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 78%, transparent), linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
         -webkit-mask-composite: source-in; mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 78%, transparent), linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); mask-composite: intersect; }
-/* a painting right under the header starts at the header's edge: it only melts at the sides and the bottom, never at the top */
-.melt.under-header { -webkit-mask-image: linear-gradient(to bottom, #000 78%, transparent), linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
-        mask-image: linear-gradient(to bottom, #000 78%, transparent), linear-gradient(to right, transparent, #000 6%, #000 94%, transparent); }
 .bleed { width: 100vw; margin-left: calc(50% - 50vw); }
 .credit { font-size: 11px; letter-spacing: .08em; color: var(--muted); }
 
