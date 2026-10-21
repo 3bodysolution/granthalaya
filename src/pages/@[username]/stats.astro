@@ -1,9 +1,8 @@
 ---
 import Base from '../../layouts/Base.astro';
 import ShelfStrip from '../../components/ShelfStrip.astro';
-import { site } from '../../data/site';
 import { openShelf } from '../../lib/shelfpage';
-import { loadShelf, loadCollections, minutes, duration, short, monthNames, kind, typeColor, href, collectionHref, fullTitle, type Entry } from '../../lib/data';
+import { loadShelf, monthNames, href, fullTitle, coverSrc, palette, type Entry } from '../../lib/data';
 export const prerender = false;
 
 const o = await openShelf(Astro, '/stats/');
@@ -11,179 +10,220 @@ if (o.out) return o.out;
 const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
-const [shelf, collections] = await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]);
+const shelf = await loadShelf(sb, profile);
 const name = profile.display_name || profile.username;
 // stats count finished things only; TV counts with films
 const all = shelf.filter((e) => e.data.status === 'done');
 const bucket = (e: Entry) => (e.data.type === 'tv' ? 'film' : e.data.type) as 'book' | 'film' | 'essay';
+const yearOf = (e: Entry) => e.data.date.getUTCFullYear();
 const today = new Date();
 const thisYear = today.getUTCFullYear();
-const year = all.some((e) => e.data.date.getUTCFullYear() === thisYear) ? thisYear : (all[0]?.data.date.getUTCFullYear() ?? thisYear);
-const inYear = all.filter((e) => e.data.date.getUTCFullYear() === year);
-const done = inYear.filter((e) => e.data.status === 'done');
+const years = [...new Set(all.map(yearOf))].sort((a, b) => b - a);
+const asked = Number(Astro.url.searchParams.get('year'));
+const year = years.includes(asked) ? asked : years.includes(thisYear) ? thisYear : (years[0] ?? thisYear);
+const inYear = all.filter((e) => yearOf(e) === year);
+const count = (t: 'book' | 'film' | 'essay') => inYear.filter((e) => bucket(e) === t).length;
+const nBooks = count('book'), nFilms = count('film'), nEssays = count('essay');
+const hasTv = inYear.some((e) => e.data.type === 'tv');
+const plural = (n: number, one: string, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+
 const DAY = 86400000;
 const jan1 = Date.UTC(year, 0, 1);
 const endOfPeriod = year === thisYear ? Date.UTC(thisYear, today.getUTCMonth(), today.getUTCDate()) : Date.UTC(year, 11, 31);
-const daysSoFar = Math.round((endOfPeriod - jan1) / DAY) + 1;
 
-// minutes by type
-const T = { book: 0, film: 0, essay: 0 } as Record<'book' | 'film' | 'essay', number>;
-for (const e of inYear) T[bucket(e)] += minutes(e);
-const total = T.book + T.film + T.essay || 1;
-const hours = (m: number) => Math.round(m / 60);
-const pct = (m: number) => Math.round((m / total) * 100);
-const perDay = total / daysSoFar;
+// the headline: the numbers, in the book and film colours
+const read = [nBooks && plural(nBooks, 'book'), nEssays && plural(nEssays, 'essay')].filter(Boolean) as string[];
+const who = isMe ? 'you' : name.split(' ')[0];
 
-// daily activity — books are spread over the days before you finished them (~50 min a day)
-const daily = new Map<number, number>();
-const add = (t: number, m: number) => daily.set(t, (daily.get(t) ?? 0) + m);
+// months: how many finished (hours only in the tooltip, and only for titles with a runtime or page count)
+const months = monthNames.map((m, i) => {
+  const from = Date.UTC(year, i, 1), to = Date.UTC(year, i + 1, 1);
+  const list = inYear.filter((e) => { const t = e.data.date.getTime(); return t >= from && t < to; });
+  const k = { book: 0, film: 0, essay: 0 };
+  for (const e of list) k[bucket(e)]++;
+  return { name: m, list, ...k, sum: list.length, future: from > endOfPeriod };
+});
+const maxMonth = Math.max(4, ...months.map((m) => m.sum));
+const BAR = 150;
+
+// tiles
+const rated = inYear.filter((e) => e.data.rating != null)
+  .sort((a, b) => b.data.rating! - a.data.rating! || Number(b.data.loved) - Number(a.data.loved) || b.data.date.getTime() - a.data.date.getTime());
+const fav = rated[0];
+const films = inYear.filter((e) => bucket(e) === 'film');
+const filmsKnown = films.filter((e) => e.data.runtime);
+const filmMin = filmsKnown.reduce((s, e) => s + e.data.runtime!, 0);
+const books = inYear.filter((e) => e.data.type === 'book');
+const booksKnown = books.filter((e) => e.data.pages);
+const pageSum = booksKnown.reduce((s, e) => s + e.data.pages!, 0);
+const missing = (all: Entry[], known: Entry[]) => all.length - known.length;
+const fmt = (n: number) => n.toLocaleString('en-IN');
+const filmHours = Math.round(filmMin / 60);
+
+// days with something finished, streaks and the calendar
+const perDay = new Map<number, number>();
 for (const e of all) {
   const t = Date.UTC(e.data.date.getUTCFullYear(), e.data.date.getUTCMonth(), e.data.date.getUTCDate());
-  const m = minutes(e);
-  if (e.data.type === 'book') {
-    const n = Math.max(1, Math.ceil(m / 50));
-    const start = t - (n - 1) * DAY; // spread over the days before it was finished
-    for (let i = 0; i < n; i++) { const day = start + i * DAY; if (day <= endOfPeriod) add(day, m / n); }
-  } else add(t, m);
+  perDay.set(t, (perDay.get(t) ?? 0) + 1);
 }
+let best = 0, run = 0;
+for (let t = jan1; t <= endOfPeriod; t += DAY) {
+  if (perDay.has(t)) { run++; if (run > best) best = run; } else run = 0;
+}
+const activeDays = [...perDay.keys()].filter((t) => t >= jan1 && t <= endOfPeriod).length;
+const daysSoFar = Math.round((endOfPeriod - jan1) / DAY) + 1;
 
-// months (stacked bars)
-const months = monthNames.map((name, i) => {
-  const from = Date.UTC(year, i, 1), to = Date.UTC(year, i + 1, 1);
-  const k = { book: 0, film: 0, essay: 0 };
-  for (const e of inYear) { const t = e.data.date.getTime(); if (t >= from && t < to) k[bucket(e)] += minutes(e); }
-  return { name, ...k, sum: k.book + k.film + k.essay, future: from > endOfPeriod };
-});
-const maxMonth = Math.max(60, ...months.map((m) => m.sum));
-const BAR = 190;
+// top language, only where the title has one saved
+const langNames = new Intl.DisplayNames(['en'], { type: 'language' });
+const langName = (c: string) => { try { return langNames.of(c) ?? c; } catch { return c; } };
+const langCount = new Map<string, number>();
+for (const e of inYear) if (e.data.language) langCount.set(e.data.language, (langCount.get(e.data.language) ?? 0) + 1);
+const topLang = [...langCount.entries()].sort((a, b) => b[1] - a[1])[0];
 
-// heatmap
+// how you rate: half-star steps
+const steps = Array.from({ length: 10 }, (_, i) => (i + 1) / 2);
+const rateCount = steps.map((s) => inYear.filter((e) => e.data.rating === s).length);
+const maxRate = Math.max(1, ...rateCount);
+const stepLabel = (s: number) => (s % 1 ? `${Math.floor(s) || ''}½` : String(s));
+const RATE = [
+  'var(--sky)', 'var(--lat)', 'var(--moss)', 'var(--book)',
+  'color-mix(in srgb, var(--sky) 55%, var(--moss))', 'color-mix(in srgb, var(--lat) 55%, var(--book))',
+  'color-mix(in srgb, var(--moss) 55%, var(--book))', 'color-mix(in srgb, var(--sky) 60%, var(--book))',
+  'color-mix(in srgb, var(--lat) 55%, var(--sky))', 'color-mix(in srgb, var(--moss) 55%, var(--lat))',
+];
+
+// the calendar
 const firstMon = jan1 - ((new Date(jan1).getUTCDay() + 6) % 7) * DAY;
-const weeks: { t: number; lvl: number; out: boolean; m: number }[][] = [];
+const weeks: { t: number; n: number; out: boolean }[][] = [];
 for (let w = 0; w < 54; w++) {
   const col = [];
   for (let d = 0; d < 7; d++) {
     const t = firstMon + (w * 7 + d) * DAY;
-    const m = daily.get(t) ?? 0;
-    const lvl = m <= 0 ? 0 : m < 30 ? 1 : m < 60 ? 2 : m < 120 ? 3 : 4;
-    col.push({ t, lvl, m, out: t < jan1 || t > Date.UTC(year, 11, 31) });
+    col.push({ t, n: perDay.get(t) ?? 0, out: t < jan1 || t > Date.UTC(year, 11, 31) });
   }
   if (col.every((c) => c.out)) break;
   weeks.push(col);
 }
-const monthLabels = monthNames.map((name, i) => ({ name, w: Math.floor((Date.UTC(year, i, 1) - firstMon) / DAY / 7) }));
-const activeDays = [...daily.entries()].filter(([t, m]) => m > 0 && t >= jan1 && t <= endOfPeriod).length;
-
-// streaks
-let cur = 0, best = 0, run = 0, bestEnd = jan1;
-for (let t = jan1; t <= endOfPeriod; t += DAY) {
-  if ((daily.get(t) ?? 0) > 0) { run++; if (run > best) { best = run; bestEnd = t; } } else run = 0;
-}
-for (let t = endOfPeriod; t >= jan1 && (daily.get(t) ?? 0) > 0; t -= DAY) cur++;
-if (cur === 0 && (daily.get(endOfPeriod - DAY) ?? 0) > 0) for (let t = endOfPeriod - DAY; t >= jan1 && (daily.get(t) ?? 0) > 0; t -= DAY) cur++;
-const wd = [0, 0, 0, 0, 0, 0, 0];
-for (const [t, m] of daily) if (t >= jan1 && t <= endOfPeriod) wd[new Date(t).getUTCDay()] += m;
-const busiestDay = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][wd.indexOf(Math.max(...wd))];
-
-// season recap (monsoon: June–September)
-const sFrom = Date.UTC(year, 5, 1), sTo = Date.UTC(year, 9, 1);
-const season = done.filter((e) => e.data.date.getTime() >= sFrom && e.data.date.getTime() < sTo);
-const sc = (t: string) => season.filter((e) => bucket(e) === t).length;
-const loved = [...season].filter((e) => e.data.rating != null).sort((a, b) => b.data.rating! - a.data.rating! || b.data.date.getTime() - a.data.date.getTime())[0];
-const ids = new Set(season.map((e) => e.id));
-const busiest = [...collections].sort((a, b) => b.data.items.filter((i) => ids.has(i.slug)).length - a.data.items.filter((i) => ids.has(i.slug)).length)[0];
-
-const booksDone = done.filter((e) => e.data.type === 'book').length;
-const kpis = [
-  { label: 'Books', value: booksDone, note: 'finished this year', color: 'var(--book)' },
-  { label: 'Films and TV', value: done.filter((e) => bucket(e) === 'film').length, note: `${hours(T.film)} hours on screen`, color: 'var(--sky)' },
-  { label: 'Essays', value: done.filter((e) => e.data.type === 'essay').length, note: `${hours(T.essay) || '<1'} hour${hours(T.essay) === 1 ? '' : 's'} of reading`, color: 'var(--moss)' },
-  { label: 'Days with a story', value: activeDays, note: `of ${daysSoFar} so far`, color: 'var(--haldi)' },
-];
-const recent = all.slice(0, 4);
-const LV = [{ c: 'var(--soft)', o: 1 }, { c: 'var(--lat)', o: 0.3 }, { c: 'var(--lat)', o: 0.55 }, { c: 'var(--lat)', o: 0.8 }, { c: 'var(--lat)', o: 1 }];
+const monthLabels = monthNames.map((m, i) => ({ name: m, w: Math.floor((Date.UTC(year, i, 1) - firstMon) / DAY / 7) }));
+const LV = [{ c: 'var(--soft)', o: 1 }, { c: 'var(--lat)', o: 0.35 }, { c: 'var(--lat)', o: 0.6 }, { c: 'var(--lat)', o: 0.8 }, { c: 'var(--lat)', o: 1 }];
 const label = (t: number) => { const d = new Date(t); return `${monthNames[d.getUTCMonth()]} ${d.getUTCDate()}`; };
+
+// the year in covers: up to three a month, best rated first
+const monthCovers = months.filter((m) => m.sum > 0).map((m) => ({
+  name: m.name, total: m.sum,
+  picks: [...m.list].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0) || b.data.date.getTime() - a.data.date.getTime()).slice(0, 3),
+}));
+const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '' : `?year=${y}`}`;
 ---
-<Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username} description={`${hours(total)} hours of stories in ${year}.`}>
-  <section class="pad head">
-    <div class="rise d1" style="margin-bottom: 30px"><ShelfStrip shelf={o.shelf} current="stats" /></div>
-    <div class="rise stack" style="gap: 10px">
-      <p class="eyebrow" style="color: var(--lat)">Stats | {year}</p>
-      <h1 class="title"><span class="num">{hours(total)}</span> hours {year === thisYear ? 'so far this year' : `in ${year}`}</h1>
-      <p class="lede">About {duration(perDay, 'words').replace(/ min$/, ' minutes')} a day, counting finished things. Worked out from runtimes, pages and word counts.</p>
+<Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username}
+  description={inYear.length ? `${plural(inYear.length, 'thing')} finished in ${year}.` : `Stats for ${year}.`}>
+  <section class="hero bleed">
+    <div class="art melt under-header bg" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)" aria-hidden="true"></div>
+    <div class="pad words">
+      <p class="eyebrow">Your year | {year}</p>
+      {inYear.length ? (
+        <h1 class="title num">
+          In {year} {who} {read.length > 0 && <>read {read.map((r, i) => <>{i > 0 && ' and '}<b class="nb">{r.split(' ')[0]}</b> {r.split(' ').slice(1).join(' ')}</>)}</>}
+          {read.length > 0 && nFilms > 0 && ' and '}
+          {nFilms > 0 && <>watched <b class="nf">{nFilms}</b> {nFilms === 1 ? (hasTv ? 'film or show' : 'film') : (hasTv ? 'films and shows' : 'films')}</>}.
+        </h1>
+      ) : (
+        <h1 class="title">Nothing finished in {year} yet.</h1>
+      )}
     </div>
   </section>
 
-  <section class="pad kpis num">
-    {kpis.map((k, i) => (
-      <div class="card kpi rise" style={`animation-delay: ${(0.1 + i * 0.08).toFixed(2)}s`}>
-        <div class="blob" aria-hidden="true" style={`background: ${k.color}`}></div>
-        <span class="eyebrow">{k.label}</span>
-        <span class="serif kv">{k.value}</span>
-        <span class="muted" style="font-size: 13px">{k.note}</span>
+  <section class="pad bars-wrap">
+    <div class="bars num" role="img" aria-label={`Finished per month in ${year}: ` + months.filter((m) => !m.future).map((m) => `${m.name} ${m.sum}`).join(', ')}>
+      {months.map((m, i) => (
+        <div class="mcol" title={m.future ? undefined : `${m.name}: ${m.book} books, ${m.film} films and shows, ${m.essay} essays`}>
+          {!m.future && m.sum > 0 && <span class="mt">{m.sum}</span>}
+          {m.sum > 0 && (
+            <div class="stackbar" style={`animation-delay: ${(0.2 + i * 0.05).toFixed(2)}s`}>
+              {m.essay > 0 && <div style={`height: ${(m.essay / maxMonth) * BAR}px; background: var(--moss)`}></div>}
+              {m.film > 0 && <div style={`height: ${(m.film / maxMonth) * BAR}px; background: var(--sky)`}></div>}
+              {m.book > 0 && <div style={`height: ${(m.book / maxMonth) * BAR}px; background: var(--book)`}></div>}
+            </div>
+          )}
+          <span class="mn type">{m.name.slice(0, 1)}</span>
+        </div>
+      ))}
+    </div>
+    <div class="keys"><span class="key"><i style="background: var(--book)"></i>Books</span><span class="key"><i style="background: var(--sky)"></i>Films and TV</span><span class="key"><i style="background: var(--moss)"></i>Essays</span>
+      {years.length > 1 && <span class="yrs" aria-label="Year">{years.map((y) => <a class="gchip" href={yearUrl(y)} aria-current={y === year ? 'page' : undefined}>{y}</a>)}</span>}
+    </div>
+  </section>
+
+  <section class="pad strip-row"><ShelfStrip shelf={o.shelf} current="stats" /></section>
+
+  {inYear.length > 0 && (
+    <section class="pad tiles num">
+      {fav && (
+        <a class="card tile fav" href={href(fav)}>
+          <span class="eyebrow">Favourite of the year</span>
+          <div class="favcover"><div class="pic" style={`--bg: ${palette(fav).bg}; --hill: ${palette(fav).hill}; --ac: ${palette(fav).accent}`}>{coverSrc(fav) ? <img src={coverSrc(fav)} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" /> : <span class="serif pt">{fav.data.title}</span>}</div></div>
+          <span class="serif favname">{fullTitle(fav)}</span>
+          <span class="muted small">{fav.data.rating != null && `${fav.data.rating} stars`}</span>
+        </a>
+      )}
+      <div class="card tile"><span class="eyebrow">Hours of film</span>
+        {filmsKnown.length ? <><span class="serif big" style="color: var(--sky)">{filmHours < 1 ? '<1' : fmt(filmHours)}</span><span class="muted small">{missing(films, filmsKnown) ? `About, from ${plural(filmsKnown.length, 'title')} with a runtime` : 'Counted from each runtime'}</span></>
+          : <span class="muted small">No runtimes saved for these yet.</span>}</div>
+      <div class="card tile"><span class="eyebrow">Pages</span>
+        {booksKnown.length ? <><span class="serif big" style="color: var(--book)">{fmt(pageSum)}</span><span class="muted small">{missing(books, booksKnown) ? `About, from ${plural(booksKnown.length, 'book')} with a page count` : 'Counted from each book’s pages'}</span></>
+          : <span class="muted small">No page counts saved for these yet.</span>}</div>
+      <div class="card tile"><span class="eyebrow">Longest streak</span>
+        <span class="serif big">{best} {best === 1 ? 'day' : 'days'}</span><span class="muted small">{activeDays} of {daysSoFar} days had something finished</span></div>
+      {topLang && <div class="card tile"><span class="eyebrow">Top language</span>
+        <span class="serif big lang" style="color: var(--moss)">{langName(topLang[0])}</span><span class="muted small">{plural(topLang[1], 'title')}, where a language is saved</span></div>}
+      <div class="card tile wide"><span class="eyebrow">How you rate</span>
+        {rated.length ? (
+          <div class="rate" role="img" aria-label={'Ratings: ' + steps.map((s, i) => `${s} stars ${rateCount[i]}`).join(', ')}>
+            {steps.map((s, i) => (
+              <div class="rcol">
+                <span class="rn">{rateCount[i] || ''}</span>
+                <div class="rbar" style={`height: ${Math.max(rateCount[i] ? 6 : 2, (rateCount[i] / maxRate) * 96)}px; background: ${RATE[i]}; opacity: ${rateCount[i] ? 1 : .35}`}></div>
+                <span class="rl">{stepLabel(s)}</span>
+              </div>
+            ))}
+          </div>
+        ) : <span class="muted small">Nothing rated in {year} yet.</span>}
       </div>
-    ))}
-  </section>
+    </section>
+  )}
 
-  <section class="pad split">
-    <div class="between"><h2 class="eyebrow">Where the hours went</h2><span class="muted" style="font-size: 13px">Jan 1 to {label(endOfPeriod)}</span></div>
-    <div class="bar" role="img" aria-label={`Books ${hours(T.book)} hours, ${pct(T.book)} percent. Films ${hours(T.film)} hours, ${pct(T.film)} percent. Essays ${hours(T.essay)} hours, ${pct(T.essay)} percent.`}>
-      <div class="wash growX" style={`animation-delay: .6s; width: ${pct(T.book)}%; background: var(--book)`}></div>
-      <div class="wash growX" style={`animation-delay: .8s; width: ${pct(T.film)}%; background: var(--sky)`}></div>
-      <div class="wash growX" style={`animation-delay: 1s; width: ${Math.max(pct(T.essay), 1)}%; background: var(--moss)`}></div>
-    </div>
-    <div class="num keys">
-      <span class="key"><i style="background: var(--book)"></i>Books | {hours(T.book)}h | {pct(T.book)}%</span>
-      <span class="key"><i style="background: var(--sky)"></i>Films and TV | {hours(T.film)}h | {pct(T.film)}%</span>
-      <span class="key"><i style="background: var(--moss)"></i>Essays | {hours(T.essay)}h | {pct(T.essay)}%</span>
-    </div>
-  </section>
+  {monthCovers.length > 0 && (
+    <section class="pad covers">
+      <h2 class="serif">{isMe ? 'Your year in covers' : `${name}’s year in covers`}</h2>
+      <div class="cgrid">
+        {monthCovers.map((m) => (
+          <div class="cmonth">
+            <span class="eyebrow">{m.name}{m.total > 3 && <span class="more"> | {m.total}</span>}</span>
+            <div class="crow">{m.picks.map((e) => <a href={href(e)} class="ctile" title={fullTitle(e)}><div class="pic" style={`--bg: ${palette(e).bg}; --hill: ${palette(e).hill}; --ac: ${palette(e).accent}`}>{coverSrc(e) ? <img src={coverSrc(e)} alt={fullTitle(e)} loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" /> : <span class="serif pt">{e.data.title}</span>}</div></a>)}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
 
-  <section class="pad" style="padding-top: 44px">
-    <div class="card shelfcard">
-      <div class="between">
-        <h2 class="eyebrow">{year} as a bookshelf</h2>
-        <div class="keys hide-sm"><span class="key" style="font-size: 13px"><i style="background: var(--book)"></i>Books</span><span class="key" style="font-size: 13px"><i style="background: var(--sky)"></i>Films and TV</span><span class="key" style="font-size: 13px"><i style="background: var(--moss)"></i>Essays</span></div>
+  {inYear.length > 0 && (
+    <section class="pad cal">
+      <div class="rule between">
+        <h2 class="eyebrow">Day by day</h2>
+        <div class="legend">Less {LV.map((l) => <span style={`background: ${l.c}; opacity: ${l.o}`}></span>)} More</div>
       </div>
       <div class="scroller">
-        <div class="bars" role="img" aria-label={`Hours per month in ${year}: ` + months.filter((m) => !m.future).map((m) => `${m.name} ${hours(m.sum)}`).join(', ')}>
-          {months.map((m, i) => (
-            <div class="mcol">
-              {!m.future && <span class="num mt">{hours(m.sum)}h</span>}
-              {m.future ? <div class="ghost"></div> : m.sum > 0 && (
-                <div class="growY stackbar" style={`animation-delay: ${(0.3 + i * 0.06).toFixed(2)}s`}>
-                  {m.essay > 0 && <div class="wash" style={`height: ${Math.max(3, (m.essay / maxMonth) * BAR)}px; background: var(--moss)`}></div>}
-                  {m.film > 0 && <div class="wash" style={`height: ${(m.film / maxMonth) * BAR}px; background: var(--sky)`}></div>}
-                  {m.book > 0 && <div class="wash" style={`height: ${(m.book / maxMonth) * BAR}px; background: var(--book)`}></div>}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-        <div class="plank"></div>
-        <div class="mnames">{months.map((m) => <span class="type">{m.name}</span>)}</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="pad" style="padding-top: 44px">
-    <div class="rule" style="margin-bottom: 18px">
-      <h2 class="eyebrow">Activity, day by day</h2>
-      <div class="legend">Less {LV.map((l) => <span style={`background: ${l.c}; opacity: ${l.o}`}></span>)} More</div>
-    </div>
-    <div class="heat">
-      <div class="scroller hs">
         <div class="hgrid">
           <div class="type dl" aria-hidden="true"><span>M</span><span></span><span>W</span><span></span><span>F</span><span></span><span>S</span></div>
-          <div role="img" aria-label={`A calendar of daily activity in ${year}. ${activeDays} of ${daysSoFar} days so far had something read or watched.`} class="stack" style="gap: 6px">
+          <div role="img" aria-label={`A calendar of ${year}. ${activeDays} of ${daysSoFar} days so far had something finished.`} class="stack" style="gap: 6px">
             <div class="type ml">{monthLabels.map((m) => <span style={`left: ${m.w * 17}px`}>{m.name}</span>)}</div>
             <div class="weeks">
-              {weeks.map((wk, i) => (
-                <div class="wk rise" style={`animation-delay: ${(0.2 + i * 0.012).toFixed(3)}s`}>
+              {weeks.map((wk) => (
+                <div class="wk">
                   {wk.map((d) => (
-                    <span class:list={['cell', d.out && 'out', d.t > endOfPeriod && 'future']}
-                          style={d.out ? '' : `background: ${LV[d.lvl].c}; opacity: ${d.t > endOfPeriod ? 0.35 : LV[d.lvl].o}`}
-                          title={d.out || d.t > endOfPeriod ? undefined : `${label(d.t)} | ${d.m > 0 ? duration(d.m) : 'nothing'}`}></span>
+                    <span class:list={['cell', d.out && 'out']}
+                          style={d.out ? '' : `background: ${LV[Math.min(d.n, 4)].c}; opacity: ${d.t > endOfPeriod ? 0.35 : LV[Math.min(d.n, 4)].o}`}
+                          title={d.out || d.t > endOfPeriod ? undefined : `${label(d.t)} | ${d.n ? `${d.n} finished` : 'nothing'}`}></span>
                   ))}
                 </div>
               ))}
@@ -191,81 +231,76 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
           </div>
         </div>
       </div>
-      <div class="num streaks">
-        <div class="stack"><span class="serif sv">{cur} day{cur === 1 ? '' : 's'}</span><span class="muted" style="font-size: 13px">current streak</span></div>
-        <div class="stack"><span class="serif sv">{best} day{best === 1 ? '' : 's'}</span><span class="muted" style="font-size: 13px">longest streak, in {monthNames[new Date(bestEnd).getUTCMonth()]}</span></div>
-        <div class="stack"><span class="serif sv">{busiestDay}</span><span class="muted" style="font-size: 13px">most active day</span></div>
-      </div>
-    </div>
-  </section>
+    </section>
+  )}
 
-  <section class="pad bottom">
-    <div class="art recap" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)">
-      <div class="between"><span class="rk">Season recap</span><span style="font-size: 13px; color: #C9C2B4">Jun 1 to Sep 30</span></div>
-      <h3 class="serif">Monsoon {year}</h3>
-      <div class="num three">
-        <div class="stack"><span class="serif" style="font-size: 34px">{sc('book')}</span><span style="font-size: 12px; color: #C9C2B4">books</span></div>
-        <div class="stack"><span class="serif" style="font-size: 34px">{sc('film')}</span><span style="font-size: 12px; color: #C9C2B4">films</span></div>
-        <div class="stack"><span class="serif" style="font-size: 34px">{sc('essay')}</span><span style="font-size: 12px; color: #C9C2B4">essays</span></div>
-      </div>
-      <div class="stack" style="gap: 6px; font-size: 14px; color: #E9E1D1">
-        {loved && <span>Most loved | <span class="serif" style="font-style: italic">{loved.data.title}</span></span>}
-        {busiest && ids.size > 0 && busiest.data.items.some((i) => ids.has(i.slug)) && <span>Busiest collection | <a href={collectionHref(busiest)} class="serif" style="font-style: italic">{busiest.data.title}</a></span>}
-      </div>
-    </div>
-
-    <div class="stack" style="gap: 28px">
-      <div class="card how">
-        <div class="between"><h2 class="eyebrow">Nothing to log</h2><span class="muted" style="font-size: 13px">Time is worked out for you</span></div>
-        <div class="hr"><span class="key"><i style="background: var(--sky)"></i></span><span class="serif grow">Films and TV</span><span class="muted">the runtime</span></div>
-        <div class="hr"><span class="key"><i style="background: var(--book)"></i></span><span class="serif grow">Books</span><span class="muted">pages × {site.minutesPerPage} min</span></div>
-        <div class="hr last"><span class="key"><i style="background: var(--moss)"></i></span><span class="serif grow">Essays</span><span class="muted">words ÷ {site.wordsPerMinute} a minute</span></div>
-      </div>
-      <div class="stack">
-        <h2 class="eyebrow" style="margin-bottom: 8px">Counted lately</h2>
-        {recent.map((e) => (
-          <a href={href(e)} class="sess">
-            <span class="sk" style={`color: ${typeColor(e.data.type)}`}>{kind(e)}</span>
-            <span class="serif grow" style="font-size: 16px">{fullTitle(e)}</span>
-            <span class="type num" style="font-size: 13px">{duration(minutes(e))}</span>
-            <span class="num muted" style="width: 64px; text-align: right; font-size: 13px">{short(e.data.date)}</span>
-          </a>
-        ))}
-      </div>
-    </div>
+  <section class="pad foot-note">
+    <p class="muted small">Only finished things are counted, and only what you can see here. Hours and pages come from a title’s own runtime or page count; titles without one are left out, never guessed.</p>
   </section>
 </Base>
 
 <style>
-  .head { padding-top: 52px; }
-  .head .title { max-width: 900px; }
-  .between { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-  .grow { flex-grow: 1; min-width: 0; }
-  .kpis { padding-top: 36px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-  .kpi { position: relative; padding: 22px 22px 20px; display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
-  .blob { position: absolute; right: -26px; top: -26px; width: 90px; height: 90px; border-radius: 45px; opacity: .16; }
-  .kv { font-size: 40px; line-height: 1.1; }
-  .split { padding-top: 36px; display: flex; flex-direction: column; gap: 12px; }
-  .bar { display: flex; height: 22px; border-radius: 11px; overflow: hidden; gap: 3px; }
-  .keys { display: flex; gap: 12px 28px; flex-wrap: wrap; }
+  .hero { position: relative; aspect-ratio: 2172 / 724; min-height: 380px; max-height: 640px; overflow-x: clip; }
+  .hero .bg { position: absolute; inset: 0; background-position: center bottom; }
+  .words { position: relative; padding-top: clamp(20px, 2.6vw, 40px); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+  .words .eyebrow { color: #0B5552; }
+  .words .title { font-size: clamp(26px, 3.1vw, 42px); line-height: 1.12; max-width: 760px; color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .6); }
+  .words .nb { color: #6B4527; font-weight: inherit; }
+  .words .nf { color: #1E4F7A; font-weight: inherit; }
+  :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
+  :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .65); }
+  :global(html[data-theme="dark"]) .words .nb { color: #E4BE94; }
+  :global(html[data-theme="dark"]) .words .nf { color: #A9C8E2; }
 
-  .shelfcard { padding: 28px 32px 0; display: flex; flex-direction: column; gap: 8px; }
-  .scroller { overflow-x: auto; scrollbar-width: thin; min-width: 0; max-width: 100%; }
-  .bars { display: grid; grid-template-columns: repeat(12, minmax(44px, 1fr)); gap: 18px; align-items: end; height: 240px; padding: 0 12px; min-width: 700px; }
-  .mcol { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 240px; }
+  /* the bars rise from where the painting fades into the page */
+  .bars-wrap { position: relative; margin-top: calc(-1 * clamp(70px, 9vw, 150px)); display: flex; flex-direction: column; gap: 14px; }
+  .bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: clamp(8px, 2vw, 22px); align-items: end; max-width: 760px; margin: 0 auto; width: 100%; }
+  .mcol { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; min-height: 185px; }
   .mt { font-size: 12px; font-weight: 600; color: var(--muted); }
-  .stackbar { display: flex; flex-direction: column; width: 44px; }
-  .stackbar > div:first-child { border-radius: 4px 4px 0 0; }
-  .stackbar > div + div { border-top: 2px solid rgba(0,0,0,.15); }
-  .ghost { width: 44px; height: 60px; border: 1.5px dashed var(--line); border-radius: 4px 4px 0 0; }
-  .plank { height: 12px; margin: 0 -8px; border-radius: 3px; background: var(--soft); box-shadow: 0 6px 10px -4px var(--shadow); min-width: 716px; }
-  .mnames { display: grid; grid-template-columns: repeat(12, minmax(44px, 1fr)); gap: 18px; padding: 6px 12px 22px; min-width: 700px; }
-  .mnames span { text-align: center; font-size: 12px; color: var(--muted); }
+  .mn { font-size: 12px; color: var(--muted); padding-top: 4px; }
+  .stackbar { display: flex; flex-direction: column; width: min(100%, 36px); border-radius: 4px 4px 0 0; overflow: hidden; transform-origin: bottom; animation: rise .9s var(--spring) backwards; }
+  .stackbar > div + div { border-top: 2px solid var(--bg); }
+  @keyframes rise { from { transform: scaleY(0); } }
+  .keys { display: flex; gap: 10px 26px; flex-wrap: wrap; justify-content: center; align-items: center; font-size: 13px; }
+  .yrs { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-left: 10px; }
+  .yrs .gchip[aria-current="page"] { background: var(--lat); color: var(--bg); }
+  .strip-row { padding-top: 34px; }
 
+  .tiles { padding-top: 28px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+  .tile { padding: 22px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .tile .big { font-size: clamp(38px, 4.4vw, 56px); line-height: 1.05; }
+  .tile .big.lang { font-size: clamp(30px, 3.4vw, 42px); }
+  .small { font-size: 13px; }
+  .fav { grid-row: span 3; gap: 12px; }
+  .favcover { width: min(100%, 220px); margin: 4px auto; }
+  .pic { position: relative; aspect-ratio: 2 / 3; border-radius: 6px; overflow: hidden; display: flex; align-items: flex-end; padding: 8px; background: linear-gradient(to top, var(--hill) 0 28%, var(--bg) 28%); box-shadow: 0 0 0 1px rgba(0, 0, 0, .12), 0 10px 16px -10px var(--shadow); }
+  .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pt { position: relative; color: #F6EEDF; font-size: 13px; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+  .favcover .pt { font-size: 22px; padding: 6px; }
+  .favname { font-size: 20px; line-height: 1.2; text-align: center; }
+  .fav .small { text-align: center; }
+  .wide { grid-column: 2 / -1; }
+  .rate { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: clamp(6px, 1.2vw, 14px); align-items: end; height: 150px; padding-top: 10px; }
+  .rcol { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; }
+  .rbar { width: 100%; max-width: 34px; border-radius: 4px 4px 0 0; }
+  .rn { font-size: 12px; color: var(--muted); min-height: 14px; }
+  .rl { font-size: 12px; color: var(--muted); }
+
+  .covers { padding-top: 56px; display: flex; flex-direction: column; gap: 22px; }
+  .covers h2 { font-size: clamp(28px, 3vw, 38px); font-weight: 400; margin: 0; }
+  .cgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 30px 28px; }
+  .cmonth { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .more { color: var(--muted); letter-spacing: .1em; }
+  .crow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .ctile { display: block; min-width: 0; transition: transform .2s ease; }
+  .ctile:hover { transform: translateY(-3px); }
+  .ctile:active { transform: scale(.97); }
+
+  .cal { padding-top: 56px; }
+  .between { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 16px; }
   .legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
   .legend span { width: 13px; height: 13px; border-radius: 3px; }
-  .heat { display: flex; gap: 24px; align-items: flex-start; }
-  .hs { flex: 1; min-width: 0; width: 100%; }
+  .scroller { overflow-x: auto; scrollbar-width: thin; min-width: 0; max-width: 100%; }
   .hgrid { display: flex; gap: 12px; width: max-content; }
   .dl { display: flex; flex-direction: column; gap: 3px; font-size: 10px; color: var(--muted); padding-top: 20px; }
   .dl span { height: 14px; line-height: 14px; }
@@ -273,49 +308,27 @@ const label = (t: number) => { const d = new Date(t); return `${monthNames[d.get
   .ml span { position: absolute; top: 0; }
   .weeks { display: flex; gap: 3px; }
   .wk { display: flex; flex-direction: column; gap: 3px; }
-  .cell { display: block; width: 14px; height: 14px; border-radius: 3px; transition: transform .25s var(--spring); }
-  .cell:not(.out):not(.future):hover { transform: scale(1.5); }
+  .cell { display: block; width: 14px; height: 14px; border-radius: 3px; transition: transform .2s ease; }
+  .cell:not(.out):hover { transform: scale(1.5); }
   .cell.out { background: transparent; }
-  .streaks { flex-shrink: 0; width: 190px; display: flex; flex-direction: column; gap: 14px; padding-top: 20px; }
-  .streaks .stack { gap: 2px; }
-  .sv { font-size: 30px; }
+  .foot-note { padding-top: 40px; padding-bottom: 20px; max-width: 760px; }
 
-  .bottom { padding-top: 52px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
-  /* the recap sits in the storm clouds, top right, so the fields and the cart stay clear */
-  .recap { grid-column: 1 / -1; border-radius: 18px; background-color: #22313F; color: #F4ECDD; min-height: clamp(420px, 36vw, 500px); padding: 30px 34px; display: flex; flex-direction: column; align-items: flex-end; text-align: right; gap: 16px; box-shadow: 0 24px 40px -24px var(--shadow); text-shadow: 0 1px 12px rgba(10, 16, 30, .65); }
-  .recap > * { width: min(360px, 100%); }
-  .recap .between { gap: 16px; }
-  .recap .three .stack { align-items: flex-end; }
-  .rk { font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #E7B24C; }
-  .recap h3 { margin: 0; font-weight: 400; font-size: 46px; line-height: 1; }
-  .recap h3 em { color: #E7B24C; }
-  .recap a:hover { color: #E7B24C; }
-  .bottom > .stack:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; align-items: start; }
-  .three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-  .three .stack { gap: 2px; }
-  .how { padding: 28px; display: flex; flex-direction: column; gap: 16px; }
-  .hr { display: flex; align-items: center; gap: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
-  .hr .serif { font-size: 18px; }
-  .hr.last { border-bottom: 0; padding-bottom: 0; }
-  .sess { display: flex; align-items: center; gap: 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
-  .sk { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; width: 52px; }
-
+  @media (prefers-reduced-motion: reduce) { .stackbar { animation: none; } }
   @media (max-width: 1100px) {
-    .kpis { grid-template-columns: 1fr 1fr; }
-    .heat { flex-direction: column; }
-    .streaks { flex-direction: row; width: auto; gap: 40px; padding-top: 0; }
-    .bottom { grid-template-columns: 1fr; }
-    .bottom > .stack:last-child { grid-template-columns: 1fr; }
+    .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fav { grid-row: auto; grid-column: 1 / -1; }
+    .wide { grid-column: 1 / -1; }
+    .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 780px) {
-    .head { padding-top: 36px; }
-    .kpis { gap: 12px; }
-    .kpi { padding: 18px; }
-    .kv { font-size: 32px; }
-    .shelfcard { padding: 22px 18px 0; }
-    .streaks { gap: 24px; flex-wrap: wrap; }
-    .sv { font-size: 24px; }
-    .recap h3 { font-size: 38px; }
-    .recap { background-position: 72% center; min-height: 460px; }
+    .hero { aspect-ratio: auto; min-height: 400px; }
+    .hero .bg { background-position: 60% bottom; }
+    .words { padding-top: 30px; }
+    .bars-wrap { margin-top: -80px; }
+    .favcover { width: 150px; }
+    .tiles { gap: 12px; }
+    .tile { padding: 18px; }
+    .cgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+    .rate { gap: 4px; }
   }
 </style>
