@@ -1,5 +1,5 @@
-// What the share window needs for one thing: its public short link, the text that goes with it (WhatsApp, X), and the
-// painting its card starts on. Public things only: private accounts, "Only me" entries and blocks give a 404.
+// What the share window needs for one thing: its public short link and the text that goes with it (WhatsApp, X).
+// It never waits for the AI: the line is the saved one, if any. Public things only: private accounts, "Only me" entries and blocks give a 404.
 //   ?title=film:<address part> | tv:... | book:...   a film, show or book page
 //   ?entry=<username>/<slug>                         a title on someone's shelf
 //   ?year=<username>/<year>                          the My year card
@@ -8,9 +8,9 @@ import type { APIRoute } from 'astro';
 import { json } from '../../lib/http';
 import { loadProfile, loadShelf, loadVisits, loadCollections } from '../../lib/data';
 import { pageBits } from '../../lib/cards/titlepage';
-import { backgroundOf } from '../../lib/cards/backgrounds';
+import { within } from '../../lib/cards/output';
 import { creditFor } from '../../lib/cards/credits';
-import { titleLine } from '../../lib/cards/tagline';
+import { cardFacts } from '../../lib/cards/tagline';
 import { shortPath, pageText, entryText, yearText, collectionText } from '../../lib/share';
 import { titlePageHref } from '../../lib/catalog/onsite';
 export const prerender = false;
@@ -27,7 +27,7 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     const b = await pageBits(sb, type, rest.join(':'));
     if (!b) return gone();
     const link = abs(b.short);
-    return json({ link, bg: b.bg, text: pageText(b, b.line, link) });
+    return json({ link, text: pageText(b, b.line, link) });
   }
 
   if (q('entry')) {
@@ -42,10 +42,10 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     const d = e.data;
     const row = { kind: d.type, tmdb_id: d.tmdbId ?? null, ol_key: d.olKey ?? null, slug: e.id, link: d.link ?? null, title: d.title };
     const short = shortPath(row);
-    const [line, bg, by] = await Promise.all([titleLine(sb, e), backgroundOf(e), creditFor(e)]);
+    const [facts, by] = await Promise.all([cardFacts(sb, e), within(creditFor(e), 2000, d.creator)]);   // never waits for the AI
     // a title with no short address (an essay, or a film we only know by name) goes to its full page, or to the home page
     const link = abs(short ?? titlePageHref(row));
-    return json({ link, bg, text: entryText({ kind: d.type, title: d.title, year: d.year, creator: by }, d.status, d.rating, line, link) });
+    return json({ link, text: entryText({ kind: d.type, title: d.title, year: d.year, creator: by }, d.status, d.rating, facts.line, link) });
   }
 
   if (q('year')) {
@@ -73,7 +73,7 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     if (!col) return gone();
     const books = col.data.items.filter((i) => i.title.kind === 'book').length;
     const link = abs(`/c/${col.uuid}`);
-    return json({ link, bg: 'reading', text: collectionText(col.data.title, books, col.data.items.length - books, link) });
+    return json({ link, text: collectionText(col.data.title, books, col.data.items.length - books, link) });
   }
   return gone();
 };

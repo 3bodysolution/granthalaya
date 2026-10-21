@@ -9,6 +9,8 @@ import { creditFor } from '../../lib/cards/credits';
 import { pageBits } from '../../lib/cards/titlepage';
 import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
 import { drawPreview, type PreviewData } from '../../lib/cards/preview';
+import { savedFacts } from '../../lib/cards/tagline';
+import { picture, within } from '../../lib/cards/output';
 export const prerender = false;
 
 const KIND = { film: 'Film', tv: 'TV show', book: 'Book' } as const;
@@ -49,9 +51,9 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
         if (!e || e.data.private) return gone();
         const d = e.data;
         card = {
-          kicker: `@${profile.username} | ${statusLabel(d.type, d.status)}`, title: d.title, rating: d.rating, bg: await backgroundOf(e),
+          kicker: `@${profile.username} | ${statusLabel(d.type, d.status)}`, title: d.title, rating: d.rating, bg: (await savedFacts(sb, e.titleId)).bg ?? await within(backgroundOf(e), 2500, d.type === 'book' ? 'reading' as const : 'cinema' as const),
           accent: d.type === 'book' ? 'book' : d.type === 'essay' ? 'plain' : 'film',
-          meta: meta(d.year, d.type === 'film' ? 'directed by' : d.type === 'tv' ? 'created by' : 'by', await creditFor(e)),
+          meta: meta(d.year, d.type === 'film' ? 'directed by' : d.type === 'tv' ? 'created by' : 'by', await within(creditFor(e), 2000, d.creator)),
           covers: [{ src: d.cover, title: d.title, color: d.color }],
         };
       } else {
@@ -68,6 +70,11 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
   const asked = url.searchParams.get('bg');
   if (isBackground(asked)) card.bg = asked;
 
-  const png = await drawPreview(card);
-  return new Response(png, { headers: { 'Content-Type': 'image/png', 'Cache-Control': shared ? 'public, max-age=3600, s-maxage=86400' : 'public, max-age=300' } });
+  const pic = await drawPreview(card);
+  // catalogue cards are the same for everyone: Vercel's CDN may keep them a long time (a day while the title has no line yet,
+  // which the AI may still add). Cards about someone's shelf stay short.
+  const cache = shared
+    ? (card.line ? 'public, max-age=3600, s-maxage=2592000, stale-while-revalidate=86400' : 'public, max-age=600, s-maxage=86400')
+    : 'public, max-age=300';
+  return picture(pic, cache);
 };

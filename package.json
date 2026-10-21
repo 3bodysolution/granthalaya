@@ -27,6 +27,7 @@
     "@vercel/functions": "^3.9.11",
     "astro": "^5.18.2",
     "satori": "^0.63.2",
+    "sharp": "^0.34.5",
     "simple-icons": "^16.34.0",
     "tailwind-merge": "^3.7.0",
     "tailwind-variants": "^3.3.1",

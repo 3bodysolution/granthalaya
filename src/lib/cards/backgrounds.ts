@@ -1,5 +1,6 @@
-// Card backgrounds: eleven tall paintings (src/assets/cards/bg), each painted in the top 60% and fading to the card's dark
-// below. A card picks one by genre (TMDB's genres for films and shows, subjects for books); the share window can swap it.
+// Card backgrounds: eleven paintings (src/assets/cards/bg), only the top part of each (1080 wide, 1100 tall: the rest of the
+// original is dark), which fades into the card's own dark colour. Each card has one, chosen by the AI (saved on the title) or
+// by genre. A card picks one by genre (TMDB's genres for films and shows, subjects for books); the share window can swap it.
 // The pictures are loaded one at a time, only when a card needs them.
 import type { Entry } from '../data';
 import { film, show } from '../catalog/tmdb';
@@ -10,7 +11,9 @@ export type Background = (typeof BACKGROUNDS)[number];
 export const isBackground = (s: unknown): s is Background => typeof s === 'string' && (BACKGROUNDS as readonly string[]).includes(s);
 
 const files = import.meta.glob('../../assets/cards/bg/*.jpg', { query: '?inline', import: 'default' }) as Record<string, () => Promise<string>>;
-/** the painting as a data address (a JPEG, 1200x1800: satori and resvg can't read webp) */
+/** how tall the stored part of a painting is, at 1080 wide */
+export const PAINT_H = 1100;
+/** the painting as a data address (a JPEG, 1080 wide: satori and resvg can't read webp) */
 export async function backgroundData(key: Background): Promise<string> {
   const load = files[`../../assets/cards/bg/${key}.jpg`];
   const v = load ? await load() : '';
@@ -61,7 +64,7 @@ export async function backgroundOf(e: Entry): Promise<Background> {
 
 /** each painting's own dark at its bottom edge, so a tall card continues it without a seam */
 const BASE: Record<Background, string> = {
-  cinema: '#0b0c0f', fair: '#0c0d11', fields: '#101113', forest: '#0e0f13', fort: '#121317', noir: '#0c0d10',
-  rain: '#131418', reading: '#111112', sea: '#101216', stars: '#0e0f13', wada: '#111216',
+  cinema: '#0f0f14', fair: '#0e0f13', fields: '#111215', forest: '#0e0f13', fort: '#121317', noir: '#0b0c10',
+  rain: '#131418', reading: '#161614', sea: '#151517', stars: '#0f1014', wada: '#131417',
 };
 export const baseColor = (key: Background = 'cinema') => BASE[key];

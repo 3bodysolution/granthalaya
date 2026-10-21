@@ -1,6 +1,9 @@
 // A link preview for a shelf, with made-up titles, to check the three-cover layout.
 import type { APIRoute } from 'astro';
 import { isBackground } from '../../lib/cards/backgrounds';
+import { picture } from '../../lib/cards/output';
+// the samples never change between releases: Vercel's CDN may keep them a long time
+const LONG = 'public, max-age=3600, s-maxage=2592000, stale-while-revalidate=86400';
 import { drawPreview } from '../../lib/cards/preview';
 export const prerender = false;
 
@@ -11,5 +14,5 @@ export const GET: APIRoute = async ({ url }) => {
     kicker: 'Shelf', title: 'Sarthak', meta: '@sarthak', line: 'Books, films and the lines I keep.',
     covers: [{ title: 'श्यामची आई' }, { title: 'ययाति' }, { title: 'Paterson' }],
   });
-  return new Response(png, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' } });
+  return picture(png, LONG);
 };

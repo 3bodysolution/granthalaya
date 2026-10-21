@@ -26,7 +26,7 @@ import {
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
 import { titlePageHref } from '../../../lib/catalog/onsite';
 import { entryOg } from '../../../lib/share';
-import { titleLine } from '../../../lib/cards/tagline';
+import { cardFacts } from '../../../lib/cards/tagline';
 import { isBareEntry } from '../../../lib/saved';
 import Stack from '@tabler/icons/outline/stack-2.svg';
 export const prerender = false;
@@ -78,7 +78,7 @@ const off = (k: string) => ({ 'data-bare': bare ? '1' : '0', 'data-unsave-go': `
 const nav = inCols[0];
 const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : undefined;
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
-const og = entryOg(name, { kind: d.type, title: d.title, year: d.year, creator: d.creator }, d.status, d.rating, entry.body, !entry.body.trim() && !d.private && !profile.is_private ? await titleLine(sb, entry) : undefined);
+const og = entryOg(name, { kind: d.type, title: d.title, year: d.year, creator: d.creator }, d.status, d.rating, entry.body, !entry.body.trim() && !d.private && !profile.is_private ? (await cardFacts(sb, entry)).line : undefined);
 const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
 const notes = md(entry.body);
 const sLabel = statusLabel(d.type, d.status);

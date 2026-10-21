@@ -1,17 +1,21 @@
-// The story card for one title on someone's shelf, as a picture: /@username/library/<slug>/story.png
+// The story card for one title on someone's shelf, as a picture: /@username/library/<slug>/story.png (a JPEG, whatever the name).
 // Drawn as the visitor, so the database's privacy rules apply: "Only me" entries, private accounts and blocks give a 404.
-// The address carries ?v=<when the entry last changed>, so a changed rating or status is a new card.
-// The line under the title is the title's own short line. ?bg=<painting> picks the background (else by genre).
+// The address may carry ?v=<when the entry last changed>: with it the browser keeps the card for good (a changed rating or status
+// is a new address); without it the current card is sent and kept for a minute only.
+// ?w=540 gives the half-size preview; ?bg=<painting> is for tests (otherwise the title's saved pick, else by genre).
+// It never waits for the AI: with no saved line it draws without one, and the AI step runs in the background for next time.
 import type { APIRoute } from 'astro';
 import { loadProfile, loadVisits } from '../../../../lib/data';
 import { statusLabel } from '../../../../lib/kinds';
 import { drawStory } from '../../../../lib/cards/story';
 import { creditFor } from '../../../../lib/cards/credits';
-import { titleLine } from '../../../../lib/cards/tagline';
+import { cardFacts } from '../../../../lib/cards/tagline';
 import { backgroundOf, isBackground } from '../../../../lib/cards/backgrounds';
+import { picture, within, type Picture } from '../../../../lib/cards/output';
+import { timed, mark } from '../../../../lib/timing';
 export const prerender = false;
 
-const rendered = new Map<string, Buffer>();   // finished cards, checked against the database before every use
+const rendered = new Map<string, Picture>();   // finished cards, checked against the database before every use
 
 export const GET: APIRoute = async ({ params, url, locals }) => {
   const gone = () => new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
@@ -31,25 +35,35 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   const { data: row } = await sb.from('logs').select('updated_at').eq('id', entry.logId).maybeSingle();
   if (!row) return gone();
   const v = String(Math.floor(Date.parse(row.updated_at) / 1000));
-  if (url.searchParams.get('v') !== v) {
-    const to = new URL(url); to.searchParams.set('v', v);
-    return new Response(null, { status: 302, headers: { Location: to.pathname + to.search, 'Cache-Control': 'no-store' } });
-  }
+  // only a card asked for with the entry's current ?v= may be kept by the browser for good; without it (the share window) or with an
+  // old one, the current card is sent straight away (no redirect, which costs a whole extra round trip on a phone) and not kept
+  const current = url.searchParams.get('v') === v;
 
-  const custom = isMe ? (url.searchParams.get('line') ?? '').replace(/\s+/g, ' ').trim().slice(0, 140) : '';
-  const key = `${entry.logId}:${v}:${custom}`;
-  let png = rendered.get(key);
-  if (!png) {
-    const d = entry.data;
-    const [line, bg, credit] = await Promise.all([titleLine(sb, entry), isBackground(asked) ? asked : backgroundOf(entry), creditFor(entry)]);
-    png = await drawStory({
-      kind: d.type, title: d.title, year: d.year, creator: credit || undefined, season: d.season,
-      rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line: line || undefined,
-      owner: profile.username, cover: d.cover, color: d.color, bg,
-    });
-    if (rendered.size > 40) rendered.delete(rendered.keys().next().value!);
-    rendered.set(key, png);
-  }
+  const asked = url.searchParams.get('bg');
+  const width = url.searchParams.get('w') === '540' ? 540 : 1080;
+  const key = `${entry.logId}:${v}:${asked ?? ''}:${width}`;
+  const cached = rendered.get(key);
   // the picture is for this visitor's browser only (a shared cache could not tell a blocked person from anyone else)
-  return new Response(png, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=31536000, immutable' } });
+  const keep = current ? 'private, max-age=31536000, immutable' : 'private, max-age=60';
+  if (cached) return picture(cached, keep);
+
+  const d = entry.data;
+  const facts = await timed('line', 'saved line and painting', cardFacts(sb, entry));
+  // with no saved painting yet: by genre, but only for a moment (the catalogue may be slow)
+  const [bg, credit] = await Promise.all([
+    isBackground(asked) ? asked : facts.bg ?? within(timed('genre', 'painting by genre', backgroundOf(entry)), 2500, d.type === 'book' ? 'reading' as const : 'cinema' as const),
+    within(creditFor(entry), 2000, d.creator),
+  ]);
+  const pic = await drawStory({
+    kind: d.type, title: d.title, year: d.year, creator: credit || undefined, season: d.season,
+    rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line: facts.line,
+    owner: profile.username, cover: d.cover, color: d.color, bg,
+  }, width);
+  mark('size', pic.body.length / 1024, 'KB');
+  // a card drawn before its line is saved is not kept: the next one will have the line
+  const complete = !!facts.line || d.type === 'essay';
+  if (!complete) return picture(pic, 'private, no-store');
+  if (rendered.size > 40) rendered.delete(rendered.keys().next().value!);
+  rendered.set(key, pic);
+  return picture(pic, keep);
 };

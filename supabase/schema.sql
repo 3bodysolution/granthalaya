@@ -126,6 +126,7 @@ create table public.titles (
   language text check (language is null or language ~ '^[a-z]{2,3}$'),  -- ISO 639-1, else 639-3
   note text check (note is null or char_length(note) <= 300),
   tagline text check (tagline is null or char_length(tagline) <= 140),  -- the short line on share cards: TMDB's tagline, else one written once from the summary
+  card_bg text check (card_bg is null or card_bg in ('cinema', 'fair', 'fields', 'forest', 'fort', 'noir', 'rain', 'reading', 'sea', 'stars', 'wada')),  -- the painting behind its share card, picked once by the AI
   tmdb_id int,
   ol_key text,                                       -- Open Library work, like OL45883W
   trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),

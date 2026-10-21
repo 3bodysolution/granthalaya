@@ -6,9 +6,12 @@ import { createHash } from 'node:crypto';
 import { loadProfile, loadShelf, type Entry } from '../../lib/data';
 import { drawYear } from '../../lib/cards/year';
 import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
+import { picture, type Picture } from '../../lib/cards/output';
+import { savedFacts } from '../../lib/cards/tagline';
+import { within } from '../../lib/cards/output';
 export const prerender = false;
 
-const rendered = new Map<string, Buffer>();
+const rendered = new Map<string, Picture>();
 
 export const GET: APIRoute = async ({ params, url, locals }) => {
   const gone = () => new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
@@ -38,21 +41,22 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   });
   const fav = [...withArt].filter((e) => e.data.rating != null).sort(better)[0];
   const favourite = fav ? months.findIndex((e) => e?.logId === fav.logId) : -1;
+  const width = url.searchParams.get('w') === '540' ? 540 : 1080;
   const bgAsked = url.searchParams.get('bg');
-  const key = createHash('sha1').update(`${profile.id}:${year}:${bgAsked ?? ''}:${list.map((e) => `${e.logId}/${e.data.rating}`).sort().join(',')}`).digest('hex');
-  let png = rendered.get(key);
-  if (!png) {
+  const key = createHash('sha1').update(`${profile.id}:${year}:${bgAsked ?? ''}:${width}:${list.map((e) => `${e.logId}/${e.data.rating}`).sort().join(',')}`).digest('hex');
+  let pic = rendered.get(key);
+  if (!pic) {
     const kind = (t: string) => list.filter((e) => (t === 'film' ? e.data.type === 'film' || e.data.type === 'tv' : e.data.type === t)).length;
-    png = await drawYear({
-      bg: isBackground(bgAsked) ? bgAsked : fav ? await backgroundOf(fav) : 'cinema',
+    pic = await drawYear({
+      bg: isBackground(bgAsked) ? bgAsked : fav ? ((await savedFacts(sb, fav.titleId)).bg ?? await within(backgroundOf(fav), 2500, 'cinema' as const)) : 'cinema',
       year, owner: profile.username,
       books: kind('book'), films: kind('film'), essays: kind('essay'),
       months: months.map((e) => e && { title: e.data.title, cover: e.data.cover, color: e.data.color }),
       favourite: favourite >= 0 ? favourite : undefined,
       fav: fav && { title: fav.data.title, cover: fav.data.cover, color: fav.data.color },
-    });
+    }, width);
     if (rendered.size > 20) rendered.delete(rendered.keys().next().value!);
-    rendered.set(key, png);
+    rendered.set(key, pic);
   }
-  return new Response(png, { headers: { 'Content-Type': 'image/png', 'Cache-Control': 'private, max-age=300' } });
+  return picture(pic, 'private, max-age=300');
 };

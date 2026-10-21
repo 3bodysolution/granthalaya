@@ -2,10 +2,11 @@
 // Drawn with satori (layout) and resvg (pixels). Fonts and the painting are our own files in src/assets/cards,
 // built into the code.
 import satori from 'satori';
-import { Resvg } from '@resvg/resvg-js';
+import { mark } from '../timing';
+import { render, type Picture } from './output';
 import { paletteFor } from '../data';
 import type { Kind } from '../kinds';
-import { backgroundData, baseColor, type Background } from './backgrounds';
+import { backgroundData, baseColor, PAINT_H, type Background } from './backgrounds';
 
 export interface StoryData {
   kind: Kind;
@@ -36,6 +37,7 @@ import sans400 from '../../assets/cards/instrument-sans-latin-400-normal.woff?in
 import sans400x from '../../assets/cards/instrument-sans-latin-ext-400-normal.woff?inline';
 import deva700 from '../../assets/cards/noto-serif-devanagari-devanagari-700-normal.woff?inline';
 import deva400 from '../../assets/cards/noto-serif-devanagari-devanagari-400-normal.woff?inline';
+const fontsFrom = performance.now();
 const bytes = (dataUri: string) => Buffer.from(dataUri.slice(dataUri.indexOf(',') + 1), 'base64');
 export const FONTS = [
   { name: 'Fraunces', data: bytes(fraunces700), weight: 700, style: 'normal' },
@@ -50,22 +52,36 @@ export const FONTS = [
   { name: 'Noto Serif Devanagari', data: bytes(deva400), weight: 400, style: 'italic' },
 ];
 
-/** a cover image as a data address satori can draw; only our two cover hosts, and only PNG or JPEG */
+export const fontsMs = performance.now() - fontsFrom;   // decoding the fonts, once per start-up
+
+/** a cover image as a data address satori can draw; only our two cover hosts, and only PNG or JPEG.
+ *  `big` asks for the larger picture; it gives up after 2.5 seconds (the card then shows the painted placeholder). */
 export async function coverData(src?: string, big = true) {
   if (!src) return undefined;
+  const t = performance.now();
   try {
     const u = new URL(src, 'https://x.invalid');
     if (!['image.tmdb.org', 'covers.openlibrary.org'].includes(u.hostname)) return undefined;
     // the card is big: ask for the larger picture
     if (u.hostname === 'image.tmdb.org') u.pathname = u.pathname.replace(/\/t\/p\/w\d+\//, big ? '/t/p/w500/' : '/t/p/w342/');
     if (u.hostname === 'covers.openlibrary.org') u.pathname = u.pathname.replace(/-[SML]\.jpg$/, big ? '-L.jpg' : '-M.jpg');
-    const r = await fetch(u, { signal: AbortSignal.timeout(5000), headers: { 'User-Agent': 'Granthalaya/1.0 (share card)' } });
+    const r = await fetch(u, { signal: AbortSignal.timeout(2500), headers: { 'User-Agent': 'Granthalaya/1.0 (share card)' } });
     if (!r.ok) return undefined;
     const b = Buffer.from(await r.arrayBuffer());
     if (b.length > 4_000_000) return undefined;
     const type = b[0] === 0xff && b[1] === 0xd8 ? 'jpeg' : b[0] === 0x89 && b[1] === 0x50 ? 'png' : undefined;
     return type ? `data:image/${type};base64,${b.toString('base64')}` : undefined;
-  } catch { return undefined; }
+  } catch { return undefined; } finally { mark('poster', performance.now() - t, big ? 'large' : 'small'); }
+}
+
+/** a soft shadow under a box without a blur (a real blur cost over a second per card): a few wider, fainter layers */
+export const softShadow = (left: number, top: number, w: number, hgt: number, radius = 8, dy = 18) =>
+  [36, 24, 14, 6].map((grow, i) => h('div', { position: 'absolute', left: left - grow, top: top - grow + dy, width: w + grow * 2, height: hgt + grow * 2, borderRadius: radius + grow, background: `rgba(0,0,0,${[0.08, 0.1, 0.12, 0.16][i]})` }, ''));
+
+/** the painting, timed */
+export async function timedPainting(key: Background) {
+  const t = performance.now();
+  try { return await backgroundData(key); } finally { mark('painting', performance.now() - t, key); }
 }
 
 /* ——— tiny element helpers (satori takes plain objects) ——— */
@@ -89,11 +105,12 @@ export const SERIF = 'Fraunces, Fraunces Ext, Noto Serif Devanagari';
 export const SANS = 'Instrument Sans, Instrument Sans Ext, Noto Serif Devanagari';
 export const cut = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : s);
 
-export async function drawStory(d: StoryData): Promise<Buffer> {
+/** `width` 1080 is the full card, 540 the half-size preview shown in the share window */
+export async function drawStory(d: StoryData, width = W): Promise<Picture> {
   const film = d.kind === 'film' || d.kind === 'tv';
   const accent = film ? TEAL : GOLD;
   const titleColor = film ? CREAM : GOLD;
-  const cover = await coverData(d.cover);
+  const [cover, painting] = await Promise.all([coverData(d.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
 
   const title = cut(d.title, 70);
   const size = title.length <= 14 ? 72 : title.length <= 26 ? 60 : title.length <= 44 ? 50 : 42;
@@ -107,7 +124,7 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
   const CW = 400, CH = 600, CT = 600;
   const coverBox = h('div', {
     position: 'absolute', left: (W - CW) / 2, top: CT, width: CW, height: CH, borderRadius: 8, overflow: 'hidden',
-    border: '2px solid rgba(255,255,255,.2)', boxShadow: '0 30px 60px rgba(0,0,0,.55)', background: p.bg,
+    border: '2px solid rgba(255,255,255,.2)', background: p.bg,
   }, cover
     ? { type: 'img', props: { src: cover, width: CW, height: CH, style: { width: CW, height: CH, objectFit: 'cover' } } }
     : [
@@ -116,7 +133,8 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
     ]);
 
   const root = h('div', { width: W, height: H, background: baseColor(d.bg), flexDirection: 'column', alignItems: 'center', position: 'relative' }, [
-    { type: 'img', props: { src: await backgroundData(d.bg ?? 'cinema'), width: W, height: 1620, style: { position: 'absolute', left: 0, top: 0, width: W, height: 1620 } } },
+    { type: 'img', props: { src: painting, width: W, height: PAINT_H, style: { position: 'absolute', left: 0, top: 0, width: W, height: PAINT_H } } },
+    ...softShadow((W - CW) / 2, CT, CW, CH),
     coverBox,
     h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 34, flexDirection: 'column', alignItems: 'center' }, [
       h('div', { fontSize: size, lineHeight: 1.12, color: titleColor, fontFamily: SERIF, fontWeight: 700, textAlign: 'center', justifyContent: 'center' }, title),
@@ -137,6 +155,8 @@ export async function drawStory(d: StoryData): Promise<Buffer> {
     ]),
   ]);
 
+  const t = performance.now();
   const svg = await satori(root as never, { width: W, height: H, fonts: FONTS as never });
-  return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
+  mark('layout', performance.now() - t);
+  return render(svg, width);
 }

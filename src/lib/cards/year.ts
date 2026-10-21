@@ -1,10 +1,11 @@
 // The "My year" card: a roll of film, one frame per month, with the year's favourite marked (1080x1920).
 // Follows private/designs/share-year.png.
 import satori from 'satori';
-import { Resvg } from '@resvg/resvg-js';
+import { mark } from '../timing';
+import { render, type Picture } from './output';
 import { paletteFor } from '../data';
-import { W, H, BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
-import { backgroundData, baseColor, type Background } from './backgrounds';
+import { softShadow, timedPainting, W, H, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
+import { baseColor, PAINT_H, type Background } from './backgrounds';
 
 export interface YearTitle { title: string; cover?: string; color?: string }
 export interface YearData {
@@ -20,8 +21,8 @@ const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 
 const STRIP_X = 500, FRAME_W = 236, FRAME_H = 78, FAV_W = 286, FAV_H = 100, GAP = 8, TOP = 336;   // the strip starts below where the painting fades out
 const FILM = '#1B1C20', HOLE = '#E9E3D6';
 
-export async function drawYear(d: YearData): Promise<Buffer> {
-  const [covers, favCover] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover)]);
+export async function drawYear(d: YearData, width = W): Promise<Picture> {
+  const [covers, favCover, painting] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
 
   // a column of sprocket holes
   const holes = (height: number) => h('div', { flexDirection: 'column', justifyContent: 'space-between', height, paddingTop: 8, paddingBottom: 8 },
@@ -72,16 +73,17 @@ export async function drawYear(d: YearData): Promise<Buffer> {
   const root = h('div', { width: W, height: H, background: baseColor(d.bg), position: 'relative' }, [
     // a strip of the painting at the top, melting into the card
     h('div', { position: 'absolute', left: 0, top: 0, width: W, height: 310, overflow: 'hidden' }, [
-      { type: 'img', props: { src: await backgroundData(d.bg ?? 'cinema'), width: W, height: 1620, style: { position: 'absolute', left: 0, top: 0, width: W, height: 1620 } } },
+      { type: 'img', props: { src: painting, width: W, height: PAINT_H, style: { position: 'absolute', left: 0, top: 0, width: W, height: PAINT_H } } },
     ]),
     h('div', { position: 'absolute', left: 0, top: 150, width: W, height: 160, background: `linear-gradient(to bottom, rgba(18,19,22,0), ${baseColor(d.bg)})` }),
     h('div', { position: 'absolute', left: 60, top: 350, width: 420, flexDirection: 'column' }, [
       h('div', { fontSize: 88, whiteSpace: 'nowrap', lineHeight: 1.05, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, `My ${d.year}`),
       h('div', { marginTop: 18, flexDirection: 'column', gap: 0 }, stats),
     ]),
+    ...(d.fav ? softShadow(60, 800 + 20 + 14 + 0, 300, 450, 6, 14) : []),
     d.fav ? h('div', { position: 'absolute', left: 60, top: 800, width: 380, flexDirection: 'column' }, [
       h('div', { fontSize: 20, letterSpacing: 4, color: CREAM, fontFamily: SANS, whiteSpace: 'nowrap' }, 'FAVOURITE OF THE YEAR'),
-      h('div', { marginTop: 14, width: 300, height: 450, borderRadius: 6, overflow: 'hidden', border: '2px solid rgba(255,255,255,.2)', boxShadow: '0 24px 48px rgba(0,0,0,.55)', background: paletteFor(d.fav.title, d.fav.color).bg },
+      h('div', { marginTop: 14, width: 300, height: 450, borderRadius: 6, overflow: 'hidden', border: '2px solid rgba(255,255,255,.2)', background: paletteFor(d.fav.title, d.fav.color).bg },
         favCover ? { type: 'img', props: { src: favCover, width: 300, height: 450, style: { width: 300, height: 450, objectFit: 'cover' } } }
           : h('div', { padding: '24px 20px', fontSize: 36, lineHeight: 1.15, color: '#F6EEDF', fontFamily: SERIF, fontWeight: 700 }, cut(d.fav.title, 40))),
       h('div', { marginTop: 14, width: 380, fontSize: 32, lineHeight: 1.15, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, cut(d.fav.title, 44)),
@@ -93,6 +95,8 @@ export async function drawYear(d: YearData): Promise<Buffer> {
     ]),
   ]);
 
+  const t = performance.now();
   const svg = await satori(root as never, { width: W, height: H, fonts: FONTS as never });
-  return new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng();
+  mark('layout', performance.now() - t);
+  return render(svg, width);
 }
