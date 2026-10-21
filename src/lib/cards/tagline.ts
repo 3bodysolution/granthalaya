@@ -1,73 +1,35 @@
 // What a share card needs to know about a title that a catalogue can't give: a short line under the title, and which of our
 // 11 paintings suits it. TMDB's own tagline is the line when a film or show has one; otherwise a free AI model writes one (10 words
-// at most) from the title's official summary only. The same AI call also picks the painting from the summary, genres and setting.
-// Both are saved on the title (`titles.tagline`, `titles.card_bg`), so the AI is asked once.
-// A card never waits for the AI: it draws with what is saved and the AI step runs in the background for next time.
+// at most) from the title's official summary only. The same AI call also picks the painting from the summary, genres and setting
+// (src/lib/cards/facts-ai.mjs). Both are saved on the title (`titles.tagline`, `titles.card_bg`), so the AI is asked once.
+// A card never waits for the AI: it draws with what is saved. The AI step runs in the background, when a title is added to the
+// catalogue or logged (like the trivia facts), and as a catch-up when a card finds something missing.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { waitUntil } from '@vercel/functions';
 import { adminClient, env } from '../supabase';
 import { film, show } from '../catalog/tmdb';
 import { olBook, gbBook } from '../catalog/books';
-import { askGemini, askGroq } from '../trivia.mjs';
-import { BACKGROUNDS, isBackground, type Background } from './backgrounds';
+import { askFacts, tidyLine as tidy } from './facts-ai.mjs';
+import { isBackground, type Background } from './backgrounds';
 import type { Entry } from '../data';
+import type { Kind } from '../kinds';
 
-const MAX_WORDS = 10;
+export const tidyLine: (raw: unknown) => string | null = tidy;
 
-/** tidy a line: one sentence, no dashes, no quotes, and short enough; null if it can't be used */
-export function tidyLine(raw: unknown): string | null {
-  let s = String(raw ?? '').replace(/\s+/g, ' ').replace(/^["“”'‘’\s]+|["“”'‘’\s]+$/g, '').trim();
-  if (/[—–]/.test(s)) s = s.replace(/\s*[—–]\s*/g, ', ');
-  s = s.replace(/\.$/, '');
-  if (s.length < 8 || s.split(' ').length > MAX_WORDS) return null;
-  return s;
-}
-
-const WHAT = `cinema = film and the cinema, documentaries; fair = music, animation, fun, festivals, plays, graphic novels; fields = comedy, family, village life, countryside, self-help; forest = horror, fantasy, myth, dark woods; fort = history, war, western, biography, politics, forts and old cities; noir = thriller, crime, mystery, night in the city; rain = action, adventure, monsoon, coast road and storms; reading = essays, psychology, quiet books, libraries and ideas; sea = romance, poetry, travel, beaches and the coast; stars = science fiction, science, philosophy, religion, space and the night sky; wada = drama, family sagas, literary fiction, short stories, memoir, old houses`;
-
-const prompt = (title: string, kind: string, genres: string[], summary: string) => `Two jobs for the ${kind} "${title}", for a share card.
-
-Use ONLY the official summary and genres below.
-1. "line": one short line saying what it is about, in plain, specific words. At most ${MAX_WORDS} words. No spoilers (nothing from the middle or the end). No em dashes or en dashes. No quotation marks. Do not repeat the title. Do not start with "A story about".
-2. "background": the one painting that suits it best, judged from the summary, the genres and where and when it is set. It must be exactly one of: ${BACKGROUNDS.join(', ')}.
-What the paintings are: ${WHAT}.
-
-Reply with JSON only: {"line": "...", "background": "..."}
-
-GENRES: ${genres.join(', ') || 'none listed'}
-SUMMARY:
-${summary.slice(0, 1800)}`;
-
-async function ask(title: string, kind: string, genres: string[], summary: string): Promise<{ line: string | null; bg: Background | null } | null> {
-  const keys = { gemini: env('GEMINI_API_KEY'), geminiModel: env('GEMINI_MODEL'), groq: env('GROQ_API_KEY'), groqModel: env('GROQ_MODEL') };
-  if (!keys.gemini && !keys.groq) return null;
-  const text = prompt(title, kind === 'tv' ? 'TV series' : kind, genres, summary);
-  let raw: string;
-  try {
-    if (!keys.gemini) throw new Error('no Gemini key');
-    raw = await askGemini(keys.gemini, keys.geminiModel, text, 1);
-  } catch (e) {
-    if (!keys.groq) return null;
-    raw = await askGroq(keys.groq, keys.groqModel, text, 1);
-  }
-  try {
-    const j = JSON.parse(raw.replace(/^```(?:json)?|```$/g, '').trim());
-    const bg = String(j.background ?? '').toLowerCase().trim();
-    return { line: tidyLine(j.line), bg: isBackground(bg) ? bg : null };   // anything but one of the 11 names is ignored
-  } catch { return null; }
-}
+/** the title, as much as the AI step needs to find its summary */
+export interface Subject { titleId: string; title: string; type: Kind; tmdbId?: number | null; olKey?: string | null; link?: string | null }
+const subjectOf = (e: Entry): Subject => ({ titleId: e.titleId, title: e.data.title, type: e.data.type, tmdbId: e.data.tmdbId, olKey: e.data.olKey, link: e.data.link });
 
 /** the official summary and genres, from wherever the title comes from */
-async function sourceOf(e: Entry, note?: string | null): Promise<{ tagline?: string; summary?: string; genres: string[] }> {
-  const d = e.data;
-  if ((d.type === 'film' || d.type === 'tv') && d.tmdbId) {
-    const p = d.type === 'film' ? await film(d.tmdbId) : await show(d.tmdbId);
+async function sourceOf(s: Subject, note?: string | null): Promise<{ tagline?: string; summary?: string; genres: string[] }> {
+  if ((s.type === 'film' || s.type === 'tv') && s.tmdbId) {
+    const p = s.type === 'film' ? await film(s.tmdbId) : await show(s.tmdbId);
     return { tagline: p?.tagline, summary: p?.overview, genres: (p?.genres ?? []).map((g) => g.name) };
   }
-  if (d.type === 'book') {
-    const gb = d.link?.match(/books\.google\.[a-z.]+\/books\?id=([A-Za-z0-9_-]{6,20})/)?.[1];
-    const b = d.olKey ? await olBook(d.olKey) : gb ? await gbBook(gb) : null;
-    return { summary: b?.description || note || undefined, genres: (b?.subjects ?? []).map((s) => s.name) };
+  if (s.type === 'book') {
+    const gb = s.link?.match(/books\.google\.[a-z.]+\/books\?id=([A-Za-z0-9_-]{6,20})/)?.[1];
+    const b = s.olKey ? await olBook(s.olKey) : gb ? await gbBook(gb) : null;
+    return { summary: b?.description || note || undefined, genres: (b?.subjects ?? []).map((x) => x.name) };
   }
   return { genres: [] };
 }
@@ -84,31 +46,32 @@ export async function savedFacts(sb: SupabaseClient, titleId: string): Promise<S
   } catch { return { bgColumn: false }; }
 }
 
-const inflight = new Map<string, Promise<void>>();   // the card and the share window ask together: do it once
+const inflight = new Map<string, Promise<void>>();   // the card, the share window and a new log may ask together: do it once
 
 /** the AI step: write the line and pick the painting, then save both. Never throws. Slow, so only run it in the background. */
-export function fillFacts(sb: SupabaseClient, e: Entry): Promise<void> {
-  let p = inflight.get(e.titleId);
-  if (!p) { p = doFill(sb, e).finally(() => inflight.delete(e.titleId)); inflight.set(e.titleId, p); }
+export function fillFacts(s: Subject): Promise<void> {
+  let p = inflight.get(s.titleId);
+  if (!p) { p = doFill(s).finally(() => inflight.delete(s.titleId)); inflight.set(s.titleId, p); }
   return p;
 }
-async function doFill(sb: SupabaseClient, e: Entry) {
+async function doFill(s: Subject) {
   try {
-    if (e.data.type === 'essay') return;
-    const saved = await savedFacts(sb, e.titleId);
+    if (s.type === 'essay') return;
+    const admin = adminClient();
+    const saved = await savedFacts(admin, s.titleId);
     if (saved.line && (saved.bg || !saved.bgColumn)) return;
-    const { tagline, summary, genres } = await sourceOf(e, saved.note);
+    const { tagline, summary, genres } = await sourceOf(s, saved.note);
     let line = saved.line ?? (tagline ? tagline.replace(/\s+/g, ' ').trim() : null);
     if (line && line.length > 90) line = null;
-    let bg = saved.bg ?? null;
+    let bg: Background | null = saved.bg ?? null;
     if ((!line || !bg) && summary && summary.length > 40) {
-      const ai = await ask(e.data.title, e.data.type, genres, summary);
+      const keys = { gemini: env('GEMINI_API_KEY'), geminiModel: env('GEMINI_MODEL'), groq: env('GROQ_API_KEY'), groqModel: env('GROQ_MODEL') };
+      const ai = await askFacts({ title: s.title, kind: s.type, genres, summary }, keys);
       line ||= ai?.line ?? null;
-      bg ||= ai?.bg ?? null;
+      bg ||= isBackground(ai?.bg) ? (ai!.bg as Background) : null;   // anything but one of the 11 names is ignored
     }
-    const admin = adminClient();
-    if (line && !saved.line) await admin.from('titles').update({ tagline: line }).eq('id', e.titleId).is('tagline', null);
-    if (bg && !saved.bg && saved.bgColumn) await admin.from('titles').update({ card_bg: bg }).eq('id', e.titleId).is('card_bg', null);
+    if (line && !saved.line) await admin.from('titles').update({ tagline: line }).eq('id', s.titleId).is('tagline', null);
+    if (bg && !saved.bg && saved.bgColumn) await admin.from('titles').update({ card_bg: bg }).eq('id', s.titleId).is('card_bg', null);
   } catch (err) {
     console.error('Could not fill in the share card facts', err);
   }
@@ -119,12 +82,23 @@ export function later(job: Promise<unknown>) {
   try { waitUntil(job); } catch { /* not on Vercel: the promise just finishes on its own */ }
 }
 
+/** when a title is added to the catalogue or logged: make sure its line and painting get written, in the background */
+export function ensureFactsLater(titleId: string) {
+  later((async () => {
+    try {
+      const { data } = await adminClient().from('titles').select('id, kind, title, tmdb_id, ol_key, link').eq('id', titleId).maybeSingle();
+      if (!data) return;
+      await fillFacts({ titleId: data.id, title: data.title, type: data.kind as Kind, tmdbId: data.tmdb_id, olKey: data.ol_key, link: data.link });
+    } catch (err) { console.error('Could not start the share card facts', err); }
+  })());
+}
+
 /**
  * What a card uses right now: the saved line and painting. Nothing here waits for the AI: when either is missing,
  * the AI step is started in the background so the next card has them.
  */
 export async function cardFacts(sb: SupabaseClient, e: Entry): Promise<{ line?: string; bg?: Background }> {
   const s = await savedFacts(sb, e.titleId);
-  if (e.data.type !== 'essay' && (!s.line || (!s.bg && s.bgColumn))) later(fillFacts(sb, e));
+  if (e.data.type !== 'essay' && (!s.line || (!s.bg && s.bgColumn))) later(fillFacts(subjectOf(e)));
   return { line: s.line, bg: s.bg };
 }

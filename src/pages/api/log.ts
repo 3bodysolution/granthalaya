@@ -3,6 +3,7 @@ import type { APIRoute, APIContext } from 'astro';
 import { json, oops, body, str, isoDate, needMe, sameOrigin } from '../../lib/http';
 import { dbMessage } from '../../lib/supabase';
 import { cleanHit, titleFor } from '../../lib/titles';
+import { ensureFactsLater } from '../../lib/cards/tagline';
 import { statusFits, type Kind, type Status } from '../../lib/kinds';
 import { isPlainSave, isBareEntry } from '../../lib/saved';
 export const prerender = false;
@@ -60,6 +61,7 @@ export const POST: APIRoute = async (ctx) => {
   }
   const t = await kindOf(ctx, titleId);
   if (!t) return oops('Couldn’t find that title.', 404);
+  ensureFactsLater(titleId);   // its card line and painting are written in the background, so they are ready before anyone shares
   const status = String(b.status ?? 'done');
   if (!statusFits(t.kind, status)) return oops('Pick a status.');
 

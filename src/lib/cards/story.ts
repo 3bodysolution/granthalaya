@@ -54,25 +54,8 @@ export const FONTS = [
 
 export const fontsMs = performance.now() - fontsFrom;   // decoding the fonts, once per start-up
 
-/** a cover image as a data address satori can draw; only our two cover hosts, and only PNG or JPEG.
- *  `big` asks for the larger picture; it gives up after 2.5 seconds (the card then shows the painted placeholder). */
-export async function coverData(src?: string, big = true) {
-  if (!src) return undefined;
-  const t = performance.now();
-  try {
-    const u = new URL(src, 'https://x.invalid');
-    if (!['image.tmdb.org', 'covers.openlibrary.org'].includes(u.hostname)) return undefined;
-    // the card is big: ask for the larger picture
-    if (u.hostname === 'image.tmdb.org') u.pathname = u.pathname.replace(/\/t\/p\/w\d+\//, big ? '/t/p/w500/' : '/t/p/w342/');
-    if (u.hostname === 'covers.openlibrary.org') u.pathname = u.pathname.replace(/-[SML]\.jpg$/, big ? '-L.jpg' : '-M.jpg');
-    const r = await fetch(u, { signal: AbortSignal.timeout(2500), headers: { 'User-Agent': 'Granthalaya/1.0 (share card)' } });
-    if (!r.ok) return undefined;
-    const b = Buffer.from(await r.arrayBuffer());
-    if (b.length > 4_000_000) return undefined;
-    const type = b[0] === 0xff && b[1] === 0xd8 ? 'jpeg' : b[0] === 0x89 && b[1] === 0x50 ? 'png' : undefined;
-    return type ? `data:image/${type};base64,${b.toString('base64')}` : undefined;
-  } catch { return undefined; } finally { mark('poster', performance.now() - t, big ? 'large' : 'small'); }
-}
+export { coverData, CoverMissing, setOrigin } from './covers';
+import { coverData, CoverMissing } from './covers';
 
 /** a soft shadow under a box without a blur (a real blur cost over a second per card): a few wider, fainter layers */
 export const softShadow = (left: number, top: number, w: number, hgt: number, radius = 8, dy = 18) =>
@@ -111,6 +94,7 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
   const accent = film ? TEAL : GOLD;
   const titleColor = film ? CREAM : GOLD;
   const [cover, painting] = await Promise.all([coverData(d.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
+  if (d.cover && !cover) throw new CoverMissing();   // a title with a cover never gets a card with a placeholder
 
   const title = cut(d.title, 70);
   const size = title.length <= 14 ? 72 : title.length <= 26 ? 60 : title.length <= 44 ? 50 : 42;

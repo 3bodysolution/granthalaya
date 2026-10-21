@@ -4,7 +4,7 @@ import satori from 'satori';
 import { mark } from '../timing';
 import { render, type Picture } from './output';
 import { paletteFor } from '../data';
-import { softShadow, timedPainting, W, H, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
+import { CoverMissing, softShadow, timedPainting, W, H, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
 import { baseColor, PAINT_H, type Background } from './backgrounds';
 
 export interface YearTitle { title: string; cover?: string; color?: string }
@@ -23,6 +23,7 @@ const FILM = '#1B1C20', HOLE = '#E9E3D6';
 
 export async function drawYear(d: YearData, width = W): Promise<Picture> {
   const [covers, favCover, painting] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
+  if ((d.fav?.cover && !favCover) || d.months.some((m, i) => m?.cover && !covers[i])) throw new CoverMissing();
 
   // a column of sprocket holes
   const holes = (height: number) => h('div', { flexDirection: 'column', justifyContent: 'space-between', height, paddingTop: 8, paddingBottom: 8 },

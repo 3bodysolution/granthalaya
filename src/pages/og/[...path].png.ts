@@ -10,7 +10,8 @@ import { pageBits } from '../../lib/cards/titlepage';
 import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
 import { drawPreview, type PreviewData } from '../../lib/cards/preview';
 import { savedFacts } from '../../lib/cards/tagline';
-import { picture, within } from '../../lib/cards/output';
+import { picture, within, coverSlow } from '../../lib/cards/output';
+import { CoverMissing, setOrigin } from '../../lib/cards/covers';
 export const prerender = false;
 
 const KIND = { film: 'Film', tv: 'TV show', book: 'Book' } as const;
@@ -18,6 +19,7 @@ const gone = () => new Response('Not found', { status: 404, headers: { 'Cache-Co
 const meta = (year: number | undefined, by: string, who?: string) => [year, who ? `${by} ${who}` : ''].filter(Boolean).join(' | ');
 
 export const GET: APIRoute = async ({ params, locals, url }) => {
+  setOrigin(url.origin);
   const sb = locals.supabase;
   const [type, a, b] = String(params.path ?? '').split('/');
   let card: PreviewData | null = null;
@@ -70,7 +72,8 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
   const asked = url.searchParams.get('bg');
   if (isBackground(asked)) card.bg = asked;
 
-  const pic = await drawPreview(card);
+  let pic;
+  try { pic = await drawPreview(card); } catch (e) { if (e instanceof CoverMissing) return coverSlow(); throw e; }
   // catalogue cards are the same for everyone: Vercel's CDN may keep them a long time (a day while the title has no line yet,
   // which the AI may still add). Cards about someone's shelf stay short.
   const cache = shared

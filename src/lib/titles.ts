@@ -1,6 +1,7 @@
 // The shared catalogue: one row per book, film, TV season or essay, used by everyone who adds it.
 // Only the server writes here (with the secret key), after checking what it's given.
 import { waitUntil } from '@vercel/functions';
+import { ensureFactsLater } from './cards/tagline';
 import { adminClient, env } from './supabase';
 import { filmDetails, seasonDetails, type Hit } from './lookup';
 import { KINDS, type Kind } from './kinds';
@@ -101,5 +102,6 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
   }
   if (error || !data) return { error: 'Couldn’t add that title. Please try again.' };
   factsLater(data as any);
+  ensureFactsLater(data.id);   // the card line and painting too
   return { id: data.id, slug: data.slug };
 }

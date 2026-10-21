@@ -6,7 +6,8 @@ import { createHash } from 'node:crypto';
 import { loadProfile, loadShelf, type Entry } from '../../lib/data';
 import { drawYear } from '../../lib/cards/year';
 import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
-import { picture, type Picture } from '../../lib/cards/output';
+import { picture, coverSlow, type Picture } from '../../lib/cards/output';
+import { CoverMissing, setOrigin } from '../../lib/cards/covers';
 import { savedFacts } from '../../lib/cards/tagline';
 import { within } from '../../lib/cards/output';
 export const prerender = false;
@@ -15,6 +16,7 @@ const rendered = new Map<string, Picture>();
 
 export const GET: APIRoute = async ({ params, url, locals }) => {
   const gone = () => new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+  setOrigin(url.origin);
   const sb = locals.supabase;
   if (!sb) return gone();
   const username = String(params.username ?? '').toLowerCase();
@@ -47,6 +49,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   let pic = rendered.get(key);
   if (!pic) {
     const kind = (t: string) => list.filter((e) => (t === 'film' ? e.data.type === 'film' || e.data.type === 'tv' : e.data.type === t)).length;
+    try {
     pic = await drawYear({
       bg: isBackground(bgAsked) ? bgAsked : fav ? ((await savedFacts(sb, fav.titleId)).bg ?? await within(backgroundOf(fav), 2500, 'cinema' as const)) : 'cinema',
       year, owner: profile.username,
@@ -55,6 +58,10 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
       favourite: favourite >= 0 ? favourite : undefined,
       fav: fav && { title: fav.data.title, cover: fav.data.cover, color: fav.data.color },
     }, width);
+    } catch (e) {
+      if (e instanceof CoverMissing) return coverSlow();
+      throw e;
+    }
     if (rendered.size > 20) rendered.delete(rendered.keys().next().value!);
     rendered.set(key, pic);
   }

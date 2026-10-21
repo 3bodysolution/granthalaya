@@ -109,6 +109,7 @@ const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
   const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
   const mouse = () => matchMedia('(hover: hover) and (pointer: fine)').matches;
   const phone = () => typeof navigator.share === 'function' && (matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent));
+  type Pending = Blob & { pending?: boolean };
   const LIMIT = 8000;                     // a card slower than this stops the loader and offers Retry
 
   const warm = new Map<string, Job>();    // started by a hover or a press, reused when the window opens
@@ -127,7 +128,9 @@ const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
       const r = await fetch(address, { credentials: 'same-origin', signal: ctl.signal });
       if (!r.ok) return null;
       const b = await r.blob();
-      return b.type.startsWith('image/') ? b : new Blob([b], { type: 'image/jpeg' });   // a File for the phone's share sheet must say what it is
+      const out: Pending = b.type.startsWith('image/') ? b : new Blob([b], { type: 'image/jpeg' });   // a File for the phone's share sheet must say what it is
+      out.pending = r.headers.get('x-card') === 'pending';   // drawn before its line was written: ask again in a few seconds
+      return out;
     } catch { return null; } finally { clearTimeout(timer); }
   }
 
@@ -180,16 +183,48 @@ const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
   }
   const state = (s: 'busy' | 'ready' | 'failed') => { $('sh-stage').dataset.state = s; $('sh-fail').hidden = s !== 'failed'; };
 
+  function put(b: Blob) {
+    const img = $<HTMLImageElement>('sh-img');
+    img.src = URL.createObjectURL(b);
+    return img.decode().catch(() => {});
+  }
+
   function show(j: Job, n: number) {
     state('busy');
-    void j.preview.then((b) => {
+    void j.preview.then((b: Pending | null) => {
       if (n !== epoch) return;
       if (!b) { state('failed'); return; }
-      const img = $<HTMLImageElement>('sh-img');
-      img.src = URL.createObjectURL(b);
-      void img.decode().catch(() => {}).then(() => { if (n === epoch) state('ready'); });
+      void put(b).then(() => { if (n === epoch) state('ready'); });
       void fullOf(j);                     // the picture to share, while the person looks at the preview
+      if (b.pending) later(j, n, 1);
     });
+  }
+
+  /** the card was drawn before its line was written (that happens in the background): ask again, up to three times, and
+   *  redraw the preview, the picture to share and the text for WhatsApp and X as soon as the line has arrived */
+  function later(j: Job, n: number, tries: number) {
+    setTimeout(async () => {
+      if (n !== epoch) return;
+      const b: Pending | null = await draw(half(j.base, j.wide), LIMIT);
+      if (n !== epoch || !b) return;
+      if (b.pending) { if (tries < 3) later(j, n, tries + 1); return; }
+      await put(b);
+      j.preview = Promise.resolve(b); j.full = undefined; j.file = undefined;
+      void fullOf(j);
+      const ref = plan(opts!)?.ref;
+      if (ref) {
+        j.meta = fetch('/api/share?' + ref, { credentials: 'same-origin' }).then((r) => (r.ok ? (r.json() as Promise<Meta>) : null)).catch(() => null);
+        const m = await j.meta;
+        if (n === epoch && m) setLinks(m.text);
+      }
+    }, 5000);
+  }
+
+  function setLinks(text: string) {
+    const t = encodeURIComponent(text);
+    const wa = $<HTMLAnchorElement>('sh-wa'), x = $<HTMLAnchorElement>('sh-x');
+    wa.href = 'https://wa.me/?text=' + t; wa.removeAttribute('aria-disabled');
+    x.href = 'https://x.com/intent/post?text=' + t; x.removeAttribute('aria-disabled');
   }
 
   async function open(o: Opts) {
@@ -204,17 +239,14 @@ const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
     $('sh-stage').dataset.wide = j.wide ? '1' : '0';
     $<HTMLImageElement>('sh-img').removeAttribute('src');
     $('sh-more').hidden = !phone();
-    const wa = $<HTMLAnchorElement>('sh-wa'), x = $<HTMLAnchorElement>('sh-x');
-    for (const a of [wa, x]) { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); }
+    for (const a of [$<HTMLAnchorElement>('sh-wa'), $<HTMLAnchorElement>('sh-x')]) { a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); }
     if (!dlg.open) dlg.showModal();
     show(j, n);
 
     // the text for WhatsApp and X comes separately and never holds the card back; without it, the title and this page's address
     const m = await j.meta;
     if (n !== epoch) return;
-    const text = encodeURIComponent(m?.text ?? `${o.title} ${location.href}`);
-    wa.href = `https://wa.me/?text=${text}`; wa.removeAttribute('aria-disabled');
-    x.href = `https://x.com/intent/post?text=${text}`; x.removeAttribute('aria-disabled');
+    setLinks(m?.text ?? `${o.title} ${location.href}`);
   }
 
   function retry() {

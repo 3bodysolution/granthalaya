@@ -24,7 +24,10 @@ export async function render(svg: string, width: number, quality = 80): Promise<
 }
 
 /** a picture as a response; `cache` is the Cache-Control value */
-export const picture = (p: Picture, cache: string) => new Response(p.body, { headers: { 'Content-Type': p.type, 'Cache-Control': cache } });
+export const picture = (p: Picture, cache: string, extra: Record<string, string> = {}) => new Response(p.body, { headers: { 'Content-Type': p.type, 'Cache-Control': cache, ...extra } });
+
+/** the answer when a title's cover could not be fetched in time: no card (it would carry a placeholder), and nothing kept, so the next ask tries again */
+export const coverSlow = () => new Response('The cover is slow. Try again.', { status: 503, headers: { 'Cache-Control': 'no-store', 'Retry-After': '2' } });
 
 /** wait for a promise, but only so long: after `ms` the fallback is used instead (the promise carries on unwatched) */
 export function within<T>(p: Promise<T>, ms: number, fallback: T): Promise<T> {

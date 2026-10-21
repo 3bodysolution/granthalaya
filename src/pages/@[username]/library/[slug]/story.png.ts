@@ -11,7 +11,8 @@ import { drawStory } from '../../../../lib/cards/story';
 import { creditFor } from '../../../../lib/cards/credits';
 import { cardFacts } from '../../../../lib/cards/tagline';
 import { backgroundOf, isBackground } from '../../../../lib/cards/backgrounds';
-import { picture, within, type Picture } from '../../../../lib/cards/output';
+import { picture, within, coverSlow, type Picture } from '../../../../lib/cards/output';
+import { CoverMissing, setOrigin } from '../../../../lib/cards/covers';
 import { timed, mark } from '../../../../lib/timing';
 export const prerender = false;
 
@@ -19,6 +20,7 @@ const rendered = new Map<string, Picture>();   // finished cards, checked agains
 
 export const GET: APIRoute = async ({ params, url, locals }) => {
   const gone = () => new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
+  setOrigin(url.origin);
   const sb = locals.supabase;
   if (!sb) return gone();
   const username = String(params.username ?? '').toLowerCase();
@@ -54,15 +56,22 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     isBackground(asked) ? asked : facts.bg ?? within(timed('genre', 'painting by genre', backgroundOf(entry)), 2500, d.type === 'book' ? 'reading' as const : 'cinema' as const),
     within(creditFor(entry), 2000, d.creator),
   ]);
-  const pic = await drawStory({
+  let pic: Picture;
+  try {
+    pic = await drawStory({
     kind: d.type, title: d.title, year: d.year, creator: credit || undefined, season: d.season,
     rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line: facts.line,
     owner: profile.username, cover: d.cover, color: d.color, bg,
-  }, width);
+    }, width);
+  } catch (e) {
+    if (e instanceof CoverMissing) return coverSlow();
+    throw e;
+  }
   mark('size', pic.body.length / 1024, 'KB');
   // a card drawn before its line is saved is not kept: the next one will have the line
   const complete = !!facts.line || d.type === 'essay';
-  if (!complete) return picture(pic, 'private, no-store');
+  // the header tells the share window to ask again in a few seconds: the line is being written
+  if (!complete) return picture(pic, 'private, no-store', { 'X-Card': 'pending' });
   if (rendered.size > 40) rendered.delete(rendered.keys().next().value!);
   rendered.set(key, pic);
   return picture(pic, keep);

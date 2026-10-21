@@ -3,7 +3,7 @@ import satori from 'satori';
 import { mark } from '../timing';
 import { render, type Picture } from './output';
 import { paletteFor } from '../data';
-import { BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData, timedPainting, softShadow } from './story';
+import { BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData, timedPainting, softShadow, CoverMissing } from './story';
 import { type Background } from './backgrounds';
 
 export interface PreviewData {
@@ -23,6 +23,7 @@ export async function drawPreview(d: PreviewData): Promise<Picture> {
   const one = d.covers.length <= 1;
   const CW = one ? 290 : 190, CH = one ? 435 : 285;
   const [covers, painting] = await Promise.all([Promise.all(d.covers.slice(0, 3).map(async (c) => ({ ...c, data: await coverData(c.src, false) }))), timedPainting(d.bg ?? 'cinema')]);
+  if (covers.some((c) => c.src && !c.data)) throw new CoverMissing();   // no placeholder when the title has a cover
   const title = cut(d.title, 80);
   const size = title.length <= 18 ? 76 : title.length <= 36 ? 62 : 50;
   const full = d.rating == null ? 0 : Math.floor(d.rating), half = d.rating != null && d.rating % 1 >= 0.5;
