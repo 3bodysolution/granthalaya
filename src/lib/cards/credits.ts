@@ -30,3 +30,13 @@ export async function creditFor(e: Entry): Promise<string> {
   } catch { /* fall back to the one name we have */ }
   return d.creator;
 }
+
+/** the directors (film) or creators (TV) of an entry's title, each with a link to their page; empty for books and when TMDB is slow. Never throws. */
+export async function peopleFor(e: Entry): Promise<{ name: string; href: string }[]> {
+  const d = e.data;
+  try {
+    if (d.type === 'film' && d.tmdbId) return ((await film(d.tmdbId))?.directors ?? []).filter((p) => p.href).map((p) => ({ name: p.name, href: p.href }));
+    if (d.type === 'tv' && d.tmdbId) return ((await show(d.tmdbId))?.creators ?? []).filter((p) => p.href).map((p) => ({ name: p.name, href: p.href }));
+  } catch { /* plain text is fine */ }
+  return [];
+}

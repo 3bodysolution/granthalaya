@@ -15,7 +15,6 @@ import Repeat from '@tabler/icons/outline/repeat.svg';
 import Share from '@tabler/icons/outline/share.svg';
 import Plus from '@tabler/icons/outline/plus.svg';
 import Lock from '@tabler/icons/outline/lock.svg';
-import Route from '@tabler/icons/outline/route.svg';
 import Mark from '../../../components/ui/Mark.astro';
 import InCollections from '../../../components/InCollections.astro';
 import { openShelf } from '../../../lib/shelfpage';
@@ -28,6 +27,8 @@ import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
 import { titlePageHref } from '../../../lib/catalog/onsite';
 import { entryOg } from '../../../lib/share';
 import { cardFacts } from '../../../lib/cards/tagline';
+import { peopleFor } from '../../../lib/cards/credits';
+import { within } from '../../../lib/cards/output';
 import { isBareEntry } from '../../../lib/saved';
 import Stack from '@tabler/icons/outline/stack-2.svg';
 export const prerender = false;
@@ -76,6 +77,8 @@ const off = (k: string) => ({ 'data-bare': bare ? '1' : '0', 'data-unsave-go': `
 const nav = inCols[0];
 const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : undefined;
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
+// directors and creators link to their pages (a short wait at most: plain names are fine without them)
+const people = d.type === 'film' || d.type === 'tv' ? await within(peopleFor(entry), 2500, []) : [];
 const og = entryOg(name, { kind: d.type, title: d.title, year: d.year, creator: d.creator }, d.status, d.rating, entry.body, !entry.body.trim() && !d.private && !profile.is_private ? (await cardFacts(sb, entry)).line : undefined);
 const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
 const notes = md(entry.body);
@@ -126,11 +129,11 @@ const pinnedId = shown?.pinned ? shown.id : null;
             <span class="bt"><span class="serif ht">{d.title}</span><span class="hb">{d.creator}</span></span>
           </div>
           <p class="when num">{whenLine}</p>
-          <div class="counts" aria-label="On Granthalaya">
-            <span title={`${isFilm ? 'Watched' : 'Read'} by ${seen ?? 0} ${seen === 1 ? 'person' : 'people'} here`}><Eye />{seen ?? 0}</span>
-            <span title={`Saved by ${wanted ?? 0} ${wanted === 1 ? 'person' : 'people'} here`}><Mark solid size={15} />{wanted ?? 0}</span>
-            {inCols.length > 0 && <span title={`In ${inCols.length} of ${name}’s collections`}><Route />{inCols.length}</span>}
-          </div>
+          <p class="counts num" aria-label="On Granthalaya">
+            <span><b>{seen ?? 0}</b>{isFilm ? ' watched' : ' read'}</span>
+            <span><b>{wanted ?? 0}</b>{' saved'}</span>
+            {inCols.length > 0 && <span><b>{inCols.length}</b>{inCols.length === 1 ? ' collection' : ' collections'}</span>}
+          </p>
           {about && <a href={about} class="btn about rise d5">{aboutLabel} <span aria-hidden="true">→</span></a>}
         </div>
 
@@ -138,15 +141,18 @@ const pinnedId = shown?.pinned ? shown.id : null;
           <a href={`/@${profile.username}/library/`} class="owner rise d2"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
           <h1 class="title bigtitle rise d3">{fullTitle(entry)}</h1>
           <p class="rise d3 meta">
-            {isFilm
-              ? [d.year, d.type === 'tv' ? (d.creator ? `Created by ${d.creator}` : '') : `Directed by ${d.creator}`].filter(Boolean).join(' | ')
-              : [d.creator, d.year].filter(Boolean).join(' | ')}
+            {isFilm ? (
+              <>
+                {d.year}
+                {(people.length > 0 || d.creator) && <>{d.year ? ' | ' : ''}{d.type === 'tv' ? 'Created by ' : 'Directed by '}</>}
+                {people.length > 0 ? people.map((c, i) => <>{i > 0 && ', '}<a href={c.href} class="ul">{c.name}</a></>) : d.creator}
+              </>
+            ) : [d.creator, d.year].filter(Boolean).join(' | ')}
           </p>
           <div class="stats rise d4 num">
             <div class="stat"><span class="sub">{done ? 'Rating' : 'Status'}</span>
-              {done ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s || 'Not rated'}</span> : <b>{sLabel}</b>}
+              {done ? (s ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="notrated">Not rated</span>) : <b>{sLabel}</b>}
             </div>
-            <div class="stat"><span class="sub">{d.status === 'want' ? 'Added' : done ? (isFilm ? 'Watched' : 'Finished') : 'Started'}</span><b>{long(done ? (d.finished ?? d.date) : (d.started ?? d.date))}</b></div>
             <div class="stat"><span class="sub">{isFilm ? 'Runtime' : 'Reading time'}</span><b>{isFilm ? duration(mins) : `≈ ${duration(mins)}`}</b></div>
             <div class="stat"><span class="sub">{isFilm ? 'Times seen' : 'Times read'}</span><b>{d.again && d.times === 1 ? (isFilm ? 'A rewatch' : 'A re-read') : timesWord(d.times, isFilm ? 'watch' : 'read')}</b></div>
           </div>
@@ -329,10 +335,13 @@ const pinnedId = shown?.pinned ? shown.id : null;
   .main { flex: 1; min-width: 0; padding-top: 176px; display: flex; flex-direction: column; gap: 18px; }
   .bigtitle { font-size: clamp(42px, 5.5vw, 64px); line-height: 1; }
   .meta { margin: 0; font-size: 16px; color: var(--muted); }
+  .meta .ul { color: inherit; text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 4px; transition: color .2s ease, text-decoration-color .2s ease; }
+  .meta .ul:hover { color: var(--ink); text-decoration-color: var(--lat); }
   .stats { display: flex; flex-wrap: wrap; gap: 20px 48px; padding: 20px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: 6px; }
   .stat { display: flex; flex-direction: column; gap: 6px; }
   .stat b { font-weight: 400; font-size: 18px; }
   .bigstars { font-size: 24px; color: var(--haldi); letter-spacing: .06em; }
+  .notrated { font-size: 14px; color: var(--muted); }
   .note { max-width: 660px; display: flex; flex-direction: column; gap: 14px; }
   .note :global(p) { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted); }
   .note :global(p:first-child) { margin-top: 6px; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 23px; line-height: 1.6; color: var(--ink); }
@@ -406,9 +415,9 @@ const pinnedId = shown?.pinned ? shown.id : null;
   .lrow2 b { font-weight: 600; }
   .lrow2.quiet { font-size: 13px; color: var(--muted); padding-left: 43px; }
   .lp-note { margin: 0; padding: 12px 16px 14px; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line); }
-  .counts { margin-top: 12px; display: flex; gap: 16px; font-size: 13px; font-weight: 600; color: var(--muted); }
-  .counts span { display: inline-flex; align-items: center; gap: 5px; }
-  .counts :global(svg) { width: 15px; height: 15px; }
+  /* the same plain style as the On Granthalaya box: a bold number, then the word */
+  .counts { margin: 4px 0 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+  .counts b { color: var(--ink); font-weight: 600; }
   .visits { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
   .visits li { display: grid; grid-template-columns: 110px 140px 1fr; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; align-items: baseline; }
   .owner { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
