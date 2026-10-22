@@ -3,7 +3,7 @@ import { defineMiddleware } from 'astro:middleware';
 import { serverClient, supabaseReady } from './lib/supabase';
 import { site } from './data/site';
 import type { Profile } from './lib/data';
-import { withTiming, timingOn, header } from './lib/timing';
+import { withTiming, timingOn, header, summary } from './lib/timing';
 
 // Addresses from the days when this was one person's site keep working.
 function oldAddress(path: string): string | null {
@@ -28,7 +28,26 @@ function oldAddress(path: string): string | null {
 // Pages someone without a username yet may still open.
 const OPEN = /^\/(welcome|signin|auth\/|api\/|privacy|terms|about)/;
 
-export const onRequest = defineMiddleware((ctx, next) => withTiming(() => handle(ctx, next)));
+export const onRequest = defineMiddleware((ctx, next) => withTiming(() => (CARD.test(ctx.url.pathname) ? logged(ctx.url, () => handle(ctx, next)) : handle(ctx, next)) as Promise<Response>));
+
+// Share cards and the cover copies they use: each one writes a line to the function log (Vercel → Logs) with its steps,
+// their times and, when it fails, why. A cold start shows as a long first step.
+const CARD = /^\/(story\/|og\/|api\/cover$|@[^/]+\/library\/[^/]+\/story\.png$)/;
+const started = Date.now();
+async function logged(url: URL, run: () => unknown) {
+  const where = `${url.pathname}${url.searchParams.get('w') === '540' ? ' (preview)' : ''}`;
+  const age = `instance ${Math.round((Date.now() - started) / 1000)}s old`;
+  try {
+    const res = (await run()) as Response;
+    const why = res.status >= 400 ? ` | failed: ${res.status} ${res.status === 503 ? 'cover too slow' : res.status === 404 ? 'not found or not allowed' : (await res.clone().text().catch(() => '')).slice(0, 80)}` : '';
+    const line = `[card] ${where} ${res.status} | ${age} | ${summary()}${why}`;
+    if (res.status >= 400) console.warn(line); else console.log(line);
+    return res;
+  } catch (e) {
+    console.error(`[card] ${where} crashed | ${age} | ${summary()} | ${e instanceof Error ? e.message : String(e)}`);
+    throw e;
+  }
+}
 
 const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
   const path = ctx.url.pathname;

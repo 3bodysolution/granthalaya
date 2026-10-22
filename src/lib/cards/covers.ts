@@ -4,6 +4,7 @@
 //   Open Library at -L (-M for a preview), following its redirect;
 // · a copy is kept for days: in memory here, and, for the web sources, by Vercel's CDN through /api/cover;
 // · one retry, then `undefined`: the caller must not hand out a card with a placeholder when the title has a cover.
+import { waitUntil } from '@vercel/functions';
 import { mark } from '../timing';
 
 /** thrown when a title has a cover we could not get in time: no card is made (it would carry a placeholder) */
@@ -96,6 +97,19 @@ async function get(u: URL | string, ms: number): Promise<string | undefined> {
     const img = await safeImage(url, ms);
     return img ? `data:${img.type};base64,${img.body.toString('base64')}` : undefined;
   } catch { return undefined; }
+}
+
+/** when a title is added or logged: ask for its cover through /api/cover in the background, at both card sizes, so Vercel's CDN
+ *  holds it before anyone shares (a cold Open Library cover can take seconds). Nobody waits for it. */
+export function warmCover(site: string, src?: string | null) {
+  if (!src || OLD.test(src)) return;
+  const job = Promise.all([true, false].map(async (big) => {
+    const u = coverAddress(src, big);
+    if (!u) return;
+    const r = await fetch(`${site}/api/cover?u=${encodeURIComponent(u.href)}`, { signal: AbortSignal.timeout(15000) }).catch(() => null);
+    await r?.arrayBuffer().catch(() => null);   // read it through, so the CDN keeps a whole copy
+  }));
+  try { waitUntil(job); } catch { /* not on Vercel: the promise just finishes on its own */ }
 }
 
 /** a cover as a data address satori can draw; `undefined` when there is none or it could not be had (the caller decides what that means) */

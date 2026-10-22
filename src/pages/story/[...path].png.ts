@@ -10,6 +10,7 @@ import { isBackground } from '../../lib/cards/backgrounds';
 import { picture, coverSlow } from '../../lib/cards/output';
 import { CoverMissing, setOrigin } from '../../lib/cards/covers';
 import { noteStart } from '../../lib/share';
+import { mark } from '../../lib/timing';
 export const prerender = false;
 
 const gone = () => new Response('Not found', { status: 404, headers: { 'Cache-Control': 'no-store' } });
@@ -50,6 +51,7 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
   } catch (e) {
     if (e instanceof CoverMissing) return coverSlow();
     console.error('story card', params.path, e);
+    mark('fail', 0, e instanceof Error ? e.message : 'error');   // shown in the [card] log line
     return gone();
   }
   return gone();

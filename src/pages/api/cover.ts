@@ -1,4 +1,4 @@
-// A copy of a cover, for the share cards: /api/cover?u=<cover address>. Public, and kept by Vercel's CDN for a week, so the next
+// A copy of a cover, for the share cards: /api/cover?u=<cover address>. Public, and kept by Vercel's CDN for 30 days, so the next
 // card that needs the same poster gets it at once. It is a small fetch-for-anyone door, so it is strict:
 //   · only our cover sources: image.tmdb.org posters, covers.openlibrary.org, Google Books covers (and archive.org, but only when
 //     Open Library redirects to it; each redirect is checked, at most 4), over https, no logins or ports in the address;
@@ -15,5 +15,5 @@ export const GET: APIRoute = async ({ url }) => {
   if (u.protocol !== 'https:' || u.username || u.password || u.port || !coverAllowed(u)) return no(400);
   const img = await safeImage(u, u.hostname === 'covers.openlibrary.org' ? 4000 : 2300);
   if (!img) return no(502);
-  return new Response(img.body, { headers: { 'Content-Type': img.type, 'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400', 'X-Content-Type-Options': 'nosniff' } });
+  return new Response(img.body, { headers: { 'Content-Type': img.type, 'Cache-Control': 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400', 'X-Content-Type-Options': 'nosniff' } });
 };

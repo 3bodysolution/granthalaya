@@ -35,6 +35,15 @@ export function header(): string {
   return items.join(', ');
 }
 
+/** one line for the function log: every step with its time, then the total ("poster 3120ms (cdn) | pixels 410ms (1080 wide) | total 4210ms") */
+export function summary(): string {
+  const run = store.getStore();
+  if (!run) return '';
+  const steps = run.entries.map((e) => `${e.name} ${Math.round(e.ms)}ms${e.desc ? ` (${e.desc})` : ''}`);
+  steps.push(`total ${Math.round(performance.now() - run.start)}ms`);
+  return steps.join(' | ');
+}
+
 /** a fetch that notes each database call (for the Supabase clients) */
 export const timedFetch: typeof fetch = async (input, init) => {
   const t = performance.now();

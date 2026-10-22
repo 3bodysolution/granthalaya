@@ -263,7 +263,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
                 </div>
               )}
               <button class="lrow2" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}><Stack /><span>Add to a collection</span></button>
-              <button class="lrow2" type="button" data-share={shareData}><Share /><span>Share</span></button>
+              <button class="lrow2" type="button" data-share={shareData} data-share-early><Share /><span>Share</span></button>
             </>
           ) : isMe ? (
             <>
@@ -278,7 +278,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Notes /><span>Edit rating and review</span></a>
               {done && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
               <button class="lrow2" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}><Stack /><span>Add to a collection</span></button>
-              <button class="lrow2" type="button" data-share={shareData}><Share /><span>Share</span></button>
+              <button class="lrow2" type="button" data-share={shareData} data-share-early><Share /><span>Share</span></button>
             </>
           ) : me ? (
             <>

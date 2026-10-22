@@ -126,6 +126,9 @@ const apps = { wa: siWhatsapp.path, x: siX.path };
   const half = (base: string, wide: boolean) => (wide ? base : `${base}${base.includes('?') ? '&' : '?'}w=540`);
   const fileName = (b: Blob) => `granthalaya-${(opts?.title ?? 'card').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'card'}.${b.type === 'image/png' ? 'png' : 'jpg'}`;
 
+  /** a card picture, asked for once more if the first try fails (a cold start and a slow cover can pass the limit once) */
+  const drawTwice = (address: string, ms: number) => draw(address, ms).then((b) => b ?? draw(address, ms));
+
   /** fetch a card picture, giving up after `ms` */
   async function draw(address: string, ms: number): Promise<Blob | null> {
     const ctl = new AbortController();
@@ -162,7 +165,7 @@ const apps = { wa: siWhatsapp.path, x: siX.path };
         new Promise<null>((res) => setTimeout(() => res(null), 6000)),
       ]).catch(() => null)
       : Promise.resolve(null);
-    const j: Job = { key: p.key, base: p.base, wide: p.wide, meta, preview: draw(half(p.base, p.wide), LIMIT), at: Date.now() };
+    const j: Job = { key: p.key, base: p.base, wide: p.wide, meta, preview: drawTwice(half(p.base, p.wide), LIMIT), at: Date.now() };
     warm.set(p.key, j);
     if (warm.size > 8) warm.delete(warm.keys().next().value!);
     return j;
@@ -171,7 +174,7 @@ const apps = { wa: siWhatsapp.path, x: siX.path };
   /** the full-size picture as a File, started once the preview is shown (or at once if sharing is pressed first) */
   function fullOf(j: Job): Promise<File | null> {
     if (!j.full) {
-      j.full = (j.wide ? j.preview : draw(j.base, 20000)).then((b) => {
+      j.full = (j.wide ? j.preview : drawTwice(j.base, 20000)).then((b) => {
         if (!b) return null;
         j.file = new File([b], fileName(b), { type: b.type });
         return j.file;
@@ -327,6 +330,13 @@ const apps = { wa: siWhatsapp.path, x: siX.path };
   document.addEventListener('pointerdown', (ev) => {
     const b = (ev.target as Element).closest<HTMLElement>('[data-share]');
     if (b) { try { start(JSON.parse(b.dataset.share!)); } catch { /* bad data */ } }
+  });
+  // your own entry page: the card is drawn quietly once the page has loaded, so it is ready when Share is tapped
+  document.addEventListener('astro:page-load', () => {
+    const b = document.querySelector<HTMLElement>('[data-share][data-share-early]');
+    if (!b || (navigator as { connection?: { saveData?: boolean } }).connection?.saveData) return;
+    const go = () => { try { const j = start(JSON.parse(b.dataset.share!)); if (j) void j.preview.then((x) => { if (x) void fullOf(j); }); } catch { /* bad data */ } };
+    if ('requestIdleCallback' in window) requestIdleCallback(go, { timeout: 3000 }); else setTimeout(go, 1500);
   });
   document.addEventListener('close', (ev) => { if ((ev.target as HTMLElement).id === 'share-box') { epoch++; opts = null; job = null; } }, true);
 

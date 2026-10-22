@@ -3,6 +3,7 @@
 import type { APIRoute } from 'astro';
 import { json, oops, body, needMe, sameOrigin } from '../../lib/http';
 import { cleanHit, titleFor } from '../../lib/titles';
+import { warmCover } from '../../lib/cards/covers';
 export const prerender = false;
 
 export const POST: APIRoute = async (ctx) => {
@@ -15,5 +16,6 @@ export const POST: APIRoute = async (ctx) => {
   if (!hit) return oops('A title is needed.');
   const t = await titleFor(hit, me.id);
   if ('error' in t) return oops(t.error);
+  warmCover(ctx.url.origin, hit.cover);   // ready in the CDN before the first share card needs it
   return json({ ok: true, id: t.id, slug: t.slug });
 };

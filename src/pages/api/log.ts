@@ -6,6 +6,7 @@ import { cleanHit, titleFor } from '../../lib/titles';
 import { ensureFactsLater } from '../../lib/cards/tagline';
 import { statusFits, type Kind, type Status } from '../../lib/kinds';
 import { isPlainSave, isBareEntry } from '../../lib/saved';
+import { warmCover } from '../../lib/cards/covers';
 export const prerender = false;
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -34,9 +35,9 @@ function fields(b: Record<string, any>, kind: Kind, status: Status) {
 /** a review's tagline: one line, at most 140 characters */
 const oneLine = (v: unknown) => [...(str(v, 400) ?? '').replace(/\s+/g, ' ')].slice(0, 140).join('').trim();
 
-type TitleBits = { kind: Kind; slug: string; season: number | null; show_id: string | null };
+type TitleBits = { kind: Kind; slug: string; season: number | null; show_id: string | null; cover_url?: string | null };
 async function kindOf(ctx: APIContext, titleId: string): Promise<TitleBits | null> {
-  const { data } = await ctx.locals.supabase.from('titles').select('kind, slug, season, show_id').eq('id', titleId).maybeSingle();
+  const { data } = await ctx.locals.supabase.from('titles').select('kind, slug, season, show_id, cover_url').eq('id', titleId).maybeSingle();
   return (data as TitleBits | null) ?? null;
 }
 /** a TV show's own row (no season): it only takes "want to watch" */
@@ -69,6 +70,7 @@ export const POST: APIRoute = async (ctx) => {
   const t = await kindOf(ctx, titleId);
   if (!t) return oops('Couldn’t find that title.', 404);
   ensureFactsLater(titleId);   // its card line and painting are written in the background, so they are ready before anyone shares
+  warmCover(ctx.url.origin, t.cover_url);   // and its cover is fetched into the CDN, so the first card doesn't wait on Open Library
   const status = String(b.status ?? 'done');
   if (!statusFits(t.kind, status)) return oops('Pick a status.');
   if (wholeShow(t) && status !== 'want') return oops('Pick a season first.');
