@@ -127,6 +127,10 @@ create table public.titles (
   note text check (note is null or char_length(note) <= 300),
   tagline text check (tagline is null or char_length(tagline) <= 140),  -- the short line on share cards: TMDB's tagline, else one written once from the summary
   card_bg text check (card_bg is null or card_bg in ('cinema', 'fair', 'fields', 'forest', 'fort', 'noir', 'rain', 'reading', 'sea', 'stars', 'wada')),  -- the painting behind its share card, picked once by the AI
+  description text check (description is null or char_length(description) <= 2000),  -- books: Wikipedia's intro, else Open Library's text (AI-shortened when long); never Google Books
+  description_source text check (description_source is null or description_source in ('wikipedia', 'openlibrary', 'ai-wikipedia', 'ai-openlibrary')),
+  description_url text check (description_url is null or char_length(description_url) <= 600),  -- the Wikipedia article, for the credit
+  description_checked_at timestamptz,                -- looked for one; look again after 90 days
   tmdb_id int,
   ol_key text,                                       -- Open Library work, like OL45883W
   trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),

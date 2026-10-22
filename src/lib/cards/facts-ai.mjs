@@ -41,6 +41,40 @@ GENRES: ${genres.join(', ') || 'none listed'}
 TEXT:
 ${summary.slice(0, 1800)}`;
 
+// a book description from a long or messy text: what the book is, in 2 or 3 plain sentences, from that text only
+const summaryPrompt = (title, creator, text) => `Write the short description shown on the page of the book "${title}"${creator ? ` by ${creator}` : ''}.
+
+Use ONLY the text below. Do not add anything from memory.
+- 2 or 3 plain sentences, at most 70 words in all.
+- Say what kind of book it is and what it is about. Only the setup: nothing from the middle or the end.
+- No praise, no review quotes, no sales lines ("bestseller", "masterpiece", "must-read").
+- No em dashes or en dashes. No quotation marks around the whole text.
+- Simple, natural English.
+
+Reply with JSON only: {"description": "..."}
+
+TEXT:
+${text.slice(0, 5000)}`;
+
+/** 2 or 3 plain sentences about a book, from `text` only. Returns the description, or null when no model answered or the answer can't be used. */
+export async function askSummary({ title, creator, text }, keys) {
+  if (!keys.gemini && !keys.groq) return null;
+  const q = summaryPrompt(title, creator, text);
+  let raw;
+  try {
+    if (!keys.gemini) throw new Error('no Gemini key');
+    raw = await askGemini(keys.gemini, keys.geminiModel, q, 1);
+  } catch (e) {
+    if (!keys.groq) return null;
+    try { raw = await askGroq(keys.groq, keys.groqModel, q, 1); } catch { return null; }
+  }
+  try {
+    const s = String(JSON.parse(raw.replace(/^```(?:json)?|```$/g, '').trim()).description ?? '')
+      .replace(/\s*[—–]\s*/g, ', ').replace(/\s+/g, ' ').replace(/^["“]+|["”]+$/g, '').trim();
+    return s.length >= 60 && s.length <= 700 ? s : null;
+  } catch { return null; }
+}
+
 /**
  * Ask the free AI models (Gemini, then Groq). `keys` = { gemini, geminiModel, groq, groqModel }. With `needLine: false` only the painting is asked for.
  * Returns { line, bg } where each is null when missing or unusable (a painting that isn't one of the 11 names is ignored), or null when no model answered.

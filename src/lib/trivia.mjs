@@ -22,17 +22,22 @@ async function getJSON(url, init = {}, ms = 8000) {
 
 const KINDS = {
   film: /\bfilm\b|\bmovie\b|\bdocumentary\b/i,
-  book: /\bnovel\b|\bbook\b|\bcollection\b|\bpoems?\b|\bpoetry\b|\bmemoir\b|\bnovella\b|\bshort stor|\bessays?\b/i,
+  book: /\bnovel\b|\bbook\b|\bcollection\b|\bpoems?\b|\bpoetry\b|\bmemoir\b|\bnovella\b|\bshort stor|\bessays?\b|\bliterary work\b|\bplay\b|\bepic\b|\bautobiograph|\bbiography\b|\btreatise\b/i,
   tv: /\btelevision\b|\btv\b|\bseries\b|\bsitcom\b|\bminiseries\b|\bdrama\b/i,
 };
 const SEARCH_WORD = { film: 'film', book: 'novel', tv: 'TV series' };
+// a page about an adaptation mentions the book too ("British television dramatisation of the 1869 novel War and Peace")
+const NOT_KIND = { book: /\btelevision\b|\btv\b|\bfilm\b|\bminiseries\b|\bopera\b|\bvideo game\b/i };
 
 // "Paterson (film)" matches "Paterson"; "Applesauce (novel)" doesn't match "A Room of One's Own"
 const norm = (s = '') => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
 const sameTitle = (page, title) => norm(page.replace(/\s*\([^)]*\)\s*$/, '')) === norm(title);
 
-/** Find the Wikipedia page for a film or book. Returns { title, url, text } or null. */
-export async function findWikipediaPage({ title, year, type, creator }) {
+/**
+ * Find the Wikipedia page for a film or book. Returns { title, url, text, description } or null.
+ * `intro: true` gives only the opening section (for book descriptions) instead of the whole article.
+ */
+export async function findWikipediaPage({ title, year, type, creator }, { intro = false } = {}) {
   const kind = KINDS[type];
   if (!kind) return null;
   const tries = [
@@ -46,13 +51,14 @@ export async function findWikipediaPage({ title, year, type, creator }) {
       prop: 'description', format: 'json', formatversion: '2', origin: '*',
     });
     const pages = ((await getJSON(`https://en.wikipedia.org/w/api.php?${q}`)).query?.pages ?? []).sort((a, b) => a.index - b.index);
-    const fits = (p) => sameTitle(p.title, title) && kind.test(p.description ?? '') &&!/^list of|disambiguation/i.test(`${p.title} ${p.description ?? ''}`);
+    const fits = (p) => sameTitle(p.title, title) && kind.test(p.description ?? '') && !NOT_KIND[type]?.test(`${p.title} ${p.description ?? ''}`)
+      && !/^list of|disambiguation/i.test(`${p.title} ${p.description ?? ''}`);
     const hit = pages.find((p) => fits(p) && (!year || (p.description ?? '').includes(String(year)))) ?? pages.find(fits);
     if (!hit) continue;
-    const ex = new URLSearchParams({ action: 'query', prop: 'extracts', explaintext: '1', titles: hit.title, format: 'json', formatversion: '2', origin: '*' });
+    const ex = new URLSearchParams({ action: 'query', prop: 'extracts', explaintext: '1', ...(intro ? { exintro: '1' } : {}), titles: hit.title, format: 'json', formatversion: '2', origin: '*' });
     const text = (await getJSON(`https://en.wikipedia.org/w/api.php?${ex}`)).query?.pages?.[0]?.extract ?? '';
-    if (text.length < 400) continue;
-    return { title: hit.title, url: `https://en.wikipedia.org/wiki/${encodeURIComponent(hit.title.replace(/ /g, '_'))}`, text: text.slice(0, 24000) };
+    if (text.length < (intro ? 120 : 400)) continue;
+    return { title: hit.title, url: `https://en.wikipedia.org/wiki/${encodeURIComponent(hit.title.replace(/ /g, '_'))}`, text: text.slice(0, intro ? 6000 : 24000), description: hit.description ?? '' };
   }
   return null;
 }

@@ -15,6 +15,7 @@ import { site as siteConfig } from '../../data/site';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
 import { pageBits } from '../../lib/cards/titlepage';
 import { bookOg } from '../../lib/share';
+import { cleanBlurb, savedDescription, describeLater } from '../../lib/catalog/describe';
 export const prerender = false;
 
 const param = String(Astro.params.id ?? '');
@@ -46,8 +47,17 @@ if ('ol' in k) {
 }
 } catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // a catalogue failing is not "not found"
 if (!b) { Astro.response.status = 404; return Astro.rewrite('/404'); }
-const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
 const row = rows[0];
+const [site, saved] = await Promise.all([
+  sb ? onSite(sb, rows, me) : Promise.resolve({ done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] }),
+  sb && row ? savedDescription(sb, row.id) : Promise.resolve(null),
+]);
+// a better description is looked for once, in the background, and only for books already in our catalogue
+if (row && saved && !saved.checked) describeLater(row.id);
+const description = saved?.text ?? cleanBlurb(b.description);
+const credit = saved?.text && saved.source !== 'openlibrary'
+  ? { adapted: saved.source?.startsWith('ai-'), from: saved.source?.endsWith('wikipedia') ? 'Wikipedia' : 'Open Library', url: saved.url ?? (saved.source?.endsWith('wikipedia') ? undefined : b.sourceLink) }
+  : null;
 const gbId = 'gb' in k ? k.gb : null;
 const hit = {
   kind: 'book', olKey: 'ol' in k ? k.ol : undefined, title: b.title, creator: b.authors[0]?.name, year: b.year, pages: b.pages, cover: b.cover,
@@ -67,10 +77,10 @@ const language = row?.language ? new Intl.DisplayNames(['en'], { type: 'language
 const manyEditions = (b.editions ?? 0) >= 2;
 const bits = await pageBits(sb, 'book', param);
 const og = bookOg(b, bits?.creator ?? b.authors.map((a) => a.name).join(', '), bits?.line);
-const paras = b.description ? b.description.split(/\n{2,}/) : [];
+const paras = description ? description.split(/\n{2,}/) : [];
 const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
 ---
-<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={b.description ? b.description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
+<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
     <Poster slot="poster" src={b.cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
     <Fragment slot="side">
@@ -87,6 +97,12 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
       {b.year && <span><span class="vbar" aria-hidden="true"></span><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></span>}
     </p>
     {paras.length > 0 && <div class="desc">{paras.map((p) => <p>{p}</p>)}</div>}
+    {credit && (
+      <p class="from">
+        {credit.adapted ? 'Adapted from ' : 'From '}{credit.url ? <a href={credit.url} target="_blank" rel="noopener" class="ul">{credit.from}</a> : credit.from}
+        {credit.from === 'Wikipedia' && <>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener license" class="ul">CC BY-SA</a></>}
+      </p>
+    )}
 
     <Fragment slot="more">
       <Tabs id="book" tabs={tabs}>
@@ -129,6 +145,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
   .ul:hover { color: var(--lat); text-decoration-color: var(--lat); }
   .desc { max-width: 640px; display: flex; flex-direction: column; gap: 12px; }
   .desc p { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 18px; line-height: 1.6; }
+  .from { margin: -4px 0 0; font-size: 12.5px; color: var(--muted); }
   .tp { padding-top: 16px; }
   .facts { margin: 0; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px 18px; font-size: 14.5px; }
   .facts dt { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; padding-top: 2px; }
