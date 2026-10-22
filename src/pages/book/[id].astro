@@ -54,7 +54,7 @@ const [site, saved] = await Promise.all([
 ]);
 // a better description is looked for once, in the background, and only for books already in our catalogue
 if (row && saved && !saved.checked) describeLater(row.id);
-const description = saved?.text ?? cleanBlurb(b.description);
+const description = cleanBlurb(saved?.text ?? b.description);   // saved text too: the cleaner may have learnt something since it was saved
 const credit = saved?.text && saved.source !== 'openlibrary'
   ? { adapted: saved.source?.startsWith('ai-'), from: saved.source?.endsWith('wikipedia') ? 'Wikipedia' : 'Open Library', url: saved.url ?? (saved.source?.endsWith('wikipedia') ? undefined : b.sourceLink) }
   : null;
@@ -99,8 +99,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
     {paras.length > 0 && <div class="desc">{paras.map((p) => <p>{p}</p>)}</div>}
     {credit && (
       <p class="from">
-        {credit.adapted ? 'Adapted from ' : 'From '}{credit.url ? <a href={credit.url} target="_blank" rel="noopener" class="ul">{credit.from}</a> : credit.from}
-        {credit.from === 'Wikipedia' && <>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener license" class="ul">CC BY-SA</a></>}
+        {credit.adapted ? 'Adapted from ' : 'From '}{credit.url ? <a href={credit.url} target="_blank" rel="noopener" class="ul">{credit.from}</a> : credit.from}{credit.from === 'Wikipedia' && <>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener license" class="ul">CC BY-SA</a></>}
       </p>
     )}
 

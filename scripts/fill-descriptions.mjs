@@ -7,6 +7,9 @@
 //                                                   Wikipedia match for a look, asks no AI and writes nothing
 //   node scripts/fill-descriptions.mjs --write      does it (only when Sarthak asks for it in that message)
 //   --limit=N                                       stops after N books (the free AI allowance is limited; run it again to carry on)
+//   --trust=slug,slug                               skips the author's surname check for those books (Wikipedia page checked by hand;
+//                                                   the slug or the title written like one, "raag-darbari")
+//   --log=file.json                                 also writes each saved description next to the text it came from
 //
 // Needs PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY (and an AI key for --write) in .env. Nothing from .env is printed.
 // The dry run also works before supabase/changes/007 is applied (it then treats every book as having no description).
@@ -23,6 +26,9 @@ try {
 if (!process.env.PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SECRET_KEY) { console.log('Add PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY to .env first.'); process.exit(1); }
 const write = process.argv.includes('--write');
 const limit = Number(process.argv.find((a) => a.startsWith('--limit='))?.slice(8)) || Infinity;
+const trust = (process.argv.find((a) => a.startsWith('--trust='))?.slice(8) ?? '').split(',').filter(Boolean);
+const logFile = process.argv.find((a) => a.startsWith('--log='))?.slice(6);
+const log = [];
 const keys = { gemini: process.env.GEMINI_API_KEY, geminiModel: process.env.GEMINI_MODEL, groq: process.env.GROQ_API_KEY, groqModel: process.env.GROQ_MODEL };
 const db = createClient(process.env.PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -68,7 +74,7 @@ for (const r of rows) {
   if (done >= limit) break;
   done++;
   const ol = plain(await olText(r.ol_key));
-  const d = await describeBook({ title: r.title, creator: r.creator, year: r.year, olText: ol }, keys, { ai: write });
+  const d = await describeBook({ title: r.title, creator: r.creator, year: r.year, olText: ol }, keys, { ai: write, trust: trust.includes(r.slug) || trust.includes(r.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) });
   if (d.wiki) matches.push(`  ${r.title} (${r.creator || 'no author'}) -> ${d.wiki.title} [${d.wiki.description}]${d.source === 'openlibrary' || d.source === 'ai-openlibrary' ? ' (intro too short, Open Library used)' : ''}`);
   if (d.wikiRejected) { tally.rejected++; rejected.push(`  ${r.title} (${r.creator || 'no author'}) -x- ${d.wikiRejected.title} [${d.wikiRejected.description}]`); }
   if (!d.text) { tally.nothing++; await sleep(300); continue; }
@@ -78,7 +84,7 @@ for (const r of rows) {
   const { error } = await db.from('titles').update({ description: d.text.slice(0, MAX), description_source: d.source, description_url: d.url, description_checked_at: new Date().toISOString() })
     .eq('id', r.id).is('description', null);
   if (error) console.log(`  could not save "${r.title}": ${error.message}`);
-  else { changed++; console.log(`  ${r.title}: [${d.source}] ${d.text.slice(0, 90)}${d.text.length > 90 ? '…' : ''}`); }
+  else { changed++; log.push({ title: r.title, source: d.source, url: d.url, text: d.text, original: d.original }); console.log(`  ${r.title}: [${d.source}] ${d.text.slice(0, 90)}${d.text.length > 90 ? '…' : ''}`); }
   await sleep(d.needsAi ? 3500 : 300);   // a free AI allowance is a few calls a minute
 }
 
@@ -88,4 +94,5 @@ console.log(`\nWikipedia pages found but left out because the author's surname i
 console.log(rejected.join('\n') || '  none');
 console.log(`\n${write ? 'Saved' : 'Would save'}: ${tally.wikipedia} from Wikipedia as it is, ${tally['ai-wikipedia']} shortened from Wikipedia by the AI, ${tally.openlibrary} from Open Library as it is, ${tally['ai-openlibrary']} shortened from Open Library by the AI; ${tally.nothing} with nothing usable; ${done} looked at${stopped ? ', stopped early' : ''}.`);
 if (write) console.log(`${changed} titles changed.`);
+if (logFile) fs.writeFileSync(logFile, JSON.stringify(log, null, 2));
 else console.log('(dry run: no AI was asked and nothing was changed)');

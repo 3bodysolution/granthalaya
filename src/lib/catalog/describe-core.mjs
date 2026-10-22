@@ -45,9 +45,24 @@ export function cleanBlurb(text) {
     .replace(/\s*\(\s*(source|from)\s*:?[^)]{0,120}\)\s*$/i, '')     // (Source: Penguin)
     .replace(/\s*\[?\(?\s*source\s*\)?\]?\s*$/i, '')                // ([source][1]) after plain()
     .replace(/\s*(source|from)\s*:\s*\S[^\n]{0,120}$/i, '')          // Source: the publisher
+    .replace(/\s*(?:pronounced:?\s*|IPA:\s*)\[[^\]]*\]/gi, '')       // Wikipedia's pronunciations: (pronounced [prɒθɒm]; transl. ...)
+    .replace(/\(\s*[;,]\s*/g, '(').replace(/\s*[;,]\s*\)/g, ')')
     .replace(/\(\s*[;,]?\s*\)/g, '')                                 // brackets left empty by a removed pronunciation
-    .replace(/[ \t]{2,}/g, ' ').replace(/ ([,.;:])/g, '$1').trim();
+    .replace(/\s+[—–]\s+/g, ', ')                                    // no dashes on the site
+    .replace(/[ \t]{2,}/g, ' ').replace(/ ([,.;:)])/g, '$1').trim();
+  t = unmatched(t);
   return t.length >= 40 ? t : '';
+}
+
+/** drop a closing bracket that was never opened ("an autobiography of Sane Guruji).") */
+function unmatched(t) {
+  let open = 0, out = '';
+  for (const c of t) {
+    if (c === '(') open++;
+    else if (c === ')') { if (!open) continue; open--; }
+    out += c;
+  }
+  return out;
 }
 
 /** still not fit to show as it is: lists, links, lots of quotes */
@@ -77,21 +92,24 @@ const byAuthor = (page, creator) => {
 
 /**
  * The description for one book. `book` = { title, creator, year, olText }, `keys` = the AI keys.
- * `ai: false` (the dry run) asks no AI and only says what would happen.
- * Returns { text, source, url, wiki, wikiRejected, needsAi, aiFailed } where text is null when nothing usable was found.
+ * `ai: false` (the dry run) asks no AI and only says what would happen. `trust: true` skips the surname check (for a page
+ * checked by hand, where the author's name is spelt differently).
+ * Returns { text, source, url, wiki, wikiRejected, needsAi, aiFailed, original } where text is null when nothing usable was found
+ * and original is the cleaned text it came from.
  */
-export async function describeBook({ title, creator, year, olText }, keys, { ai = true } = {}) {
+export async function describeBook({ title, creator, year, olText }, keys, { ai = true, trust = false } = {}) {
   let wiki = null, wikiRejected = null;
   try {
     const page = await findWikipediaPage({ title, year, type: 'book', creator }, { intro: true });
-    if (page && byAuthor(page, creator)) wiki = page; else if (page) wikiRejected = page;
+    if (page && (trust || byAuthor(page, creator))) wiki = page; else if (page) wikiRejected = page;
   } catch { /* Wikipedia busy or down: Open Library alone */ }
   const fromWiki = wiki ? cleanBlurb(wiki.text) : '';
   const fromOl = cleanBlurb(olText);
   const base = fromWiki.length >= 80 ? { text: fromWiki, from: 'wikipedia', url: wiki.url } : fromOl ? { text: fromOl, from: 'openlibrary', url: null } : null;
-  const result = { text: null, source: null, url: null, wiki, wikiRejected, needsAi: false, aiFailed: false };
+  const result = { text: null, source: null, url: null, wiki, wikiRejected, needsAi: false, aiFailed: false, original: null };
   if (!base) return result;
   result.url = base.url;
+  result.original = base.text;
   if (base.text.length <= SHORT && !messy(base.text)) return { ...result, text: base.text, source: base.from };
   result.needsAi = true;
   if (!ai) return { ...result, text: base.text, source: `ai-${base.from}` };
