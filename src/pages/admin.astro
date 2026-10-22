@@ -8,7 +8,7 @@ const me = Astro.locals.me;
 if (!me?.is_admin) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const show = Astro.url.searchParams.get('show') === 'all' ? 'all' : 'open';
 const db = adminClient();
-let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug))').order('created_at', { ascending: false }).limit(100);
+let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug)), comment:review_comments(id, body, author:profiles(username), log:logs(title:titles(title, slug), owner:profiles!logs_user_id_fkey(username)))').order('created_at', { ascending: false }).limit(100);
 if (show === 'open') q = q.eq('status', 'open');
 const { data: reports, error } = await q;
 const { data: picks } = await db.from('book_suggestions').select('id, language, hidden, checked_with, created_at, title:titles(title, creator, slug)').order('created_at', { ascending: false }).limit(200);
@@ -33,9 +33,11 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
             {' '}| from {r.reporter ? `@${r.reporter.username}` : 'a removed account'}
           </p>
           {r.details && <p class="quote">“{r.details}”</p>}
-          {r.log?.notes && <p class="small muted">Their note: {r.log.notes.slice(0, 280)}</p>}
+          {r.log?.notes && <p class="small muted">Their review: {r.log.notes.slice(0, 280)}</p>}
+          {r.comment && <p class="small">Comment by @{r.comment.author?.username} on <a class="accent" href={`/@${r.comment.log?.owner?.username}/library/${r.comment.log?.title?.slug}/`}>{r.comment.log?.title?.title}</a>: <span class="muted">{r.comment.body.slice(0, 280)}</span></p>}
           <div class="flex gap-2 flex-wrap">
             {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'dismiss' })}>Dismiss</button>}
+            {r.comment && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'delete_comment' })}>Delete the comment</button>}
             {r.log && !r.log.only_me && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'hide_entry' })}>Hide the entry</button>}
             {r.target?.featured && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'unfeature' })}>Stop featuring them</button>}
             {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'done' })}>Mark as dealt with</button>}

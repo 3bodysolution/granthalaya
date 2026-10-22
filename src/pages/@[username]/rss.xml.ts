@@ -20,7 +20,7 @@ export const GET: APIRoute = async ({ params, locals, site: url }) => {
     items: all.slice(0, 50).map((e) => ({
       title: `${e.data.status === 'done' ? VERB[e.data.type] : 'Started'}: ${fullTitle(e)}`,
       pubDate: e.data.date,
-      description: `${e.data.creator}. ${excerpt(e, 400)}`,
+      description: `${e.data.creator}. ${e.data.spoiler ? 'The review has spoilers.' : [e.data.tagline, excerpt(e, 400)].filter(Boolean).join(' ')}`,
       link: href(e),
     })),
   });

@@ -25,18 +25,14 @@ function fields(b: Record<string, any>, kind: Kind, status: Status) {
     finished_on: status === 'done' ? finished ?? today() : null,
     again: b.again === true,
     notes: str(b.notes, 10000) ?? '',
+    tagline: oneLine(b.tagline),
+    spoiler: b.spoiler === true,
     where_seen: str(b.where, 80) ?? '',
     only_me: b.onlyMe === true,
   };
 }
-/** the lines you underlined, checked */
-type LineIn = { text?: unknown; where?: unknown; note?: unknown; mine?: unknown };
-function lines(b: Record<string, any>) {
-  const list = Array.isArray(b.lines) ? b.lines : b.line ? [b.line] : [];
-  return list.slice(0, 50).map((l: LineIn | null, i: number) => ({
-    body: str(l?.text, 2000), where_at: str(l?.where, 80) ?? '', note: str(l?.note, 1000) ?? '', mine: l?.mine === true, position: i,
-  })).filter((l) => l.body);
-}
+/** a review's tagline: one line, at most 140 characters */
+const oneLine = (v: unknown) => [...(str(v, 400) ?? '').replace(/\s+/g, ' ')].slice(0, 140).join('').trim();
 
 type TitleBits = { kind: Kind; slug: string; season: number | null; show_id: string | null };
 async function kindOf(ctx: APIContext, titleId: string): Promise<TitleBits | null> {
@@ -83,11 +79,6 @@ export const POST: APIRoute = async (ctx) => {
   if (error || !data) return oops(dbMessage(error));
   // the first season logged replaces "want to watch" on the whole show
   if (t.kind === 'tv' && t.season != null && t.show_id) await sb.from('logs').delete().eq('user_id', me.id).eq('title_id', t.show_id);
-  const hl = lines(b).map((l) => ({ ...l, log_id: data.id, user_id: me.id }));
-  if (hl.length) {
-    const { error: e2 } = await sb.from('highlights').insert(hl);
-    if (e2) return oops(dbMessage(e2, 'Saved, but the line you underlined didn’t save. Edit the entry to add it again.'));
-  }
   return json({ ok: true, id: data.id, href: await entryHref(ctx, me.username, t) });
 };
 
@@ -119,6 +110,8 @@ export const PATCH: APIRoute = async (ctx) => {
     // a season's review or date, edited in place on the show's entry page
     change = {};
     if ('notes' in b) change.notes = str(b.notes, 10000) ?? '';
+    if ('tagline' in b) change.tagline = oneLine(b.tagline);
+    if ('spoiler' in b) change.spoiler = b.spoiler === true;
     if ('finished' in b) {
       const day = isoDate(b.finished);
       if (!day) return oops('That date doesn’t look right.');
@@ -137,23 +130,6 @@ export const PATCH: APIRoute = async (ctx) => {
   }
   const { error } = await sb.from('logs').update(change).eq('id', cur.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
-  if (b.full === true) {
-    // the lines are saved afresh; if one of them was pinned to the profile, keep it pinned
-    const { data: det } = await sb.from('profile_details').select('pinned_line').eq('id', me.id).maybeSingle();
-    let pinnedText: string | null = null;
-    if (det?.pinned_line) {
-      const { data: p } = await sb.from('highlights').select('body').eq('id', det.pinned_line).eq('log_id', cur.id).maybeSingle();
-      pinnedText = p?.body ?? null;
-    }
-    await sb.from('highlights').delete().eq('log_id', cur.id).eq('user_id', me.id);
-    const hl = lines(b).map((l) => ({ ...l, log_id: cur.id, user_id: me.id }));
-    if (hl.length) {
-      const { data: saved, error: e2 } = await sb.from('highlights').insert(hl).select('id, body');
-      if (e2) return oops(dbMessage(e2));
-      const again = pinnedText ? (saved ?? []).find((h) => h.body === pinnedText) : undefined;
-      if (again) await sb.from('profile_details').update({ pinned_line: again.id }).eq('id', me.id);
-    }
-  }
   return json({ ok: true, id: cur.id, href: await entryHref(ctx, me.username, cur.title) });
 };
 

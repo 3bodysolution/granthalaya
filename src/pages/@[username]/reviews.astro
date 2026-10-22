@@ -1,0 +1,88 @@
+---
+// Every review on one shelf (an entry's text or tagline; a show's are per season), newest first, with their likes and comments.
+// Reached from the Reviews count on the profile. Lines used to live here (/lines/ redirects in middleware.ts).
+import Base from '../../layouts/Base.astro';
+import Cover from '../../components/Cover.astro';
+import ShelfStrip from '../../components/ShelfStrip.astro';
+import Stars from '../../components/ui/Stars.astro';
+import { openShelf } from '../../lib/shelfpage';
+import { loadShelf, long, shelfReviews } from '../../lib/data';
+import { reviewExtras } from '../../lib/reviews';
+import { md } from '../../lib/md';
+export const prerender = false;
+
+const o = await openShelf(Astro, '/reviews/');
+if (o.out) return o.out;
+const { profile, isMe, visible } = o.shelf;
+if (!visible) return Astro.redirect(`/@${profile.username}/`);
+const sb = Astro.locals.supabase;
+const all = shelfReviews(await loadShelf(sb, profile));
+const name = profile.display_name || profile.username;
+const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.private).map((r) => [r.logId, profile.id])), Astro.locals.me);
+---
+<Base title={isMe ? 'Your reviews' : `${name}’s reviews`} shelf={profile.username} description={`Reviews ${name} wrote on Granthalaya.`}>
+  <section class="pad head">
+    <div class="rise stack" style="gap: 10px">
+      <p class="eyebrow" style="color: var(--lat)">Reviews</p>
+      <h1 class="title">{isMe ? 'My reviews' : `${name}’s reviews`}</h1>
+    </div>
+  </section>
+
+  <div class="pad rise d1" style="padding-top: 26px"><ShelfStrip shelf={o.shelf} /></div>
+
+  <section class="pad list" style="padding-top: 36px">
+    {all.length === 0 && <p class="serif" style="font-size: 22px; margin: 0">{isMe ? 'No reviews yet. Write one when you log a book or film.' : `${name} hasn’t written any reviews yet.`}</p>}
+    {all.map((r) => {
+      const x = extras.get(r.logId);
+      return (
+        <article class="card rv">
+          <a href={r.href} class="src">
+            <Cover entry={r.entry} variant="swatch" w={40} h={60} />
+            <span class="stack grow" style="gap: 4px">
+              <span class="serif st">{r.entry.data.title}{r.season ? `, season ${r.season}` : ''}</span>
+              <span class="muted meta num">{r.entry.data.creator}{' | '}{long(r.date)}{r.loved ? ' | ♥' : ''}{r.rating != null && <span class="rst"> <Stars rating={r.rating} /></span>}</span>
+            </span>
+          </a>
+          {r.spoiler && !isMe ? (
+            <details class="spoil">
+              <summary class="gchip">Contains spoilers. Show the review</summary>
+              {r.tagline && <p class="tl">{r.tagline}</p>}
+              {r.text && <div class="vt" set:html={md(r.text)} />}
+            </details>
+          ) : (
+            <>
+              {r.tagline && <p class="tl">{r.tagline}</p>}
+              {r.text && <div class="vt" set:html={md(r.text)} />}
+            </>
+          )}
+          <p class="muted foot2 num">
+            {r.entry.data.private ? 'Only you can see this review' : <>{x?.likes ?? 0} {x?.likes === 1 ? 'like' : 'likes'} | {x?.comments.length ?? 0} {x?.comments.length === 1 ? 'comment' : 'comments'}</>}
+            {' | '}<a href={r.href} class="accent">Open</a>
+          </p>
+        </article>
+      );
+    })}
+  </section>
+</Base>
+
+<style>
+  .head { padding-top: 52px; }
+  .list { display: flex; flex-direction: column; gap: 18px; max-width: 820px; }
+  .rv { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+  .src { display: flex; align-items: center; gap: 14px; color: var(--ink); }
+  .src:hover .st { color: var(--lat); }
+  .grow { flex-grow: 1; min-width: 0; }
+  .st { font-size: 18px; line-height: 1.2; transition: color .2s ease; }
+  .meta { font-size: 13px; }
+  .rst { color: var(--haldi); }
+  .tl { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 20px; line-height: 1.35; font-weight: 600; }
+  .vt { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
+  .vt :global(p) { margin: 0 0 .8em; }
+  .vt :global(p:last-child) { margin: 0; }
+  .spoil { display: flex; flex-direction: column; gap: 12px; }
+  .spoil summary { list-style: none; width: fit-content; min-height: 40px; }
+  .spoil summary::-webkit-details-marker { display: none; }
+  .spoil[open] summary { display: none; }
+  .foot2 { margin: 0; font-size: 13px; }
+  @media (max-width: 780px) { .head { padding-top: 36px; } .rv { padding: 18px 16px; } }
+</style>

@@ -19,12 +19,12 @@ export interface Title {
   link: string | null; source: string | null; tmdb_id: number | null; ol_key: string | null; trivia: string[];
   trivia_source: string | null; color: string | null; language: string | null;
   show_id?: string | null; seasons?: number | null;   // TV: a season's show row; a show row's number of seasons
+  tagline?: string | null;                            // the title's own line (see cards/tagline.ts)
 }
-interface HighlightRow { id: string; body: string; where_at: string; note: string; mine: boolean; position: number }
 interface LogRow {
   id: string; user_id: string; title_id: string; status: Status; rating: number | null; loved: boolean;
   started_on: string | null; finished_on: string | null; logged_on: string; again: boolean; notes: string;
-  where_seen: string; only_me: boolean; created_at: string; title: Title; highlights: HighlightRow[];
+  where_seen: string; only_me: boolean; created_at: string; title: Title; tagline: string; spoiler: boolean;
 }
 
 /** One thing on someone's shelf: a visit to a title. Shaped like the old markdown entries so the
@@ -35,14 +35,15 @@ export interface Entry {
   titleId: string;
   showId?: string;   // a TV season: its show's catalogue row
   owner: string;     // the shelf's username
-  body: string;      // your notes
+  body: string;      // your review
   data: {
     title: string; type: Kind; creator: string; year?: number; season?: number; episodes?: number;
     date: Date; started?: Date; finished?: Date; status: Status; rating?: number; loved: boolean;
     runtime?: number; pages?: number; words?: number; link?: string; source?: string; where?: string;
     again: boolean; times: number; color?: string; cover?: string; private: boolean;
     trivia: string[]; triviaSource?: string; tmdbId?: number; olKey?: string; language?: string;
-    highlights: { id: string; text: string; where?: string; note?: string; mine: boolean }[];
+    tagline?: string; spoiler: boolean;   // the review's one line, and whether it gives the story away
+    cardLine?: string;                    // the title's own line (TMDB's tagline, or one written by the AI), for cards and the footer
     /** a TV show folded from its season logs (see loadShelf): each season's newest visit, "Seasons 1–2 of 3", the average of rated seasons */
     seasons?: SeasonOnShelf[]; progress?: string; average?: number; total?: number;
   };
@@ -50,7 +51,7 @@ export interface Entry {
 /** one season of a show on a shelf: its newest visit */
 export interface SeasonOnShelf {
   n: number; logId: string; titleId: string; slug: string; status: Status; date: Date; started?: Date; finished?: Date;
-  rating?: number; times: number; notes: string; private: boolean;
+  rating?: number; times: number; notes: string; tagline?: string; spoiler: boolean; private: boolean;
 }
 /** A collection: a short, ordered list of titles with a line about each. Stored in the `threads` tables. */
 export interface Collection {
@@ -75,17 +76,16 @@ function toEntry(r: LogRow, owner: string): Entry {
       runtime: opt(t.runtime), pages: opt(t.pages), words: opt(t.words), link: opt(t.link), source: opt(t.source),
       where: opt(r.where_seen), again: r.again, times: 1, color: opt(t.color), cover: opt(t.cover_url), private: r.only_me,
       trivia: Array.isArray(t.trivia) ? t.trivia : [], triviaSource: opt(t.trivia_source), tmdbId: opt(t.tmdb_id), olKey: opt(t.ol_key), language: opt(t.language),
-      highlights: [...(r.highlights ?? [])].sort((a, b) => a.position - b.position)
-        .map((h) => ({ id: h.id, text: h.body, where: opt(h.where_at), note: opt(h.note), mine: h.mine })),
+      tagline: opt(r.tagline), spoiler: r.spoiler === true, cardLine: opt(t.tagline),
     },
   };
 }
 
-const LOG_SELECT = 'id, user_id, title_id, status, rating, loved, started_on, finished_on, logged_on, again, notes, where_seen, only_me, created_at, title:titles(*), highlights(id, body, where_at, note, mine, position)';
+const LOG_SELECT = 'id, user_id, title_id, status, rating, loved, started_on, finished_on, logged_on, again, notes, where_seen, only_me, created_at, tagline, spoiler, title:titles(*)';
 
 /* ——— loading ——— */
 
-/** the extra profile details (bio, links, favourites, pinned line) */
+/** the extra profile details (bio, links, favourites) */
 export async function loadDetails(sb: SupabaseClient, id: string): Promise<Details | null> {
   const { data } = await sb.from('profile_details').select('*').eq('id', id).maybeSingle<Details>();
   return data ?? null;
@@ -177,13 +177,13 @@ export function foldShow(show: Title, logs: Entry[]): Entry {
   const want = logs.find(isShowRow);
   const e = toEntry({
     id: want?.logId ?? seasonLogs[0].logId, user_id: '', title_id: show.id, status: 'want', rating: null, loved: false, started_on: null, finished_on: null,
-    logged_on: '2000-01-01', again: false, notes: '', where_seen: '', only_me: false, created_at: '', title: show, highlights: [],
+    logged_on: '2000-01-01', again: false, notes: '', where_seen: '', only_me: false, created_at: '', title: show, tagline: '', spoiler: false,
   }, logs[0].owner);
   const d = e.data;
   d.total = show.seasons ?? undefined;
   if (!seasonLogs.length) {
     // only saved as a whole show
-    Object.assign(d, { status: want!.data.status, date: want!.data.date, private: want!.data.private, highlights: want!.data.highlights, seasons: [] });
+    Object.assign(d, { status: want!.data.status, date: want!.data.date, private: want!.data.private, tagline: want!.data.tagline, spoiler: want!.data.spoiler, seasons: [] });
     e.body = want!.body;
     return e;
   }
@@ -191,7 +191,7 @@ export function foldShow(show: Title, logs: Entry[]): Entry {
   for (const x of seasonLogs) byN.set(x.data.season!, [...(byN.get(x.data.season!) ?? []), x]);
   const seasons: SeasonOnShelf[] = [...byN.entries()].sort((a, b) => a[0] - b[0]).map(([n, v]) => ({
     n, logId: v[0].logId, titleId: v[0].titleId, slug: v[0].id, status: v[0].data.status, date: v[0].data.date, started: v[0].data.started,
-    finished: v[0].data.finished, rating: v[0].data.rating, times: v.length, notes: v[0].body, private: v[0].data.private,
+    finished: v[0].data.finished, rating: v[0].data.rating, times: v.length, notes: v[0].body, tagline: v[0].data.tagline, spoiler: v[0].data.spoiler, private: v[0].data.private,
   }));
   const rated = seasons.filter((s) => s.rating != null).map((s) => s.rating!);
   const average = rated.length ? Math.round((rated.reduce((a, b) => a + b, 0) / rated.length) * 10) / 10 : undefined;
@@ -204,7 +204,7 @@ export function foldShow(show: Title, logs: Entry[]): Entry {
     started: seasons.map((s) => s.started).filter(Boolean).sort((a, b) => a!.getTime() - b!.getTime())[0],
     finished: newest.data.finished, private: seasonLogs.every((x) => x.data.private),
     runtime: runtimes.length ? runtimes.reduce((a, b) => a + b, 0) : d.runtime,
-    highlights: seasonLogs.flatMap((x) => x.data.highlights), times: 1,
+    times: 1,
   });
   e.logId = newest.logId;
   return e;
@@ -253,7 +253,7 @@ export async function loadFeatured(sb: SupabaseClient, limit = 6) {
         .order('logged_on', { ascending: false }).limit(6),
       sb.from('profile_details').select('bio').eq('id', p.id).maybeSingle(),
     ]);
-    const covers = ((logs ?? []) as any[]).filter((l) => l.title).map((l) => toEntry({ ...l, highlights: [], status: 'done', notes: '' } as LogRow, p.username));
+    const covers = ((logs ?? []) as any[]).filter((l) => l.title).map((l) => toEntry({ ...l, status: 'done', notes: '', tagline: '', spoiler: false } as LogRow, p.username));
     return { profile: p, bio: det?.bio ?? '', count: count ?? 0, covers };
   }));
 }
@@ -262,7 +262,7 @@ export async function loadFeatured(sb: SupabaseClient, limit = 6) {
 export function titleAsEntry(t: Title, owner: string): Entry {
   return toEntry({
     id: '', user_id: '', title_id: t.id, status: 'done', rating: null, loved: false, started_on: null, finished_on: null,
-    logged_on: new Date().toISOString().slice(0, 10), again: false, notes: '', where_seen: '', only_me: false, created_at: '', title: t, highlights: [],
+    logged_on: new Date().toISOString().slice(0, 10), again: false, notes: '', where_seen: '', only_me: false, created_at: '', title: t, tagline: '', spoiler: false,
   }, owner);
 }
 
@@ -270,7 +270,25 @@ export function titleAsEntry(t: Title, owner: string): Entry {
 export const profileHref = (username: string) => `/@${username}/`;
 export const href = (e: Pick<Entry, 'id' | 'owner'>) => `/@${e.owner}/library/${e.id}/`;
 export const collectionHref = (t: Pick<Collection, 'id' | 'owner'>) => `/@${t.owner}/collections/${t.id}/`;
-export const linesHref = (username: string) => `/@${username}/lines/`;
+export const reviewsHref = (username: string) => `/@${username}/reviews/`;
+/** an entry with a review on it: text or a tagline */
+export const reviewed = (e: Pick<Entry, 'body' | 'data'>) => !!(e.body.trim() || e.data.tagline);
+/** one review on a shelf: an entry's, or a season's (a show's reviews are per season) */
+export interface ShelfReview { entry: Entry; logId: string; season?: number; text: string; tagline?: string; spoiler: boolean; rating?: number; loved: boolean; date: Date; href: string }
+/** every review on a (loaded) shelf, newest first */
+export function shelfReviews(shelf: Entry[]): ShelfReview[] {
+  const out: ShelfReview[] = [];
+  for (const e of shelf) {
+    if (e.data.seasons?.length) {
+      for (const s of e.data.seasons) if (s.notes.trim() || s.tagline) {
+        out.push({ entry: e, logId: s.logId, season: s.n, text: s.notes, tagline: s.tagline, spoiler: s.spoiler, rating: s.rating, loved: false, date: s.finished ?? s.date, href: `${href(e)}#s${s.n}` });
+      }
+    } else if (reviewed(e)) {
+      out.push({ entry: e, logId: e.logId, text: e.body, tagline: e.data.tagline, spoiler: e.data.spoiler, rating: e.data.rating, loved: e.data.loved, date: e.data.finished ?? e.data.date, href: href(e) });
+    }
+  }
+  return out.sort((a, b) => b.date.getTime() - a.date.getTime());
+}
 
 /* ——— covers ——— */
 export function coverSrc(e: Entry): string | undefined {
@@ -373,19 +391,6 @@ export function collectionsFor(e: Entry, collections: Collection[]) {
     .map((t) => ({ t, i: t.data.items.findIndex((x) => x.slug === e.id) }))
     .filter((x) => x.i >= 0)
     .map(({ t, i }) => ({ id: t.id, owner: t.owner, title: t.data.title, pos: i + 1, of: t.data.items.length, items: t.data.items }));
-}
-
-/* ——— the line on a profile: the one pinned, or else the newest saved ——— */
-export interface ShownLine { id: string; text: string; by: string; source: string; href: string; pinned: boolean; mine: boolean }
-export function pickLine(shelf: Entry[], details: Pick<Details, 'pinned_line'> | null, ownerName: string): ShownLine | null {
-  const all = shelf.flatMap((e) => e.data.highlights.map((h) => ({ e, h })));
-  if (!all.length) return null;
-  const pinned = details?.pinned_line ? all.find((x) => x.h.id === details.pinned_line) : undefined;
-  const x = pinned ?? all[0];
-  return {
-    id: x.h.id, text: x.h.text, by: x.h.mine ? ownerName : x.e.data.creator, source: x.e.data.title,
-    href: href(x.e), pinned: !!pinned, mine: x.h.mine,
-  };
 }
 
 /** the first letter of a name, for an avatar without a photo */

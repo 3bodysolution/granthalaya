@@ -6,7 +6,7 @@ import Poster from '../../components/title/Poster.astro';
 import Where from '../../components/title/Where.astro';
 import Tabs from '../../components/title/Tabs.astro';
 import PeopleGrid from '../../components/title/PeopleGrid.astro';
-import Voices from '../../components/title/Voices.astro';
+import Reviews from '../../components/title/Reviews.astro';
 import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
 import { film, idFrom, filmHref, type FilmPage } from '../../lib/catalog/tmdb';
@@ -39,7 +39,7 @@ if (id) {
   }
 }
 if (!f) { Astro.response.status = 404; return Astro.rewrite('/404'); }
-const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
+const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, collections: [], mine: [] };
 const row = rows[0];
 const onTmdb = !!f.id;
 const hit = { kind: 'film', tmdbId: f.id || undefined, title: f.title, year: f.year, runtime: f.runtime, creator: f.directors[0]?.name, cover: f.poster, link: f.id ? `https://www.themoviedb.org/movie/${f.id}` : undefined };
@@ -56,7 +56,7 @@ const bits = f.id ? await pageBits(sb, 'film', String(f.id)) : null;
 const og = filmOg('film', f, bits?.line, bits?.creator ?? f.directors.map((p) => p.name).join(', '));
 const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${f.year})` : ''} on Granthalaya.`;
 ---
-<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} og={og} image={id && f.id ? `/og/film/${id}.png` : f.poster}>
+<Base title={`${f.title}${f.year ? ` (${f.year})` : ''}`} description={desc} og={og} line={row?.tagline || f.tagline ? { text: (row?.tagline || f.tagline)!, source: f.title } : undefined} image={id && f.id ? `/og/film/${id}.png` : f.poster}>
   <TitleLayout backdrop={f.backdrop}>
     <Poster slot="poster" src={f.poster} title={f.title} by={f.directors[0]?.name} kind="film" year={f.year} />
     <Fragment slot="side">
@@ -110,7 +110,7 @@ const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${
     </Fragment>
 
     <Fragment slot="below">
-      <Voices site={site} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the film' } : undefined} />
+      <Reviews site={site} rows={rows} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the film' } : undefined} />
       <p class="pad credit-line">Film data from TMDB. Streaming data from JustWatch.</p>
     </Fragment>
   </TitleLayout>

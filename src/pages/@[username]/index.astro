@@ -8,7 +8,8 @@ import SectionHead from '../../components/ui/SectionHead.astro';
 import StatusTag from '../../components/ui/StatusTag.astro';
 import SocialLink from '../../components/ui/SocialLink.astro';
 import { openShelf } from '../../lib/shelfpage';
-import { loadShelf, loadCollections, href, short, fullTitle, collectionHref, linesHref, pickLine, type Entry } from '../../lib/data';
+import { loadShelf, loadCollections, href, short, fullTitle, collectionHref, reviewsHref, shelfReviews, excerpt, type Entry } from '../../lib/data';
+import Stars from '../../components/ui/Stars.astro';
 import { statusLabel, socialLinks } from '../../lib/kinds';
 import { profileOg } from '../../lib/share';
 export const prerender = false;
@@ -23,12 +24,12 @@ const [shelf, collections] = visible ? await Promise.all([loadShelf(sb, profile)
 const name = profile.display_name || profile.username;
 const done = shelf.filter((e) => e.data.status === 'done');
 const year = new Date().getUTCFullYear();
-const lines = shelf.reduce((n, e) => n + e.data.highlights.length, 0);
+const reviews = shelfReviews(shelf);
 const base = `/@${profile.username}`;
 const nums = [
   [done.length, 'Finished', `${base}/library/?status=done`],
   [done.filter((e) => e.data.date.getUTCFullYear() === year).length, String(year), `${base}/stats/`],
-  [lines, 'Lines', linesHref(profile.username)],
+  [reviews.length, 'Reviews', reviewsHref(profile.username)],
   [collections.length, 'Collections', `${base}/collections/`],
 ] as const;
 
@@ -47,10 +48,8 @@ const og = visible && !profile.is_private ? profileOg(name, count('book'), count
 const links = socialLinks(details?.links);
 const dm = (d: Date) => `${d.getUTCDate()} ${d.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' }).slice(0, 3)}`;
 const since = new Date(profile.created_at).toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-const shown = visible ? pickLine(shelf, details, name) : null;
-const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
 ---
-<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} line={line} noindex={profile.is_private} og={og}
+<Base title={`${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} noindex={profile.is_private} og={og}
   image={profile.is_private ? undefined : `/og/u/${profile.username}.png`}>
   <div class="art banner bleed" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
 
@@ -155,13 +154,15 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
       </div>
 
       <aside class="flex flex-col gap-10">
-        {shown && (
+        {reviews.length > 0 && (
           <section class="flex flex-col gap-4">
-            <SectionHead title={shown.pinned ? 'Pinned line' : 'Latest line'} more="All" href={linesHref(profile.username)} />
-            <a href={shown.href} class="lotw">
-              <span class:list={['serif q', shown.mine && 'own']}>{shown.mine ? shown.text : `“${shown.text}”`}</span>
-              <span class="hint">{shown.mine ? `${isMe ? 'My' : 'Their'} line` : shown.by} | {shown.source}</span>
-            </a>
+            <SectionHead title="Recent reviews" more="All" href={reviewsHref(profile.username)} />
+            {reviews.slice(0, 3).map((r) => (
+              <a href={r.href} class="lotw">
+                <span class="hint rt">{r.entry.data.title}{r.season ? `, season ${r.season}` : ''}{r.rating != null && <span class="rst"><Stars rating={r.rating} /></span>}</span>
+                {r.spoiler && !isMe ? <span class="hint">Contains spoilers</span> : <span class="serif q">{r.tagline || excerpt({ body: r.text }, 120)}</span>}
+              </a>
+            ))}
           </section>
         )}
         <section class="flex flex-col gap-4">
@@ -212,10 +213,12 @@ const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : 
   .nt { font-size: 19px; line-height: 1.2; }
   .small { font-size: 13px; }
   .hintline { margin: 0; font-size: 14px; }
-  .lotw { display: flex; flex-direction: column; gap: 10px; }
-  .lotw .q { font-size: 17px; font-style: italic; line-height: 1.45; }
-  .lotw .q.own { font-style: normal; }
+  .lotw { display: flex; flex-direction: column; gap: 6px; }
+  .lotw .q { font-size: 17px; line-height: 1.45; }
   .lotw:hover .q { color: var(--ink); }
+  .lotw:hover .rt { color: var(--lat); }
+  .rt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-weight: 600; }
+  .rst { color: var(--haldi); font-size: 12px; }
   .diary { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
   .diary li { display: grid; grid-template-columns: 64px 1fr; gap: 8px; font-size: 14.5px; }
   .diary li .hint { grid-column: 2; margin-top: -8px; }

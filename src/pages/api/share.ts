@@ -45,7 +45,7 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     const [facts, by] = await Promise.all([cardFacts(sb, e), within(creditFor(e), 2000, d.creator)]);   // never waits for the AI
     // a title with no short address (an essay, or a film we only know by name) goes to its full page, or to the home page
     const link = abs(short ?? titlePageHref(row));
-    return json({ link, text: entryText({ kind: d.type, title: d.title, year: d.year, creator: by }, d.status, d.rating, facts.line, link) });
+    return json({ link, text: entryText({ kind: d.type, title: d.title, year: d.year, creator: by }, d.status, d.rating, (!d.spoiler && d.tagline) || facts.line, link) });
   }
 
   if (q('year')) {

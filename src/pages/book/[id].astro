@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import TitleLayout from '../../components/title/TitleLayout.astro';
 import Poster from '../../components/title/Poster.astro';
 import Tabs from '../../components/title/Tabs.astro';
-import Voices from '../../components/title/Voices.astro';
+import Reviews from '../../components/title/Reviews.astro';
 import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
 import { olBook, gbBook, bookKey, bookHref, type BookPage } from '../../lib/catalog/books';
@@ -49,7 +49,7 @@ if ('ol' in k) {
 if (!b) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const row = rows[0];
 const [site, saved] = await Promise.all([
-  sb ? onSite(sb, rows, me) : Promise.resolve({ done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] }),
+  sb ? onSite(sb, rows, me) : Promise.resolve({ done: 0, saved: 0, average: null, ratings: 0, collections: [], mine: [] }),
   sb && row ? savedDescription(sb, row.id) : Promise.resolve(null),
 ]);
 // a better description is looked for once, in the background, and only for books already in our catalogue
@@ -80,7 +80,7 @@ const og = bookOg(b, bits?.creator ?? b.authors.map((a) => a.name).join(', '), b
 const paras = description ? description.split(/\n{2,}/) : [];
 const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
 ---
-<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
+<Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} line={row?.tagline ? { text: row.tagline, source: b.title } : undefined} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
     <Poster slot="poster" src={b.cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
     <Fragment slot="side">
@@ -130,7 +130,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
     </Fragment>
 
     <Fragment slot="below">
-      <Voices site={site} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the book' } : undefined} />
+      <Reviews site={site} rows={rows} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the book' } : undefined} />
       {b.sourceLink && <p class="pad credit-line">Book data from {b.source}.</p>}
     </Fragment>
   </TitleLayout>

@@ -6,7 +6,7 @@ import Poster from '../../components/title/Poster.astro';
 import Where from '../../components/title/Where.astro';
 import Tabs from '../../components/title/Tabs.astro';
 import PeopleGrid from '../../components/title/PeopleGrid.astro';
-import Voices from '../../components/title/Voices.astro';
+import Reviews from '../../components/title/Reviews.astro';
 import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
 import StatusTag from '../../components/ui/StatusTag.astro';
@@ -31,7 +31,7 @@ try { [t, rows] = await Promise.all([show(id), sb ? rowsForShow(sb, id) : Promis
 catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // TMDB failing is not "not found"
 if (!t) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${id}-${slug(t.title)}` && slug(t.title)) return Astro.redirect(showHref(id, t.title) + Astro.url.search, 301);
-const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
+const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, collections: [], mine: [] };
 const rowFor = (n: number) => rows.find((r) => r.season === n);
 const mineFor = (n: number) => site.mine.find((m) => m.season === n);   // your newest visit to that season
 // the log panel: the whole show (saved as "want to watch"), then each season
@@ -65,7 +65,7 @@ const bits = await pageBits(sb, 'tv', String(id));
 const og = filmOg('tv', t, bits?.line, bits?.creator ?? t.creators.map((p) => p.name).join(', '));
 const facts = rows.find((r) => (r.trivia ?? []).length);
 ---
-<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} og={og} image={`/og/tv/${id}.png`}>
+<Base title={`${t.title}${t.year ? ` (${t.year})` : ''}`} line={showRow?.tagline || t.tagline ? { text: (showRow?.tagline || t.tagline)!, source: t.title } : undefined} description={t.overview ? t.overview.slice(0, 180) : `${t.title} on Granthalaya.`} og={og} image={`/og/tv/${id}.png`}>
   <TitleLayout backdrop={t.backdrop}>
     <Poster slot="poster" src={t.poster} title={t.title} by={t.creators[0]?.name} kind="tv" year={t.year} />
     <Fragment slot="side"><Where where={t.where} title={t.title} /></Fragment>
@@ -137,7 +137,7 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
           </div>
         </section>
       )}
-      <Voices site={site} facts={facts ? { list: facts.trivia, source: facts.trivia_source, label: 'Behind the show' } : undefined} />
+      <Reviews site={site} rows={rows} facts={facts ? { list: facts.trivia, source: facts.trivia_source, label: 'Behind the show' } : undefined} />
       <p class="pad credit-line">TV data from TMDB. Streaming data from JustWatch.</p>
     </Fragment>
   </TitleLayout>

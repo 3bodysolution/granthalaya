@@ -17,12 +17,12 @@ let start: Record<string, any> = { mode: 'new', kind: ['book', 'film', 'tv', 'es
 const logId = params.get('log');
 const titleId = params.get('title');
 if (logId) {
-  const { data: l } = await sb.from('logs').select('*, title:titles(*), highlights(body, where_at, note, mine, position)').eq('id', logId).eq('user_id', me.id).maybeSingle<any>();
+  const { data: l } = await sb.from('logs').select('*, title:titles(*)').eq('id', logId).eq('user_id', me.id).maybeSingle<any>();
   if (!l) return Astro.redirect('/add/');
   start = {
     mode: 'edit', id: l.id, kind: l.title.kind, title: l.title, status: l.status, rating: l.rating == null ? null : Number(l.rating), loved: l.loved,
     started: l.started_on, finished: l.finished_on, again: l.again, notes: l.notes, where: l.where_seen, onlyMe: l.only_me,
-    lines: [...(l.highlights ?? [])].sort((a: any, b: any) => a.position - b.position).map((h: any) => ({ text: h.body, where: h.where_at, note: h.note, mine: h.mine })),
+    tagline: l.tagline ?? '', spoiler: l.spoiler === true,
   };
 } else if (titleId && /^[0-9a-f-]{36}$/i.test(titleId)) {
   const { data: t } = await sb.from('titles').select('*').eq('id', titleId).maybeSingle<any>();
@@ -103,9 +103,14 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
           </div>
         </div>
 
+        <label class="stack not-essay" style="gap: 8px">
+          <span class="lbl">Tagline</span>
+          <input name="tagline" class="field serif" maxlength="140" placeholder="Optional. Your review in one line" />
+        </label>
         <label class="stack" style="gap: 8px">
-          <span class="lbl" id="noteslbl">A few lines to remember</span>
-          <textarea name="notes" class="field serif" rows="3" maxlength="10000" placeholder="Optional. What stayed with you?"></textarea>
+          <span class="lbl" id="noteslbl">Review</span>
+          <textarea name="notes" class="field serif" rows="4" maxlength="10000" placeholder="Optional. What did you think?"></textarea>
+          <span class="hint not-essay">Reviews show on the title’s page for everyone. An “Only me” entry, or a private account, keeps it to you.</span>
         </label>
 
         <div class="opts">
@@ -113,18 +118,20 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
             <span class="stack" style="gap: 2px"><b>Again</b><span class="hint" id="againhint">A re-read or re-watch. Your first time stays as its own entry.</span></span>
             <input type="checkbox" class="onoff" name="again" />
           </label>
+          <label class="opt not-essay">
+            <span class="stack" style="gap: 2px"><b>Contains spoilers</b><span class="hint">Your review stays hidden until someone taps to read it.</span></span>
+            <input type="checkbox" class="onoff" name="spoiler" />
+          </label>
           <label class="opt">
             <span class="stack" style="gap: 2px"><b>Only me</b><span class="hint">Hide this one entry from your profile.</span></span>
             <input type="checkbox" class="onoff" name="onlyMe" />
           </label>
         </div>
 
-        <details class="more-box" id="morebox">
-          <summary>+ A line you underlined, where you watched it</summary>
+        <details class="more-box only-filmish" id="morebox">
+          <summary>+ Where you watched it</summary>
           <div class="stack" style="gap: 14px; padding-top: 14px">
-            <div id="lines" class="stack" style="gap: 14px"></div>
-            <button type="button" class="linkbtn sm" id="addline">+ Another line</button>
-            <label class="stack only-filmish" style="gap: 6px"><span class="lbl">Where</span><input name="where" class="field" maxlength="80" placeholder="at home, at the cinema, film club…" /></label>
+            <label class="stack" style="gap: 6px"><span class="lbl">Where</span><input name="where" class="field" maxlength="80" placeholder="at home, at the cinema, film club…" /></label>
           </div>
         </details>
 
@@ -222,7 +229,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
   #add .opt b { font-size: 15px; font-weight: 600; }
   #add .more-box summary { cursor: pointer; color: var(--lat); font-size: 14px; font-weight: 600; list-style: none; }
   #add .more-box summary::-webkit-details-marker { display: none; }
-  #add .line { padding: 14px; border: 1px solid var(--line); border-radius: 14px; display: flex; flex-direction: column; gap: 10px; }
   #add .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
   #add .check input { accent-color: var(--lat); }
   #add[data-kind="book"] .only-film, #add[data-kind="book"] .only-tv, #add[data-kind="book"] .only-essay, #add[data-kind="book"] .only-filmish,
@@ -283,7 +289,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       if (manual) $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[k]} | by hand`;
       root.querySelectorAll<HTMLElement>('[data-kind]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.kind === k)));
       f('creator').placeholder = k === 'book' ? 'Author' : k === 'film' ? 'Director' : k === 'tv' ? 'Created by' : 'Writer';
-      $('noteslbl').textContent = k === 'essay' ? 'Why you saved it' : 'A few lines to remember';
+      $('noteslbl').textContent = k === 'essay' ? 'Why you saved it' : 'Review';
       $('againhint').textContent = k === 'book' || k === 'essay' ? 'A re-read. Your first time stays as its own entry.' : 'A re-watch. Your first time stays as its own entry.';
       drawStatuses();
     };
@@ -308,15 +314,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         b.classList.toggle('half', rating === n - 0.5);
       });
       $('rl').textContent = rating ? `${rating} out of 5. Tap again for a half.` : 'Tap a star. Tap again for a half.';
-    };
-    const addLine = (l: any = {}) => {
-      const div = document.createElement('div');
-      div.className = 'line';
-      div.innerHTML = `<textarea class="field serif" rows="2" maxlength="2000" placeholder="The line, as it was written" data-l="text">${esc(l.text ?? '')}</textarea>
-        <input class="field sm" maxlength="80" placeholder="Where: a chapter, a page, a scene (optional)" data-l="where" value="${esc(l.where ?? '')}" />
-        <input class="field sm" maxlength="1000" placeholder="Your note about it (optional)" data-l="note" value="${esc(l.note ?? '')}" />
-        <label class="check"><input type="checkbox" data-l="mine" ${l.mine ? 'checked' : ''} /> This line is mine, not a quote</label>`;
-      $('lines').appendChild(div);
     };
 
     // the chosen title, shown above the form
@@ -420,7 +417,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
     $('find').addEventListener('submit', (ev) => { ev.preventDefault(); clearTimeout(timer); search(); });
     $('manual').addEventListener('click', () => { pick = null; titleId = null; toForm({ title: ($('q') as HTMLInputElement).value.trim() }, true); });
     $('change').addEventListener('click', () => { if (start.mode === 'edit') return; at('find'); ($('q') as HTMLInputElement).focus(); });
-    $('startover').addEventListener('click', () => { if (start.mode === 'edit') { history.back(); return; } form.reset(); $('lines').innerHTML = ''; addLine(); rating = 0; paintStars(); at('find'); });
+    $('startover').addEventListener('click', () => { if (start.mode === 'edit') { history.back(); return; } form.reset(); rating = 0; paintStars(); at('find'); });
     $('statuses').addEventListener('click', (ev) => { const b = (ev.target as Element).closest<HTMLElement>('[data-st]'); if (b) setStatus(b.dataset.st!); });
     root.querySelectorAll<HTMLButtonElement>('#stars button').forEach((b) => b.addEventListener('click', () => {
       const n = +b.dataset.n!;
@@ -429,7 +426,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
     }));
     $('loved').addEventListener('click', () => { const v = $('loved').getAttribute('aria-pressed') !== 'true'; $('loved').setAttribute('aria-pressed', String(v)); });
     root.querySelectorAll<HTMLButtonElement>('[data-day]').forEach((b) => b.addEventListener('click', () => { const d = new Date(); d.setDate(d.getDate() - +b.dataset.day!); f('finished').value = iso(d); }));
-    $('addline').addEventListener('click', () => addLine());
     $('another').addEventListener('click', () => { location.href = '/add/'; });
     $('remove')?.addEventListener('click', async () => {
       if (!confirmRemove()) return;
@@ -447,16 +443,11 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
     form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
       const err = $('saveerr'); err.hidden = true;
-      const lines = [...$('lines').querySelectorAll<HTMLElement>('.line')].map((el) => ({
-        text: (el.querySelector('[data-l=text]') as HTMLTextAreaElement).value.trim(),
-        where: (el.querySelector('[data-l=where]') as HTMLInputElement).value.trim(),
-        note: (el.querySelector('[data-l=note]') as HTMLInputElement).value.trim(),
-        mine: (el.querySelector('[data-l=mine]') as HTMLInputElement).checked,
-      })).filter((l) => l.text);
       const data: any = {
         status, rating: rating || null, loved: $('loved').getAttribute('aria-pressed') === 'true',
         started: f('started').value || null, finished: f('finished').value || null,
-        again: f('again').checked, onlyMe: f('onlyMe').checked, notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value, where: f('where').value, lines,
+        again: f('again').checked, onlyMe: f('onlyMe').checked, notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value, where: f('where').value,
+        tagline: kind === 'essay' ? '' : f('tagline').value, spoiler: kind !== 'essay' && f('spoiler').checked,
       };
       if (start.mode === 'edit') { data.id = start.id; data.full = true; }
       else if (titleId) data.title = titleId;
@@ -482,7 +473,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
 
     // starting point
     setKind(kind);
-    addLine();
     if (start.mode === 'edit' || start.mode === 'title') {
       titleId = start.title.id;
       toForm({ ...start.title, from: 'you' });
@@ -495,9 +485,8 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         f('again').checked = !!start.again; f('onlyMe').checked = !!start.onlyMe;
         (form.elements.namedItem('notes') as HTMLTextAreaElement).value = start.notes ?? '';
         f('where').value = start.where ?? '';
-        $('lines').innerHTML = '';
-        (start.lines?.length ? start.lines : [{}]).forEach(addLine);
-        if (start.lines?.length || start.where) ($('morebox') as HTMLDetailsElement).open = true;
+        f('tagline').value = start.tagline ?? ''; f('spoiler').checked = !!start.spoiler;
+        if (start.where) ($('morebox') as HTMLDetailsElement).open = true;
         ($('savebtn')).textContent = 'Save changes';
       } else if (start.again) {
         f('again').checked = true;

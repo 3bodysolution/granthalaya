@@ -17,11 +17,13 @@ import Plus from '@tabler/icons/outline/plus.svg';
 import Lock from '@tabler/icons/outline/lock.svg';
 import Mark from '../../../components/ui/Mark.astro';
 import InCollections from '../../../components/InCollections.astro';
+import ReviewSocial from '../../../components/ReviewSocial.astro';
+import { reviewExtras } from '../../../lib/reviews';
 import { openShelf } from '../../../lib/shelfpage';
 import { md } from '../../../lib/md';
 import {
   loadShelf, loadCollections, loadVisits, href, palette, coverSrc, stars, starsLabel, long, timesWord,
-  minutes, duration, kind, collectionsFor, excerpt, fullTitle, collectionHref, linesHref, pickLine, type Entry,
+  minutes, duration, kind, collectionsFor, excerpt, fullTitle, collectionHref, reviewed, type Entry,
 } from '../../../lib/data';
 import { STATUSES, statusLabel, type Status } from '../../../lib/kinds';
 import { titlePageHref } from '../../../lib/catalog/onsite';
@@ -38,7 +40,7 @@ export const prerender = false;
 const slug = String(Astro.params.slug ?? '');
 const o = await openShelf(Astro, `/library/${slug}/`);
 if (o.out) return o.out;
-const { profile, details, isMe, visible } = o.shelf;
+const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
 const me = Astro.locals.me;
@@ -87,8 +89,9 @@ const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : unde
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
 // directors and creators link to their pages (a short wait at most: plain names are fine without them)
 const people = d.type === 'film' || d.type === 'tv' ? await within(peopleFor(entry), 2500, []) : [];
-const og = entryOg(name, { kind: d.type, title: d.title, year: d.year, creator: d.creator }, d.status, d.rating, entry.body, !entry.body.trim() && !d.private && !profile.is_private ? (await cardFacts(sb, entry)).line : undefined);
-const desc = excerpt(entry, 150) || `${d.title} by ${d.creator}`;
+// the card's line: your review's tagline, else the title's own line (TMDB's tagline or one written by the AI)
+const og = entryOg(name, { kind: d.type, title: d.title, year: d.year, creator: d.creator }, d.status, d.rating, d.spoiler ? '' : entry.body, (!d.spoiler && d.tagline) || (!entry.body.trim() && !d.private && !profile.is_private ? (await cardFacts(sb, entry)).line : undefined));
+const desc = (d.spoiler ? '' : d.tagline || excerpt(entry, 150)) || `${d.title} by ${d.creator}`;   // a review with spoilers stays out of link previews
 const notes = md(entry.body);
 const sLabel = statusLabel(d.type, d.status);
 
@@ -118,7 +121,7 @@ if (isShow) {
       n: x.n, name: x.name, year: x.year, episodes: x.episodes,
       src: r ? { title: r.id } : { hit: { kind: 'tv', tmdbId: d.tmdbId, season: x.n, title: d.title, year: x.year ?? d.year, episodes: x.episodes, cover: x.poster ?? d.cover, creator: d.creator } },
       mine: m && {
-        logId: m.logId, status: m.status, rating: m.rating, notes: m.notes, times: m.times, private: m.private, bare: m.rating == null && !m.notes && m.times === 1,
+        logId: m.logId, status: m.status, rating: m.rating, notes: m.notes, tagline: m.tagline, spoiler: m.spoiler, times: m.times, private: m.private, bare: m.rating == null && !m.notes && !m.tagline && m.times === 1,
         day: dayOf(shown), when: `${m.status === 'done' ? 'Watched' : m.status === 'want' ? 'Added' : 'Started'} ${long(shown!)}`,
       },
     };
@@ -153,9 +156,12 @@ const shareData = JSON.stringify({
   ...(isMe ? { stories: { entry: { user: profile.username, slug: entry.id } } }
     : aboutKind ? { ref: `title=${aboutKind}:${aboutSeg}`, card: `/story/${aboutKind}/${aboutSeg}.png`, wide: false } : {}),
 });
-const shown = pickLine(all, details, name);
-const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;
-const pinnedId = shown?.pinned ? shown.id : null;
+// the review: its likes and comments (none on an "Only me" entry, which no one else can see)
+const hasReview = reviewed(entry) && !isShow;
+const social = hasReview && !d.private ? (await reviewExtras(sb, new Map([[entry.logId, profile.id]]), me)).get(entry.logId) : undefined;
+const hideSpoiler = d.spoiler && !isMe;
+// the shepherd in the footer says the title's own line
+const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
 ---
 <Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private} og={d.private || profile.is_private ? undefined : og}
   image={d.private || profile.is_private ? undefined : `/og/e/${profile.username}/${slug}.png`}>
@@ -208,10 +214,22 @@ const pinnedId = shown?.pinned ? shown.id : null;
             </div>
           )}
           {d.private && <span class="priv"><Lock width="15" height="15" /> Only you can see this entry</span>}
-          {notes && (
-            <div class="mynotes rise d5">
-              <p class="eyebrow">{isMe ? 'My notes' : `${name}’s notes`}</p>
-              <div class="note" set:html={notes} />
+          {hasReview && (
+            <div class="mynotes rise d5" id="review">
+              <p class="eyebrow">{isMe ? 'My review' : `${name}’s review`}{d.spoiler && <span class="spl"> | Contains spoilers</span>}</p>
+              {hideSpoiler ? (
+                <details class="spoil">
+                  <summary class="gchip">Show the review</summary>
+                  {d.tagline && <p class="tagl">{d.tagline}</p>}
+                  {notes && <div class="note" set:html={notes} />}
+                </details>
+              ) : (
+                <>
+                  {d.tagline && <p class="tagl">{d.tagline}</p>}
+                  {notes && <div class="note" set:html={notes} />}
+                </>
+              )}
+              {social && <ReviewSocial logId={entry.logId} owner={{ id: profile.id, username: profile.username }} likes={social.likes} liked={social.liked} comments={social.comments} report={false} />}
             </div>
           )}
           {isShow && seasonRows.length > 0 && (
@@ -226,7 +244,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <p class="sub">Every time</p>
               <ol class="visits">
                 {visits.map((v) => (
-                  <li><span class="num">{long(v.data.date)}</span><span>{statusLabel(v.data.type, v.data.status)}{v.data.again ? ' | again' : ''}{stars(v) ? ` | ${stars(v)}` : ''}</span><span class="muted">{excerpt(v, 80)}</span></li>
+                  <li><span class="num">{long(v.data.date)}</span><span>{statusLabel(v.data.type, v.data.status)}{v.data.again ? ' | again' : ''}{stars(v) ? ` | ${stars(v)}` : ''}</span><span class="muted">{v.data.spoiler && !isMe ? '' : v.data.tagline || excerpt(v, 80)}</span></li>
                 ))}
               </ol>
             </div>
@@ -257,7 +275,7 @@ const pinnedId = shown?.pinned ? shown.id : null;
                 })}
               </div>
               <a class="lrow2" href={`/add/?log=${entry.logId}`}><Calendar /><span>{dateRow}</span></a>
-              <a class="lrow2" href={`/add/?log=${entry.logId}`}><Notes /><span>Edit rating, notes and lines</span></a>
+              <a class="lrow2" href={`/add/?log=${entry.logId}`}><Notes /><span>Edit rating and review</span></a>
               {done && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
               <button class="lrow2" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}><Stack /><span>Add to a collection</span></button>
               <button class="lrow2" type="button" data-share={shareData}><Share /><span>Share</span></button>
@@ -284,32 +302,13 @@ const pinnedId = shown?.pinned ? shown.id : null;
           ) : (
             <>
               <p class="lp-head">Keep your own shelf</p>
-              <p class="lp-note">Log what you {verb}, keep the lines that stayed with you.</p>
+              <p class="lp-note">Log what you {verb} and say what you thought of it.</p>
               <a class="lrow2" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname)}`} data-astro-prefetch="false"><Plus /><span>Sign in to add this</span></a>
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
             </>
           )}
         </aside>
       </section>
-
-      {d.highlights.length > 0 && (
-        <section class="pad block rise d6">
-          <div class="rule"><h2 class="eyebrow">{d.highlights.every((h) => h.mine) ? (isMe ? 'Lines I wrote' : 'Their lines') : (isMe ? 'Lines I underlined' : 'Lines they underlined')}</h2><a href={linesHref(profile.username)} class="more">All lines →</a></div>
-          <div class="hl">
-            {d.highlights.map((h) => (
-              <article class="card lift hlc">
-                {isMe && (
-                  <button type="button" class:list={['pinbtn', pinnedId === h.id && 'on']} data-pin={JSON.stringify({ id: h.id, on: pinnedId !== h.id })} aria-pressed={pinnedId === h.id ? 'true' : 'false'}
-                    title={pinnedId === h.id ? 'Pinned to your profile' : 'Pin to your profile'}><Mark size={14} /><span>{pinnedId === h.id ? 'Pinned' : 'Pin to profile'}</span></button>
-                )}
-                <p class:list={['serif q', h.mine && 'own']}>{h.mine ? h.text : `“${h.text}”`}</p>
-                {h.note && <p class="soft-note"><span class="sub">My note</span>{h.note}</p>}
-                {h.where && <span class="num muted" style="margin-top: auto; font-size: 12px">{h.where}</span>}
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
 
       {d.trivia.length > 0 && (
         <section class="pad block rise d6">
@@ -419,17 +418,14 @@ const pinnedId = shown?.pinned ? shown.id : null;
   .chips { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 
   .block { padding-top: 64px; display: flex; flex-direction: column; gap: 24px; }
-  .hl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-  .hlc { position: relative; padding: 26px; display: flex; flex-direction: column; gap: 16px; }
-  .pinbtn { align-self: flex-start; display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; margin: -8px 0 -4px -6px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; opacity: 0; transition: opacity .2s ease, background-color .2s ease, color .2s ease; }
-  .hlc:hover .pinbtn, .pinbtn:focus-visible, .pinbtn.on { opacity: 1; }
-  .pinbtn:hover { background: var(--soft); color: var(--ink); }
-  .pinbtn.on { color: var(--lat); }
-  @media (hover: none) { .pinbtn { opacity: 1; } }
   .save[aria-busy], .save:disabled { opacity: 1; cursor: default; }
   .save.is-saved { color: var(--lat); }
-  .q { margin: 0; font-size: 20px; line-height: 1.5; font-style: italic; }
-  .q.own { font-style: normal; }
+  .tagl { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 26px; line-height: 1.3; font-weight: 600; max-width: 660px; }
+  .spl { color: var(--muted); }
+  .spoil { display: flex; flex-direction: column; gap: 14px; }
+  .spoil summary { list-style: none; width: fit-content; min-height: 40px; }
+  .spoil summary::-webkit-details-marker { display: none; }
+  .spoil[open] summary { display: none; }
   .rel { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 28px; }
 
   .essay-page { width: min(720px, calc(100% - 2 * var(--gut))); margin: 0 auto; padding-top: 64px; display: flex; flex-direction: column; gap: 22px; }
@@ -442,7 +438,6 @@ const pinnedId = shown?.pinned ? shown.id : null;
 
   @media (max-width: 1100px) {
     .rel { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-    .hl { grid-template-columns: 1fr 1fr; }
   }
   @media (max-width: 780px) {
     .banner { height: 200px; }
@@ -452,13 +447,12 @@ const pinnedId = shown?.pinned ? shown.id : null;
     .about { width: 100%; }
     .main { padding-top: 0; }
     .stats { gap: 18px 32px; }
-    .hl { grid-template-columns: 1fr; }
     .rel { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
     .note :global(p:first-child) { font-size: 20px; }
     .essay-page { padding-top: 36px; }
   }
   .mynotes { display: flex; flex-direction: column; gap: 10px; }
-  /* small plain headings; the uppercase eyebrow is kept for the four main sections (notes, lines, behind the film, sits well next to) */
+  /* small plain headings; the uppercase eyebrow is kept for the main sections (review, behind the film, sits well next to) */
   .sub { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
   .mynotes .eyebrow { color: var(--lat); margin: 0; }
   .seasons-h { margin: 6px 0 0; color: var(--lat); }

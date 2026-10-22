@@ -15,13 +15,17 @@ export const POST: APIRoute = async (ctx) => {
     return error ? oops('Couldn’t change that.', 500) : json({ ok: true });
   }
   if (!b?.id) return oops('Which report?');
-  const { data: r } = await db.from('reports').select('id, target_user, target_log').eq('id', b.id).maybeSingle();
+  const { data: r } = await db.from('reports').select('id, target_user, target_log, target_comment').eq('id', b.id).maybeSingle();
   if (!r) return oops('Couldn’t find that report.', 404);
   if (b.action === 'dismiss') await db.from('reports').update({ status: 'dismissed' }).eq('id', r.id);
   else if (b.action === 'done') await db.from('reports').update({ status: 'actioned' }).eq('id', r.id);
   else if (b.action === 'hide_entry' && r.target_log) {
     await db.from('logs').update({ only_me: true }).eq('id', r.target_log);
     await db.from('reports').update({ status: 'actioned' }).eq('id', r.id);
+  } else if (b.action === 'delete_comment' && r.target_comment) {
+    // the report goes with the comment (on delete cascade)
+    const { error } = await db.from('review_comments').delete().eq('id', r.target_comment);
+    if (error) return oops('Couldn’t delete that comment.', 500);
   } else if (b.action === 'unfeature' && r.target_user) {
     await db.from('profiles').update({ featured: false }).eq('id', r.target_user);
     await db.from('reports').update({ status: 'actioned' }).eq('id', r.id);

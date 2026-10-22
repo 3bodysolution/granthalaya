@@ -3,6 +3,7 @@
 // The address may carry ?v=<when the entry last changed>: with it the browser keeps the card for good (a changed rating or status
 // is a new address); without it the current card is sent and kept for a minute only.
 // ?w=540 gives the half-size preview; ?bg=<painting> is for tests (otherwise the title's saved pick, else by genre).
+// The line on it: the entry's review tagline (unless the review has spoilers), else the title's saved line.
 // It never waits for the AI: with no saved line it draws without one, and the AI step runs in the background for next time.
 import type { APIRoute } from 'astro';
 import { loadProfile, loadVisits } from '../../../../lib/data';
@@ -51,6 +52,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
 
   const d = entry.data;
   const facts = await timed('line', 'saved line and painting', cardFacts(sb, entry));
+  const line = (!d.spoiler && d.tagline) || facts.line;
   // with no saved painting yet: by genre, but only for a moment (the catalogue may be slow)
   const [bg, credit] = await Promise.all([
     isBackground(asked) ? asked : facts.bg ?? within(timed('genre', 'painting by genre', backgroundOf(entry)), 2500, d.type === 'book' ? 'reading' as const : 'cinema' as const),
@@ -60,7 +62,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   try {
     pic = await drawStory({
     kind: d.type, title: d.title, year: d.year, creator: credit || undefined, season: d.season,
-    rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line: facts.line,
+    rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line,
     owner: profile.username, cover: d.cover, color: d.color, bg,
     }, width);
   } catch (e) {
@@ -69,7 +71,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   }
   mark('size', pic.body.length / 1024, 'KB');
   // a card drawn before its line is saved is not kept: the next one will have the line
-  const complete = !!facts.line || d.type === 'essay';
+  const complete = !!line || d.type === 'essay';
   // the header tells the share window to ask again in a few seconds: the line is being written
   if (!complete) return picture(pic, 'private, no-store', { 'X-Card': 'pending' });
   if (rendered.size > 40) rendered.delete(rendered.keys().next().value!);

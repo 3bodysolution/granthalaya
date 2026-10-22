@@ -1,0 +1,103 @@
+---
+// Under a title: its facts, the reviews people on Granthalaya wrote (only those the visitor may see), and the collections it's in.
+// Reviews come Popular (likes, then newest) or Recent, 10 at a time; the choice and the count live in the address (?reviews=recent&rn=20).
+import Face from '../Face.astro';
+import Stars from '../ui/Stars.astro';
+import ReviewSocial from '../ReviewSocial.astro';
+import type { OnSite } from '../../lib/catalog/onsite';
+import { loadReviews, type ReviewSort } from '../../lib/reviews';
+import { long } from '../../lib/data';
+import { md } from '../../lib/md';
+interface Props { site: OnSite; rows: { id: string; slug: string; season: number | null }[]; facts?: { list: string[]; source?: string | null; label: string } }
+const { site, rows, facts } = Astro.props;
+const sb = Astro.locals.supabase;
+const me = Astro.locals.me;
+const sort: ReviewSort = Astro.url.searchParams.get('reviews') === 'recent' ? 'recent' : 'popular';
+const shown = Math.min(40, Math.max(10, Math.round(Number(Astro.url.searchParams.get('rn')) / 10) * 10 || 10));
+const { list, more } = sb ? await loadReviews(sb, rows, me, sort, shown) : { list: [], more: false };
+const at = (p: Record<string, string | null>) => {
+  const u = new URL(Astro.url);
+  for (const [k, v] of Object.entries(p)) if (v == null) u.searchParams.delete(k); else u.searchParams.set(k, v);
+  return `${u.pathname}${u.search}#reviews`;
+};
+---
+{facts && facts.list.length > 0 && (
+  <section class="pad block">
+    <div class="rule"><h2 class="eyebrow">{facts.label}</h2>{facts.source && <a href={facts.source} class="more" target="_blank" rel="noopener">From Wikipedia ↗</a>}</div>
+    <ol class="facts">{facts.list.map((t, i) => <li class="card"><span class="serif num fn">{String(i + 1).padStart(2, '0')}</span><p>{t}</p></li>)}</ol>
+  </section>
+)}
+{(list.length > 0 || sort === 'recent') && (
+  <section class="pad block" id="reviews">
+    <div class="rule">
+      <h2 class="eyebrow">Reviews</h2>
+      <nav class="rsort" aria-label="Order of reviews">
+        <a class:list={['gchip', sort === 'popular' && 'on']} href={at({ reviews: null, rn: null })} aria-current={sort === 'popular' ? 'true' : undefined} data-keep-place>Popular</a>
+        <a class:list={['gchip', sort === 'recent' && 'on']} href={at({ reviews: 'recent', rn: null })} aria-current={sort === 'recent' ? 'true' : undefined} data-keep-place>Recent</a>
+      </nav>
+    </div>
+    {list.length === 0 && <p class="muted">No reviews yet.</p>}
+    <div class="reviews">
+      {list.map((r) => (
+        <article class="card review" id={`r-${r.id}`}>
+          <header class="who">
+            <a href={`/@${r.username}/`} class="wl"><Face name={r.name} src={r.avatar} size={32} /><b>{r.name}</b></a>
+            {r.loved ? <span class="vst">♥</span> : r.rating != null && <span class="vst"><Stars rating={r.rating} /></span>}
+            <span class="muted vs">{r.season != null && <>Season {r.season} | </>}{long(new Date(`${r.date}T00:00:00Z`))}{r.again && ' | again'}</span>
+          </header>
+          {r.spoiler ? (
+            <details class="spoil">
+              <summary class="gchip">Contains spoilers. Show the review</summary>
+              {r.tagline && <p class="tl">{r.tagline}</p>}
+              {r.notes && <div class="vt" set:html={md(r.notes)} />}
+            </details>
+          ) : (
+            <>
+              {r.tagline && <p class="tl">{r.tagline}</p>}
+              {r.notes && <div class="vt" set:html={md(r.notes)} />}
+            </>
+          )}
+          <a href={r.href} class="open muted">Open the entry</a>
+          <ReviewSocial logId={r.id} owner={{ id: r.userId, username: r.username }} likes={r.likes} liked={r.liked} comments={r.comments} />
+        </article>
+      ))}
+    </div>
+    {more && <a class="btn morebtn" href={at({ rn: String(shown + 10) })} data-keep-place>More reviews</a>}
+  </section>
+)}
+{site.collections.length > 0 && (
+  <section class="pad block">
+    <div class="rule"><h2 class="eyebrow">In collections</h2></div>
+    <div class="cols">{site.collections.map((c) => <a href={c.href} class="chip">{c.name} <span class="muted"> | {c.by}</span></a>)}</div>
+  </section>
+)}
+<style>
+  .block { padding-top: 56px; display: flex; flex-direction: column; gap: 22px; }
+  .facts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+  .facts li { padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .fn { font-size: 28px; line-height: 1; color: var(--haldi); }
+  .facts p { margin: 0; font-size: 15.5px; line-height: 1.6; }
+  .rsort { display: flex; gap: 8px; }
+  .reviews { display: flex; flex-direction: column; gap: 18px; max-width: 760px; }
+  .review { padding: 20px 22px 10px; display: flex; flex-direction: column; gap: 12px; }
+  .who { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-size: 14px; }
+  .wl { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); }
+  .wl:hover { color: var(--lat); }
+  .vst { color: var(--haldi); letter-spacing: .04em; }
+  .vs { font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .tl { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 20px; line-height: 1.35; font-weight: 600; }
+  .vt { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
+  .vt :global(p) { margin: 0 0 .8em; }
+  .vt :global(p:last-child) { margin: 0; }
+  .spoil { display: flex; flex-direction: column; gap: 12px; }
+  .spoil summary { list-style: none; width: fit-content; min-height: 40px; }
+  .spoil summary::-webkit-details-marker { display: none; }
+  .spoil[open] summary { display: none; }
+  .spoil[open] { gap: 12px; }
+  .open { font-size: 13px; width: fit-content; }
+  .open:hover { color: var(--lat); }
+  .morebtn { align-self: flex-start; }
+  .cols { display: flex; flex-wrap: wrap; gap: 10px; }
+  @media (max-width: 1100px) { .facts { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 780px) { .facts { grid-template-columns: 1fr; } .block { padding-top: 40px; } .review { padding: 18px 16px 8px; } }
+</style>

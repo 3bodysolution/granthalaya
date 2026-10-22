@@ -12,15 +12,15 @@ function oldAddress(path: string): string | null {
   let m = path.match(/^\/library\/([a-z0-9-]+)\/?$/);
   if (m) return `${f}/library/${m[1]}/`;
   if (/^\/stats\/?$/.test(path)) return `${f}/stats/`;
-  if (/^\/notes\/?$/.test(path)) return `${f}/lines/`;
+  if (/^\/notes\/?$/.test(path)) return `${f}/reviews/`;
   if (/^\/threads\/?$/.test(path)) return `${f}/collections/`;
   m = path.match(/^\/threads\/([a-z0-9-]+)\/?$/);
   if (m) return `${f}/collections/${m[1]}/`;
-  // Threads became Collections, and Notes became Lines
+  // Threads became Collections; Notes became Lines, and Lines became Reviews
   m = path.match(/^\/@([^/]+)\/threads(\/.*)?$/);
   if (m) return `/@${m[1]}/collections${m[2] ?? '/'}`;
-  m = path.match(/^\/@([^/]+)\/notes\/?$/);
-  if (m) return `/@${m[1]}/lines/`;
+  m = path.match(/^\/@([^/]+)\/(?:notes|lines)\/?$/);
+  if (m) return `/@${m[1]}/reviews/`;
   if (path === '/rss.xml') return `${f}/rss.xml`;
   return null;
 }

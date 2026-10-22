@@ -173,7 +173,9 @@ create table public.logs (
   finished_on date,
   logged_on date not null default ((now() at time zone 'utc')::date),
   again boolean not null default false,
-  notes text not null default '' check (char_length(notes) <= 10000),
+  notes text not null default '' check (char_length(notes) <= 10000),   -- the review
+  tagline text not null default '' check (char_length(tagline) <= 140), -- the review's one line
+  spoiler boolean not null default false,
   where_seen text not null default '' check (char_length(where_seen) <= 80),
   only_me boolean not null default false,
   created_at timestamptz not null default now(),
@@ -224,6 +226,51 @@ create table public.highlights (
 create index highlights_log on public.highlights (log_id, position);
 create index highlights_user on public.highlights (user_id, created_at desc);
 
+-- Likes and comments on a review (a log with notes or a tagline). Comments can't be edited, only deleted.
+create table public.review_likes (
+  log_id uuid not null references public.logs (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (log_id, user_id)
+);
+create index review_likes_user on public.review_likes (user_id, created_at desc);
+create table public.review_comments (
+  id uuid primary key default gen_random_uuid(),
+  log_id uuid not null references public.logs (id) on delete cascade,
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  body text not null check (char_length(body) between 1 and 1000),
+  created_at timestamptz not null default now()
+);
+create index review_comments_log on public.review_comments (log_id, created_at);
+create index review_comments_user on public.review_comments (user_id, created_at desc);
+
+-- gentle limits, like check_log (the website's own server is exempt)
+create or replace function public.check_review_comment()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare n int; d int;
+begin
+  if coalesce(auth.role(), '') <> 'service_role' then
+    select count(*) filter (where created_at > now() - interval '10 minutes'), count(*) into n, d
+      from public.review_comments where user_id = new.user_id and created_at > now() - interval '1 day';
+    if n >= 10 or d >= 100 then raise exception 'That''s a lot of comments at once. Try again in a little while.' using errcode = 'P0001', hint = 'rate'; end if;
+  end if;
+  return new;
+end $$;
+create trigger review_comments_check before insert on public.review_comments
+  for each row execute function public.check_review_comment();
+create or replace function public.check_review_like()
+returns trigger language plpgsql security definer set search_path = '' as $$
+declare n int;
+begin
+  if coalesce(auth.role(), '') <> 'service_role' then
+    select count(*) into n from public.review_likes where user_id = new.user_id and created_at > now() - interval '1 hour';
+    if n >= 300 then raise exception 'That''s a lot of likes at once. Try again in a little while.' using errcode = 'P0001', hint = 'rate'; end if;
+  end if;
+  return new;
+end $$;
+create trigger review_likes_check before insert on public.review_likes
+  for each row execute function public.check_review_like();
+
 -- The line pinned to a profile. If the line is deleted, the profile simply shows your latest line instead.
 alter table public.profile_details add constraint profile_details_pinned_line_fkey
   foreign key (pinned_line) references public.highlights (id) on delete set null;
@@ -264,11 +311,12 @@ create table public.reports (
   reporter uuid references public.profiles (id) on delete set null,
   target_user uuid references public.profiles (id) on delete cascade,
   target_log uuid references public.logs (id) on delete cascade,
+  target_comment uuid references public.review_comments (id) on delete cascade,
   reason text not null check (reason in ('spam', 'abuse', 'sexual', 'hate', 'illegal', 'other')),
   details text not null default '' check (char_length(details) <= 1000),
   status text not null default 'open' check (status in ('open', 'dismissed', 'actioned')),
   created_at timestamptz not null default now(),
-  check (target_user is not null or target_log is not null)
+  constraint reports_target check (target_user is not null or target_log is not null or target_comment is not null)
 );
 create index reports_open on public.reports (status, created_at desc);
 
@@ -311,6 +359,8 @@ alter table public.titles enable row level security;
 alter table public.book_suggestions enable row level security;
 alter table public.logs enable row level security;
 alter table public.highlights enable row level security;
+alter table public.review_likes enable row level security;
+alter table public.review_comments enable row level security;
 alter table public.threads enable row level security;
 alter table public.thread_items enable row level security;
 alter table public.blocks enable row level security;
@@ -352,6 +402,38 @@ create policy "highlights: edit your own" on public.highlights for update to aut
   with check (user_id = auth.uid() and exists (select 1 from public.logs l where l.id = log_id and l.user_id = auth.uid()));
 create policy "highlights: delete your own" on public.highlights for delete to authenticated using (user_id = auth.uid());
 
+-- likes and comments: seen only when their review is (the subquery runs under the visitor's own rules), never across a block
+create policy "review likes: seen with their review" on public.review_likes for select to anon, authenticated
+  using (exists (select 1 from public.logs l where l.id = log_id) and not public.blocked_with(user_id));
+create policy "review likes: like a review you can see" on public.review_likes for insert to authenticated
+  with check (user_id = auth.uid() and exists (select 1 from public.logs l where l.id = log_id and (l.notes <> '' or l.tagline <> '')));
+create policy "review likes: take back your own" on public.review_likes for delete to authenticated using (user_id = auth.uid());
+create policy "review comments: seen with their review" on public.review_comments for select to anon, authenticated
+  using (exists (select 1 from public.logs l where l.id = log_id) and not public.blocked_with(user_id));
+create policy "review comments: comment on a review you can see" on public.review_comments for insert to authenticated
+  with check (user_id = auth.uid() and exists (select 1 from public.logs l where l.id = log_id and (l.notes <> '' or l.tagline <> '')));
+create policy "review comments: delete yours or on your review" on public.review_comments for delete to authenticated
+  using (user_id = auth.uid() or exists (select 1 from public.logs l where l.id = log_id and l.user_id = auth.uid()));
+
+-- a title's reviews (TV: all of a show's season ids), with likes, comments and whether you liked each.
+-- security invoker: every rule above applies to whoever asks.
+create or replace function public.title_reviews(title_ids uuid[], sort text default 'popular', lim int default 10, off int default 0)
+returns table (id uuid, user_id uuid, title_id uuid, status text, rating numeric, loved boolean, notes text, tagline text,
+  spoiler boolean, logged_on date, again boolean, created_at timestamptz, username text, display_name text, avatar_url text,
+  likes int, comments int, liked boolean)
+language sql stable security invoker set search_path = '' as $$
+  select l.id, l.user_id, l.title_id, l.status, l.rating, l.loved, l.notes, l.tagline, l.spoiler, l.logged_on, l.again, l.created_at,
+    p.username, p.display_name, p.avatar_url,
+    (select count(*)::int from public.review_likes k where k.log_id = l.id),
+    (select count(*)::int from public.review_comments c where c.log_id = l.id),
+    exists (select 1 from public.review_likes k where k.log_id = l.id and k.user_id = auth.uid())
+  from public.logs l join public.profiles p on p.id = l.user_id
+  where l.title_id = any (title_ids) and (l.notes <> '' or l.tagline <> '')
+  order by case when title_reviews.sort = 'popular' then (select count(*) from public.review_likes k where k.log_id = l.id) end desc nulls last,
+    l.logged_on desc, l.created_at desc
+  limit least(greatest(title_reviews.lim, 1), 50) offset greatest(title_reviews.off, 0);
+$$;
+
 create policy "threads: visible with the shelf" on public.threads for select to anon, authenticated
   using (public.can_see_shelf(user_id));
 create policy "threads: add your own" on public.threads for insert to authenticated with check (user_id = auth.uid());
@@ -386,11 +468,16 @@ grant insert, update on public.profile_details to authenticated;
 grant insert, update, delete on public.logs, public.highlights, public.threads, public.thread_items to authenticated;
 grant select, insert, delete on public.blocks to authenticated;
 grant select on public.reports to authenticated;
-grant insert (reporter, target_user, target_log, reason, details) on public.reports to authenticated;
+grant insert (reporter, target_user, target_log, target_comment, reason, details) on public.reports to authenticated;
+grant select on public.review_likes, public.review_comments to anon, authenticated;
+grant insert (log_id, user_id), delete on public.review_likes to authenticated;
+grant insert (log_id, user_id, body), delete on public.review_comments to authenticated;
 grant all on all tables in schema public to service_role;
 
 revoke all on function public.blocked_with(uuid), public.can_see_shelf(uuid) from public;
 grant execute on function public.blocked_with(uuid), public.can_see_shelf(uuid), public.username_reserved(text)
   to anon, authenticated, service_role;
+revoke all on function public.title_reviews(uuid[], text, int, int) from public;
+grant execute on function public.title_reviews(uuid[], text, int, int) to anon, authenticated, service_role;
 
 commit;

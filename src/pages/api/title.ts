@@ -1,5 +1,5 @@
 // Make sure a title is in the shared catalogue (adding it if needed) and say its id, so the Add page can
-// open it for a note or a line. Signed-in people only.
+// open it for a review. Signed-in people only.
 import type { APIRoute } from 'astro';
 import { json, oops, body, needMe, sameOrigin } from '../../lib/http';
 import { cleanHit, titleFor } from '../../lib/titles';

@@ -9,7 +9,7 @@ import { base, getJSON, slug as slugOf } from './fetch';
 import { plainOf, bareOf, LOG_COLS, type LogRow } from '../saved';
 import { showStatus } from '../data';
 
-export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string;
+export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string; tagline?: string | null;
   /** only loaded by rowBySlug */ source?: string | null; original_title?: string | null; language?: string | null; note?: string | null }
 
 /** `source` of a book made from a prize or classics list: it has no Open Library page, so never look for one */
@@ -27,7 +27,7 @@ export function titlePageHref(t: Pick<TitleRow, 'kind' | 'slug' | 'title' | 'tmd
   return null;
 }
 
-const COLS = 'id, kind, slug, title, season, tmdb_id, ol_key, link, trivia, trivia_source, cover_url, year, creator';
+const COLS = 'id, kind, slug, title, season, tmdb_id, ol_key, link, trivia, trivia_source, cover_url, year, creator, tagline';
 export async function rowsForFilm(sb: SupabaseClient, tmdbId: number) {
   const { data } = await sb.from('titles').select(COLS).eq('kind', 'film').eq('tmdb_id', tmdbId);
   return (data ?? []) as TitleRow[];
@@ -49,40 +49,25 @@ export async function rowBySlug(sb: SupabaseClient, kind: string, slug: string) 
   return (data as TitleRow) ?? null;
 }
 
-export interface Voice { username: string; name: string; avatar: string | null; rating: number | null; loved: boolean; status: string; notes: string; href: string; date: string; again: boolean }
 export interface OnSite {
   done: number; saved: number; average: number | null; ratings: number;
-  voices: Voice[];
   collections: { name: string; href: string; by: string; count: number }[];
   mine: { id: string; status: string; rating: number | null; titleId: string; slug: string; season: number | null; logged: string; again: boolean; plain: boolean; bare: boolean }[];
 }
-/** counts, people's notes and collections for one or more catalogue rows (a TV show has one per season) */
+/** counts, collections and your own logs for one or more catalogue rows (a TV show has one per season). Reviews: lib/reviews.ts */
 export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: string } | null): Promise<OnSite> {
-  const empty: OnSite = { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
+  const empty: OnSite = { done: 0, saved: 0, average: null, ratings: 0, collections: [], mine: [] };
   const ids = rows.map((r) => r.id);
   if (!ids.length) return empty;
   const byId = new Map(rows.map((r) => [r.id, r]));
-  const [done, saved, rated, notes, cols, mine] = await Promise.all([
+  const [done, saved, rated, cols, mine] = await Promise.all([
     sb.from('logs').select('id', { count: 'exact', head: true }).in('title_id', ids).eq('status', 'done'),
     sb.from('logs').select('id', { count: 'exact', head: true }).in('title_id', ids).eq('status', 'want'),
     sb.from('logs').select('rating').in('title_id', ids).not('rating', 'is', null).limit(1000),
-    sb.from('logs').select('id, title_id, status, rating, loved, notes, logged_on, again, user_id, profile:profiles(username, display_name, avatar_url)')
-      .in('title_id', ids).neq('notes', '').order('logged_on', { ascending: false }).limit(12),
     sb.from('thread_items').select('title_id, thread:threads(name, slug, user_id, thread_items(count), profile:profiles(username, display_name))').in('title_id', ids).limit(20),
     me ? sb.from('logs').select(`${LOG_COLS}, logged_on, again`).eq('user_id', me.id).in('title_id', ids).order('logged_on', { ascending: false }).order('created_at', { ascending: false }) : Promise.resolve({ data: [] as any[] }),
   ]);
   const rs = ((rated.data ?? []) as { rating: number }[]).map((r) => Number(r.rating));
-  const voices: Voice[] = ((notes.data ?? []) as any[]).filter((l) => l.profile && l.user_id !== me?.id).map((l) => {
-    const t = byId.get(l.title_id)!;
-    return {
-      username: l.profile.username, name: l.profile.display_name || l.profile.username, avatar: l.profile.avatar_url,
-      rating: l.rating == null ? null : Number(l.rating), loved: l.loved, status: l.status, notes: l.notes,
-      href: `/@${l.profile.username}/library/${t.slug}/`, date: l.logged_on, again: l.again,
-    };
-  });
-  // one voice per person, newest first
-  const seen = new Set<string>();
-  const oneEach = voices.filter((v) => (seen.has(v.username) ? false : (seen.add(v.username), true))).slice(0, 6);
   const colSeen = new Set<string>();
   const collections = ((cols.data ?? []) as any[]).map((c) => c.thread).filter((t) => t?.profile).map((t) => ({
     name: t.name, href: `/@${t.profile.username}/collections/${t.slug}/`, by: t.profile.display_name || t.profile.username, count: t.thread_items?.[0]?.count ?? 0,
@@ -92,7 +77,7 @@ export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: str
   return {
     done: done.count ?? 0, saved: saved.count ?? 0, ratings: rs.length,
     average: rs.length >= 2 ? Math.round((rs.reduce((a, b) => a + b, 0) / rs.length) * 10) / 10 : null,
-    voices: oneEach, collections,
+    collections,
     mine: mineRows.map((l) => ({ plain: plain.has(l.id), bare: bare.has(l.id), id: l.id, status: l.status, rating: l.rating == null ? null : Number(l.rating), titleId: l.title_id, slug: byId.get(l.title_id)?.slug ?? '', season: byId.get(l.title_id)?.season ?? null, logged: l.logged_on, again: l.again })),
   };
 }

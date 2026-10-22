@@ -137,6 +137,43 @@ else {
   w.error ? ok('a stranger cannot add to the catalogue') : fail('a stranger added a row to titles (delete slug check-site-test!)');
   const w2 = await db.from('book_suggestions').update({ hidden: true }).eq('language', 'zz');
   w2.error ? ok('a stranger cannot change book suggestions') : info('book_suggestions update by a stranger did not error (it matched no rows; check the grants if unsure)');
+
+  // reviews, likes and comments (supabase/changes/009)
+  const probe = await db.from('review_likes').select('log_id').limit(1);
+  if (probe.error) info(`reviews: not checked (${probe.error.message}); is 009 applied?`);
+  else {
+    // every like and comment a stranger can read must sit on a review a stranger can read (not "Only me", not a private account)
+    let leaks = 0;
+    for (const t of ['review_likes', 'review_comments']) {
+      const x = await rows(db.from(t).select('log_id, log:logs(id, only_me, owner:profiles!logs_user_id_fkey(is_private))').limit(1000));
+      const badRows = x.data.filter((l) => !l.log || l.log.only_me || l.log.owner?.is_private);
+      if (badRows.length) { leaks++; fail(`${t}: ${badRows.length} row(s) readable on a review a stranger can't see`); }
+      else ok(`${t}: ${x.data.length} readable, all on public reviews`);
+    }
+    // title_reviews over the whole catalogue: nothing "Only me", nothing from a private account
+    const ids = (await rows(db.from('titles').select('id').limit(2000))).data.map((t) => t.id);
+    const rv = await db.rpc('title_reviews', { title_ids: ids, sort: 'recent', lim: 50, off: 0 });
+    if (rv.error) fail(`title_reviews failed for a stranger: ${rv.error.message}`);
+    else {
+      const privIds = new Set(priv.data.map((p) => p.id));
+      const fromPriv = (rv.data ?? []).filter((r) => privIds.has(r.user_id));
+      const seen = rv.data.length ? (await rows(db.from('logs').select('id').in('id', rv.data.map((r) => r.id)))).data.length : 0;
+      if (fromPriv.length) fail(`title_reviews shows ${fromPriv.length} review(s) from private accounts`);
+      else if (seen !== rv.data.length) fail(`title_reviews shows ${rv.data.length - seen} review(s) a stranger can't read directly`);
+      else ok(`title_reviews: ${rv.data.length} review(s) shown to a stranger, none private or "Only me"`);
+    }
+    // nobody can like or comment as someone else (here: without signing in at all)
+    // a public review if there is one; otherwise made-up ids (a stranger must be refused before any row is looked at)
+    const someLog = (await rows(db.from('logs').select('id, user_id').neq('notes', '').limit(1))).data[0]
+      ?? { id: '00000000-0000-4000-8000-000000000001', user_id: priv.data[0]?.id ?? '00000000-0000-4000-8000-000000000002' };
+    {
+      const l = await db.from('review_likes').insert({ log_id: someLog.id, user_id: someLog.user_id });
+      l.error ? ok('a stranger cannot like a review as someone else') : (leaks++, fail('a stranger added a like (delete it from review_likes!)'));
+      const c = await db.from('review_comments').insert({ log_id: someLog.id, user_id: someLog.user_id, body: 'check-site test' });
+      c.error ? ok('a stranger cannot comment as someone else') : (leaks++, fail('a stranger added a comment (delete "check-site test" from review_comments!)'));
+    }
+    if (!leaks) info('Signed-in checks (liking as another account, blocked people) need a test account (not done).');
+  }
   info('Blocked users cannot be tested without signing in as one; this needs a test account (not done).');
 }
 

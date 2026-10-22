@@ -11,7 +11,7 @@ import { STATUSES, statusLabel, type Status } from '../lib/kinds';
 export interface SeasonRow {
   n: number; name?: string; year?: number; episodes?: number;
   src: Record<string, unknown>;   // how to log it: { title } once in the catalogue, else { hit }
-  mine?: { logId: string; status: Status; rating?: number; day: string; when: string; notes: string; bare: boolean; times: number; private: boolean };
+  mine?: { logId: string; status: Status; rating?: number; day: string; when: string; notes: string; tagline?: string; spoiler?: boolean; bare: boolean; times: number; private: boolean };
 }
 interface Props { seasons: SeasonRow[]; mode: 'panel' | 'owner' | 'view' }
 const { seasons, mode } = Astro.props;
@@ -59,15 +59,20 @@ const stars = (r?: number) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r
         {mode === 'owner' && m && (
           <form class="sl-edit" data-season-edit={m.logId}>
             <label class="sl-day"><span>{m.status === 'done' ? 'Watched on' : m.status === 'want' ? 'Added on' : 'Started on'}</span><input type="date" name="day" value={m.day} required /></label>
+            <label class="sl-review"><span>Tagline</span><input name="tagline" maxlength="140" value={m.tagline ?? ''} placeholder="Optional. Your review in one line" /></label>
             <label class="sl-review"><span>Review</span><textarea name="notes" rows="3" maxlength="10000" placeholder={`What did season ${s.n} leave you with?`}>{m.notes}</textarea></label>
             <div class="sl-actions">
               <button type="submit" class="btn">Save</button>
-              <a href={`/add/?log=${m.logId}`} class="sl-more">Lines and more</a>
+              <a href={`/add/?log=${m.logId}`} class="sl-more">Spoilers and more</a>
               {m.private && <span class="sl-meta">Only you can see this season</span>}
             </div>
           </form>
         )}
-        {mode === 'view' && m?.notes && <div class="sl-notes" set:html={md(m.notes)} />}
+        {mode === 'view' && (m?.notes || m?.tagline) && (m.spoiler ? (
+          <details class="sl-spoil"><summary class="gchip">Contains spoilers. Show the review</summary>{m.tagline && <p class="sl-tag">{m.tagline}</p>}{m.notes && <div class="sl-notes" set:html={md(m.notes)} />}</details>
+        ) : (
+          <>{m.tagline && <p class="sl-tag">{m.tagline}</p>}{m.notes && <div class="sl-notes" set:html={md(m.notes)} />}</>
+        ))}
       </li>
     );
   })}
@@ -103,6 +108,11 @@ const stars = (r?: number) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r
   .sl-more { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--lat); }
   .sl-line { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); }
   .sl-stars { color: var(--haldi); letter-spacing: .05em; }
+  .sl-tag { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.35; }
+  .sl-spoil { display: flex; flex-direction: column; gap: 10px; }
+  .sl-spoil summary { list-style: none; width: fit-content; min-height: 40px; }
+  .sl-spoil summary::-webkit-details-marker { display: none; }
+  .sl-spoil[open] summary { display: none; }
   .sl-notes { max-width: 660px; display: flex; flex-direction: column; gap: 10px; }
   .sl-notes :global(p) { margin: 0; font-size: 16px; line-height: 1.65; }
   .sl-edit { display: flex; flex-direction: column; gap: 10px; max-width: 660px; }

@@ -19,7 +19,7 @@ interface Props {
   active?: string;
   /** whose shelf this page belongs to (for the menu and search); defaults to yours */
   shelf?: string;
-  /** a line of the week for the shepherd in the footer */
+  /** the shepherd's line in the footer: a title's own line on its pages (else this week's line from site.ts) */
   line?: { text: string; by?: string; source?: string };
   /** keep this page out of search engines */
   noindex?: boolean;
@@ -265,11 +265,11 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       d.showModal();
       return new Promise((done) => d.addEventListener('close', () => done(d.returnValue === 'ok'), { once: true }));
     }
-    function reportBox(target: { user: string; log: string | null; who: string }): Promise<{ reason: string; details: string } | null> {
+    function reportBox(target: { user?: string; log?: string | null; comment?: string; who: string }): Promise<{ reason: string; details: string } | null> {
       const d = document.getElementById('report-box') as HTMLDialogElement;
       const f = d.querySelector('form') as HTMLFormElement;
       f.reset();
-      d.querySelector('#report-h')!.textContent = target.log ? 'Report this entry' : `Report @${target.who}`;
+      d.querySelector('#report-h')!.textContent = target.comment ? 'Report this comment' : target.log ? 'Report this review' : `Report @${target.who}`;
       d.returnValue = '';
       d.showModal();
       return new Promise((done) => d.addEventListener('close', () => {
@@ -372,7 +372,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         if (st.getAttribute('aria-pressed') === 'true') {
           // tapped again: the status comes off. An entry with nothing else on it goes at once; one with a rating or notes asks first
           const bare = st.dataset.bare === '1';
-          if (!bare && !(await ask('Take it off your shelf?', 'Your rating, notes and lines on it will go too.', 'Remove'))) return;
+          if (!bare && !(await ask('Take it off your shelf?', 'Your rating and review on it will go too, with any likes and comments.', 'Remove'))) return;
           const away = async () => {
             const r = await send('/api/log', 'DELETE', { id: v.id, onlyBare: bare });
             if (!r) return null;
@@ -412,20 +412,42 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         toast('Saved to your shelf', { mark: true }); // tapping the filled bookmark again takes it back
         return;
       }
-      const pin = el.closest<HTMLButtonElement>('[data-pin]');
-      if (pin) {
-        const v = JSON.parse(pin.dataset.pin!);
-        busy(pin, true);
-        const r = await send('/api/profile', 'POST', { section: 'pin', line: v.on ? v.id : null });
-        if (r) { toast(v.on ? 'Pinned to your profile' : 'Unpinned', { mark: v.on }); reload(); } else busy(pin, false);
+      // a review: like or unlike straight away, and put it back if the server says no
+      const like = el.closest<HTMLButtonElement>('[data-like]');
+      if (like) {
+        if (like.disabled) return;
+        const on = like.getAttribute('aria-pressed') !== 'true';
+        const count = like.querySelector<HTMLElement>('[data-count]');
+        const n = Number(count?.textContent || 0) + (on ? 1 : -1);
+        const show = (v: boolean, k: number) => {
+          like.setAttribute('aria-pressed', String(v));
+          like.setAttribute('aria-label', v ? 'Unlike this review' : 'Like this review');
+          if (count) count.textContent = k > 0 ? String(k) : '';
+          const word = like.querySelector('.rbl'); if (word) word.textContent = k === 1 ? 'like' : 'likes';
+        };
+        show(on, n);
+        like.disabled = true;
+        const r = await send('/api/review', 'POST', { action: 'like', id: like.dataset.like, on });
+        like.disabled = false;
+        if (r) show(on, r.likes); else show(!on, n + (on ? -1 : 1));
         return;
       }
+      const unc = el.closest<HTMLButtonElement>('[data-uncomment]');
+      if (unc) {
+        if (!(await ask('Delete this comment?', 'It can’t be brought back.', 'Delete'))) return;
+        busy(unc, true);
+        const box = unc.closest<HTMLElement>('[data-review]');
+        if (await send('/api/review', 'DELETE', { comment: unc.dataset.uncomment })) { toast('Comment deleted'); if (box) await refreshReview(box); } else busy(unc, false);
+        return;
+      }
+      // Popular, Recent and More under a title's reviews: the page stays where it is
+      if (el.closest('a[data-keep-place]')) { (window as any).__keepPlace = scrollY; setTimeout(() => { (window as any).__keepPlace = null; }, 15000); }
       const rep = el.closest<HTMLElement>('[data-report]');
       if (rep) {
         rep.closest('details')?.removeAttribute('open');
         const target = JSON.parse(rep.dataset.report!);
         const r = await reportBox(target);
-        if (r && await send('/api/report', 'POST', { user: target.user, log: target.log, ...r })) toast('Thanks. Your report was sent.');
+        if (r && await send('/api/report', 'POST', { user: target.user, log: target.log, comment: target.comment, ...r })) toast('Thanks. Your report was sent.');
         return;
       }
       const bl = el.closest<HTMLElement>('[data-block]');
@@ -445,6 +467,30 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const panel = pickS.closest('.logpanel')!;
       panel.querySelectorAll<HTMLElement>('[data-season-panel]').forEach((p) => (p.hidden = p.dataset.seasonPanel !== pickS.value));
     });
+    // likes and comments under one review (components/ReviewSocial.astro): fetched again quietly and swapped, comments left open
+    async function refreshReview(box: HTMLElement) {
+      try {
+        const r = await fetch(location.pathname + location.search, { headers: { Accept: 'text/html' }, cache: 'no-store' });
+        const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+        const next = doc.querySelector<HTMLElement>(`[data-review="${box.dataset.review}"]`);
+        if (!r.ok || !next) { reload(); return; }
+        next.querySelector('details.cmt')?.setAttribute('open', '');
+        box.replaceWith(document.importNode(next, true));
+      } catch { reload(); }
+    }
+    document.addEventListener('submit', async (ev) => {
+      const f = (ev.target as Element).closest<HTMLFormElement>('form[data-comment]');
+      if (!f) return;
+      ev.preventDefault();
+      const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      const text = (f.elements.namedItem('body') as HTMLTextAreaElement).value.trim();
+      if (!text) return;
+      busy(btn, true);
+      const r = await send('/api/review', 'POST', { action: 'comment', id: f.dataset.comment, body: text });
+      if (!r) { busy(btn, false); return; }
+      const box = f.closest<HTMLElement>('[data-review]');
+      if (box) await refreshReview(box); else reload();
+    });
     // a season's date and review, edited in place on a show's entry page (components/SeasonList.astro)
     document.addEventListener('submit', async (ev) => {
       const f = (ev.target as Element).closest<HTMLFormElement>('form[data-season-edit]');
@@ -452,7 +498,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       ev.preventDefault();
       const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
       busy(btn, true);
-      const r = await send('/api/log', 'PATCH', { id: f.dataset.seasonEdit, notes: (f.elements.namedItem('notes') as HTMLTextAreaElement).value, finished: (f.elements.namedItem('day') as HTMLInputElement).value });
+      const r = await send('/api/log', 'PATCH', { id: f.dataset.seasonEdit, notes: (f.elements.namedItem('notes') as HTMLTextAreaElement).value, tagline: (f.elements.namedItem('tagline') as HTMLInputElement | null)?.value ?? '', finished: (f.elements.namedItem('day') as HTMLInputElement).value });
       busy(btn, false);
       if (r) toast('Saved');
     });

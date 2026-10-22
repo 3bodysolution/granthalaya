@@ -1,0 +1,94 @@
+---
+// Under a review: Like with its count, the comments (each with Delete where allowed, and Report), a box to comment,
+// and Report for the review. Clicks are handled in Base.astro (data-like, data-comment, data-uncomment, data-report).
+import Face from './Face.astro';
+import Heart from '@tabler/icons/outline/heart.svg';
+import HeartFill from '@tabler/icons/filled/heart.svg';
+import Talk from '@tabler/icons/outline/message-circle.svg';
+import type { Comment } from '../lib/reviews';
+import { long } from '../lib/data';
+interface Props { logId: string; owner: { id: string; username: string }; likes: number; liked: boolean; comments: Comment[]; open?: boolean; report?: boolean }
+const { logId, owner, likes, liked, comments, open = false, report = true } = Astro.props;
+const me = Astro.locals.me;
+const mine = me?.id === owner.id;
+const signin = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
+---
+<div class="rsoc" data-review={logId}>
+  <div class="rbar">
+    {me ? (
+      <button type="button" class="rb like" aria-pressed={liked ? 'true' : 'false'} data-like={logId} aria-label={liked ? 'Unlike this review' : 'Like this review'}>
+        <Heart class="h-off" aria-hidden="true" /><HeartFill class="h-on" aria-hidden="true" /><span class="num" data-count>{likes || ''}</span><span class="rbl">{likes === 1 ? 'like' : 'likes'}</span>
+      </button>
+    ) : (
+      <a class="rb" href={signin} aria-label="Sign in to like this review"><Heart aria-hidden="true" /><span class="num">{likes || ''}</span><span class="rbl">{likes === 1 ? 'like' : 'likes'}</span></a>
+    )}
+    <details class="cmt" open={open || undefined}>
+      <summary class="rb"><Talk aria-hidden="true" /><span class="num">{comments.length || ''}</span><span class="rbl">{comments.length === 1 ? 'comment' : 'comments'}</span></summary>
+      <div class="cbox">
+        {comments.length > 0 && (
+          <ul class="clist">
+            {comments.map((c) => (
+              <li class="c">
+                <Face name={c.name} src={c.avatar} size={26} />
+                <div class="cb">
+                  <p class="ch"><a href={`/@${c.username}/`}>{c.name}</a><span class="muted"> | {long(new Date(c.date))}</span></p>
+                  <p class="ct">{c.body}</p>
+                  {me && (
+                    <p class="cact">
+                      {c.canDelete && <button type="button" class="lk" data-uncomment={c.id}>Delete</button>}
+                      {c.userId !== me.id && <button type="button" class="lk" data-report={JSON.stringify({ comment: c.id, who: c.username })}>Report</button>}
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        {me ? (
+          <form class="cform" data-comment={logId}>
+            <label class="sr-only" for={`c-${logId}`}>Your comment</label>
+            <textarea id={`c-${logId}`} name="body" rows="2" maxlength="1000" required placeholder="Add a comment"></textarea>
+            <button type="submit" class="btn sm">Post</button>
+          </form>
+        ) : (
+          <p class="muted small"><a class="accent" href={signin}>Sign in</a> to comment.</p>
+        )}
+      </div>
+    </details>
+    {me && !mine && report && <button type="button" class="rb rep" data-report={JSON.stringify({ user: owner.id, log: logId, who: owner.username })}>Report</button>}
+  </div>
+</div>
+<style>
+  .rsoc { display: flex; flex-direction: column; gap: 10px; }
+  .rbar { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 4px 6px; }
+  .rb { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; margin-left: -10px; border: 0; border-radius: 999px; background: none; color: var(--muted); font: inherit; font-size: 13.5px; cursor: pointer; list-style: none; transition: color .2s ease, background-color .2s ease, transform .2s ease; }
+  .rb::-webkit-details-marker { display: none; }
+  .rb + .rb, .cmt, .rep { margin-left: 0; }
+  .rb:hover { color: var(--ink); background: var(--soft, rgba(0, 0, 0, .04)); }
+  .rb:active { transform: scale(.97); }
+  .rb:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
+  .rb:disabled { opacity: .5; cursor: default; }
+  .rb :global(svg) { width: 17px; height: 17px; }
+  .like .h-on, .like[aria-pressed='true'] .h-off { display: none; }
+  .like[aria-pressed='true'] .h-on { display: inline; }
+  .like[aria-pressed='true'] { color: var(--lat); }
+  .rep { margin-left: auto; }
+  .cmt { flex: 1 1 auto; min-width: 0; }
+  .cmt[open] { flex-basis: 100%; order: 3; }
+  .cbox { display: flex; flex-direction: column; gap: 14px; padding: 10px 0 4px; }
+  .clist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+  .c { display: flex; gap: 10px; align-items: flex-start; }
+  .cb { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .cb p { margin: 0; }
+  .ch { font-size: 13px; }
+  .ch a { font-weight: 600; color: var(--ink); }
+  .ch a:hover { color: var(--lat); }
+  .ct { font-size: 15px; line-height: 1.5; white-space: pre-line; overflow-wrap: anywhere; }
+  .cact { display: flex; gap: 14px; }
+  .lk { border: 0; background: none; padding: 6px 0; min-height: 32px; font: inherit; font-size: 12.5px; color: var(--muted); cursor: pointer; transition: color .2s ease; }
+  .lk:hover { color: var(--ink); }
+  .lk:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
+  .cform { display: flex; gap: 10px; align-items: flex-end; }
+  .cform textarea { flex: 1; min-height: 44px; resize: vertical; }
+  .small { font-size: 13.5px; margin: 0; }
+</style>

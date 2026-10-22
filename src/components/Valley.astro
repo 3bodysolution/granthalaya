@@ -6,7 +6,9 @@
 import { site } from '../data/site';
 import overlay from '../data/valley.json';
 interface Props { line?: { text: string; by?: string; source?: string } }
-const line = Astro.props.line?.text ? Astro.props.line : site.line;
+// the page's own line (a title's), else this week's from the list in site.ts (the same all week, everywhere)
+const week = Math.floor(Date.now() / (7 * 24 * 3600 * 1000));
+const line = Astro.props.line?.text ? Astro.props.line : site.lines[week % site.lines.length];
 const said = `“${line.text}”` + (line.by || line.source ? ` (${[line.by, line.source].filter(Boolean).join(', ')})` : '');
 const layers = [0, 1, 2, 3];
 ---

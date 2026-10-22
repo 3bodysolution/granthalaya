@@ -98,11 +98,11 @@ const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKin
             {m ? (
               <>
                 <a class="lp-row" href={`/@${me.username}/library/${m.slug}/`}><Eye aria-hidden="true" /><span>Your entry | {statusLabel(kind, m.status as Status)}</span></a>
-                <a class="lp-row" href={`/add/?log=${m.id}`}><Notes aria-hidden="true" /><span>Notes, lines and dates</span></a>
+                <a class="lp-row" href={`/add/?log=${m.id}`}><Notes aria-hidden="true" /><span>Review and dates</span></a>
                 {m.status === 'done' && <a class="lp-row" href={`/add/?title=${m.titleId}&again=1`}><Repeat aria-hidden="true" /><span>{film ? 'Watch it again' : 'Read it again'}</span></a>}
               </>
             ) : (
-              <button class="lp-row" type="button" data-write={JSON.stringify(src)}><Notes aria-hidden="true" /><span>Log with a note or a line</span></button>
+              <button class="lp-row" type="button" data-write={JSON.stringify(src)}><Notes aria-hidden="true" /><span>Log with a review</span></button>
             )}
             <button class="lp-row" type="button" data-collect={JSON.stringify({ ...src, what })}><Stack aria-hidden="true" /><span>Add to a collection</span></button>
           </div>

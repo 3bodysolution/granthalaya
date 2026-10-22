@@ -1,4 +1,4 @@
-// Settings: profile, favourites, the pinned line, links, photo and privacy switches.
+// Settings: profile, favourites, links, photo and privacy switches.
 import type { APIRoute } from 'astro';
 import { json, oops, body, str, needMe, sameOrigin } from '../../lib/http';
 import { dbMessage } from '../../lib/supabase';
@@ -44,19 +44,6 @@ export const POST: APIRoute = async (ctx) => {
     const { error } = await sb.from('profile_details').upsert({ id: me.id, favourites });
     if (error) return oops(dbMessage(error));
     return json({ ok: true, favourites });
-  }
-
-  // pin one of your own lines to your profile (or unpin with line: null)
-  if (b.section === 'pin') {
-    let line: string | null = null;
-    if (typeof b.line === 'string') {
-      const { data } = await sb.from('highlights').select('id').eq('id', b.line).eq('user_id', me.id).maybeSingle();
-      if (!data) return oops('Couldn’t find that line.', 404);
-      line = data.id;
-    }
-    const { error } = await sb.from('profile_details').upsert({ id: me.id, pinned_line: line });
-    if (error) return oops(dbMessage(error));
-    return json({ ok: true });
   }
 
   if (b.section === 'links') {

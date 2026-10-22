@@ -49,6 +49,11 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       </aside>
 
       <div class="panels">
+        <!-- said once: notes became public reviews (dismissed in this browser) -->
+        <div class="notice reviews-note" id="reviewsnote" hidden>
+          <p><b>Notes are now reviews.</b> What you write about a film, show or book now shows on its page for everyone, and people can like it and comment. Entries marked Only me, and everything on a private account, never appear there.</p>
+          <button type="button" class="gchip" id="reviewsok">Got it</button>
+        </div>
         <!-- ——— Profile ——— -->
         <div class="panel" role="tabpanel" id="profile" aria-labelledby="tab-profile">
           <form class="sec" data-save="profile">
@@ -117,7 +122,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
         <div class="panel" role="tabpanel" id="privacy" aria-labelledby="tab-privacy" hidden>
           <div class="sec">
             <div class="head"><h2>Privacy</h2><p>Who can see your shelf.</p></div>
-            <label class="row"><span><b>Private account</b><span>Only you see your shelf, lines, collections and stats. Others see just your name and photo.</span></span><input type="checkbox" class="onoff" data-flag="is_private" checked={me.is_private} /></label>
+            <label class="row"><span><b>Private account</b><span>Only you see your shelf, reviews, collections and stats. Others see just your name and photo.</span></span><input type="checkbox" class="onoff" data-flag="is_private" checked={me.is_private} /></label>
             <label class="row"><span><b>Feature my shelf</b><span>Show your shelf to new visitors on the home page.</span></span><input type="checkbox" class="onoff" data-flag="featured" checked={me.featured} disabled={me.is_private} /></label>
             <p class="notice bad" id="flagerr" hidden></p>
           </div>
@@ -134,7 +139,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
           <div class="sec">
             <div class="head"><h2>Export</h2><p>Everything you’ve added, in files you keep.</p></div>
             <div class="row">
-              <span><b>Download your data</b><span>A zip of spreadsheets: your shelf, your lines, your collections and your profile. They open in Excel, Numbers or Google Sheets.</span></span>
+              <span><b>Download your data</b><span>A zip of spreadsheets: your shelf and reviews, the comments and likes you gave, your collections and your profile. They open in Excel, Numbers or Google Sheets.</span></span>
               <a class="btn sm" href="/api/export" download data-astro-reload>Download</a>
             </div>
           </div>
@@ -143,7 +148,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
         <!-- ——— Account ——— -->
         <div class="panel" role="tabpanel" id="account" aria-labelledby="tab-account" hidden>
           <div class="sec danger">
-            <div class="head"><h2>Delete account</h2><p>Removes your profile, shelf, notes, lines and collections for good. This can’t be undone. You might want to download your data first.</p></div>
+            <div class="head"><h2>Delete account</h2><p>Removes your profile, shelf, reviews, comments and collections for good. This can’t be undone. You might want to download your data first.</p></div>
             <label class="fld"><span class="lbl">Type your username to confirm</span><input class="field" id="confirmname" placeholder={me.username} autocapitalize="none" spellcheck="false" /></label>
             <p class="notice bad" id="delerr" hidden></p>
             <div><button type="button" class="btn delete" id="deleteme" disabled>Delete my account</button></div>
@@ -187,6 +192,9 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
   .sn[aria-selected="true"] { background: var(--soft); color: var(--ink); }
   .sn.view { margin-top: 12px; color: var(--lat); }
   .panels { min-width: 0; }
+  .reviews-note { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 24px; line-height: 1.55; }
+  .reviews-note[hidden] { display: none; }
+  .reviews-note p { margin: 0; }
   .panel { display: flex; flex-direction: column; gap: 24px; }
   .panel:not([hidden]) { animation: fadein .2s ease; }
   @keyframes fadein { from { opacity: 0; transform: translateY(4px); } }
@@ -265,6 +273,10 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
     const root = document.querySelector<HTMLElement>('.panels');
     if (!root || root.dataset.ready) return;
     root.dataset.ready = '1';
+
+    const note = document.getElementById('reviewsnote')!;
+    try { note.hidden = localStorage.getItem('reviewsNoteSeen') === '1'; } catch (e) { note.hidden = false; }
+    document.getElementById('reviewsok')!.addEventListener('click', () => { note.hidden = true; try { localStorage.setItem('reviewsNoteSeen', '1'); } catch (e) { /* storage */ } });
 
     // ——— tabs, kept in the address (#privacy) so links and the back button work ———
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
