@@ -7,6 +7,7 @@ import { bookHref } from './books';
 import { adminClient, env } from '../supabase';
 import { base, getJSON, slug as slugOf } from './fetch';
 import { plainOf, bareOf, LOG_COLS, type LogRow } from '../saved';
+import { showStatus } from '../data';
 
 export interface TitleRow { id: string; kind: string; slug: string; title: string; season: number | null; tmdb_id: number | null; ol_key: string | null; link: string | null; trivia: string[]; trivia_source: string | null; cover_url: string | null; year: number | null; creator: string;
   /** only loaded by rowBySlug */ source?: string | null; original_title?: string | null; language?: string | null; note?: string | null }
@@ -97,7 +98,7 @@ export async function onSite(sb: SupabaseClient, rows: TitleRow[], me: { id: str
 }
 
 /** what the visitor has on their shelf for one title: its newest status, the log, and whether it's only a save (see lib/saved.ts) */
-export interface Mark { status: string; id: string; plain: boolean }
+export interface Mark { status: string; id: string; plain: boolean; date?: string }
 
 /** your newest log for each of these titles, in one lookup: { title id → Mark } */
 async function shelfMarks(sb: SupabaseClient, me: { id: string }, titleIds: string[]): Promise<Map<string, Mark>> {
@@ -106,7 +107,7 @@ async function shelfMarks(sb: SupabaseClient, me: { id: string }, titleIds: stri
   const { data } = await sb.from('logs').select(`${LOG_COLS}, logged_on`).eq('user_id', me.id).in('title_id', titleIds).order('logged_on', { ascending: true });
   const logs = (data ?? []) as (LogRow & { logged_on: string })[];
   const plain = await plainOf(sb, logs);
-  for (const l of logs) out.set(l.title_id, { status: l.status, id: l.id, plain: plain.has(l.id) }); // the newest wins
+  for (const l of logs) out.set(l.title_id, { status: l.status, id: l.id, plain: plain.has(l.id), date: l.logged_on }); // the newest wins
   return out;
 }
 
@@ -118,12 +119,24 @@ export async function myMarks(sb: SupabaseClient, me: { id: string } | null, key
   const ol = [...new Set(keys.filter((k) => k.ol).map((k) => k.ol!))];
   const ors = [tmdb.length && `tmdb_id.in.(${tmdb.join(',')})`, ol.length && `ol_key.in.(${ol.map((k) => `"${k}"`).join(',')})`].filter(Boolean).join(',');
   if (!ors) return out;
-  const { data: titles } = await sb.from('titles').select('id, kind, tmdb_id, ol_key').or(ors);
+  const { data: titles } = await sb.from('titles').select('id, kind, tmdb_id, ol_key, season, seasons').or(ors);
   const byId = new Map((titles ?? []).map((t: any) => [t.id, t]));
   const marks = await shelfMarks(sb, me, [...byId.keys()]);
+  const shows = new Map<number, { total: number | null; whole?: Mark; seasons: { n: number; m: Mark }[] }>();
   for (const [id, m] of marks) {
     const t = byId.get(id)!;
-    out.set(t.kind === 'book' ? `book:${t.ol_key}` : `${t.kind}:${t.tmdb_id}`, m);
+    if (t.kind !== 'tv') { out.set(t.kind === 'book' ? `book:${t.ol_key}` : `${t.kind}:${t.tmdb_id}`, m); continue; }
+    const s = shows.get(t.tmdb_id) ?? { total: null, seasons: [] };
+    if (t.season == null) s.whole = m; else s.seasons.push({ n: t.season, m });
+    shows.set(t.tmdb_id, s);
+  }
+  // a show's mark: worked out from its seasons (see showStatus), else its whole-show save
+  for (const t of byId.values()) if (t.kind === 'tv' && t.season == null && shows.has(t.tmdb_id)) shows.get(t.tmdb_id)!.total = t.seasons;
+  for (const [tmdb, s] of shows) {
+    if (!s.seasons.length) { if (s.whole) out.set(`tv:${tmdb}`, s.whole); continue; }
+    const newest = [...s.seasons].sort((a, b) => (b.m.date ?? '').localeCompare(a.m.date ?? ''))[0];
+    const status = showStatus(s.seasons.map((x) => ({ n: x.n, status: x.m.status as any, date: new Date(x.m.date ?? 0) })), s.total);
+    out.set(`tv:${tmdb}`, { status, id: newest.m.id, plain: false, date: newest.m.date });
   }
   return out;
 }

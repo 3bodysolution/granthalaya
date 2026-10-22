@@ -18,14 +18,18 @@ export const GET: APIRoute = async ({ locals }) => {
   const sb = locals.supabase;
   const [{ data: details }, { data: logs }, { data: cols }] = await Promise.all([
     sb.from('profile_details').select('bio, links, favourites, pinned_line').eq('id', me.id).maybeSingle(),
-    sb.from('logs').select('id, status, rating, loved, started_on, finished_on, logged_on, again, notes, where_seen, only_me, title:titles(id, kind, title, creator, year, season, link), highlights(id, body, where_at, note, mine, position)').eq('user_id', me.id).order('logged_on', { ascending: false }),
+    sb.from('logs').select('id, status, rating, loved, started_on, finished_on, logged_on, again, notes, where_seen, only_me, title:titles(id, kind, title, creator, year, season, link, show_id), highlights(id, body, where_at, note, mine, position)').eq('user_id', me.id).order('logged_on', { ascending: false }),
     sb.from('threads').select('slug, name, intro, position, thread_items(position, why, title:titles(title, kind, creator, year))').eq('user_id', me.id).order('position'),
   ]);
   const shelf = (logs ?? []) as any[];
+  // TV: the show each season belongs to, and shows chosen as favourites
+  const showIds = [...new Set([...shelf.map((l) => l.title?.show_id), ...((details?.favourites ?? []) as string[])].filter(Boolean))];
+  const { data: shows } = showIds.length ? await sb.from('titles').select('id, title').in('id', showIds) : { data: [] };
+  const showName = new Map<string, string>(((shows ?? []) as any[]).map((t) => [t.id, t.title]));
 
   const shelfCsv = csv(
-    ['Kind', 'Title', 'Season', 'By', 'Year', 'Status', 'Rating', 'Loved', 'Added', 'Started', 'Finished', 'Again', 'Where', 'Only me', 'Notes', 'Link'],
-    shelf.map((l) => [l.title?.kind, l.title?.title, l.title?.season ?? '', l.title?.creator, l.title?.year ?? '', l.status, l.rating ?? '', yes(l.loved),
+    ['Kind', 'Title', 'Show', 'Season', 'By', 'Year', 'Status', 'Rating', 'Loved', 'Added', 'Started', 'Finished', 'Again', 'Where', 'Only me', 'Notes', 'Link'],
+    shelf.map((l) => [l.title?.kind, l.title?.title, showName.get(l.title?.show_id) ?? '', l.title?.season ?? '', l.title?.creator, l.title?.year ?? '', l.status, l.rating ?? '', yes(l.loved),
       l.logged_on, l.started_on ?? '', l.finished_on ?? '', yes(l.again), l.where_seen, yes(l.only_me), l.notes, l.title?.link ?? '']),
   );
   const linesCsv = csv(
@@ -40,7 +44,7 @@ export const GET: APIRoute = async ({ locals }) => {
       c.name, c.intro, i.position + 1, i.title?.title, i.title?.kind, i.title?.creator, i.title?.year ?? '', i.why,
     ])),
   );
-  const titleName = new Map<string, string>(shelf.map((l) => [l.title?.id, l.title?.title]));
+  const titleName = new Map<string, string>([...showName, ...shelf.map((l) => [l.title?.id, l.title?.title] as [string, string])]);
   const links = (details?.links ?? {}) as Record<string, string>;
   const profileCsv = csv(['Field', 'Value'], [
     ['Username', me.username], ['Name', me.display_name], ['About', details?.bio ?? ''], ['Photo', me.avatar_url ?? ''],

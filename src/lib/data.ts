@@ -18,6 +18,7 @@ export interface Title {
   episodes: number | null; runtime: number | null; pages: number | null; words: number | null; cover_url: string | null;
   link: string | null; source: string | null; tmdb_id: number | null; ol_key: string | null; trivia: string[];
   trivia_source: string | null; color: string | null; language: string | null;
+  show_id?: string | null; seasons?: number | null;   // TV: a season's show row; a show row's number of seasons
 }
 interface HighlightRow { id: string; body: string; where_at: string; note: string; mine: boolean; position: number }
 interface LogRow {
@@ -32,6 +33,7 @@ export interface Entry {
   id: string;        // the title's address name, e.g. "paterson"
   logId: string;
   titleId: string;
+  showId?: string;   // a TV season: its show's catalogue row
   owner: string;     // the shelf's username
   body: string;      // your notes
   data: {
@@ -41,7 +43,14 @@ export interface Entry {
     again: boolean; times: number; color?: string; cover?: string; private: boolean;
     trivia: string[]; triviaSource?: string; tmdbId?: number; olKey?: string; language?: string;
     highlights: { id: string; text: string; where?: string; note?: string; mine: boolean }[];
+    /** a TV show folded from its season logs (see loadShelf): each season's newest visit, "Seasons 1–2 of 3", the average of rated seasons */
+    seasons?: SeasonOnShelf[]; progress?: string; average?: number; total?: number;
   };
+}
+/** one season of a show on a shelf: its newest visit */
+export interface SeasonOnShelf {
+  n: number; logId: string; titleId: string; slug: string; status: Status; date: Date; started?: Date; finished?: Date;
+  rating?: number; times: number; notes: string; private: boolean;
 }
 /** A collection: a short, ordered list of titles with a line about each. Stored in the `threads` tables. */
 export interface Collection {
@@ -58,7 +67,7 @@ const opt = <T,>(v: T | null | undefined) => (v === null || v === undefined || v
 function toEntry(r: LogRow, owner: string): Entry {
   const t = r.title;
   return {
-    id: t.slug, logId: r.id, titleId: t.id, owner, body: r.notes ?? '',
+    id: t.slug, logId: r.id, titleId: t.id, showId: t.show_id ?? undefined, owner, body: r.notes ?? '',
     data: {
       title: t.title, type: t.kind, creator: t.creator, year: opt(t.year), season: opt(t.season), episodes: opt(t.episodes),
       date: day(r.logged_on)!, started: day(r.started_on), finished: day(r.finished_on), status: r.status,
@@ -98,8 +107,9 @@ export async function loadProfile(sb: SupabaseClient, username: string, known?: 
   return { profile, details: await loadDetails(sb, profile.id) };
 }
 
-/** everything on a shelf that the visitor is allowed to see, newest first */
-export async function loadShelf(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<Entry[]> {
+/** everything on a shelf that the visitor is allowed to see, newest first. A TV show's season logs are folded into one
+ *  entry for the show (`byShow`, the default); Diary, Stats and RSS pass `{ byShow: false }` and keep each season's visits. */
+export async function loadShelf(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>, { byShow = true } = {}): Promise<Entry[]> {
   const { data, error } = await sb.from('logs').select(LOG_SELECT).eq('user_id', profile.id)
     .order('logged_on', { ascending: false }).order('created_at', { ascending: false }).range(0, 4999);
   if (error) throw new Error(error.message);
@@ -107,16 +117,113 @@ export async function loadShelf(sb: SupabaseClient, profile: Pick<Profile, 'id' 
   const visits = new Map<string, number>();
   for (const e of list) visits.set(e.titleId, (visits.get(e.titleId) ?? 0) + 1);
   for (const e of list) e.data.times = visits.get(e.titleId)!;
-  return list;
+  return byShow ? foldShows(sb, list) : list;
 }
 
-/** the visits to one title on one shelf (newest first), or [] */
+/** a show's own row: kind TV with no season */
+const isShowRow = (e: Entry) => e.data.type === 'tv' && e.data.season === undefined;
+
+/** season logs (and a whole-show "want") become one entry per show, where the newest of them stood in the list */
+async function foldShows(sb: SupabaseClient, list: Entry[]): Promise<Entry[]> {
+  const key = (e: Entry) => (e.data.type !== 'tv' ? undefined : isShowRow(e) ? e.titleId : e.showId);
+  const ids = [...new Set(list.map(key).filter(Boolean) as string[])];
+  if (!ids.length) return list;
+  const { data } = await sb.from('titles').select('*').in('id', ids);
+  const shows = new Map(((data ?? []) as Title[]).map((t) => [t.id, t]));
+  const groups = new Map<string, Entry[]>();
+  for (const e of list) { const k = key(e); if (k && shows.has(k)) groups.set(k, [...(groups.get(k) ?? []), e]); }
+  const out: Entry[] = [];
+  for (const e of list) {
+    const k = key(e);
+    const g = k ? groups.get(k) : undefined;
+    if (!g) out.push(e);
+    else if (g[0] === e) out.push(foldShow(shows.get(k!)!, g));
+  }
+  return out;
+}
+
+// 1, 2, 3, 5 → "1–3, 5"
+function ranges(ns: number[]) {
+  const parts: string[] = [];
+  for (let i = 0; i < ns.length; i++) {
+    let j = i;
+    while (j + 1 < ns.length && ns[j + 1] === ns[j] + 1) j++;
+    parts.push(j > i ? `${ns[i]}–${ns[j]}` : `${ns[i]}`);
+    i = j;
+  }
+  return parts.join(', ');
+}
+/** "Season 2 of 3", "Seasons 1–2 of 3", "Seasons 1, 3" (saved-only seasons don't count) */
+export function progressOf(seasons: Pick<SeasonOnShelf, 'n' | 'status'>[], total?: number | null) {
+  const ns = seasons.filter((s) => s.status !== 'want').map((s) => s.n).sort((a, b) => a - b);
+  if (!ns.length) return undefined;
+  return `Season${ns.length > 1 ? 's' : ''} ${ranges(ns)}${total ? ` of ${total}` : ''}`;
+}
+/** a show's status from its seasons: Watched once every released season is watched (`total`, from TMDB), else Watching.
+ *  A show whose newest season is paused or dropped says so, and one with only saved seasons is "want to watch". */
+export function showStatus(seasons: Pick<SeasonOnShelf, 'n' | 'status' | 'date'>[], total?: number | null): Status {
+  const done = (n: number) => seasons.some((s) => s.n === n && s.status === 'done');
+  const all = total ? Array.from({ length: total }, (_, i) => i + 1).every(done) : seasons.every((s) => s.status === 'done');
+  if (all) return 'done';
+  if (seasons.some((s) => s.status === 'watching')) return 'watching';
+  const newest = [...seasons].sort((a, b) => b.date.getTime() - a.date.getTime())[0].status;
+  if (newest === 'paused' || newest === 'dropped') return newest;
+  return seasons.every((s) => s.status === 'want') ? 'want' : 'watching';
+}
+
+/** one show entry from its logs (newest first): the show's title, poster and facts, and a line per season */
+export function foldShow(show: Title, logs: Entry[]): Entry {
+  const seasonLogs = logs.filter((e) => e.data.season !== undefined);
+  const want = logs.find(isShowRow);
+  const e = toEntry({
+    id: want?.logId ?? seasonLogs[0].logId, user_id: '', title_id: show.id, status: 'want', rating: null, loved: false, started_on: null, finished_on: null,
+    logged_on: '2000-01-01', again: false, notes: '', where_seen: '', only_me: false, created_at: '', title: show, highlights: [],
+  }, logs[0].owner);
+  const d = e.data;
+  d.total = show.seasons ?? undefined;
+  if (!seasonLogs.length) {
+    // only saved as a whole show
+    Object.assign(d, { status: want!.data.status, date: want!.data.date, private: want!.data.private, highlights: want!.data.highlights, seasons: [] });
+    e.body = want!.body;
+    return e;
+  }
+  const byN = new Map<number, Entry[]>();
+  for (const x of seasonLogs) byN.set(x.data.season!, [...(byN.get(x.data.season!) ?? []), x]);
+  const seasons: SeasonOnShelf[] = [...byN.entries()].sort((a, b) => a[0] - b[0]).map(([n, v]) => ({
+    n, logId: v[0].logId, titleId: v[0].titleId, slug: v[0].id, status: v[0].data.status, date: v[0].data.date, started: v[0].data.started,
+    finished: v[0].data.finished, rating: v[0].data.rating, times: v.length, notes: v[0].body, private: v[0].data.private,
+  }));
+  const rated = seasons.filter((s) => s.rating != null).map((s) => s.rating!);
+  const average = rated.length ? Math.round((rated.reduce((a, b) => a + b, 0) / rated.length) * 10) / 10 : undefined;
+  const newest = seasonLogs[0];
+  const runtimes = seasonLogs.filter((x, i, a) => a.findIndex((y) => y.titleId === x.titleId) === i).map((x) => x.data.runtime).filter(Boolean) as number[];
+  Object.assign(d, {
+    status: showStatus(seasons, d.total), date: newest.data.date, seasons, average,
+    rating: average == null ? undefined : Math.round(average * 2) / 2,   // stars on a tile: the average, to the nearest half
+    progress: progressOf(seasons, d.total),
+    started: seasons.map((s) => s.started).filter(Boolean).sort((a, b) => a!.getTime() - b!.getTime())[0],
+    finished: newest.data.finished, private: seasonLogs.every((x) => x.data.private),
+    runtime: runtimes.length ? runtimes.reduce((a, b) => a + b, 0) : d.runtime,
+    highlights: seasonLogs.flatMap((x) => x.data.highlights), times: 1,
+  });
+  e.logId = newest.logId;
+  return e;
+}
+
+/** the visits to one title on one shelf (newest first), or []. A show's slug gives one entry: the show, folded from its seasons. */
 export async function loadVisits(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>, slug: string): Promise<Entry[]> {
-  const { data: t } = await sb.from('titles').select('id').eq('slug', slug).maybeSingle();
+  const { data: t } = await sb.from('titles').select('*').eq('slug', slug).maybeSingle<Title>();
   if (!t) return [];
-  const { data } = await sb.from('logs').select(LOG_SELECT).eq('user_id', profile.id).eq('title_id', t.id)
+  const show = t.kind === 'tv' && t.season == null;
+  const ids = [t.id];
+  if (show) {
+    const { data: ss } = await sb.from('titles').select('id').eq('show_id', t.id);
+    ids.push(...(ss ?? []).map((x) => x.id));
+  }
+  const { data } = await sb.from('logs').select(LOG_SELECT).eq('user_id', profile.id).in('title_id', ids)
     .order('logged_on', { ascending: false }).order('created_at', { ascending: false });
-  const list = ((data ?? []) as unknown as LogRow[]).map((r) => toEntry(r, profile.username));
+  const list = ((data ?? []) as unknown as LogRow[]).filter((r) => r.title).map((r) => toEntry(r, profile.username));
+  if (show) return list.length ? [foldShow(t, list)] : [];
   for (const e of list) e.data.times = list.length;
   return list;
 }
@@ -219,6 +326,7 @@ export function stars(e: Entry) {
 }
 export function starsLabel(e: Entry) {
   if (e.data.type === 'essay' && e.data.loved) return 'Loved';
+  if (e.data.average != null) return `Average ${e.data.average} out of 5 across rated seasons`;
   return e.data.rating == null ? 'Not rated' : `Rated ${e.data.rating} out of 5`;
 }
 

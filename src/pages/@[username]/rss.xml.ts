@@ -12,7 +12,7 @@ export const GET: APIRoute = async ({ params, locals, site: url }) => {
   const found = await loadProfile(locals.supabase, String(params.username ?? '').toLowerCase());
   if (!found || 'redirect' in found || found.profile.is_private) return new Response('Not found', { status: 404 });
   const p = found.profile;
-  const all = (await loadShelf(locals.supabase, p)).filter((e) => !e.data.private && e.data.status !== 'want');
+  const all = (await loadShelf(locals.supabase, p, { byShow: false })).filter((e) => !e.data.private && e.data.status !== 'want');
   const res = await rss({
     title: `${p.display_name || p.username} on ${site.name}`,
     description: found.details?.bio || `What @${p.username} is reading and watching.`,

@@ -445,6 +445,17 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const panel = pickS.closest('.logpanel')!;
       panel.querySelectorAll<HTMLElement>('[data-season-panel]').forEach((p) => (p.hidden = p.dataset.seasonPanel !== pickS.value));
     });
+    // a season's date and review, edited in place on a show's entry page (components/SeasonList.astro)
+    document.addEventListener('submit', async (ev) => {
+      const f = (ev.target as Element).closest<HTMLFormElement>('form[data-season-edit]');
+      if (!f) return;
+      ev.preventDefault();
+      const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+      busy(btn, true);
+      const r = await send('/api/log', 'PATCH', { id: f.dataset.seasonEdit, notes: (f.elements.namedItem('notes') as HTMLTextAreaElement).value, finished: (f.elements.namedItem('day') as HTMLInputElement).value });
+      busy(btn, false);
+      if (r) toast('Saved');
+    });
     const paintStars = (box: HTMLElement, v: number) => box.querySelectorAll<HTMLElement>('.st').forEach((s, i) => {
       s.classList.toggle('full', v >= i + 1);
       s.classList.toggle('half', v === i + 0.5);

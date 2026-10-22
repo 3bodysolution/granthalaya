@@ -11,7 +11,7 @@ if (o.out) return o.out;
 const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
-const shelf = await loadShelf(sb, profile);
+const shelf = await loadShelf(sb, profile, { byShow: false });
 const name = profile.display_name || profile.username;
 // stats count finished things only; TV counts with films
 const all = shelf.filter((e) => e.data.status === 'done');

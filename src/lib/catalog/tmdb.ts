@@ -67,7 +67,7 @@ interface Common {
 export interface FilmPage extends Common { kind: 'film'; released?: string; runtime?: number; studios: string[]; directors: Person[]; writers: Person[] }
 export interface ShowPage extends Common {
   kind: 'tv'; lastYear?: number; status?: string; networks: string[]; creators: Person[]; episodeRuntime?: number;
-  seasons: { n: number; name: string; episodes?: number; year?: number; poster?: string; overview: string }[];
+  seasons: { n: number; name: string; episodes?: number; year?: number; poster?: string; overview: string; aired: boolean }[];
 }
 
 const person = (p: { id: number; name: string; profile_path?: string | null }, role: string): Person => ({ id: p.id, name: p.name, role, photo: img(p.profile_path, 'w185'), href: personHref(p.id, p.name) });
@@ -143,6 +143,7 @@ export async function show(id: number): Promise<ShowPage | null> {
     seasons: (t.seasons ?? []).filter((s: any) => s.season_number > 0).map((s: any) => ({
       n: s.season_number, name: s.name, episodes: s.episode_count || undefined, year: yearOf(s.air_date),
       poster: img(s.poster_path, 'w342'), overview: plain(s.overview, 400),
+      aired: !!s.air_date && s.air_date <= new Date().toISOString().slice(0, 10),
     })),
     cast: (ac.cast ?? []).slice(0, 40).map((c: any) => person(c, (c.roles ?? []).map((r: any) => r.character).filter(Boolean).slice(0, 2).join(', '))),
     crew: crewGroups(ac.crew ?? [], (c) => (c.jobs ?? []).map((j: any) => j.job)),

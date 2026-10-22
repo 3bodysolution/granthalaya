@@ -21,9 +21,11 @@ const label = statusLabel(d.type, d.status);
     {s ? <span class="stars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="date">{open ? label : ''}</span>}
     <span class="date num">{short(d.date)}</span>
   </div>
+  {d.progress && <span class="tile-prog num">{d.progress}</span>}
 </a>
 <style>
   .tile-cover { position: relative; display: block; }
   .tile-cover :global(.tile-status) { position: absolute; top: 8px; right: 8px; z-index: 2; }
+  .tile-prog { margin-top: -8px; padding: 0 2px; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tile-lock { position: absolute; top: 8px; left: 8px; z-index: 2; width: 26px; height: 26px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); background: color-mix(in srgb, var(--card) 92%, transparent); box-shadow: 0 4px 12px -4px rgba(0,0,0,.4); }
 </style>

@@ -31,6 +31,8 @@ import { peopleFor } from '../../../lib/cards/credits';
 import { within } from '../../../lib/cards/output';
 import { isBareEntry } from '../../../lib/saved';
 import Stack from '@tabler/icons/outline/stack-2.svg';
+import SeasonList, { type SeasonRow } from '../../../components/SeasonList.astro';
+import { show as tmdbShow } from '../../../lib/catalog/tmdb';
 export const prerender = false;
 
 const slug = String(Astro.params.slug ?? '');
@@ -44,6 +46,12 @@ const visits = await loadVisits(sb, profile, slug);
 if (!visits.length) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const entry = visits[0];
 const d = entry.data;
+// a season's old address: seasons now live on their show's entry
+if (d.type === 'tv' && d.season !== undefined && entry.showId) {
+  const { data: sh } = await sb.from('titles').select('slug').eq('id', entry.showId).maybeSingle();
+  if (sh) return Astro.redirect(`/@${profile.username}/library/${sh.slug}/#s${d.season}`, 301);
+}
+const isShow = d.type === 'tv' && d.season === undefined && !!d.seasons;
 const [all, collections] = await Promise.all([loadShelf(sb, profile), loadCollections(sb, profile)]);
 const inCols = collectionsFor(entry, collections);
 const p = palette(entry);
@@ -85,10 +93,44 @@ const notes = md(entry.body);
 const sLabel = statusLabel(d.type, d.status);
 
 // everyone's counts for this title (only shelves the visitor may see are counted)
-const [{ count: seen }, { count: wanted }] = await Promise.all([
-  sb.from('logs').select('id', { count: 'exact', head: true }).eq('title_id', entry.titleId).eq('status', 'done'),
-  sb.from('logs').select('id', { count: 'exact', head: true }).eq('title_id', entry.titleId).eq('status', 'want'),
-]);
+let seen: number | null = 0, wanted: number | null = 0;
+let seasonRows: SeasonRow[] = [];
+if (isShow) {
+  // a show: people, not season logs, across the show and all its seasons; and the season list
+  const { data: rows } = await sb.from('titles').select('id, season').eq('show_id', entry.titleId);
+  const ids = [entry.titleId, ...(rows ?? []).map((r) => r.id)];
+  const { data: who } = await sb.from('logs').select('user_id, status').in('title_id', ids).limit(5000);
+  seen = new Set((who ?? []).filter((w) => w.status === 'done').map((w) => w.user_id)).size;
+  wanted = new Set((who ?? []).filter((w) => w.status === 'want').map((w) => w.user_id)).size;
+  // your own entry lists every season TMDB has, so you can log the next one here
+  const tm = isMe && d.tmdbId ? await within(tmdbShow(d.tmdbId).catch(() => null), 2500, null) : null;
+  const rowFor = (n: number) => (rows ?? []).find((r) => r.season === n);
+  const list: { n: number; name?: string; year?: number; episodes?: number; poster?: string }[] = tm
+    ? tm.seasons.map((x) => ({ n: x.n, name: x.name, year: x.year, episodes: x.episodes, poster: x.poster }))
+    : d.seasons!.map((x) => ({ n: x.n }));
+  for (const x of d.seasons!) if (!list.some((y) => y.n === x.n)) list.push({ n: x.n });
+  const dayOf = (x: Date | undefined) => (x ? x.toISOString().slice(0, 10) : '');
+  seasonRows = list.sort((a, b) => a.n - b.n).map((x) => {
+    const m = d.seasons!.find((y) => y.n === x.n);
+    const r = rowFor(x.n);
+    const shown = m && (m.status === 'done' ? m.finished ?? m.date : m.status === 'watching' || m.status === 'paused' || m.status === 'dropped' ? m.started ?? m.date : m.date);
+    return {
+      n: x.n, name: x.name, year: x.year, episodes: x.episodes,
+      src: r ? { title: r.id } : { hit: { kind: 'tv', tmdbId: d.tmdbId, season: x.n, title: d.title, year: x.year ?? d.year, episodes: x.episodes, cover: x.poster ?? d.cover, creator: d.creator } },
+      mine: m && {
+        logId: m.logId, status: m.status, rating: m.rating, notes: m.notes, times: m.times, private: m.private, bare: m.rating == null && !m.notes && m.times === 1,
+        day: dayOf(shown), when: `${m.status === 'done' ? 'Watched' : m.status === 'want' ? 'Added' : 'Started'} ${long(shown!)}`,
+      },
+    };
+  });
+} else {
+  const [a, b] = await Promise.all([
+    sb.from('logs').select('id', { count: 'exact', head: true }).eq('title_id', entry.titleId).eq('status', 'done'),
+    sb.from('logs').select('id', { count: 'exact', head: true }).eq('title_id', entry.titleId).eq('status', 'want'),
+  ]);
+  seen = a.count; wanted = b.count;
+}
+const showLabel = isShow ? [statusLabel('tv', d.status), d.progress].filter(Boolean).join(' | ') : '';
 
 // the log panel: your own entry, or what this title is on YOUR shelf
 const ICON: Record<Status, any> = { want: null, reading: BookOpen, watching: Play, done: Check, paused: Pause, dnf: XIcon, dropped: XIcon };
@@ -149,18 +191,33 @@ const pinnedId = shown?.pinned ? shown.id : null;
               </>
             ) : [d.creator, d.year].filter(Boolean).join(' | ')}
           </p>
-          <div class="stats rise d4 num">
-            <div class="stat"><span class="sub">{done ? 'Rating' : 'Status'}</span>
-              {done ? (s ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="notrated">Not rated</span>) : <b>{sLabel}</b>}
+          {isShow ? (
+            <div class="stats rise d4 num">
+              <div class="stat"><span class="sub">Status</span><b>{sLabel}</b></div>
+              {d.progress && <div class="stat"><span class="sub">Seasons</span><b>{d.progress.replace(/^Seasons? /, '')}</b></div>}
+              <div class="stat"><span class="sub">Average</span>{s ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="notrated">Not rated</span>}</div>
+              {d.seasons!.length > 0 && <div class="stat"><span class="sub">Runtime</span><b>{duration(mins)}</b></div>}
             </div>
-            <div class="stat"><span class="sub">{isFilm ? 'Runtime' : 'Reading time'}</span><b>{isFilm ? duration(mins) : `≈ ${duration(mins)}`}</b></div>
-            <div class="stat"><span class="sub">{isFilm ? 'Times seen' : 'Times read'}</span><b>{d.again && d.times === 1 ? (isFilm ? 'A rewatch' : 'A re-read') : timesWord(d.times, isFilm ? 'watch' : 'read')}</b></div>
-          </div>
+          ) : (
+            <div class="stats rise d4 num">
+              <div class="stat"><span class="sub">{done ? 'Rating' : 'Status'}</span>
+                {done ? (s ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="notrated">Not rated</span>) : <b>{sLabel}</b>}
+              </div>
+              <div class="stat"><span class="sub">{isFilm ? 'Runtime' : 'Reading time'}</span><b>{isFilm ? duration(mins) : `≈ ${duration(mins)}`}</b></div>
+              <div class="stat"><span class="sub">{isFilm ? 'Times seen' : 'Times read'}</span><b>{d.again && d.times === 1 ? (isFilm ? 'A rewatch' : 'A re-read') : timesWord(d.times, isFilm ? 'watch' : 'read')}</b></div>
+            </div>
+          )}
           {d.private && <span class="priv"><Lock width="15" height="15" /> Only you can see this entry</span>}
           {notes && (
             <div class="mynotes rise d5">
               <p class="eyebrow">{isMe ? 'My notes' : `${name}’s notes`}</p>
               <div class="note" set:html={notes} />
+            </div>
+          )}
+          {isShow && seasonRows.length > 0 && (
+            <div class="stack rise d5" style="gap: 4px">
+              <p class="eyebrow seasons-h">Seasons</p>
+              <SeasonList seasons={seasonRows} mode={isMe ? 'owner' : 'view'} />
             </div>
           )}
           {inCols.length > 0 && <div class="chips rise d6"><InCollections items={inCols.map((t) => ({ title: t.title, href: collectionHref(t) }))} /></div>}
@@ -177,7 +234,20 @@ const pinnedId = shown?.pinned ? shown.id : null;
         </div>
 
         <aside class="logpanel rise d4" aria-label={isMe ? 'Your log' : 'Your shelf'}>
-          {isMe ? (
+          {isMe && isShow ? (
+            <>
+              <p class="lp-head">Your log</p>
+              {d.seasons!.length ? (
+                <p class="lp-note">{showLabel}. Each season has its own status, rating and review under Seasons.</p>
+              ) : (
+                <div class="toggles one" role="group" aria-label="Status">
+                  <button class="tg" type="button" aria-pressed="true" data-set-status={JSON.stringify({ id: entry.logId, status: 'want' })} {...off('want')}><Mark size={24} /><span>Want to watch</span></button>
+                </div>
+              )}
+              <button class="lrow2" type="button" data-collect={JSON.stringify({ title: entry.titleId, what: d.title })}><Stack /><span>Add to a collection</span></button>
+              <button class="lrow2" type="button" data-share={shareData}><Share /><span>Share</span></button>
+            </>
+          ) : isMe ? (
             <>
               <p class="lp-head">Your log</p>
               <div class="toggles" role="group" aria-label="Status">
@@ -197,14 +267,14 @@ const pinnedId = shown?.pinned ? shown.id : null;
               <p class="lp-head">Your shelf</p>
               {mine.length ? (
                 <>
-                  <p class="lp-note">It’s on your shelf: <b>{statusLabel(mine[0].data.type, mine[0].data.status)}</b>{stars(mine[0]) ? ` | ${stars(mine[0])}` : ''}.</p>
+                  <p class="lp-note">It’s on your shelf: <b>{statusLabel(mine[0].data.type, mine[0].data.status)}</b>{mine[0].data.progress ? ` | ${mine[0].data.progress}` : ''}{stars(mine[0]) ? ` | ${stars(mine[0])}` : ''}.</p>
                   <a class="lrow2" href={href(mine[0])}><Eye /><span>Open your entry</span></a>
-                  {mine[0].data.status === 'done' && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
+                  {mine[0].data.status === 'done' && !isShow && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
                 </>
               ) : (
                 <>
                   <button class="lrow2 save" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })} data-saved-label="Saved to your shelf"><Mark /><span data-label>{statusLabel(d.type, 'want')}</span></button>
-                  <a class="lrow2" href={`/add/?title=${entry.titleId}`}><Plus /><span>Log it on your shelf</span></a>
+                  {isShow ? (about && <a class="lrow2" href={about}><Plus /><span>Log a season</span></a>) : <a class="lrow2" href={`/add/?title=${entry.titleId}`}><Plus /><span>Log it on your shelf</span></a>}
                 </>
               )}
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
@@ -391,6 +461,8 @@ const pinnedId = shown?.pinned ? shown.id : null;
   /* small plain headings; the uppercase eyebrow is kept for the four main sections (notes, lines, behind the film, sits well next to) */
   .sub { margin: 0; font-size: 13px; font-weight: 600; color: var(--muted); }
   .mynotes .eyebrow { color: var(--lat); margin: 0; }
+  .seasons-h { margin: 6px 0 0; color: var(--lat); }
+  .toggles.one { grid-template-columns: 1fr; }
   .trivia { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
   .trivia li { padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 10px; }
   .trivia .tn { font-size: 28px; line-height: 1; color: var(--haldi); }

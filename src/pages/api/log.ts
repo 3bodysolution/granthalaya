@@ -38,9 +38,20 @@ function lines(b: Record<string, any>) {
   })).filter((l) => l.body);
 }
 
-async function kindOf(ctx: APIContext, titleId: string): Promise<{ kind: Kind; slug: string } | null> {
-  const { data } = await ctx.locals.supabase.from('titles').select('kind, slug').eq('id', titleId).maybeSingle();
-  return (data as { kind: Kind; slug: string } | null) ?? null;
+type TitleBits = { kind: Kind; slug: string; season: number | null; show_id: string | null };
+async function kindOf(ctx: APIContext, titleId: string): Promise<TitleBits | null> {
+  const { data } = await ctx.locals.supabase.from('titles').select('kind, slug, season, show_id').eq('id', titleId).maybeSingle();
+  return (data as TitleBits | null) ?? null;
+}
+/** a TV show's own row (no season): it only takes "want to watch" */
+const wholeShow = (t: Pick<TitleBits, 'kind' | 'season'>) => t.kind === 'tv' && t.season == null;
+/** where an entry lives: a season is a part of its show's page */
+async function entryHref(ctx: APIContext, username: string, t: TitleBits) {
+  if (t.kind === 'tv' && t.season != null && t.show_id) {
+    const { data } = await ctx.locals.supabase.from('titles').select('slug').eq('id', t.show_id).maybeSingle();
+    if (data) return `/@${username}/library/${data.slug}/#s${t.season}`;
+  }
+  return `/@${username}/library/${t.slug}/`;
 }
 
 export const POST: APIRoute = async (ctx) => {
@@ -64,17 +75,20 @@ export const POST: APIRoute = async (ctx) => {
   ensureFactsLater(titleId);   // its card line and painting are written in the background, so they are ready before anyone shares
   const status = String(b.status ?? 'done');
   if (!statusFits(t.kind, status)) return oops('Pick a status.');
+  if (wholeShow(t) && status !== 'want') return oops('Pick a season first.');
 
   const sb = ctx.locals.supabase;
   const row = { user_id: me.id, title_id: titleId, ...fields(b, t.kind, status) };
   const { data, error } = await sb.from('logs').insert(row).select('id').single();
   if (error || !data) return oops(dbMessage(error));
+  // the first season logged replaces "want to watch" on the whole show
+  if (t.kind === 'tv' && t.season != null && t.show_id) await sb.from('logs').delete().eq('user_id', me.id).eq('title_id', t.show_id);
   const hl = lines(b).map((l) => ({ ...l, log_id: data.id, user_id: me.id }));
   if (hl.length) {
     const { error: e2 } = await sb.from('highlights').insert(hl);
     if (e2) return oops(dbMessage(e2, 'Saved, but the line you underlined didn’t save. Edit the entry to add it again.'));
   }
-  return json({ ok: true, id: data.id, href: `/@${me.username}/library/${t.slug}/` });
+  return json({ ok: true, id: data.id, href: await entryHref(ctx, me.username, t) });
 };
 
 export const PATCH: APIRoute = async (ctx) => {
@@ -84,25 +98,36 @@ export const PATCH: APIRoute = async (ctx) => {
   const b = await body<Record<string, any>>(ctx.request);
   if (!b || typeof b.id !== 'string') return oops('Nothing to change.');
   const sb = ctx.locals.supabase;
-  const { data: cur } = await sb.from('logs').select('id, user_id, status, started_on, finished_on, title:titles(kind, slug)').eq('id', b.id).eq('user_id', me.id).maybeSingle<any>();
+  const { data: cur } = await sb.from('logs').select('id, user_id, status, started_on, finished_on, title:titles(kind, slug, season, show_id)').eq('id', b.id).eq('user_id', me.id).maybeSingle<any>();
   if (!cur) return oops('Couldn’t find that entry.', 404);
   const kind = cur.title.kind as Kind;
+  const whole = wholeShow(cur.title);
 
   let change: Record<string, unknown>;
   if (b.full === true) {
     // the whole entry, from the edit screen
     const status = String(b.status ?? cur.status);
-    if (!statusFits(kind, status)) return oops('Pick a status.');
+    if (!statusFits(kind, status) || (whole && status !== 'want')) return oops('Pick a status.');
     change = fields(b, kind, status);
   } else if ('rating' in b) {
     // a quick rating from a title page: rating something means you've finished it
     if (kind === 'essay') return oops('Essays get a heart, not stars.');
+    if (whole) return oops('Rate a season.');
     const r = rating(b.rating);
     change = r == null ? { rating: null } : { rating: r, status: 'done', finished_on: cur.finished_on ?? today() };
+  } else if ('notes' in b || 'finished' in b) {
+    // a season's review or date, edited in place on the show's entry page
+    change = {};
+    if ('notes' in b) change.notes = str(b.notes, 10000) ?? '';
+    if ('finished' in b) {
+      const day = isoDate(b.finished);
+      if (!day) return oops('That date doesn’t look right.');
+      if (cur.status === 'done') change.finished_on = day; else if (cur.status === 'want') change.logged_on = day; else change.started_on = day;
+    }
   } else {
     // a quick status change from the entry page
     const status = String(b.status ?? '');
-    if (!statusFits(kind, status)) return oops('That status doesn’t fit here.');
+    if (!statusFits(kind, status) || (whole && status !== 'want')) return oops('That status doesn’t fit here.');
     change = { status };
     if (status === 'done') change.finished_on = cur.finished_on ?? today();
     else change.finished_on = null;
@@ -129,7 +154,7 @@ export const PATCH: APIRoute = async (ctx) => {
       if (again) await sb.from('profile_details').update({ pinned_line: again.id }).eq('id', me.id);
     }
   }
-  return json({ ok: true, id: cur.id, href: `/@${me.username}/library/${cur.title.slug}/` });
+  return json({ ok: true, id: cur.id, href: await entryHref(ctx, me.username, cur.title) });
 };
 
 export const DELETE: APIRoute = async (ctx) => {

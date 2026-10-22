@@ -9,7 +9,7 @@ export type Hit = {
   pages?: number; runtime?: number; words?: number; episodes?: number; season?: number;
   link?: string; source?: string; cover?: string;
   tmdbId?: number; olKey?: string; from: string;
-  seasons?: { n: number; name: string; episodes?: number; year?: number; cover?: string }[];
+  seasons?: { n: number; name: string; episodes?: number; year?: number; cover?: string; aired: boolean }[];
 };
 
 const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; Granthalaya/1.0; +https://granthalaya-sarthak.vercel.app)' };
@@ -93,6 +93,7 @@ export async function showSeasons(id: number): Promise<Hit | null> {
     kind: 'tv', title: t.name, year: yearOf(t.first_air_date), creator: t.created_by?.[0]?.name, cover: poster(t.poster_path), tmdbId: t.id, from: 'TMDB',
     seasons: (t.seasons ?? []).filter((s: any) => s.season_number > 0).map((s: any) => ({
       n: s.season_number, name: s.name, episodes: s.episode_count, year: yearOf(s.air_date), cover: poster(s.poster_path),
+      aired: !!s.air_date && s.air_date <= new Date().toISOString().slice(0, 10),
     })),
   };
 }

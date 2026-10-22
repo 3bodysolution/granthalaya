@@ -1,8 +1,9 @@
 ---
 // The log panel on a film, TV or book page: save it, mark it, rate it, write about it, put it in a collection.
 // Works before the title is in our catalogue: the first action sends `hit` and the server adds it.
-// For TV, each season is logged on its own, so there's one panel body per season and a picker.
+// For TV, the show is saved as a whole ("want to watch") and each season is logged on its own, in a season list.
 import Mark from './ui/Mark.astro';
+import SeasonList, { type SeasonRow } from './SeasonList.astro';
 import BookOpen from '@tabler/icons/outline/book-2.svg';
 import Play from '@tabler/icons/outline/player-play.svg';
 import Pause from '@tabler/icons/outline/player-pause.svg';
@@ -17,8 +18,10 @@ import { STATUSES, statusLabel, type Kind, type Status } from '../lib/kinds';
 import type { OnSite } from '../lib/catalog/onsite';
 
 type Part = { key: string; label?: string; hit: Record<string, unknown>; titleId?: string; mine?: OnSite['mine'][number] };
-interface Props { kind: Exclude<Kind, 'essay'>; parts: Part[]; selected?: string; share: string; what: string }
-const { kind, parts, selected, share, what } = Astro.props;
+/** TV: the whole show (how to save it, its whole-show save if any, your entry if any seasons are logged) and its seasons */
+type Show = { src: Record<string, unknown>; slug?: string; saved?: { id: string; bare: boolean }; entry?: { label: string }; seasons: SeasonRow[] };
+interface Props { kind: Exclude<Kind, 'essay'>; parts: Part[]; selected?: string; share: string; what: string; show?: Show }
+const { kind, parts, selected, share, what, show } = Astro.props;
 const me = Astro.locals.me;
 const ICON: Record<Status, any> = { want: null, reading: BookOpen, watching: Play, done: Check, paused: Pause, dnf: XIcon, dropped: XIcon };
 const pick = selected ?? parts[0]?.key;
@@ -28,13 +31,31 @@ const film = kind !== 'book';
 const [, pageKind, pageSeg] = new URL(share).pathname.match(/^\/(film|tv|book)\/([^/]+)\/?$/) ?? [];
 // the share window always shows the tall story card (the wide card is only the link preview)
 const preview = pageKind ? `/story/${pageKind}/${pageSeg}.png` : undefined;
-const stories = me ? Object.fromEntries(parts.filter((p) => p.mine).map((p) => [p.key, { user: me.username, slug: p.mine!.slug }])) : undefined;
+const stories = me ? (show ? (show.slug && (show.entry || show.saved) ? { show: { user: me.username, slug: show.slug } } : undefined)
+  : Object.fromEntries(parts.filter((p) => p.mine).map((p) => [p.key, { user: me.username, slug: p.mine!.slug }]))) : undefined;
 const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKind}:${pageSeg}` : undefined, card: preview, wide: false, stories });
 ---
 <aside class="logpanel" aria-label={me ? 'Your log' : 'Keep your own shelf'}>
   {!me ? (
     <>
       <a class="lp-row lp-signin" href={next} data-astro-prefetch="false"><span>Sign in to log, rate or save</span></a>
+      <button class="lp-row" type="button" data-share={shareData}><Share aria-hidden="true" /><span>Share</span></button>
+    </>
+  ) : show ? (
+    <>
+      {show.entry ? (
+        <a class="lp-row" href={`/@${me.username}/library/${show.slug}/`}><Eye aria-hidden="true" /><span>Your entry | {show.entry.label}</span></a>
+      ) : (
+        <div class="lp-save">
+          <button class="tg" type="button" aria-pressed={show.saved ? 'true' : 'false'}
+            {...(show.saved ? { 'data-set-status': JSON.stringify({ id: show.saved.id, status: 'want' }), 'data-bare': show.saved.bare ? '1' : '0' } : { 'data-quick-add': JSON.stringify({ ...show.src, status: 'want' }), 'data-saved-label': 'Saved' })}>
+            <Mark size={24} /><span data-label>{show.saved ? 'Saved: want to watch' : 'Want to watch'}</span>
+          </button>
+        </div>
+      )}
+      <p class="lp-k lp-sh">Seasons</p>
+      <SeasonList seasons={show.seasons} mode="panel" />
+      <button class="lp-row lp-top" type="button" data-collect={JSON.stringify({ ...show.src, what })}><Stack aria-hidden="true" /><span>Add to a collection</span></button>
       <button class="lp-row" type="button" data-share={shareData}><Share aria-hidden="true" /><span>Share</span></button>
     </>
   ) : (
@@ -121,6 +142,10 @@ const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKin
   .logpanel > .lp-row:last-child { border-bottom: 0; }
   .lp-row:hover { background: var(--soft); color: var(--ink); }
   .lp-row :global(svg) { width: 17px; height: 17px; color: var(--muted); flex: none; }
+  .lp-save { padding: 8px 6px; border-bottom: 1px solid var(--line); }
+  .lp-save .tg { width: 100%; flex-direction: row; justify-content: center; min-height: 48px; font-size: 13px; }
+  .lp-sh { width: auto; padding: 14px 16px 0; margin: 0; }
+  .lp-top { border-top: 1px solid var(--line); }
   .lp-signin { justify-content: center; font-weight: 600; background: var(--ink); color: var(--bg); }
   .lp-signin:hover { background: var(--lat); color: var(--bg); }
 </style>

@@ -131,6 +131,8 @@ create table public.titles (
   description_source text check (description_source is null or description_source in ('wikipedia', 'openlibrary', 'ai-wikipedia', 'ai-openlibrary')),
   description_url text check (description_url is null or char_length(description_url) <= 600),  -- the Wikipedia article, for the credit
   description_checked_at timestamptz,                -- looked for one; look again after 90 days
+  show_id uuid references public.titles (id) on delete set null,  -- a TV season: its show's row (kind 'tv', no season)
+  seasons int check (seasons is null or seasons between 0 and 300),  -- a TV show's row: how many seasons TMDB lists
   tmdb_id int,
   ol_key text,                                       -- Open Library work, like OL45883W
   trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),
@@ -143,6 +145,7 @@ create unique index titles_tmdb_key on public.titles (kind, tmdb_id, coalesce(se
 create unique index titles_ol_key on public.titles (ol_key) where ol_key is not null;
 create unique index titles_link_key on public.titles (link) where kind = 'essay' and link is not null;
 create index titles_created_by on public.titles (created_by, created_at);
+create index titles_show on public.titles (show_id) where show_id is not null;
 
 -- Marathi and Hindi books suggested each week by a free AI model, each checked against a real source first.
 create table public.book_suggestions (
@@ -184,17 +187,18 @@ create trigger logs_touch before insert or update on public.logs
 -- Each kind has its own status tags.
 create or replace function public.check_log()
 returns trigger language plpgsql security definer set search_path = '' as $$
-declare k text; n int;
+declare k text; s int; n int;
 begin
-  select kind into k from public.titles where id = new.title_id;
+  select kind, season into k, s from public.titles where id = new.title_id;
   if k is null then raise exception 'Unknown title.' using errcode = 'P0001'; end if;
   if not (
        (k = 'book'  and new.status in ('want', 'reading', 'done', 'paused', 'dnf'))
     or (k = 'film'  and new.status in ('want', 'done', 'dnf'))
-    or (k = 'tv'    and new.status in ('want', 'watching', 'done', 'paused', 'dropped'))
+    or (k = 'tv'    and s is null and new.status = 'want')   -- a whole show: only "want to watch"
+    or (k = 'tv'    and s is not null and new.status in ('want', 'watching', 'done', 'paused', 'dropped'))
     or (k = 'essay' and new.status in ('want', 'done'))
   ) then
-    raise exception 'That status doesn''t fit a %.', k using errcode = 'P0001';
+    raise exception 'That status doesn''t fit a %.', case when k = 'tv' and s is null then 'whole show' else k end using errcode = 'P0001';
   end if;
   -- a gentle limit on how fast one account can add things (the website's own server is exempt)
   if tg_op = 'INSERT' and coalesce(auth.role(), '') <> 'service_role' then

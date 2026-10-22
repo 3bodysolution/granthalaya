@@ -26,7 +26,7 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   const { profile } = found;
   if (profile.is_private && locals.me?.id !== profile.id) return gone();
 
-  const done = (await loadShelf(sb, profile)).filter((e) => e.data.status === 'done' && !e.data.private);
+  const done = (await loadShelf(sb, profile, { byShow: false })).filter((e) => e.data.status === 'done' && !e.data.private);
   const yearOf = (e: Entry) => e.data.date.getUTCFullYear();
   const years = [...new Set(done.map(yearOf))].sort((a, b) => b - a);
   const asked = Number(url.searchParams.get('year'));

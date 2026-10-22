@@ -11,7 +11,7 @@ const o = await openShelf(Astro, '/diary/');
 if (o.out) return o.out;
 const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
-const all = await loadShelf(Astro.locals.supabase, profile);
+const all = await loadShelf(Astro.locals.supabase, profile, { byShow: false });
 const name = profile.display_name || profile.username;
 // month by month, newest first
 const months: { key: string; label: string; items: typeof all }[] = [];

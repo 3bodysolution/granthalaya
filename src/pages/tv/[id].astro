@@ -1,5 +1,5 @@
 ---
-// A TV show: its seasons (each logged on its own), cast, where to watch, and what people here thought.
+// A TV show: saved as a whole, its seasons each logged on their own, cast, where to watch, and what people here thought.
 import Base from '../../layouts/Base.astro';
 import TitleLayout from '../../components/title/TitleLayout.astro';
 import Poster from '../../components/title/Poster.astro';
@@ -14,6 +14,8 @@ import { show, idFrom, showHref } from '../../lib/catalog/tmdb';
 import { slug } from '../../lib/catalog/fetch';
 import { rowsForShow, onSite } from '../../lib/catalog/onsite';
 import { statusLabel, type Status } from '../../lib/kinds';
+import { showStatus, progressOf } from '../../lib/data';
+import type { SeasonRow } from '../../components/SeasonList.astro';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
 import { pageBits } from '../../lib/cards/titlepage';
 import { filmOg } from '../../lib/share';
@@ -31,13 +33,25 @@ if (!t) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${id}-${slug(t.title)}` && slug(t.title)) return Astro.redirect(showHref(id, t.title) + Astro.url.search, 301);
 const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, voices: [], collections: [], mine: [] };
 const rowFor = (n: number) => rows.find((r) => r.season === n);
-const mineFor = (n: number) => site.mine.find((m) => m.season === n);
-const parts = t.seasons.map((s) => ({
-  key: `s${s.n}`, label: `Season ${s.n}${s.year ? ` (${s.year})` : ''}`,
-  hit: { kind: 'tv', tmdbId: id, season: s.n, title: t.title, year: s.year ?? t.year, episodes: s.episodes, cover: s.poster ?? t.poster, creator: t.creators[0]?.name },
-  titleId: rowFor(s.n)?.id, mine: mineFor(s.n),
-}));
-const pick = site.mine[0]?.season ? `s${site.mine[0].season}` : parts[0]?.key;
+const mineFor = (n: number) => site.mine.find((m) => m.season === n);   // your newest visit to that season
+// the log panel: the whole show (saved as "want to watch"), then each season
+const showRow = rows.find((r) => r.season == null);
+const seasons: SeasonRow[] = t.seasons.map((s) => {
+  const r = rowFor(s.n), m = mineFor(s.n);
+  return {
+    n: s.n, name: s.name, year: s.year, episodes: s.episodes,
+    src: r ? { title: r.id } : { hit: { kind: 'tv', tmdbId: id, season: s.n, title: t.title, year: s.year ?? t.year, episodes: s.episodes, cover: s.poster ?? t.poster, creator: t.creators[0]?.name } },
+    mine: m && { logId: m.id, status: m.status as Status, rating: m.rating ?? undefined, day: m.logged, when: '', notes: '', bare: m.bare, private: false, times: site.mine.filter((x) => x.season === s.n).length },
+  };
+});
+const logged = site.mine.filter((m) => m.season != null && m === mineFor(m.season)).map((m) => ({ n: m.season!, status: m.status as Status, date: new Date(m.logged) }));
+const saved = site.mine.find((m) => m.season == null);
+const released = t.seasons.filter((s) => s.aired).length;   // seasons still to come don't count against Watched
+const panelShow = {
+  src: showRow ? { title: showRow.id } : { hit: { kind: 'tv', tmdbId: id, title: t.title, year: t.year, cover: t.poster, creator: t.creators[0]?.name } },
+  slug: showRow?.slug, saved: saved && !logged.length ? { id: saved.id, bare: saved.bare } : undefined, seasons,
+  entry: logged.length ? { label: [statusLabel('tv', showStatus(logged, released)), progressOf(logged, released)].filter(Boolean).join(' | ') } : undefined,
+};
 const share = new URL(showHref(id, t.title), Astro.site).href;
 const years = t.year ? (t.lastYear && t.lastYear !== t.year ? `${t.year}–${t.lastYear}` : `${t.year}`) : '';
 const tabs = [
@@ -97,7 +111,7 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
     </Fragment>
 
     <Fragment slot="panel">
-      {parts.length > 0 ? <LogPanel kind="tv" parts={parts} selected={pick} share={share} what={t.title} /> : <p class="muted">No seasons listed yet.</p>}
+      {t.seasons.length > 0 ? <LogPanel kind="tv" parts={[]} show={panelShow} share={share} what={t.title} /> : <p class="muted">No seasons listed yet.</p>}
       <OnSiteBox site={site} film />
     </Fragment>
 

@@ -55,7 +55,7 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     const { profile } = found;
     if (profile.is_private && locals.me?.id !== profile.id) return gone();
     const year = Number(y);
-    const list = (await loadShelf(sb, profile)).filter((e) => e.data.status === 'done' && !e.data.private && e.data.date.getUTCFullYear() === year);
+    const list = (await loadShelf(sb, profile, { byShow: false })).filter((e) => e.data.status === 'done' && !e.data.private && e.data.date.getUTCFullYear() === year);
     const books = list.filter((e) => e.data.type === 'book').length;
     const films = list.filter((e) => e.data.type === 'film' || e.data.type === 'tv').length;
     const link = abs(profile.is_private ? null : `/@${profile.username}/stats/?year=${year}`);

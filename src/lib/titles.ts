@@ -3,7 +3,7 @@
 import { waitUntil } from '@vercel/functions';
 import { ensureFactsLater } from './cards/tagline';
 import { adminClient, env } from './supabase';
-import { filmDetails, seasonDetails, type Hit } from './lookup';
+import { filmDetails, seasonDetails, showSeasons, type Hit } from './lookup';
 import { KINDS, type Kind } from './kinds';
 import { getTrivia } from './trivia.mjs';
 
@@ -65,10 +65,13 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
   let h = raw;
   // trust TMDB's own details over what the browser sent
   if (h.tmdbId && h.kind === 'film') h = (await filmDetails(h.tmdbId).catch(() => null)) ?? h;
+  // a TV show with no season is the whole show (saved as "want to watch")
+  if (h.tmdbId && h.kind === 'tv' && !h.season) return showFor(h.tmdbId, userId);
+  let show: { id: string } | { error: string } | null = null;
   if (h.tmdbId && h.kind === 'tv') {
-    if (!h.season) return { error: 'Pick a season.' };
-    h = (await seasonDetails(h.tmdbId, h.season).catch(() => null)) ?? h;
+    [h, show] = await Promise.all([seasonDetails(h.tmdbId, h.season!).catch(() => null).then((x) => x ?? h), showFor(h.tmdbId, userId)]);
   }
+  const showId = show && 'id' in show ? show.id : null;
   const db = adminClient();
 
   // already in the catalogue?
@@ -82,7 +85,11 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
     if (h.creator) q = q.ilike('creator', h.creator.replace(/[%_\\]/g, (c) => `\\${c}`));
   }
   const { data: found } = await q.maybeSingle();
-  if (found) return found;
+  if (found) {
+    // a season added before shows had their own rows learns its show here
+    if (showId) await db.from('titles').update({ show_id: showId }).eq('id', found.id).is('show_id', null);
+    return found;
+  }
 
   // a gentle limit on new catalogue entries per person
   const { count } = await db.from('titles').select('id', { count: 'exact', head: true }).eq('created_by', userId).gt('created_at', new Date(Date.now() - 3600_000).toISOString());
@@ -94,6 +101,7 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
     season: h.kind === 'tv' ? h.season ?? null : null, episodes: h.episodes ?? null, runtime: h.runtime ?? null,
     pages: h.pages ?? null, words: h.words ?? null, cover_url: h.kind === 'essay' ? null : h.cover ?? null,
     link: h.link ?? null, source: h.source ?? null, tmdb_id: h.tmdbId ?? null, ol_key: h.olKey ?? null, created_by: userId,
+    ...(showId ? { show_id: showId } : {}),
   };
   let { data, error } = await db.from('titles').insert(row).select('id, slug, kind, title, year, creator').single();
   if (error?.code === '23505') {
@@ -103,5 +111,29 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
   if (error || !data) return { error: 'Couldn’t add that title. Please try again.' };
   factsLater(data as any);
   ensureFactsLater(data.id);   // the card line and painting too
+  return { id: data.id, slug: data.slug };
+}
+
+/** a TV show's own row (kind 'tv', no season), above its season rows: found, or made from TMDB. Its slug is the plain name ("dark"). */
+export async function showFor(tmdbId: number, userId: string | null): Promise<{ id: string; slug: string } | { error: string }> {
+  const db = adminClient();
+  const find = () => db.from('titles').select('id, slug').eq('kind', 'tv').eq('tmdb_id', tmdbId).is('season', null).limit(1).maybeSingle();
+  const { data: found } = await find();
+  if (found) return found;
+  const s = await showSeasons(tmdbId).catch(() => null);
+  if (!s) return { error: 'Couldn’t find that show. Please try again.' };
+  const row = {
+    kind: 'tv', slug: await freeSlug(slugify(s.title), s.year), title: s.title, creator: s.creator ?? '', year: s.year ?? null, season: null,
+    episodes: s.seasons?.reduce((n, x) => n + (x.episodes ?? 0), 0) || null, seasons: s.seasons?.filter((x) => x.aired).length || null,   // released seasons only
+    cover_url: s.cover && COVER_HOSTS.test(s.cover) ? s.cover : null, link: `https://www.themoviedb.org/tv/${tmdbId}`,
+    tmdb_id: tmdbId, created_by: userId,
+  };
+  const { data, error } = await db.from('titles').insert(row).select('id, slug, kind, title, year, creator').single();
+  if (error?.code === '23505') { const { data: again } = await find(); if (again) return again; }   // added a moment ago by someone else
+  if (error || !data) return { error: 'Couldn’t add that show. Please try again.' };
+  // the seasons already in the catalogue point at it
+  await db.from('titles').update({ show_id: data.id }).eq('kind', 'tv').eq('tmdb_id', tmdbId).not('season', 'is', null).is('show_id', null);
+  factsLater(data as any);
+  ensureFactsLater(data.id);
   return { id: data.id, slug: data.slug };
 }

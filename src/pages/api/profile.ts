@@ -35,9 +35,10 @@ export const POST: APIRoute = async (ctx) => {
     const asked = Array.isArray(b.ids) ? [...new Set(b.ids.filter((x): x is string => typeof x === 'string' && UUID.test(x)))].slice(0, 4) : [];
     let favourites: string[] = [];
     if (asked.length) {
-      const { data, error } = await sb.from('logs').select('title_id').eq('user_id', me.id).in('title_id', asked);
+      // a TV show counts as on your shelf when any of its seasons is
+      const { data, error } = await sb.from('logs').select('title_id, title:titles(show_id)').eq('user_id', me.id);
       if (error) return oops(dbMessage(error));
-      const onShelf = new Set((data ?? []).map((r) => r.title_id));
+      const onShelf = new Set((data ?? []).flatMap((r: any) => [r.title_id, r.title?.show_id].filter(Boolean)));
       favourites = asked.filter((id) => onShelf.has(id));
     }
     const { error } = await sb.from('profile_details').upsert({ id: me.id, favourites });

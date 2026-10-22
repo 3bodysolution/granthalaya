@@ -1,0 +1,123 @@
+---
+// A TV show's seasons, each with its own status, half-star rating, date and review.
+// mode: panel (the log panel on a show's page: status and rating, compact) | owner (your own entry page: also the date
+// and review, edited in place) | view (someone else's entry: read only, logged seasons only).
+// The status, rating and new-log buttons are handled in Base.astro (data-set-status, data-log-new, data-rate),
+// and the in-place edit too (data-season-edit).
+import StatusTag from './ui/StatusTag.astro';
+import { md } from '../lib/md';
+import { STATUSES, statusLabel, type Status } from '../lib/kinds';
+
+export interface SeasonRow {
+  n: number; name?: string; year?: number; episodes?: number;
+  src: Record<string, unknown>;   // how to log it: { title } once in the catalogue, else { hit }
+  mine?: { logId: string; status: Status; rating?: number; day: string; when: string; notes: string; bare: boolean; times: number; private: boolean };
+}
+interface Props { seasons: SeasonRow[]; mode: 'panel' | 'owner' | 'view' }
+const { seasons, mode } = Astro.props;
+const live = mode !== 'view';
+const rows = mode === 'view' ? seasons.filter((s) => s.mine) : seasons;
+const CHOICES = STATUSES.tv.filter(([k]) => k !== 'want');   // "want to watch" is for the whole show
+const stars = (r?: number) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r % 1 >= 0.5 ? '½' : ''));
+---
+<ol class:list={['sl', mode]}>
+  {rows.map((s) => {
+    const m = s.mine;
+    const rating = m?.rating ?? 0;
+    return (
+      <li class="sl-row" id={`s${s.n}`}>
+        <div class="sl-head">
+          <b class="sl-name">{s.name ?? `Season ${s.n}`}</b>
+          {mode !== 'panel' && (s.year || s.episodes) && <span class="sl-meta num">{[s.year, s.episodes && `${s.episodes} episodes`].filter(Boolean).join(' | ')}</span>}
+          {!live && m && <StatusTag status={(m.status === 'done' ? 'watched' : m.status) as any} label={statusLabel('tv', m.status)} />}
+        </div>
+        {live && (
+          <div class="sl-status" role="group" aria-label={`Season ${s.n} status`}>
+            {CHOICES.map(([k, label]) => (
+              <button type="button" class="sl-chip" aria-pressed={m?.status === k ? 'true' : 'false'}
+                {...(m ? { 'data-set-status': JSON.stringify({ id: m.logId, status: k }), 'data-bare': m.bare ? '1' : '0' } : { 'data-log-new': JSON.stringify({ ...s.src, status: k }) })}>{label}</button>
+            ))}
+          </div>
+        )}
+        {live ? (
+          <div class="lp-rate sl-rate">
+            <div class="stars-in" role="radiogroup" aria-label={`Your rating for season ${s.n}`} data-rating={rating} data-rate-src={JSON.stringify(m ? { id: m.logId } : s.src)}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <span class="st">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path class="bg" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" /><path class="fg" d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z" /></svg>
+                  <button type="button" class="half l" role="radio" aria-checked={rating === n - 0.5 ? 'true' : 'false'} aria-label={`${n - 0.5} stars`} data-rate={n - 0.5}></button>
+                  <button type="button" class="half r" role="radio" aria-checked={rating === n ? 'true' : 'false'} aria-label={`${n} star${n > 1 ? 's' : ''}`} data-rate={n}></button>
+                </span>
+              ))}
+            </div>
+            {rating > 0 && <button type="button" class="sl-clear" data-rate="0" aria-label={`Remove the rating for season ${s.n}`}>×</button>}
+            {mode === 'panel' && m && <a class="sl-more" href={`/add/?log=${m.logId}`}>Review</a>}
+          </div>
+        ) : (
+          (m?.rating != null || m?.when) && <p class="sl-line num">{m?.rating != null && <span class="sl-stars" role="img" aria-label={`Rated ${m.rating} out of 5`}>{stars(m.rating)}</span>}<span>{m?.when}{m && m.times > 1 ? ` | ${m.times} times` : ''}</span></p>
+        )}
+        {mode === 'owner' && m && (
+          <form class="sl-edit" data-season-edit={m.logId}>
+            <label class="sl-day"><span>{m.status === 'done' ? 'Watched on' : m.status === 'want' ? 'Added on' : 'Started on'}</span><input type="date" name="day" value={m.day} required /></label>
+            <label class="sl-review"><span>Review</span><textarea name="notes" rows="3" maxlength="10000" placeholder={`What did season ${s.n} leave you with?`}>{m.notes}</textarea></label>
+            <div class="sl-actions">
+              <button type="submit" class="btn">Save</button>
+              <a href={`/add/?log=${m.logId}`} class="sl-more">Lines and more</a>
+              {m.private && <span class="sl-meta">Only you can see this season</span>}
+            </div>
+          </form>
+        )}
+        {mode === 'view' && m?.notes && <div class="sl-notes" set:html={md(m.notes)} />}
+      </li>
+    );
+  })}
+</ol>
+
+<style>
+  .sl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .sl-row { display: flex; flex-direction: column; gap: 10px; padding: 16px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 96px; }
+  .sl-row:last-child { border-bottom: 0; }
+  .sl-row:target { background: linear-gradient(var(--soft), var(--soft)) no-repeat; background-size: 100% 100%; border-radius: 10px; padding-left: 12px; padding-right: 12px; transition: background-color .2s ease; }
+  .sl-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; }
+  .sl-name { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-weight: 400; font-size: 18px; }
+  .sl-meta { font-size: 13px; color: var(--muted); }
+  .sl-status { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sl-chip { height: 32px; min-width: 40px; padding: 0 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--card); color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; transition: border-color .2s ease, color .2s ease, background-color .2s ease, transform .2s ease; }
+  .sl-chip:hover { color: var(--ink); border-color: var(--muted); }
+  .sl-chip:active { transform: scale(.96); }
+  .sl-chip[aria-pressed="true"] { border-color: var(--lat); color: var(--lat); }
+  .sl-chip:disabled { opacity: .5; cursor: default; }
+  .sl-rate { display: flex; align-items: center; gap: 10px; }
+  .stars-in { display: flex; gap: 2px; }
+  .st { position: relative; width: 26px; height: 26px; }
+  .st svg { width: 26px; height: 26px; display: block; }
+  .st .bg { fill: none; stroke: var(--muted); stroke-width: 1.3; opacity: .6; }
+  .st .fg { fill: var(--haldi); clip-path: inset(0 100% 0 0); transition: clip-path .15s ease; }
+  .st:global(.half) .fg { clip-path: inset(0 50% 0 0); }
+  .st:global(.full) .fg { clip-path: inset(0); }
+  .st button.half { position: absolute; top: 0; bottom: 0; width: 50%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+  .st button.half.l { left: 0; } .st button.half.r { right: 0; }
+  .st button.half:focus-visible { outline-offset: 0; }
+  .sl-clear { width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent; color: var(--muted); font-size: 17px; cursor: pointer; transition: background-color .2s ease, color .2s ease; }
+  .sl-clear:hover { background: var(--soft); color: var(--ink); }
+  .sl-more { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--lat); }
+  .sl-line { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); }
+  .sl-stars { color: var(--haldi); letter-spacing: .05em; }
+  .sl-notes { max-width: 660px; display: flex; flex-direction: column; gap: 10px; }
+  .sl-notes :global(p) { margin: 0; font-size: 16px; line-height: 1.65; }
+  .sl-edit { display: flex; flex-direction: column; gap: 10px; max-width: 660px; }
+  .sl-edit label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .sl-day { max-width: 220px; }
+  .sl-edit input, .sl-edit textarea { font: inherit; font-size: 15px; font-weight: 400; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; min-height: 40px; transition: border-color .2s ease; }
+  .sl-edit textarea { resize: vertical; line-height: 1.55; }
+  .sl-edit input:focus, .sl-edit textarea:focus { border-color: var(--lat); outline: none; }
+  .sl-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 16px; }
+  .sl-actions .sl-more { margin-left: 0; }
+
+  /* in the log panel: tighter, inside the card's own padding */
+  .panel .sl-row { padding: 12px 16px; gap: 8px; }
+  .panel .sl-row:target { border-radius: 0; padding-left: 16px; padding-right: 16px; }
+  .panel .sl-name { font-size: 16px; }
+  .panel .sl-chip { height: 30px; padding: 0 10px; font-size: 12px; }
+  .panel .st, .panel .st svg { width: 22px; height: 22px; }
+</style>
