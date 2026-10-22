@@ -16,9 +16,10 @@ export interface StoryData {
   season?: number;
   rating?: number;         // 0.5 to 5
   loved?: boolean;         // essays
-  status: string;          // "Watched", "Read" ...
+  status?: string;         // "Watched", "Read" ... (left out for a title that is not on a shelf)
   line?: string;           // the title's short line, or the owner's own line or a saved Line
-  owner: string;           // username
+  owner?: string;          // username; without one the card is signed "GRANTHALAYA" alone
+  meta?: string;           // replaces the line of year and director (a collection says "a collection by ...")
   cover?: string;          // address of the cover image
   color?: string;          // painted cover colour when there's no image
   bg?: Background;         // the painting behind the card
@@ -99,7 +100,7 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
   const title = cut(d.title, 70);
   const size = title.length <= 14 ? 72 : title.length <= 26 ? 60 : title.length <= 44 ? 50 : 42;
   const by = ({ film: 'directed by', tv: 'created by', book: 'by', essay: 'by' } as Record<Kind, string>)[d.kind];
-  const meta = [d.year, d.kind === 'tv' && d.season ? `season ${d.season}` : '', d.creator ? `${by} ${d.creator}` : ''].filter(Boolean).join(' | ');
+  const meta = d.meta ?? [d.year, d.kind === 'tv' && d.season ? `season ${d.season}` : '', d.creator ? `${by} ${d.creator}` : ''].filter(Boolean).join(' | ');
   const full = d.rating == null ? 0 : Math.floor(d.rating), half = d.rating != null && d.rating % 1 >= 0.5;
 
   // The top 30% (to 576) shows the painting uncovered; Instagram covers the top 13% with its own bar. The poster starts below that,
@@ -123,18 +124,18 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
     h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 34, flexDirection: 'column', alignItems: 'center' }, [
       h('div', { fontSize: size, lineHeight: 1.12, color: titleColor, fontFamily: SERIF, fontWeight: 700, textAlign: 'center', justifyContent: 'center' }, title),
       meta ? h('div', { marginTop: 12, fontSize: 30, color: GREY, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
-      h('div', { marginTop: 22, alignItems: 'center', gap: 22 }, [
+      d.status || full || half || (d.loved && d.kind === 'essay') ? h('div', { marginTop: 22, alignItems: 'center', gap: 22 }, [
         d.loved && d.kind === 'essay'
           ? h('div', { fontSize: 38, color: accent, fontFamily: SANS }, '♥ Loved')
           : full || half
             ? h('div', { gap: 6 }, [...Array(full).fill(1), ...(half ? [0.5] : [])].map((f) => star(f as 1 | 0.5, accent)))
             : null,
-        h('div', { padding: '6px 22px', borderRadius: 999, background: 'rgba(255,255,255,.1)', fontSize: 26, color: '#C9C2B4', fontFamily: SANS }, d.status),
-      ].filter(Boolean)),
+        d.status ? h('div', { padding: '6px 22px', borderRadius: 999, background: 'rgba(255,255,255,.1)', fontSize: 26, color: '#C9C2B4', fontFamily: SANS }, d.status) : null,
+      ].filter(Boolean)) : null,
       d.line ? h('div', { marginTop: 22, fontSize: 36, lineHeight: 1.25, color: CREAM, fontStyle: 'italic', fontFamily: SERIF, textAlign: 'center', justifyContent: 'center' }, cut(d.line, 90)) : null,
     ].filter(Boolean)),
     h('div', { position: 'absolute', left: 0, right: 0, top: 1722, flexDirection: 'column', alignItems: 'center' }, [
-      h('div', { fontSize: 24, letterSpacing: 6, color: DIM, fontFamily: SANS }, `@${d.owner} ON GRANTHALAYA`.toUpperCase()),
+      h('div', { fontSize: 24, letterSpacing: 6, color: DIM, fontFamily: SANS }, (d.owner ? `@${d.owner} ON GRANTHALAYA` : 'GRANTHALAYA').toUpperCase()),
       h('div', { marginTop: 8, fontSize: 22, color: DIM, fontFamily: SANS }, SITE),
     ]),
   ]);

@@ -8,8 +8,9 @@ import { siInstagram, siWhatsapp, siX } from 'simple-icons';
 import Link from '@tabler/icons/outline/link.svg';
 import Download from '@tabler/icons/outline/download.svg';
 import Dots from '@tabler/icons/outline/dots.svg';
-const brand = (i: { path: string; hex: string }) => ({ path: i.path, color: `#${i.hex}` });
-const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
+// App icons as the phone's own share panel shows them: Instagram's official full-colour icon (public/img/share/instagram.svg), WhatsApp's
+// green with its white glyph, X's black with its white glyph (the glyphs are the brands' own, from Simple Icons).
+const apps = { wa: siWhatsapp.path, x: siX.path };
 ---
 <dialog class="sheet" id="share-box" aria-label="Share">
   <div class="sh-in">
@@ -20,9 +21,9 @@ const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
       <span class="sh-bar" aria-hidden="true"></span>
     </div>
     <div class="sh-apps">
-      <button class="sh-app" type="button" id="sh-ig"><span class="ic" style={`background:${apps.ig.color}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.ig.path} /></svg></span><span>Instagram</span></button>
-      <a class="sh-app" id="sh-wa" target="_blank" rel="noopener" aria-disabled="true"><span class="ic" style={`background:${apps.wa.color}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.wa.path} /></svg></span><span>WhatsApp</span></a>
-      <a class="sh-app" id="sh-x" target="_blank" rel="noopener" aria-disabled="true"><span class="ic x" style={`background:${apps.x.color}`}><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.x.path} /></svg></span><span>X</span></a>
+      <button class="sh-app" type="button" id="sh-ig"><span class="ic ig"><img src="/img/share/instagram.svg" alt="" width="56" height="56" /></span><span>Instagram</span></button>
+      <a class="sh-app" id="sh-wa" target="_blank" rel="noopener" aria-disabled="true"><span class="ic wa"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.wa} /></svg></span><span>WhatsApp</span></a>
+      <a class="sh-app" id="sh-x" target="_blank" rel="noopener" aria-disabled="true"><span class="ic x"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={apps.x} /></svg></span><span>X</span></a>
       <button class="sh-app" type="button" id="sh-copy"><span class="ic plain"><Link aria-hidden="true" /></span><span>Copy link</span></button>
       <button class="sh-app" type="button" id="sh-save"><span class="ic plain"><Download aria-hidden="true" /></span><span>Save image</span></button>
       <button class="sh-app" type="button" id="sh-more" hidden><span class="ic plain"><Dots aria-hidden="true" /></span><span>More</span></button>
@@ -69,10 +70,15 @@ const apps = { ig: brand(siInstagram), wa: brand(siWhatsapp), x: brand(siX) };
   .sh-app:active { transform: scale(.94); }
   .sh-app:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; border-radius: 12px; }
   .sh-app[aria-disabled="true"] { opacity: .5; }
-  .sh-app .ic { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; transition: transform .2s ease, box-shadow .2s ease; }
+  .sh-app .ic { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; }
+  /* the three app icons are rounded squares, like the phone's own share panel; Copy, Save and More are plain circles */
+  .sh-app .ic.ig, .sh-app .ic.wa, .sh-app .ic.x { border-radius: 16px; }
+  .sh-app .ic.ig img { display: block; width: 100%; height: 100%; }
+  .sh-app .ic.wa { background: linear-gradient(160deg, #61FD7D, #25CF43 60%, #1FAF38); }
+  .sh-app .ic.x { background: #000; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
   .sh-app:hover .ic { transform: translateY(-2px); }
-  .sh-app .ic svg { width: 26px; height: 26px; fill: #fff; }
-  .sh-app .ic.x { box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
+  .sh-app .ic svg { width: 34px; height: 34px; fill: #fff; }
+  .sh-app .ic.x svg { width: 28px; height: 28px; }
   .sh-app .ic.plain { background: var(--soft); border: 1px solid var(--line); color: var(--ink); }
   .sh-app .ic.plain svg { fill: none; stroke: currentColor; width: 24px; height: 24px; }
 

@@ -35,7 +35,7 @@ const total = path.reduce((s, x) => s + minutes(x.e), 0);
 const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), n('tv') && plural(n('tv'), 'TV season'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' | ');
 const fan = path.slice(0, 3).map((x) => palette(x.e));
 const og = collectionOg(col.data.title, name, col.body, path.length);
-const shareData = JSON.stringify({ title: col.data.title, ref: `col=${col.uuid}`, card: `/og/c/${profile.username}/${slug}.png`, wide: true });
+const shareData = JSON.stringify({ title: col.data.title, ref: `col=${col.uuid}`, card: `/story/c/${profile.username}/${slug}.png`, wide: false });
 const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
 ---
 <Base title={`${col.data.title} | @${profile.username}`} shelf={profile.username} description={`A collection by ${name}: ${col.data.title}. ${meta}.`} og={profile.is_private ? undefined : og}

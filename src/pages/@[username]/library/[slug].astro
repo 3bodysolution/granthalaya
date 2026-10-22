@@ -109,7 +109,7 @@ const [, aboutKind, aboutSeg] = about?.match(/^\/(film|tv|book)\/([^/]+)\/?$/) ?
 const shareData = JSON.stringify({
   title: d.title,
   ...(isMe ? { stories: { entry: { user: profile.username, slug: entry.id } } }
-    : aboutKind ? { ref: `title=${aboutKind}:${aboutSeg}`, card: `/og/${aboutKind}/${aboutSeg}.png`, wide: true } : {}),
+    : aboutKind ? { ref: `title=${aboutKind}:${aboutSeg}`, card: `/story/${aboutKind}/${aboutSeg}.png`, wide: false } : {}),
 });
 const shown = pickLine(all, details, name);
 const line = shown ? { text: shown.text, by: shown.by, source: shown.source } : undefined;

@@ -26,9 +26,10 @@ const next = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
 const film = kind !== 'book';
 // the share window: the public page's address and picture, and (signed in) your entry's story card
 const [, pageKind, pageSeg] = new URL(share).pathname.match(/^\/(film|tv|book)\/([^/]+)\/?$/) ?? [];
-const preview = pageKind ? `/og/${pageKind}/${pageSeg}.png` : undefined;
+// the share window always shows the tall story card (the wide card is only the link preview)
+const preview = pageKind ? `/story/${pageKind}/${pageSeg}.png` : undefined;
 const stories = me ? Object.fromEntries(parts.filter((p) => p.mine).map((p) => [p.key, { user: me.username, slug: p.mine!.slug }])) : undefined;
-const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKind}:${pageSeg}` : undefined, card: preview, wide: true, stories });
+const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKind}:${pageSeg}` : undefined, card: preview, wide: false, stories });
 ---
 <aside class="logpanel" aria-label={me ? 'Your log' : 'Keep your own shelf'}>
   {!me ? (
