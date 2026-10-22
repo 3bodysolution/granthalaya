@@ -6,6 +6,7 @@ import PosterTile from '../../components/title/PosterTile.astro';
 import { personPage, idFrom, personHref } from '../../lib/catalog/tmdb';
 import { slug } from '../../lib/catalog/fetch';
 import { myMarks } from '../../lib/catalog/onsite';
+import { savedId } from '../../lib/saved';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
 export const prerender = false;
 
@@ -68,7 +69,7 @@ const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted i
           {g.items.map((c, n) => (
             <div data-y={c.year ?? 0} data-n={n}>
               <PosterTile href={c.href} title={c.title} year={c.year} poster={c.poster} kind={c.kind} sub={g.label === 'Actor' ? c.role : c.kind === 'tv' ? 'TV' : undefined}
-                status={marks.get(`${c.kind}:${c.id}`)} save={c.kind === 'film' ? { kind: 'film', tmdbId: c.id, title: c.title, year: c.year, cover: c.poster } : undefined} />
+                status={marks.get(`${c.kind}:${c.id}`)?.status} logId={savedId(marks.get(`${c.kind}:${c.id}`))} save={c.kind === 'film' ? { kind: 'film', tmdbId: c.id, title: c.title, year: c.year, cover: c.poster } : undefined} />
             </div>
           ))}
         </div>

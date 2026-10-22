@@ -1,0 +1,42 @@
+---
+// Shown (with a 500) when something on our side breaks while a page is being made. Astro uses this page for any error nobody
+// caught, so a visitor never sees a plain white "Internal server error". The error goes to the server log.
+import Base from '../layouts/Base.astro';
+export const prerender = false;
+const error = (Astro.props as { error?: unknown }).error;
+if (error) console.error('Page error', Astro.url.pathname, error);
+Astro.response.status = 500;
+---
+<Base title="Something went wrong" noindex>
+  <section class="nf bleed">
+    <div class="art melt settle bg" style="--day: url(/art/lost-day.webp); --night: url(/art/lost-night.webp)" aria-hidden="true"></div>
+    <div class="pad words">
+      <p class="eyebrow rise d1">500</p>
+      <h1 class="title rise d2">Something went wrong on our side</h1>
+      <p class="lede rise d3">This page broke while we were making it. It has been noted. Try again, or head back to somewhere that works.</p>
+    </div>
+  </section>
+  <div class="pad rise d4 row">
+    <button type="button" class="btn primary" data-retry>Try again</button>
+    <a href="/" class="btn">Go home</a>
+  </div>
+</Base>
+<script>
+  document.addEventListener('click', (ev) => {
+    if ((ev.target as Element).closest('[data-retry]')) location.reload();
+  });
+</script>
+<style>
+  .nf { position: relative; aspect-ratio: 2172 / 724; min-height: 440px; max-height: 720px; }
+  .bg { position: absolute; inset: 0; background-position: center bottom; }
+  .words { position: relative; padding-top: clamp(36px, 5vw, 80px); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+  .words .title { color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .55); }
+  .words .title em { color: #0B5552; }
+  .words .eyebrow { color: #0B5552; }
+  .words .lede { color: #3A2E25; text-shadow: 0 1px 12px rgba(255, 240, 220, .6); }
+  :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .6); }
+  :global(html[data-theme="dark"]) .words .title em, :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
+  :global(html[data-theme="dark"]) .words .lede { color: #E4DCCB; text-shadow: 0 2px 12px rgba(8, 14, 32, .7); }
+  .row { display: flex; justify-content: center; gap: 10px; margin-top: 8px; }
+  @media (max-width: 780px) { .nf { aspect-ratio: auto; min-height: 480px; } .bg { background-position: 20% bottom; } }
+</style>
