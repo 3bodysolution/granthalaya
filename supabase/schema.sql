@@ -131,6 +131,8 @@ create table public.titles (
   description_source text check (description_source is null or description_source in ('wikipedia', 'openlibrary', 'ai-wikipedia', 'ai-openlibrary')),
   description_url text check (description_url is null or char_length(description_url) <= 600),  -- the Wikipedia article, for the credit
   description_checked_at timestamptz,                -- looked for one; look again after 90 days
+  publisher text check (publisher is null or char_length(publisher) <= 200),
+  cover_from text check (cover_from is null or cover_from in ('akshardhara', 'bookganga')),  -- the cover is a shop's (see shop_books)
   show_id uuid references public.titles (id) on delete set null,  -- a TV season: its show's row (kind 'tv', no season)
   seasons int check (seasons is null or seasons between 0 and 300),  -- a TV show's row: how many seasons TMDB lists
   tmdb_id int,
@@ -158,6 +160,31 @@ create table public.book_suggestions (
   unique (language, title_id)
 );
 create index book_suggestions_shown on public.book_suggestions (language, created_at desc) where not hidden;
+
+-- Books from two Indian bookshops, with their permission (scripts/shops): the "Buy at" links and covers. Covers are never copied:
+-- pages show them through /api/cover. hidden / cover_hidden: a shop asked; the row stays so a re-run never brings it back.
+create table public.shop_books (
+  id uuid primary key default gen_random_uuid(),
+  shop text not null check (shop in ('akshardhara', 'bookganga')),
+  shop_key text not null check (char_length(shop_key) between 1 and 200),
+  url text not null check (url ~ '^https://(akshardhara\.com|www\.bookganga\.com)/' and char_length(url) <= 600),
+  title text not null default '' check (char_length(title) <= 300),
+  original_title text not null default '' check (char_length(original_title) <= 300),
+  author text not null default '' check (char_length(author) <= 300),
+  publisher text not null default '' check (char_length(publisher) <= 200),
+  language text check (language is null or language in ('mr', 'hi')),
+  isbn text check (isbn is null or isbn ~ '^97[89][0-9]{10}$'),
+  cover_src text check (cover_src is null or (cover_src ~ '^https://(cdn\.shopify\.com/s/files/1/0800/1214/9058/|www\.bookganga\.com/eBooks/Content/images/books/)' and char_length(cover_src) <= 600)),
+  lists text[] not null default '{}',
+  title_id uuid references public.titles (id) on delete set null,
+  match text not null default 'new' check (match in ('sure', 'checked', 'new', 'openlibrary', 'unsure', 'rejected')),
+  hidden boolean not null default false,
+  cover_hidden boolean not null default false,
+  first_seen timestamptz not null default now(),
+  last_seen timestamptz not null default now(),
+  unique (shop, shop_key)
+);
+create index shop_books_title on public.shop_books (title_id) where title_id is not null and not hidden;
 
 -- ───────────────────────── shelves ─────────────────────────
 
@@ -357,6 +384,7 @@ alter table public.username_history enable row level security;
 alter table public.profile_details enable row level security;
 alter table public.titles enable row level security;
 alter table public.book_suggestions enable row level security;
+alter table public.shop_books enable row level security;
 alter table public.logs enable row level security;
 alter table public.highlights enable row level security;
 alter table public.review_likes enable row level security;
@@ -384,6 +412,9 @@ create policy "details: edit your own" on public.profile_details for update to a
   using (id = auth.uid()) with check (id = auth.uid());
 
 create policy "book suggestions: readable unless hidden" on public.book_suggestions for select to anon, authenticated using (not hidden);
+-- shop books: only matched, shown rows (the Buy links); written only by the server
+create policy "shop books: matched and shown" on public.shop_books for select to anon, authenticated
+  using (not hidden and title_id is not null and match in ('sure', 'checked', 'new', 'openlibrary'));
 create policy "titles: readable by everyone" on public.titles for select to anon, authenticated using (true);
 
 create policy "logs: yours, or a visible shelf" on public.logs for select to anon, authenticated
@@ -461,7 +492,7 @@ create policy "reports: send one" on public.reports for insert to authenticated
 -- (new tables aren't exposed automatically in this project, so every permission is listed here)
 
 grant select on public.profiles, public.username_history, public.profile_details, public.titles,
-  public.logs, public.highlights, public.threads, public.thread_items, public.book_suggestions to anon, authenticated;
+  public.logs, public.highlights, public.threads, public.thread_items, public.book_suggestions, public.shop_books to anon, authenticated;
 grant insert (id, username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
 grant update (username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
 grant insert, update on public.profile_details to authenticated;

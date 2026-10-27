@@ -1,5 +1,5 @@
 ---
-// Reports and the weekly book suggestions, for the person who runs the site (profiles.is_admin, set by hand in the database).
+// Reports, the weekly book suggestions and the bookshops' books (hide a book or a cover), for the person who runs the site (profiles.is_admin, set by hand in the database).
 import Base from '../layouts/Base.astro';
 import { adminClient } from '../lib/supabase';
 export const prerender = false;
@@ -12,6 +12,11 @@ let q = db.from('reports').select('id, reason, details, status, created_at, repo
 if (show === 'open') q = q.eq('status', 'open');
 const { data: reports, error } = await q;
 const { data: picks } = await db.from('book_suggestions').select('id, language, hidden, checked_with, created_at, title:titles(title, creator, slug)').order('created_at', { ascending: false }).limit(200);
+const find = (Astro.url.searchParams.get('shop') ?? '').trim().slice(0, 60).replace(/[%_\,()]/g, ' ').trim();
+const SHOP: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
+let shopQ = db.from('shop_books').select('id, shop, url, title, original_title, author, hidden, cover_hidden, cover_src').order('hidden', { ascending: false }).order('title').limit(60);
+shopQ = find ? shopQ.or(`title.ilike.%${find}%,original_title.ilike.%${find}%,author.ilike.%${find}%`) : shopQ.eq('hidden', true);
+const { data: shopBooks } = await shopQ;
 const REASON: Record<string, string> = { spam: 'Spam or fake', abuse: 'Harassment', sexual: 'Sexual content', hate: 'Hate', illegal: 'Illegal', other: 'Something else' };
 const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
 ---
@@ -55,6 +60,23 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
         <li class:list={['pick', k.hidden && 'off']}>
           <span class="pt">{k.title ? <a class="accent" href={`/book/${k.title.slug}/`}>{k.title.title}</a> : 'Removed book'}<span class="muted"> | {k.title?.creator} | {k.language === 'mr' ? 'Marathi' : 'Hindi'} | checked with {k.checked_with} | {when(k.created_at)}</span></span>
           <button class="btn sm" data-admin={JSON.stringify({ id: k.id, action: k.hidden ? 'show_book' : 'hide_book' })}>{k.hidden ? 'Show again' : 'Hide'}</button>
+        </li>
+      ))}
+    </ul>
+  </section>
+  <section class="pad wrap picks">
+    <h2 class="title">Bookshop books</h2>
+    <p class="muted small">Books and covers from Akshardhara and BookGanga. If a shop asks, hide the book (no Buy link, no cover) or only its cover. A hidden book is never brought back by a later import.</p>
+    <form method="get" class="flex gap-2"><input class="input" type="search" name="shop" value={find} placeholder="Title or author" aria-label="Find a bookshop book" /><button class="btn sm" type="submit">Find</button></form>
+    {(shopBooks ?? []).length === 0 && <p class="muted small">{find ? 'No book matches.' : 'Nothing is hidden. Search to find a book.'}</p>}
+    <ul class="plist">
+      {(shopBooks ?? []).map((k: any) => (
+        <li class:list={['pick', k.hidden && 'off']}>
+          <span class="pt"><a class="accent" href={k.url} target="_blank" rel="noopener">{k.original_title || k.title}</a><span class="muted"> | {k.author} | {SHOP[k.shop]}{k.hidden ? ' | hidden' : k.cover_hidden ? ' | cover hidden' : ''}</span></span>
+          <span class="flex gap-2">
+            {!k.hidden && !k.cover_hidden && k.cover_src && <button class="btn sm" data-admin={JSON.stringify({ id: k.id, action: 'hide_cover' })}>Hide cover</button>}
+            <button class="btn sm" data-admin={JSON.stringify({ id: k.id, action: k.hidden ? 'show_shop' : 'hide_shop' })}>{k.hidden ? 'Show again' : 'Hide book'}</button>
+          </span>
         </li>
       ))}
     </ul>

@@ -12,6 +12,7 @@ import { bookRows, markRows } from '../../lib/catalog/rows';
 import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import ListGrid from '../../components/title/ListGrid.astro';
 import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, type CatalogList } from '../../lib/lists';
+import { shopLists, SHOP_LISTS } from '../../lib/catalog/shopbooks';
 import { myMarks } from '../../lib/catalog/onsite';
 import { savedId } from '../../lib/saved';
 export const prerender = false;
@@ -35,12 +36,14 @@ const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
 // a prize or classics list chosen in the filter bar shows in place; the other filters don't apply to it (Decade does)
 const front = [...q.keys()].length === 0;
 const sb = Astro.locals.supabase;
-const suggestedP = suggestedLists(sb).catch(() => [] as CatalogList[]);
+const suggestedP = Promise.all([suggestedLists(sb), shopLists(sb)]).then((l) => l.flat()).catch(() => [] as CatalogList[]);
 // the rows are started now and waited for further down the page (FrontRows), so the top of the page is sent first
 const rowsP = front ? bookRows(suggestedP).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
 const suggested = await suggestedP;
 const bookLists = [...listsOfKind('book'), ...suggested];
-const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
+// Marathi or Hindi on its own opens the shops' list first (Open Library has few books in them); "More from Open Library" is the same filter with an order
+const shopFirst = [...q.keys()].join() === 'language' ? Object.entries(SHOP_LISTS).find(([, v]) => v[2] === language)?.[0] : undefined;
+const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === (q.get('list') ?? shopFirst));
 const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ subject, language, year, decade, sort, page });
 const marks = sb && !front && !picked ? await myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
 
@@ -88,12 +91,13 @@ const fields = [
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{bookLists.map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>
       </div>
-      <p class="credit-line">Book data from Open Library.</p>
+      <p class="credit-line">Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.</p>
     </section>
   ) : picked ? (
     <section class="pad">
       <p class="muted lede">{picked.intro}</p>
       <ListGrid list={picked} decade={dcPicked} />
+      {shopFirst && <p class="muted lede"><a class="ul" href={`/books/?language=${language}&sort=top`}>More {langName} books from Open Library</a></p>}
     </section>
   ) : (
   <section class="pad">
@@ -112,7 +116,7 @@ const fields = [
       </div>
     )}
     <Pager page={page} pages={list.pages} />
-    <p class="credit-line">Book data from Open Library.</p>
+    <p class="credit-line">Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.</p>
   </section>
   )}
 </Base>

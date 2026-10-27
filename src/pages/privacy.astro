@@ -31,7 +31,8 @@ export const prerender = false;
     <li><b>Google</b> confirms who you are when you sign in.</li>
     <li><b>Cloudflare Turnstile</b> runs a quick check that a person, not a bot, is creating a new shelf.</li>
     <li><b>Open Library, Google Books, TMDB, Wikipedia, Google Gemini and Groq</b> help look up titles, covers and short facts about them. Our server sends them only what’s being looked up (a title, or what you typed in search), never anything about you.</li>
-    <li><b>Posters, covers, photos and streaming logos</b> load straight from TMDB, Open Library and Google Books, so those services see your browser’s request for the image, as with any picture on the web.</li>
+    <li><b>Posters, covers, photos and streaming logos</b> load straight from TMDB, Open Library and Google Books, so those services see your browser’s request for the image, as with any picture on the web. Covers from the bookshops Akshardhara and BookGanga do not: our server fetches them and passes them on, so those shops never see your browser.</li>
+    <li><b>Akshardhara and BookGanga</b> are Indian bookshops that let us show some of their books and covers. Our server reads their public book lists. Nothing about you is sent to them, unless you follow a “Buy at” link to their site.</li>
   </ul>
 
   <h2>Cookies</h2>

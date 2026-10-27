@@ -9,7 +9,7 @@ import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
 import { olBook, gbBook, bookKey, bookHref, type BookPage } from '../../lib/catalog/books';
 import { slug } from '../../lib/catalog/fetch';
-import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, LIST_SOURCE, type TitleRow } from '../../lib/catalog/onsite';
+import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, ownRecord, type TitleRow } from '../../lib/catalog/onsite';
 import { aboutHours } from '../../lib/data';
 import { site as siteConfig } from '../../data/site';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
@@ -34,7 +34,7 @@ if ('ol' in k) {
 } else if (sb) {
   // a book in our catalogue by its address name (added by hand, or before it had an Open Library key)
   const row = await rowBySlug(sb, 'book', k.slug);
-  if (row && !row.ol_key && row.source !== LIST_SOURCE && !/books\.google\./.test(row.link ?? '')) {
+  if (row && !row.ol_key && !ownRecord(row.source) &&!/books\.google\./.test(row.link ?? '')) {
     const ol = await healBook(row);
     if (ol) return Astro.redirect(bookHref(ol, row.title), 302);
   }
@@ -42,7 +42,7 @@ if ('ol' in k) {
   if (row && home && home !== `/book/${k.slug}/`) return Astro.redirect(home, 301);
   if (row) {
     rows = [row];
-    b = { kind: 'book', key: row.slug, title: row.title, subtitle: row.original_title ?? undefined, authors: row.creator ? [{ name: row.creator }] : [], year: row.year ?? undefined, languages: [], subjects: [], description: row.note ?? '', cover: row.cover_url ?? undefined, publishers: [], source: 'Open Library', sourceLink: '' };
+    b = { kind: 'book', key: row.slug, title: row.title, subtitle: row.original_title ?? undefined, authors: row.creator ? [{ name: row.creator }] : [], year: row.year ?? undefined, languages: [], subjects: [], description: row.note ?? '', cover: row.cover_url ?? undefined, publishers: row.publisher ? [row.publisher] : [], source: 'Open Library', sourceLink: '' };
   }
 }
 } catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // a catalogue failing is not "not found"
@@ -58,6 +58,11 @@ const description = cleanBlurb(saved?.text ?? b.description);   // saved text to
 const credit = saved?.text && saved.source !== 'openlibrary'
   ? { adapted: saved.source?.startsWith('ai-'), from: saved.source?.endsWith('wikipedia') ? 'Wikipedia' : 'Open Library', url: saved.url ?? (saved.source?.endsWith('wikipedia') ? undefined : b.sourceLink) }
   : null;
+// the two bookshops (with their permission): where to buy it, and the credit for a cover or details taken from them
+const SHOP_NAME: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
+const shopRows = sb && rows.length ? ((await sb.from('shop_books').select('shop, url').in('title_id', rows.map((r) => r.id))).data ?? []) as { shop: string; url: string }[] : [];
+const shops = [...new Map(shopRows.map((s) => [s.shop, s])).values()].filter((s) => SHOP_NAME[s.shop]);
+const cover = b.cover ?? row?.cover_url ?? undefined;   // an Open Library book with no cover there may have one from a shop
 const gbId = 'gb' in k ? k.gb : null;
 const hit = {
   kind: 'book', olKey: 'ol' in k ? k.ol : undefined, title: b.title, creator: b.authors[0]?.name, year: b.year, pages: b.pages, cover: b.cover,
@@ -66,6 +71,7 @@ const hit = {
 const share = new URL(Astro.url.pathname, Astro.site).href;
 const q = encodeURIComponent(`${b.title} ${b.authors[0]?.name ?? ''}`.trim());
 const find = [
+  ...shops.map((s) => ({ label: `Buy at ${SHOP_NAME[s.shop]}`, url: s.url })),
   b.readOnline && { label: 'Borrow or read on Open Library', url: b.readOnline },
   b.source === 'Open Library' && b.sourceLink && !b.readOnline && { label: 'Open Library', url: b.sourceLink },
   b.source === 'Google Books' && { label: 'Google Books', url: b.sourceLink },
@@ -82,7 +88,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
 ---
 <Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} line={row?.tagline ? { text: row.tagline, source: b.title } : undefined} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
-    <Poster slot="poster" src={b.cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
+    <Poster slot="poster" src={cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
     <Fragment slot="side">
       <div class="find">
         <p class="f-h">Find it</p>
@@ -132,6 +138,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
     <Fragment slot="below">
       <Reviews site={site} rows={rows} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the book' } : undefined} />
       {b.sourceLink && <p class="pad credit-line">Book data from {b.source}.</p>}
+      {shops.length > 0 && <p class="pad credit-line">Cover and details from {shops.map((s, i) => <>{i > 0 && ' and '}<a href={s.url} target="_blank" rel="noopener" class="ul">{SHOP_NAME[s.shop]}</a></>)}, with their permission.</p>}
     </Fragment>
   </TitleLayout>
 </Base>

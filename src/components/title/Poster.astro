@@ -1,8 +1,10 @@
 ---
 // A poster or book cover for a title page, with the painted cover as a fallback when there's no image.
 import { paletteFor } from '../../lib/data';
+import { viaCover } from '../../lib/images';
 interface Props { src?: string; title: string; by?: string; kind: 'film' | 'tv' | 'book'; year?: number }
-const { src, title, by, kind, year } = Astro.props;
+const { title, by, kind, year } = Astro.props;
+const src = Astro.props.src ? viaCover(Astro.props.src, 700) : undefined;   // a bookshop's cover goes through /api/cover
 const p = paletteFor(title);
 ---
 <div class:list={['poster', kind === 'book' ? 'book' : 'film', src ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>

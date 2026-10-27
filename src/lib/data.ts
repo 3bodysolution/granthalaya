@@ -4,6 +4,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { site } from '../data/site';
 import { kindName, kindColor, type Kind, type Status } from './kinds';
+import { viaCover } from './images';
 
 /* ——— shapes ——— */
 export interface Profile {
@@ -295,7 +296,7 @@ export function coverSrc(e: Entry): string | undefined {
   if (site.covers === 'painted' || e.data.type === 'essay') return;
   const c = e.data.cover;
   if (!c || c === 'painted') return;
-  return c;
+  return viaCover(c, 500);   // a bookshop's cover goes through /api/cover
 }
 
 /* ——— painted cover colours ——— */

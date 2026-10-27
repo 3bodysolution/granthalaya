@@ -1,4 +1,4 @@
-// Acting on a report, or hiding a suggested book (admins only).
+// Acting on a report, hiding a suggested book, or hiding a bookshop's book or cover (admins only).
 import type { APIRoute } from 'astro';
 import { json, oops, body, sameOrigin } from '../../lib/http';
 import { adminClient } from '../../lib/supabase';
@@ -13,6 +13,18 @@ export const POST: APIRoute = async (ctx) => {
     if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which book?');
     const { error } = await db.from('book_suggestions').update({ hidden: b.action === 'hide_book' }).eq('id', b.id);
     return error ? oops('Couldn’t change that.', 500) : json({ ok: true });
+  }
+  if (b?.action === 'hide_shop' || b?.action === 'show_shop' || b?.action === 'hide_cover') {
+    // a shop asked: no Buy link and no cover (hidden rows stay, so scripts/shops never brings them back)
+    if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which book?');
+    const { data: row } = await db.from('shop_books').select('id, shop, title_id').eq('id', b.id).maybeSingle();
+    if (!row) return oops('Couldn’t find that book.', 404);
+    const change = b.action === 'show_shop' ? { hidden: false, cover_hidden: false } : b.action === 'hide_cover' ? { cover_hidden: true } : { hidden: true, cover_hidden: true };
+    const { error } = await db.from('shop_books').update(change).eq('id', row.id);
+    if (error) return oops('Couldn’t change that.', 500);
+    // the cover goes from our record too, if it came from this shop (a cover from Open Library or elsewhere stays)
+    if (change.cover_hidden && row.title_id) await db.from('titles').update({ cover_url: null, cover_from: null }).eq('id', row.title_id).eq('cover_from', row.shop);
+    return json({ ok: true });
   }
   if (!b?.id) return oops('Which report?');
   const { data: r } = await db.from('reports').select('id, target_user, target_log, target_comment').eq('id', b.id).maybeSingle();

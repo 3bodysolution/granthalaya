@@ -5,7 +5,8 @@ import type { APIRoute } from 'astro';
 import { json } from '../../lib/http';
 import { loadProfile, loadShelf, href, palette, radius, kind, fullTitle, coverSrc } from '../../lib/data';
 import { searchAll } from '../../lib/catalog/tmdb';
-import { searchBooks } from '../../lib/catalog/books';
+import { searchBooks, type BookCard } from '../../lib/catalog/books';
+import { searchShopBooks } from '../../lib/catalog/shopbooks';
 export const prerender = false;
 type Member = { username: string; display_name: string | null; avatar_url: string | null };
 
@@ -14,15 +15,19 @@ export const GET: APIRoute = async ({ locals, url }) => {
   if (text) {
     if (text.length < 2) return json({ titles: [], people: [], books: [], authors: [], members: [] });
     const like = text.replace(/[%_\\,()]/g, ' ').trim();
-    const [tm, bk, mem] = await Promise.all([
+    const [tm, bk, own, mem] = await Promise.all([
       searchAll(text).catch(() => ({ titles: [], people: [] })),
       searchBooks(text).catch(() => ({ books: [], authors: [] })),
+      searchShopBooks(locals.supabase, like).catch(() => [] as BookCard[]),
       locals.supabase && like
         ? locals.supabase.from('profiles').select('username, display_name, avatar_url').or(`username.ilike.%${like}%,display_name.ilike.%${like}%`).limit(4)
         : Promise.resolve({ data: [] as Member[] }),
     ]);
     const members = ((mem.data ?? []) as Member[]).map((p) => ({ username: p.username, name: p.display_name || p.username, avatar: p.avatar_url, href: `/@${p.username}/` }));
-    return new Response(JSON.stringify({ ...tm, ...bk, members }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
+    // books from the two shops come first (Open Library has few in Marathi and Hindi); a book we already listed is not repeated
+    const had = new Set(own.map((b) => b.key));
+    const books = [...own, ...bk.books.filter((b) => !had.has(b.key))].slice(0, 8);
+    return new Response(JSON.stringify({ ...tm, ...bk, books, members }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
   }
   const u = (url.searchParams.get('u') ?? '').toLowerCase();
   if (!locals.supabase || !u) return json([]);

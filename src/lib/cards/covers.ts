@@ -19,7 +19,10 @@ export const setOrigin = (o: string) => { origin = o; };
 export const coverAllowed = (u: URL) =>
   (u.hostname === 'image.tmdb.org' && /^\/t\/p\/(w\d+|original)\//.test(u.pathname)) ||
   u.hostname === 'covers.openlibrary.org' ||
-  (u.hostname === 'books.google.com' && u.pathname.startsWith('/books/content'));
+  (u.hostname === 'books.google.com' && u.pathname.startsWith('/books/content')) ||
+  // the two bookshops, with their permission: only their own cover folders
+  (u.hostname === 'cdn.shopify.com' && u.pathname.startsWith('/s/files/1/0800/1214/9058/')) ||
+  (u.hostname === 'www.bookganga.com' && u.pathname.startsWith('/eBooks/Content/images/books/'));
 
 const OLD = /^\/covers\/[\w.-]+\.(jpe?g|png)$/i;
 
@@ -31,6 +34,7 @@ export function coverAddress(src: string, big: boolean): URL | null {
     if (u.protocol !== 'https:' || !coverAllowed(u)) return null;
     if (u.hostname === 'image.tmdb.org') u.pathname = u.pathname.replace(/\/t\/p\/(w\d+|original)\//, big ? '/t/p/w500/' : '/t/p/w342/');
     if (u.hostname === 'covers.openlibrary.org') u.pathname = u.pathname.replace(/-[SML]\.jpg$/, big ? '-L.jpg' : '-M.jpg');
+    if (u.hostname === 'cdn.shopify.com') u.search = `?width=${big ? 700 : 400}`;   // Shopify resizes on request
     return u;
   } catch { return null; }
 }
