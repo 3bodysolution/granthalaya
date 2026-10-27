@@ -24,7 +24,9 @@ export function serverClient(request: Request, cookies: AstroCookies): SupabaseC
       },
       setAll(list) {
         for (const { name, value, options } of list) {
-          try { cookies.set(name, value, { ...options, path: '/' }); } catch { /* the page has already started sending */ }
+          // the sign-in cookie is only ever read by the server: HttpOnly, and 90 days (the library asks for 400) unless it is being removed
+          const gone = (options.maxAge ?? 1) <= 0;
+          try { cookies.set(name, value, { ...options, path: '/', httpOnly: true, ...(gone ? {} : { maxAge: NINETY_DAYS }) }); } catch { /* the page has already started sending */ }
         }
       },
     },
