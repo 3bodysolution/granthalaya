@@ -129,6 +129,11 @@ else {
     const x = await rows(db.from(t).select('*').limit(1));
     x.data.length ? fail(`${t}: a stranger can read rows`) : ok(`${t}: closed to strangers${x.error ? ' (refused)' : ' (empty)'}`);
   }
+  // who runs the site, who is featured and when a name changed are not public
+  for (const col of ['is_admin', 'featured', 'username_changed_at']) {
+    const x = await rows(db.from('profiles').select(col).limit(1));
+    x.error && !x.data.length ? ok(`profiles.${col} is hidden from strangers`) : fail(`profiles.${col} can be read by a stranger`);
+  }
   const hid = await rows(db.from('book_suggestions').select('id').eq('hidden', true).limit(1));
   hid.data.length ? fail('hidden book suggestions can be read') : ok('hidden book suggestions are not readable');
 

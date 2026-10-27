@@ -60,4 +60,27 @@ returns boolean language sql immutable set search_path = '' as $$
   ]) or u like 'admin%' or u like 'granthalaya%' or u like '%official%';
 $$;
 
+-- L36 ────────────────────────────────────────────────────────────────────────
+-- is_admin, featured and username_changed_at can't be read by visitors any more. The site reads your own full row with
+-- my_profile() and the featured shelves with featured_profiles(); the admin page uses the secret key.
+revoke select on public.profiles from anon, authenticated;
+grant select (id, username, display_name, avatar_url, is_private, created_at) on public.profiles to anon, authenticated;
+
+create or replace function public.my_profile()
+returns setof public.profiles language sql stable security definer set search_path = '' as $$
+  select * from public.profiles where id = auth.uid();
+$$;
+create or replace function public.featured_profiles(founder text, lim int)
+returns table (id uuid, username text, display_name text, avatar_url text, is_private boolean, created_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select p.id, p.username, p.display_name, p.avatar_url, p.is_private, p.created_at
+    from public.profiles p
+   where not p.is_private and not public.blocked_with(p.id) and (p.featured or p.username = founder)
+   order by (p.username = founder) desc, p.created_at
+   limit greatest(lim, 0);
+$$;
+revoke all on function public.my_profile(), public.featured_profiles(text, int) from public;
+grant execute on function public.my_profile() to authenticated, service_role;
+grant execute on function public.featured_profiles(text, int) to anon, authenticated, service_role;
+
 commit;

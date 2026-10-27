@@ -499,7 +499,9 @@ create policy "reports: send one" on public.reports for insert to authenticated
 -- ───────────────────────── what each kind of visitor may do at all ─────────────────────────
 -- (new tables aren't exposed automatically in this project, so every permission is listed here)
 
-grant select on public.profiles, public.username_history, public.profile_details, public.titles,
+-- profiles: is_admin, featured and username_changed_at aren't readable by visitors (my_profile() and featured_profiles() below)
+grant select (id, username, display_name, avatar_url, is_private, created_at) on public.profiles to anon, authenticated;
+grant select on public.username_history, public.profile_details, public.titles,
   public.logs, public.highlights, public.threads, public.thread_items, public.book_suggestions, public.shop_books to anon, authenticated;
 -- avatar_url isn't here: the website sets it (from the person's Google sign-in) with the secret key
 grant insert (id, username, display_name, is_private, featured) on public.profiles to authenticated;
@@ -514,6 +516,23 @@ grant insert (reporter, target_user, target_log, target_comment, reason, details
 grant select on public.review_likes, public.review_comments to anon, authenticated;
 grant insert (log_id, user_id), delete on public.review_likes to authenticated;
 grant insert (log_id, user_id, body), delete on public.review_comments to authenticated;
+create or replace function public.my_profile()
+returns setof public.profiles language sql stable security definer set search_path = '' as $$
+  select * from public.profiles where id = auth.uid();
+$$;
+create or replace function public.featured_profiles(founder text, lim int)
+returns table (id uuid, username text, display_name text, avatar_url text, is_private boolean, created_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select p.id, p.username, p.display_name, p.avatar_url, p.is_private, p.created_at
+    from public.profiles p
+   where not p.is_private and not public.blocked_with(p.id) and (p.featured or p.username = founder)
+   order by (p.username = founder) desc, p.created_at
+   limit greatest(lim, 0);
+$$;
+revoke all on function public.my_profile(), public.featured_profiles(text, int) from public;
+grant execute on function public.my_profile() to authenticated, service_role;
+grant execute on function public.featured_profiles(text, int) to anon, authenticated, service_role;
+
 grant all on all tables in schema public to service_role;
 
 revoke all on function public.blocked_with(uuid), public.can_see_shelf(uuid) from public;

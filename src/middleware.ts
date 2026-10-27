@@ -78,7 +78,8 @@ const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
   if (c?.sub && c.role === 'authenticated') {
     const meta = (c.user_metadata ?? {}) as Record<string, string>;
     ctx.locals.user = { id: c.sub, email: c.email, name: meta.full_name || meta.name, avatar: googleAvatar(meta.avatar_url || meta.picture) ?? undefined };
-    const { data: me } = await sb.from('profiles').select('*').eq('id', c.sub).maybeSingle<Profile>();
+    // your own full row (visitors can't read is_admin, featured or username_changed_at directly)
+    const { data: me } = await sb.rpc('my_profile').maybeSingle<Profile>();
     ctx.locals.me = me ?? null;
     // signed in with Google but no username yet: finish setting up first
     if (!me && !OPEN.test(path)) return ctx.redirect(`/welcome?next=${encodeURIComponent(path + ctx.url.search)}`);

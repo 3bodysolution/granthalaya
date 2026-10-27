@@ -9,8 +9,11 @@ import { viaCover } from './images';
 /* ——— shapes ——— */
 export interface Profile {
   id: string; username: string; display_name: string; avatar_url: string | null;
-  is_private: boolean; featured: boolean; is_admin: boolean; username_changed_at: string | null; created_at: string;
+  is_private: boolean; created_at: string;
+  /** only on your own profile (the database hides them from everyone else) */
+  featured?: boolean; is_admin?: boolean; username_changed_at?: string | null;
 }
+const PROFILE_COLUMNS = 'id, username, display_name, avatar_url, is_private, created_at';
 export interface Details {
   id: string; bio: string; links: Record<string, string>; favourites: string[]; pinned_line: string | null;
 }
@@ -98,7 +101,7 @@ export async function loadProfile(sb: SupabaseClient, username: string, known?: 
   Promise<{ profile: Profile; details: Details | null } | { redirect: string } | null> {
   const u = username.toLowerCase();
   if (known && known.username === u) return { profile: known, details: await loadDetails(sb, known.id) };
-  const { data: profile } = await sb.from('profiles').select('*').eq('username', u).maybeSingle<Profile>();
+  const { data: profile } = await sb.from('profiles').select(PROFILE_COLUMNS).eq('username', u).maybeSingle<Profile>();
   if (!profile) {
     const { data: old } = await sb.from('username_history').select('user_id').eq('old_username', u).maybeSingle();
     if (!old) return null;
@@ -244,10 +247,8 @@ export async function loadCollections(sb: SupabaseClient, profile: Pick<Profile,
 
 /** shelves shown to new visitors: the founder's, then anyone who ticked "Feature my shelf" */
 export async function loadFeatured(sb: SupabaseClient, limit = 6) {
-  const { data } = await sb.from('profiles').select('id, username, display_name, avatar_url, is_private, featured')
-    .or(`featured.eq.true,username.eq.${site.founder}`).eq('is_private', false).limit(limit + 1);
+  const { data } = await sb.rpc('featured_profiles', { founder: site.founder, lim: limit });
   const people = (data ?? []) as Pick<Profile, 'id' | 'username' | 'display_name' | 'avatar_url'>[];
-  people.sort((a, b) => (a.username === site.founder ? -1 : b.username === site.founder ? 1 : 0));
   return Promise.all(people.slice(0, limit).map(async (p) => {
     const [{ data: logs, count }, { data: det }] = await Promise.all([
       sb.from('logs').select('id, logged_on, title:titles(*)', { count: 'exact' }).eq('user_id', p.id).eq('only_me', false)
