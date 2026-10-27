@@ -25,7 +25,9 @@ returns boolean language sql immutable set search_path = '' as $$
     'privacy','profile','report','reports','root','rss','search','security','settings','signin','signout',
     'signup','staff','stats','support','system','team','terms','threads','undefined','user','users','welcome',
     'www','you','fuck','fucker','shit','bitch','cunt','nigger','nigga','faggot','whore','slut','rape','porn',
-    'chutiya','madarchod','bhenchod','behenchod','randi','gandu','bhosdike','lund'
+    'chutiya','madarchod','bhenchod','behenchod','randi','gandu','bhosdike','lund',
+    'film','book','books','tv','story','reviews','lines','writer','person','author','essays','lists','collections',
+    'og','cards','cover','covers','img','art','static','assets','public','favicon','robots','sitemap'
   ]) or u like 'admin%' or u like 'granthalaya%' or u like '%official%';
 $$;
 

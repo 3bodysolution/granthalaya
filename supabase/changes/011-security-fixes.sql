@@ -39,4 +39,21 @@ begin
   return new;
 end $$;
 
+-- L27 ────────────────────────────────────────────────────────────────────────
+-- Names that look like addresses on the site can't be taken (people who already have one keep it).
+create or replace function public.username_reserved(u text)
+returns boolean language sql immutable set search_path = '' as $$
+  select u = any (array[
+    'about','account','accounts','add','admin','administrator','api','app','auth','blog','callback','contact',
+    'delete','diary','edit','everyone','explore','feed','films','granthalaya','help','home','index','info',
+    'library','login','logout','mail','me','mod','moderator','new','news','notes','null','official','owner',
+    'privacy','profile','report','reports','root','rss','search','security','settings','signin','signout',
+    'signup','staff','stats','support','system','team','terms','threads','undefined','user','users','welcome',
+    'www','you','fuck','fucker','shit','bitch','cunt','nigger','nigga','faggot','whore','slut','rape','porn',
+    'chutiya','madarchod','bhenchod','behenchod','randi','gandu','bhosdike','lund',
+    'film','book','books','tv','story','reviews','lines','writer','person','author','essays','lists','collections',
+    'og','cards','cover','covers','img','art','static','assets','public','favicon','robots','sitemap'
+  ]) or u like 'admin%' or u like 'granthalaya%' or u like '%official%';
+$$;
+
 commit;
