@@ -26,4 +26,17 @@ alter table public.profiles add constraint avatar_url_ok
   check (avatar_url is null or (avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$' and char_length(avatar_url) <= 600));
 revoke insert (avatar_url), update (avatar_url) on public.profiles from authenticated;
 
+-- M3 ─────────────────────────────────────────────────────────────────────────
+create or replace function public.touch_log()
+returns trigger language plpgsql set search_path = '' as $$
+begin
+  new.logged_on := coalesce(new.finished_on, new.started_on, new.logged_on, (now() at time zone 'utc')::date);
+  new.updated_at := now();
+  -- people can't backdate created_at (check_log counts rows made in the last hour); the website and direct database work can
+  if auth.role() in ('anon', 'authenticated') then
+    if tg_op = 'INSERT' then new.created_at := now(); else new.created_at := old.created_at; end if;
+  end if;
+  return new;
+end $$;
+
 commit;
