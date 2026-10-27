@@ -3,6 +3,7 @@
 import { env } from './supabase';
 import type { Kind } from './kinds';
 import { base } from './catalog/fetch';
+import { checkUrl, safeGet } from './safefetch';
 
 export type Hit = {
   kind: Kind; title: string; creator?: string; year?: number;
@@ -117,23 +118,17 @@ function meta(html: string, name: string) {
   const tag = html.match(re)?.[0];
   return tag ? decode(tag.match(/content=["']([^"']*)["']/i)?.[1] ?? '') : '';
 }
-function safeUrl(u: string) {
-  const url = new URL(u);
-  if (!/^https?:$/.test(url.protocol)) throw new Error('bad');
-  if (/^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.|\[)/.test(url.hostname) || url.hostname.endsWith('.local') || url.hostname.endsWith('.internal')) throw new Error('bad');
-  return url;
-}
 export async function link(raw: string): Promise<Hit[]> {
-  const u = safeUrl(raw);
+  const u = checkUrl(raw);
   const host = u.hostname.replace(/^www\./, '');
   const tm = u.href.match(/themoviedb\.org\/(movie|tv)\/(\d+)/);
   if (tm) {
     const h = tm[1] === 'movie' ? await filmDetails(+tm[2]) : await showSeasons(+tm[2]);
     if (h) return [h];
   }
-  const r = await get(u.href, 9000, { Accept: 'text/html' });
+  const r = await safeGet(u.href, 9000, { ...UA, Accept: 'text/html' });
   if (!r.ok) throw new Error('unreadable');
-  const html = (await r.text()).slice(0, 3_000_000);
+  const html = r.text().slice(0, 3_000_000);
   const title = meta(html, 'og:title') || decode(html.match(/<title[^>]*>([^<]*)/i)?.[1] ?? '');
   if (!title) throw new Error('unreadable');
   const site = meta(html, 'og:site_name') || host;
