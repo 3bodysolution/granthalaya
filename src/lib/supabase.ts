@@ -8,7 +8,9 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { AstroCookies } from 'astro';
 import { timedFetch } from './timing';
 
-export const env = (k: string): string => ((globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[k] ?? (import.meta.env as Record<string, string>)[k] ?? '') as string;
+// Read from the running server's environment only. (`import.meta.env` would be written into the
+// build, secret key included; on this computer astro.config.mjs fills the environment from `.env`.)
+export const env = (k: string): string => (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env?.[k] ?? '';
 
 export const supabaseReady = () => !!(env('PUBLIC_SUPABASE_URL') && env('PUBLIC_SUPABASE_PUBLISHABLE_KEY'));
 
