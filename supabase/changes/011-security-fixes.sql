@@ -39,6 +39,10 @@ begin
   return new;
 end $$;
 
+-- L31 ────────────────────────────────────────────────────────────────────────
+update public.profiles set featured = false where is_private and featured;
+alter table public.profiles add constraint featured_needs_public check (not (is_private and featured));
+
 -- L27 ────────────────────────────────────────────────────────────────────────
 -- Names that look like addresses on the site can't be taken (people who already have one keep it).
 create or replace function public.username_reserved(u text)

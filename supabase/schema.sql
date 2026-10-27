@@ -60,6 +60,7 @@ create table public.profiles (
   is_admin boolean not null default false,           -- can open the reports page; set by hand
   username_changed_at timestamptz,
   created_at timestamptz not null default now(),
+  constraint featured_needs_public check (not (is_private and featured)),       -- a private shelf can't be featured
   constraint username_format check (username ~ '^[a-z0-9_]{3,20}$'),
   constraint display_name_length check (char_length(display_name) <= 60),
   constraint avatar_url_ok check (avatar_url is null or (avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$' and char_length(avatar_url) <= 600))   -- Google's photo host only
