@@ -42,10 +42,15 @@ const rowsP = front ? bookRows(suggestedP).then((r) => markRows(sb, Astro.locals
 const suggested = await suggestedP;
 const bookLists = [...listsOfKind('book'), ...suggested];
 // Marathi or Hindi on its own opens the shops' list first (Open Library has few books in them); "More from Open Library" is the same filter with an order
-const shopFirst = [...q.keys()].join() === 'language' ? Object.entries(SHOP_LISTS).find(([, v]) => v[2] === language)?.[0] : undefined;
+const shopFirst = [...q.keys()].filter((k) => k !== 'page').join() === 'language' ? Object.entries(SHOP_LISTS).find(([, v]) => v[2] === language)?.[0] : undefined;
 const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === (q.get('list') ?? shopFirst));
 const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ subject, language, year, decade, sort, page });
 const marks = sb && !front && !picked ? await myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
+
+// the shops' lists run to hundreds of books: 48 a page like the other grids, the most listed first
+const shopPicked = picked?.slug.startsWith('shop-') ? picked : undefined;
+const shopPages = shopPicked ? Math.ceil(shopPicked.items.length / 48) : 0;
+const shown = shopPicked ? { ...shopPicked, items: shopPicked.items.slice((Math.min(page, shopPages) - 1) * 48, Math.min(page, shopPages) * 48) } : picked;
 
 const known = SUBJECTS.find(([s]) => s === subject)?.[1];
 const subjectName = subject ? known ?? subject.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()) : '';
@@ -96,7 +101,8 @@ const fields = [
   ) : picked ? (
     <section class="pad">
       <p class="muted lede">{picked.intro}</p>
-      <ListGrid list={picked} decade={dcPicked} />
+      <ListGrid list={shown!} decade={dcPicked} />
+      {shopPicked && <Pager page={Math.min(page, shopPages)} pages={shopPages} />}
       {shopFirst && <p class="muted lede"><a class="ul" href={`/books/?language=${language}&sort=top`}>More {langName} books from Open Library</a></p>}
     </section>
   ) : (

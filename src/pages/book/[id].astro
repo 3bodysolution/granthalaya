@@ -7,7 +7,7 @@ import Tabs from '../../components/title/Tabs.astro';
 import Reviews from '../../components/title/Reviews.astro';
 import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
-import { olBook, gbBook, bookKey, bookHref, type BookPage } from '../../lib/catalog/books';
+import { olBook, gbBook, bookKey, bookHref, firstYear, type BookPage } from '../../lib/catalog/books';
 import { slug } from '../../lib/catalog/fetch';
 import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, ownRecord, type TitleRow } from '../../lib/catalog/onsite';
 import { aboutHours } from '../../lib/data';
@@ -55,6 +55,7 @@ const [site, saved] = await Promise.all([
 // a better description is looked for once, in the background, and only for books already in our catalogue
 if (row && saved && !saved.checked) describeLater(row.id);
 const description = cleanBlurb(saved?.text ?? b.description);   // saved text too: the cleaner may have learnt something since it was saved
+const year = firstYear(b.year, saved?.text, saved?.source);   // the first publication, not a later edition's
 const credit = saved?.text && saved.source !== 'openlibrary'
   ? { adapted: saved.source?.startsWith('ai-'), from: saved.source?.endsWith('wikipedia') ? 'Wikipedia' : 'Open Library', url: saved.url ?? (saved.source?.endsWith('wikipedia') ? undefined : b.sourceLink) }
   : null;
@@ -65,7 +66,7 @@ const shops = [...new Map(shopRows.map((s) => [s.shop, s])).values()].filter((s)
 const cover = b.cover ?? row?.cover_url ?? undefined;   // an Open Library book with no cover there may have one from a shop
 const gbId = 'gb' in k ? k.gb : null;
 const hit = {
-  kind: 'book', olKey: 'ol' in k ? k.ol : undefined, title: b.title, creator: b.authors[0]?.name, year: b.year, pages: b.pages, cover: b.cover,
+  kind: 'book', olKey: 'ol' in k ? k.ol : undefined, title: b.title, creator: b.authors[0]?.name, year, pages: b.pages, cover: b.cover,
   link: gbId ? `https://books.google.com/books?id=${gbId}` : b.sourceLink || undefined,
 };
 const share = new URL(Astro.url.pathname, Astro.site).href;
@@ -82,13 +83,13 @@ const tabs = [{ key: 'details', label: 'Details' }, b.subjects.length && { key: 
 const language = row?.language ? new Intl.DisplayNames(['en'], { type: 'language' }).of(row.language) : null;
 const manyEditions = (b.editions ?? 0) >= 2;
 const bits = await pageBits(sb, 'book', param);
-const og = bookOg(b, bits?.creator ?? b.authors.map((a) => a.name).join(', '), bits?.line);
+const og = bookOg({ ...b, year }, bits?.creator ?? b.authors.map((a) => a.name).join(', '), bits?.line);
 const paras = description ? description.split(/\n{2,}/) : [];
 const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
 ---
 <Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} line={row?.tagline ? { text: row.tagline, source: b.title } : undefined} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
-    <Poster slot="poster" src={cover} title={b.title} by={b.authors[0]?.name} kind="book" year={b.year} />
+    <Poster slot="poster" src={cover} title={b.title} by={b.authors[0]?.name} kind="book" year={year} />
     <Fragment slot="side">
       <div class="find">
         <p class="f-h">Find it</p>
@@ -100,7 +101,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
     {b.subtitle && <p class="sub">{b.subtitle}</p>}
     <p class="meta">
       {b.authors.length > 0 && <span>by {b.authors.map((a, i) => <>{i > 0 && ', '}{a.href ? <a href={a.href} class="ul">{a.name}</a> : a.name}</>)}</span>}
-      {b.year && <span><span class="vbar" aria-hidden="true"></span><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></span>}
+      {year && <span><span class="vbar" aria-hidden="true"></span><a href={`/books/?year=${year}`} class="ul">{year}</a></span>}
     </p>
     {paras.length > 0 && <div class="desc">{paras.map((p) => <p>{p}</p>)}</div>}
     {credit && (
@@ -113,7 +114,7 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
       <Tabs id="book" tabs={tabs}>
         <div role="tabpanel" id="book-p-details" aria-labelledby="book-t-details" class="tp">
           <dl class="facts">
-            {b.year && <><dt>First published</dt><dd><a href={`/books/?year=${b.year}`} class="ul">{b.year}</a></dd></>}
+            {year && <><dt>First published</dt><dd><a href={`/books/?year=${year}`} class="ul">{year}</a></dd></>}
             {language && <><dt>Language</dt><dd>{language}</dd></>}
             {b.pages && <><dt>Length</dt><dd>{b.pages} pages{reading ? `, ${reading} to read` : ''}</dd></>}
             {b.languages.length > 0 && <><dt>Editions in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}

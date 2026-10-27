@@ -305,3 +305,15 @@ export async function searchBooks(text: string): Promise<{ books: BookCard[]; au
     .map((x: any) => ({ key: x.key, name: x.name, href: authorHref(x.key, x.name), works: x.work_count }));
   return { books: books.slice(0, 8), authors: authors.slice(0, 3) };
 }
+
+/**
+ * The year a book was first published. Open Library's year can be a later edition's (Yayati says 1978; it came out in 1959),
+ * so when the page's Wikipedia intro names an earlier year in its first sentence ("is a 1959 Marathi-language novel"),
+ * that one wins. Never later than Open Library's year, and never taken from an AI-adapted or Open Library text.
+ */
+export function firstYear(year: number | undefined, text?: string | null, source?: string | null): number | undefined {
+  if (source !== 'wikipedia' || !text) return year;
+  const sentence = text.split(/(?<=[a-z)])\.\s/)[0].replace(/\([^)]*\)/g, ' ');
+  const y = Number(sentence.match(/\b(1[0-9]{3}|20[0-2][0-9])\b/)?.[1]);
+  return y >= 1000 && (!year || y < year) ? y : year;
+}
