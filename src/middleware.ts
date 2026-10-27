@@ -2,6 +2,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { serverClient, supabaseReady } from './lib/supabase';
 import { site } from './data/site';
+import { googleAvatar } from './lib/avatar';
 import type { Profile } from './lib/data';
 import { withTiming, timingOn, header, summary } from './lib/timing';
 
@@ -76,7 +77,7 @@ const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
   const c = data?.claims as Record<string, any> | undefined;
   if (c?.sub && c.role === 'authenticated') {
     const meta = (c.user_metadata ?? {}) as Record<string, string>;
-    ctx.locals.user = { id: c.sub, email: c.email, name: meta.full_name || meta.name, avatar: meta.avatar_url || meta.picture };
+    ctx.locals.user = { id: c.sub, email: c.email, name: meta.full_name || meta.name, avatar: googleAvatar(meta.avatar_url || meta.picture) ?? undefined };
     const { data: me } = await sb.from('profiles').select('*').eq('id', c.sub).maybeSingle<Profile>();
     ctx.locals.me = me ?? null;
     // signed in with Google but no username yet: finish setting up first

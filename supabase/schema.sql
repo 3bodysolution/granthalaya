@@ -56,7 +56,7 @@ create table public.profiles (
   created_at timestamptz not null default now(),
   constraint username_format check (username ~ '^[a-z0-9_]{3,20}$'),
   constraint display_name_length check (char_length(display_name) <= 60),
-  constraint avatar_url_ok check (avatar_url is null or (avatar_url ~ '^https://' and char_length(avatar_url) <= 600))
+  constraint avatar_url_ok check (avatar_url is null or (avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$' and char_length(avatar_url) <= 600))   -- Google's photo host only
 );
 create unique index profiles_username_key on public.profiles (username);
 create index profiles_featured on public.profiles (featured) where featured;
@@ -494,8 +494,9 @@ create policy "reports: send one" on public.reports for insert to authenticated
 
 grant select on public.profiles, public.username_history, public.profile_details, public.titles,
   public.logs, public.highlights, public.threads, public.thread_items, public.book_suggestions, public.shop_books to anon, authenticated;
-grant insert (id, username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
-grant update (username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
+-- avatar_url isn't here: the website sets it (from the person's Google sign-in) with the secret key
+grant insert (id, username, display_name, is_private, featured) on public.profiles to authenticated;
+grant update (username, display_name, is_private, featured) on public.profiles to authenticated;
 grant insert, update on public.profile_details to authenticated;
 grant insert, update, delete on public.logs, public.highlights, public.threads to authenticated;
 grant insert, delete on public.thread_items to authenticated;

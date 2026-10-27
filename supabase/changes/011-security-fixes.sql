@@ -16,4 +16,14 @@ create policy "thread items: edit your own" on public.thread_items for update to
 revoke update on public.thread_items from authenticated;
 grant update (position, why) on public.thread_items to authenticated;
 
+-- C4 ─────────────────────────────────────────────────────────────────────────
+-- Photos that aren't from Google's photo host are cleared first (the person can pick "Use my Google photo" again in Settings).
+update public.profiles set avatar_url = null
+  where avatar_url is not null
+    and not (avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$' and char_length(avatar_url) <= 600);
+alter table public.profiles drop constraint avatar_url_ok;
+alter table public.profiles add constraint avatar_url_ok
+  check (avatar_url is null or (avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$' and char_length(avatar_url) <= 600));
+revoke insert (avatar_url), update (avatar_url) on public.profiles from authenticated;
+
 commit;
