@@ -477,7 +477,8 @@ create policy "thread items: visible with the shelf" on public.thread_items for 
 create policy "thread items: add to your own threads" on public.thread_items for insert to authenticated
   with check (user_id = auth.uid() and exists (select 1 from public.threads t where t.id = thread_id and t.user_id = auth.uid()));
 create policy "thread items: edit your own" on public.thread_items for update to authenticated
-  using (user_id = auth.uid()) with check (user_id = auth.uid());
+  using (user_id = auth.uid())
+  with check (user_id = auth.uid() and exists (select 1 from public.threads t where t.id = thread_id and t.user_id = auth.uid()));
 create policy "thread items: delete your own" on public.thread_items for delete to authenticated using (user_id = auth.uid());
 
 create policy "blocks: see your own" on public.blocks for select to authenticated using (blocker = auth.uid());
@@ -496,7 +497,9 @@ grant select on public.profiles, public.username_history, public.profile_details
 grant insert (id, username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
 grant update (username, display_name, avatar_url, is_private, featured) on public.profiles to authenticated;
 grant insert, update on public.profile_details to authenticated;
-grant insert, update, delete on public.logs, public.highlights, public.threads, public.thread_items to authenticated;
+grant insert, update, delete on public.logs, public.highlights, public.threads to authenticated;
+grant insert, delete on public.thread_items to authenticated;
+grant update (position, why) on public.thread_items to authenticated;   -- an item can't be moved to another collection
 grant select, insert, delete on public.blocks to authenticated;
 grant select on public.reports to authenticated;
 grant insert (reporter, target_user, target_log, target_comment, reason, details) on public.reports to authenticated;
