@@ -2,6 +2,7 @@
 //   node scripts/merge-titles.mjs               dry run: lists every cluster, changes nothing; writes private/catalogues/merge-plan.md and .json
 //   node scripts/merge-titles.mjs --rehearse    does the whole merge inside a transaction and rolls it back (proves it works, saves nothing)
 //   node scripts/merge-titles.mjs --write       merges (only when Sarthak asks; take a backup first: node scripts/backup-db.mjs --name=before-merge)
+//   add --films to any of these to work on films instead of books (same film in two rows: see the films section below; books are then left alone)
 //   private/catalogues/merge-decisions.json  { "skip": ["<winner slug>", ...] }  clusters left alone
 //
 // Same book = same language (or one has none), same title (Devanagari or English, spellings compared loosely: scripts/shops/text.mjs),
@@ -98,11 +99,44 @@ for (const f of listFiles) {
   }
 }
 
+/* ——— films (--films): the same film in two rows, usually an older row with no TMDB id and a newer one made when someone added it.
+   Same title (letters and digits only), release year within one (both known), the same director's surname when both name one,
+   and not two different TMDB ids. The row that stays: the one with the most logs, collection items and favourites, else the one with a TMDB id,
+   else the older; it takes the other's TMDB id, cover and any empty field. Books are left alone in this mode. ——— */
+if (process.argv.includes('--films')) {
+  const films = await q(`select id, slug, title, creator, language, year, tmdb_id, source, cover_url, cover_from, runtime, created_at from public.titles where kind = 'film'`);
+  const flat = (s) => String(s ?? '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '');
+  for (const f of films) {
+    f.logs = logs.get(f.id) ?? 0; f.items = items.get(f.id) ?? 0; f.favs = favs.get(f.id) ?? 0; f.shops = 0; f.sugg = 0; f.lists = 0; f.ol_key = null;
+    f.weight = f.logs + f.items + f.favs; f.tkey = flat(f.title); f.akey = authorKey(f.creator);
+  }
+  const fp = films.map((_, i) => i);
+  const ff = (i) => (fp[i] === i ? i : (fp[i] = ff(fp[i])));
+  const byTitle = new Map();
+  films.forEach((f, i) => byTitle.set(f.tkey, [...(byTitle.get(f.tkey) ?? []), i]));
+  for (const idxs of byTitle.values()) for (let x = 0; x < idxs.length; x++) for (let y = x + 1; y < idxs.length; y++) {
+    const a = films[idxs[x]], b = films[idxs[y]];
+    if (!a.tkey || a.year == null || b.year == null || Math.abs(a.year - b.year) > 1) continue;
+    if (a.tmdb_id && b.tmdb_id && a.tmdb_id !== b.tmdb_id) continue;
+    if (a.akey && b.akey && a.akey !== b.akey) continue;
+    fp[ff(idxs[x])] = ff(idxs[y]);
+  }
+  const fg = new Map();
+  films.forEach((f, i) => { const g = ff(i); fg.set(g, [...(fg.get(g) ?? []), f]); });
+  clusters.length = 0; repoint.length = 0; noAuthor.length = 0;
+  for (const rows of fg.values()) if (rows.length > 1) {
+    const win = [...rows].sort((a, b) => (b.weight - a.weight) || (Number(!!b.tmdb_id) - Number(!!a.tmdb_id)) || (new Date(a.created_at) - new Date(b.created_at)))[0];
+    clusters.push({ winner: win, losers: rows.filter((r) => r !== win), kind: 'film' });
+  }
+  clusters.sort((a, b) => a.winner.title.localeCompare(b.winner.title));
+}
+const NOUN = process.argv.includes('--films') ? 'Films' : 'Books';
+
 /* ——— the report ——— */
-const d = (b) => `${b.title}${b.original_title ? ` / ${b.original_title}` : ''}, ${b.creator || 'no author'} [${b.slug}; ${b.source ?? '?'}${b.ol_key ? `; ${b.ol_key}` : ''}; ${b.cover_url ? 'cover' : 'no cover'}; ${b.logs} logs, ${b.items} collection items, ${b.favs} favourites, ${b.shops} shop rows, ${b.sugg} suggestions, ${b.lists} list entries]`;
+const d = (b) => `${b.title}${b.original_title ? ` / ${b.original_title}` : ''}, ${b.creator || 'no author'} [${b.slug}; ${b.source ?? '?'}${b.ol_key ? `; ${b.ol_key}` : ''}${b.tmdb_id ? `; tmdb ${b.tmdb_id}` : ''}; ${b.cover_url ? 'cover' : 'no cover'}; ${b.logs} logs, ${b.items} collection items, ${b.favs} favourites, ${b.shops} shop rows, ${b.sugg} suggestions, ${b.lists} list entries]`;
 const lines = [
-  `# Books in two rows (dry run ${new Date().toLocaleDateString('en-CA')})`, '',
-  `${books.length} books. ${clusters.length} clusters of the same book (${clusters.reduce((n, c) => n + c.losers.length, 0)} rows would go). Nothing was changed.`,
+  `# ${NOUN} in two rows (dry run ${new Date().toLocaleDateString('en-CA')})`, '',
+  `${NOUN === 'Films' ? 'Films' : `${books.length} books`}. ${clusters.length} clusters of the same ${NOUN === 'Films' ? 'film' : 'book'} (${clusters.reduce((n, c) => n + c.losers.length, 0)} rows would go). Nothing was changed.`,
   `Left alone: ${noAuthor.length} pairs with the same title where one has no author named.`, '',
   ...clusters.flatMap((c, n) => [`${n + 1}. KEEP ${d(c.winner)}`, ...c.losers.map((l) => `    MERGE IN ${d(l)}`)]),
   '', `## List entries that would point at a better row (${repoint.length})`, '',
@@ -121,7 +155,7 @@ if (!write && !rehearse) { console.log('Nothing was changed (dry run).'); await 
 
 /* ——— merging (one transaction per cluster) ——— */
 const decided = fs.existsSync(`${OUT}/merge-decisions.json`) ? JSON.parse(fs.readFileSync(`${OUT}/merge-decisions.json`, 'utf8')) : { skip: [] };
-const FILL = ['original_title', 'language', 'year', 'pages', 'publisher', 'description', 'description_source', 'description_url', 'description_checked_at', 'tagline', 'card_bg', 'link', 'note', 'trivia_source', 'color'];
+const FILL = ['original_title', 'language', 'year', 'pages', 'publisher', 'description', 'description_source', 'description_url', 'description_checked_at', 'tagline', 'card_bg', 'link', 'note', 'trivia_source', 'color', 'runtime'];
 const moved = {};   // old slug → winner slug
 let merged = 0, failed = 0;
 for (const c of clusters.filter((x) => !decided.skip.includes(x.winner.slug))) {
@@ -131,7 +165,8 @@ for (const c of clusters.filter((x) => !decided.skip.includes(x.winner.slug))) {
     for (const l of c.losers) {
       const L = l.id;
       // an Open Library key is unique: the winner takes the loser's only if it has none
-      if (l.ol_key && !c.winner.ol_key) { await client.query('update public.titles set ol_key = null where id = $1', [L]); await client.query('update public.titles set ol_key = $2 where id = $1', [W, l.ol_key]); c.winner.ol_key = l.ol_key; }
+      const idCol = c.kind === 'film' ? 'tmdb_id' : 'ol_key';
+      if (l[idCol] && !c.winner[idCol]) { await client.query(`update public.titles set ${idCol} = null where id = $1`, [L]); await client.query(`update public.titles set ${idCol} = $2 where id = $1`, [W, l[idCol]]); c.winner[idCol] = l[idCol]; }
       for (const col of FILL) await client.query(`update public.titles w set ${col} = l.${col} from public.titles l where w.id = $1 and l.id = $2 and w.${col} is null and l.${col} is not null`, [W, L]);
       await client.query(`update public.titles w set trivia = l.trivia from public.titles l where w.id = $1 and l.id = $2 and w.trivia = '[]'::jsonb and l.trivia <> '[]'::jsonb`, [W, L]);
       await client.query(`update public.titles w set creator = l.creator from public.titles l where w.id = $1 and l.id = $2 and w.creator = '' and l.creator <> ''`, [W, L]);
@@ -144,7 +179,7 @@ for (const c of clusters.filter((x) => !decided.skip.includes(x.winner.slug))) {
       await client.query('update public.book_suggestions set title_id = $1 where title_id = $2', [W, L]);
       await client.query(`update public.profile_details set favourites = (select coalesce(array_agg(x order by o), '{}') from (select distinct on (x) x, o from unnest(array_replace(favourites, $2::uuid, $1::uuid)) with ordinality t(x, o) order by x, o) s) where $2::uuid = any(favourites)`, [W, L]);
       await client.query('delete from public.titles where id = $1', [L]);
-      moved[l.slug] = c.winner.slug;
+      if (c.kind !== 'film') moved[l.slug] = c.winner.slug;   // (old film addresses are /film/<tmdb id>, which doesn't change)
     }
     await client.query(rehearse ? 'rollback' : 'commit');
     merged++;
