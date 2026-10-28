@@ -46,7 +46,7 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
         line: col.body ? noteStart(col.body, 90) : undefined, cover: first?.cover_url ?? undefined, color: first?.color ?? undefined,
         bg: isBackground(asked) ? asked : 'reading', owner: profile.username,
       }, width);
-      return picture(pic, 'public, max-age=300');
+      return picture(pic, locals.me ? 'private, max-age=300' : 'public, max-age=300');   // drawn as the visitor: a signed-in one's copy is not for shared caches
     }
   } catch (e) {
     if (e instanceof CoverMissing) return coverSlow();

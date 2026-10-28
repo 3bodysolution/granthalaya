@@ -78,6 +78,6 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
   // which the AI may still add). Cards about someone's shelf stay short.
   const cache = shared
     ? (card.line ? 'public, max-age=3600, s-maxage=2592000, stale-while-revalidate=86400' : 'public, max-age=600, s-maxage=86400')
-    : 'public, max-age=300';
+    : locals.me ? 'private, max-age=300' : 'public, max-age=300';   // drawn as the visitor: a signed-in one's copy is not for shared caches
   return picture(pic, cache);
 };

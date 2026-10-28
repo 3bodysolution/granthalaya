@@ -5,6 +5,9 @@ import { site } from './data/site';
 import { googleAvatar } from './lib/avatar';
 import type { Profile } from './lib/data';
 import { withTiming, timingOn, header, summary } from './lib/timing';
+import { rateLimited } from './lib/ratelimit';
+
+const tooMany = (ctx: { url: URL; clientAddress: string }) => { try { return rateLimited(ctx.url.pathname, ctx.clientAddress); } catch { return null; } };
 
 // Addresses from the days when this was one person's site keep working.
 function oldAddress(path: string): string | null {
@@ -32,7 +35,7 @@ const OPEN = /^\/(welcome|signin|auth\/|api\/|privacy|terms|about)/;
 // an address that isn't valid text (a broken %-code such as /film/%E0%A4/) is just a page that isn't there
 const brokenAddress = (path: string) => { try { decodeURIComponent(path); return false; } catch { return true; } };
 
-export const onRequest = defineMiddleware((ctx, next) => brokenAddress(ctx.url.pathname) ? new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }) : withTiming(() => (CARD.test(ctx.url.pathname) ? logged(ctx.url, () => handle(ctx, next)) : handle(ctx, next)) as Promise<Response>));
+export const onRequest = defineMiddleware((ctx, next) => brokenAddress(ctx.url.pathname) ? new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }) : (tooMany(ctx) ?? withTiming(() => (CARD.test(ctx.url.pathname) ? logged(ctx.url, () => handle(ctx, next)) : handle(ctx, next)) as Promise<Response>)));
 
 // Share cards and the cover copies they use: each one writes a line to the function log (Vercel → Logs) with its steps,
 // their times and, when it fails, why. A cold start shows as a long first step.
