@@ -138,7 +138,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   <dialog class="search" id="search" aria-label="Search" data-src={me ? `/api/search?u=${me.username}` : ''}>
     <div class="search-top">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input type="search" placeholder="Search films, books, people" aria-label="Search" autocomplete="off" spellcheck="false" aria-controls="search-list" />
+      <input type="search" placeholder="Search films, books, people" aria-label="Search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="search-list" />
       <span class="search-wait" hidden><span class="ink" aria-hidden="true"></span></span>
       <kbd>esc</kbd>
     </div>
@@ -675,8 +675,15 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const list = document.getElementById('search-list')!;
       list.innerHTML = html;
       sel = 0;
-      const first = list.querySelector('[role=option]');
-      first?.setAttribute('aria-selected', 'true');
+      // the rows and headings in between are not options: only the links are
+      list.querySelectorAll('li').forEach((li) => li.setAttribute('role', 'presentation'));
+      const opts = [...list.querySelectorAll<HTMLElement>('[role=option]')];
+      opts.forEach((o, i) => { o.id = `search-opt-${i}`; });
+      opts[0]?.setAttribute('aria-selected', 'true');
+      // the input points at the highlighted option, so a screen reader reads it as the arrows move
+      const input = dialog().querySelector('input')!;
+      input.setAttribute('aria-expanded', String(opts.length > 0));
+      if (opts[0]) input.setAttribute('aria-activedescendant', opts[0].id); else input.removeAttribute('aria-activedescendant');
     }
     function shelfRows(q: string, n: number) {
       const all = mine || [];
@@ -718,6 +725,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (!opts.length) return;
       sel = (sel + d + opts.length) % opts.length;
       opts.forEach((o, i) => o.setAttribute('aria-selected', String(i === sel)));
+      dialog().querySelector('input')!.setAttribute('aria-activedescendant', opts[sel].id);
       opts[sel].scrollIntoView({ block: 'nearest' });
     }
     async function open(mode = '', q = '') {
