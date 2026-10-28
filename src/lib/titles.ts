@@ -5,6 +5,7 @@ import { ensureFactsLater } from './cards/tagline';
 import { adminClient, env } from './supabase';
 import { filmDetails, seasonDetails, showSeasons, type Hit } from './lookup';
 import { KINDS, type Kind } from './kinds';
+import { sameWork } from './samework';
 import { getTrivia } from './trivia.mjs';
 
 export const slugify = (s: string) =>
@@ -118,17 +119,15 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
 }
 
 /** the same film or book already in the catalogue without an id (copied from the old library): same kind, same title,
- *  year within one, same creator when both have one. It learns the id, so nothing is split. */
+ *  year within one, same creator when both have one (see samework.ts). It learns the id, so nothing is split. */
 async function adoptOlder(h: Hit): Promise<{ id: string; slug: string } | null> {
   const db = adminClient();
   const idCol = h.kind === 'film' ? 'tmdb_id' : 'ol_key';
   const idVal = h.kind === 'film' ? h.tmdbId : h.olKey;
   if (!idVal) return null;
-  let q = db.from('titles').select('id, slug, year, creator').eq('kind', h.kind).is(idCol, null).ilike('title', h.title.replace(/[%_\\]/g, (c) => `\\${c}`));
-  if (h.year) q = q.gte('year', h.year - 1).lte('year', h.year + 1);
-  const { data } = await q.limit(10);
-  const key = (s?: string | null) => slugify(s ?? '');
-  const fits = (data ?? []).filter((r) => !h.creator || !r.creator || key(r.creator).includes(key(h.creator)) || key(h.creator).includes(key(r.creator)));
+  if (!h.year) return null;
+  const { data } = await db.from('titles').select('id, slug, title, year, creator').eq('kind', h.kind).is(idCol, null).gte('year', h.year - 1).lte('year', h.year + 1).limit(500);
+  const fits = (data ?? []).filter((r) => sameWork(h, r));
   if (!fits.length) return null;
   const best = fits.find((r) => r.year === h.year) ?? fits[0];
   const { error } = await db.from('titles').update({ [idCol]: idVal }).eq('id', best.id).is(idCol, null);
