@@ -69,7 +69,7 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
   .fbar .fpart:first-child .fbtn { border-radius: 5px 0 0 5px; }
   .fbar .fpart:last-child .fbtn { border-radius: 0 5px 5px 0; }
   .fbtn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; cursor: pointer; white-space: nowrap; transition: color .2s ease, background-color .2s ease, transform .2s var(--spring); }
-  .fbtn em { font-style: normal; font-weight: 500; color: color-mix(in srgb, currentColor 78%, var(--card)); }   /* quieter than the value, but still readable (4.5:1) */
+  .fbtn em { font-style: normal; font-weight: 500; color: var(--muted); }   /* quieter than the value, but still readable (4.5:1) */
   .fbtn svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .fbtn:hover, .fpart.open .fbtn { color: var(--ink); background: var(--soft); }
   .fbtn:active { transform: scale(.97); }
