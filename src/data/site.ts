@@ -10,8 +10,8 @@ export const site = {
   maker: 'Sarthak',
   founder: 'sarthak',
   // An email address for privacy questions and data requests, shown on /privacy and /terms.
-  // Fill this in before the public launch (Google asks for a way to contact you).
-  contact: '',
+
+  contact: 'granthalayasupport@gmail.com',
 
   // Reading pace used to estimate time spent on books (minutes per page) and essays (words per minute).
   minutesPerPage: 1.1,

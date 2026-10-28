@@ -283,7 +283,7 @@ const apps = { wa: siWhatsapp.path, x: siX.path };
   }
 
   async function onApp(id: string) {
-    if (id === 'sh-copy') { say((await copy(await link())) ? 'Link copied' : 'Could not copy'); return; }
+    if (id === 'sh-copy') { say((await copy(await link())) ? 'Link copied' : 'Couldn’t copy'); return; }
     const j = job;
     if (!j) return;
     // the full-size picture is normally ready by now; if not, it is fetched now (still within the tap)

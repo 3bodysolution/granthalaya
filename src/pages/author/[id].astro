@@ -35,7 +35,7 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
     <div class="stack" style="gap: 10px; min-width: 0">
       <p class="eyebrow" style="color: var(--book)">Author</p>
       <h1 class="title">{a.name}</h1>
-      {(a.born || a.died) && <p class="muted" style="margin: 0; font-size: 15px">{[a.born, a.died].filter(Boolean).join(' – ')}</p>}
+      {(a.born || a.died) && <p class="muted" style="margin: 0; font-size: 15px">{[a.born, a.died].filter(Boolean).join('–')}</p>}
       {bioParas.length > 0 && (
         <details class="bio">
           <summary><span class="bp">{bioParas[0]}</span>{bioParas.length > 1 && <span class="more-b">Read more</span>}</summary>

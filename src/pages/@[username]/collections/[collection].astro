@@ -70,7 +70,7 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
         ? <a class="btn primary" href={Astro.url.pathname}>Done</a>
         : <a class="btn" href={`${Astro.url.pathname}?edit=1`}>Edit</a>)}
     </div>
-    {isMe && path.length === 0 && !editing && <p class="muted empty-c">Nothing here yet. Use “Add to a collection” on any film, book or entry.</p>}
+    {isMe && path.length === 0 && !editing && <p class="muted empty-c">Nothing here yet. Use “Add to a collection” on any film, show, book, essay or entry.</p>}
   </section>
 
   <div class="path">
@@ -214,7 +214,7 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
       const b = ev.currentTarget as HTMLButtonElement;
       const d = document.getElementById('confirm-box') as HTMLDialogElement;
       d.querySelector('#confirm-h')!.textContent = 'Delete this collection?';
-      d.querySelector('#confirm-p')!.textContent = 'The collection goes, with its intro and the lines about each title. Everything stays on your shelf.';
+      d.querySelector('#confirm-p')!.textContent = 'The collection goes, with its intro and what you wrote about each title. Everything stays on your shelf.';
       d.querySelector('#confirm-ok')!.textContent = 'Delete';
       d.returnValue = '';
       d.showModal();

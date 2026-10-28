@@ -27,7 +27,7 @@ const name = profile.display_name || profile.username;
     )}
   </section>
   <div class="pad rise d1" style="padding-top: 26px"><ShelfStrip shelf={o.shelf} current="collections" /></div>
-  {collections.length === 0 && <p class="pad muted" style="padding-top: 32px; font-size: 16px">{isMe ? 'No collections yet. Make one above, or use “Add to a collection” on any film or book.' : `${name} hasn’t made any collections yet.`}</p>}
+  {collections.length === 0 && <p class="pad muted" style="padding-top: 32px; font-size: 16px">{isMe ? 'No collections yet. Make one above, or use “Add to a collection” on any film, show, book or essay.' : `${name} hasn’t made any collections yet.`}</p>}
   <section class="pad grid">
     {collections.map((t, i) => <div class="rise" style={`animation-delay: ${(0.15 + i * 0.08).toFixed(2)}s`}><CollectionCard collection={t} entries={entries} /></div>)}
   </section>

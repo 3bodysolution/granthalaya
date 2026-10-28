@@ -27,7 +27,7 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
       <div class="flex gap-2"><a class:list={['gchip', show === 'open' && 'on']} href="/admin/">Open</a><a class:list={['gchip', show === 'all' && 'on']} href="/admin/?show=all">All</a></div>
     </div>
     {error && <p class="notice bad">Couldn’t load reports: {error.message}</p>}
-    {!error && (reports ?? []).length === 0 && <p class="muted" style="font-size: 16px">Nothing to look at. All quiet.</p>}
+    {!error && (reports ?? []).length === 0 && <p class="muted" style="font-size: 16px">No reports waiting.</p>}
     <div class="list">
       {(reports ?? []).map((r: any) => (
         <article class="card rep">

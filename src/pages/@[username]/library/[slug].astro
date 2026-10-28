@@ -286,7 +286,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
               {mine.length ? (
                 <>
                   <p class="lp-note">It’s on your shelf: <b>{statusLabel(mine[0].data.type, mine[0].data.status)}</b>{mine[0].data.progress ? ` | ${mine[0].data.progress}` : ''}{stars(mine[0]) ? ` | ${stars(mine[0])}` : ''}.</p>
-                  <a class="lrow2" href={href(mine[0])}><Eye /><span>Open your entry</span></a>
+                  <a class="lrow2" href={href(mine[0])}><Eye /><span>Open the entry</span></a>
                   {mine[0].data.status === 'done' && !isShow && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
                 </>
               ) : (
@@ -303,7 +303,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
             <>
               <p class="lp-head">Keep your own shelf</p>
               <p class="lp-note">Log what you {verb} and say what you thought of it.</p>
-              <a class="lrow2" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} data-astro-prefetch="false"><Plus /><span>Sign in to add this</span></a>
+              <a class="lrow2" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} data-astro-prefetch="false"><Plus /><span>Sign in to save it</span></a>
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
             </>
           )}
@@ -338,9 +338,9 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
       </div>
       {(notes || isMe) && (
         <section class="card rise d4 why">
-          <p class="eyebrow">{isMe ? 'Why I saved it' : `Why ${name} saved it`}</p>
-          {notes ? <div class="note essay-note" set:html={notes} /> : <p class="muted" style="margin: 0">No note yet. <a href={`/add/?log=${entry.logId}`} class="accent">Add one</a>.</p>}
-          <p class="muted" style="margin: 0; font-size: 14px">The essay itself lives on {d.source ?? 'its own site'}. This page only keeps the link and the note.</p>
+          <p class="eyebrow">{isMe ? 'My review' : `${name}’s review`}</p>
+          {notes ? <div class="note essay-note" set:html={notes} /> : <p class="muted" style="margin: 0">No review yet. <a href={`/add/?log=${entry.logId}`} class="accent">Add one</a>.</p>}
+          <p class="muted" style="margin: 0; font-size: 14px">The essay itself lives on {d.source ?? 'its own site'}. This page only keeps the link and the review.</p>
         </section>
       )}
       <div class="rise d4 inline">

@@ -13,7 +13,7 @@ export const GET: APIRoute = async ({ url }) => {
   const asked = url.searchParams.get('bg');
   const bg = isBackground(asked) ? asked : undefined;
   const png = await drawPreview({ bg,
-    kicker: 'Shelf', title: 'Sarthak', meta: '@sarthak', line: 'Books, films and the lines I keep.',
+    kicker: 'Shelf', title: 'Sarthak', meta: '@sarthak', line: 'Books, films and what I thought of them.',
     covers: [{ title: 'श्यामची आई' }, { title: 'ययाति' }, { title: 'Paterson' }],
   });
   return picture(png, LONG);

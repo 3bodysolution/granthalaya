@@ -42,7 +42,7 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
     {all.length === 0 ? (
       <section class="pad empty">
         <p class="serif">{isMe ? 'Nothing here yet.' : `${name} hasn’t added anything yet.`}</p>
-        {isMe && <a href="/add/" class="btn primary">Add your first book or film</a>}
+        {isMe && <a href="/add/" class="btn primary">Add your first book, film, show or essay</a>}
       </section>
     ) : (
       <>

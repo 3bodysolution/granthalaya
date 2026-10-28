@@ -26,7 +26,7 @@ const isEssay = d.type === 'essay';
     <span class="type src">{(d.source ?? d.creator).toUpperCase()}</span>
     <span class="serif et">{d.title}</span>
     <span class="serif ex">{excerpt(entry, 96)}</span>
-    <span class="go">{d.status === 'want' ? 'Saved for later ↗' : 'Note + link ↗'}</span>
+    <span class="go">{d.status === 'want' ? 'Saved for later ↗' : 'Review + link ↗'}</span>
   </div>
 ) : (
   <span class:list={['cv', variant, src ? 'real' : 'wash']} style={variant === 'swatch' ? `${vars};width:${w}px;height:${h}px` : vars} transition:name={tname} aria-hidden={variant === 'swatch' ? 'true' : undefined}>

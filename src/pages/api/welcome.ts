@@ -34,6 +34,6 @@ export const POST: APIRoute = async (ctx) => {
   if (avatar) await adminClient().from('profiles').update({ avatar_url: avatar }).eq('id', user.id);
   const { error: e2 } = await sb.from('profile_details').insert({ id: user.id, bio: str(b.bio, 160) ?? '' });
   if (e2) return oops(dbMessage(e2));
-  // new shelves start at home, which offers "Add your first book or film"
+  // new shelves start at home, which offers "Add your first book, film, show or essay"
   return json({ ok: true, next: safeNext(str(b.next, 300), '/') });
 };

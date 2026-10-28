@@ -86,14 +86,14 @@ const features = [
       <div class="art melt settle bg" style="--day: url(/art/home-day.webp); --night: url(/art/home-night.webp)" aria-hidden="true"></div>
       <div class="pad words">
         <h1 class="title rise d1">{shelf.length === 0 ? `Welcome, ${first}.` : `Welcome back, ${first}.`}</h1>
-        {shelf.length === 0 && <p class="sub rise d2">Add your first book or film.</p>}
+        {shelf.length === 0 && <p class="sub rise d2">Add your first book, film, show or essay.</p>}
       </div>
     </section>
 
     {shelf.length === 0 ? (
       <section class="pad start rise d3">
         <a href="/add/" class="btn primary big">Add a book or film</a>
-        <a href={profileHref(me.username)} class="small muted">See your profile →</a>
+        <a href={profileHref(me.username)} class="small muted">View your profile →</a>
       </section>
     ) : (
       <>

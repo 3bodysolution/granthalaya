@@ -151,7 +151,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         <h2 class="serif h">Saved</h2>
         <p class="muted" id="savedmsg">It’s on your shelf.</p>
         <div class="stack" style="gap: 10px; width: 100%">
-          <a class="btn primary big" id="viewlink" href="/">View the entry</a>
+          <a class="btn primary big" id="viewlink" href="/">Open the entry</a>
           <button class="btn big" type="button" id="another">Add another</button>
         </div>
       </div>
@@ -289,7 +289,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       if (manual) $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[k]} | by hand`;
       root.querySelectorAll<HTMLElement>('[data-kind]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.kind === k)));
       f('creator').placeholder = k === 'book' ? 'Author' : k === 'film' ? 'Director' : k === 'tv' ? 'Created by' : 'Writer';
-      $('noteslbl').textContent = k === 'essay' ? 'Why you saved it' : 'Review';
+      $('noteslbl').textContent = k === 'essay' ? 'Review' : 'Review';
       $('againhint').textContent = k === 'book' || k === 'essay' ? 'A re-read. Your first time stays as its own entry.' : 'A re-watch. Your first time stays as its own entry.';
       drawStatuses();
     };
