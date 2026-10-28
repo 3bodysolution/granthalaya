@@ -61,11 +61,11 @@ const credit = saved?.text && saved.source !== 'openlibrary'
   : null;
 // the two bookshops (with their permission): where to buy it, and the credit for a cover or details taken from them
 const SHOP_NAME: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
-type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null };
+type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null; back_src?: string | null; cover_hidden?: boolean };
 let shopRows: ShopRow[] = [];
 if (sb && rows.length) {
   const ids = rows.map((r) => r.id);
-  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages').in('title_id', ids);
+  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages, back_src, cover_hidden').in('title_id', ids);
   if (r.error) r = await sb.from('shop_books').select('shop, url, isbn, publisher').in('title_id', ids) as typeof r;   // before 012
   shopRows = (r.data ?? []) as ShopRow[];
 }
@@ -86,6 +86,8 @@ const usedSource = !!b.sourceLink && (!fromShop || [
   b.pages && pagesShown === b.pages, b.publishers.length && publishers === b.publishers, b.isbn && isbnShown === b.isbn,
 ].some(Boolean));
 const coverFromShop = !!cover && !b.cover;
+// Akshardhara's back cover, only when the cover shown is the shop's and the shop hasn't asked for it to be hidden
+const back = coverFromShop ? shopRows.find((s) => s.back_src && !s.cover_hidden)?.back_src ?? undefined : undefined;
 const gbId = 'gb' in k ? k.gb : null;
 const hit = {
   kind: 'book', olKey: 'ol' in k ? k.ol : undefined, title: b.title, creator: b.authors[0]?.name, year, pages: b.pages, cover: b.cover,
@@ -110,7 +112,7 @@ const reading = pagesShown ? aboutHours(Math.round(pagesShown * siteConfig.minut
 ---
 <Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} line={row?.tagline ? { text: row.tagline, source: b.title } : undefined} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
-    <Poster slot="poster" src={cover} title={b.title} by={b.authors[0]?.name} kind="book" year={year} />
+    <Poster slot="poster" src={cover} back={back} title={b.title} by={b.authors[0]?.name} kind="book" year={year} />
     <Fragment slot="side">
       <div class="find">
         <p class="f-h">Find it</p>

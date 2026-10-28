@@ -182,6 +182,8 @@ create table public.shop_books (
   language text check (language is null or language in ('mr', 'hi')),
   isbn text check (isbn is null or isbn ~ '^97[89][0-9]{10}$'),
   cover_src text check (cover_src is null or (cover_src ~ '^https://(cdn\.shopify\.com/s/files/1/0800/1214/9058/|www\.bookganga\.com/eBooks/Content/images/books/)' and char_length(cover_src) <= 600)),
+  back_src text check (back_src is null or (back_src ~ '^https://cdn\.shopify\.com/s/files/1/0800/1214/9058/' and char_length(back_src) <= 600)),  -- Akshardhara's back cover (its second image, names end in -b); shown through /api/cover, hidden with cover_hidden
+  pages int check (pages is null or pages between 1 and 100000),  -- the shop's edition
   lists text[] not null default '{}',
   title_id uuid references public.titles (id) on delete set null,
   match text not null default 'new' check (match in ('sure', 'checked', 'new', 'openlibrary', 'unsure', 'rejected')),

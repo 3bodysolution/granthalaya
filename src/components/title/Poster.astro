@@ -1,18 +1,40 @@
 ---
 // A poster or book cover for a title page, with the painted cover as a fallback when there's no image.
+// A book with a back cover (`back`, from a shop) gets a small flip button: the cover turns like a real book (a plain swap with reduced motion).
 import { paletteFor } from '../../lib/data';
 import { viaCover } from '../../lib/images';
-interface Props { src?: string; title: string; by?: string; kind: 'film' | 'tv' | 'book'; year?: number }
+interface Props { src?: string; back?: string; title: string; by?: string; kind: 'film' | 'tv' | 'book'; year?: number }
 const { title, by, kind, year } = Astro.props;
 const src = Astro.props.src ? viaCover(Astro.props.src, 700) : undefined;   // a bookshop's cover goes through /api/cover
+const back = src && Astro.props.back ? viaCover(Astro.props.back, 700) : undefined;
 const p = paletteFor(title);
 ---
-<div class:list={['poster', kind === 'book' ? 'book' : 'film', src ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
-  {src && <img src={src} alt={`${title} ${kind === 'book' ? 'cover' : 'poster'}`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
-  <i class="sun"></i><i class="hill"></i>
-  <span class="k">{kind === 'book' ? 'Book' : kind === 'tv' ? 'TV' : 'Film'}{year ? ` | ${year}` : ''}</span>
-  <span class="t"><span class="serif">{title}</span>{by && <span class="by">{by}</span>}</span>
-</div>
+{back ? (
+  <div class="flip" data-flip>
+    <div class="turn">
+      <div class="side side-front">
+        <div class="poster book real" style={`--bg:${p.bg}`}>
+          <img src={src} alt={`${title} cover`} decoding="async" draggable="false" referrerpolicy="no-referrer" />
+        </div>
+      </div>
+      <div class="side side-rear" aria-hidden="true">
+        <div class="poster book real" style={`--bg:${p.bg}`}>
+          <img src={back} alt="" loading="lazy" decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('[data-flip]')?.querySelector('.flipbtn')?.remove()" />
+        </div>
+      </div>
+    </div>
+    <button type="button" class="flipbtn" data-flip-btn aria-pressed="false" aria-label="Show the back cover" title="Flip the book">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l0 18" /><path d="M16 7l0 10l5 0l-5 -10" /><path d="M8 7l0 10l-5 0l5 -10" /></svg>
+    </button>
+  </div>
+) : (
+  <div class:list={['poster', kind === 'book' ? 'book' : 'film', src ? 'real' : 'wash']} style={`--bg:${p.bg};--accent:${p.accent};--hill:${p.hill}`}>
+    {src && <img src={src} alt={`${title} ${kind === 'book' ? 'cover' : 'poster'}`} decoding="async" draggable="false" referrerpolicy="no-referrer" onerror="this.closest('.real')?.classList.replace('real','wash');this.remove()" />}
+    <i class="sun"></i><i class="hill"></i>
+    <span class="k">{kind === 'book' ? 'Book' : kind === 'tv' ? 'TV' : 'Film'}{year ? ` | ${year}` : ''}</span>
+    <span class="t"><span class="serif">{title}</span>{by && <span class="by">{by}</span>}</span>
+  </div>
+)}
 <style>
   .poster { position: relative; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; color: #F6EEDF; background: var(--bg); display: flex; flex-direction: column; justify-content: space-between; padding: 18px; box-shadow: 0 22px 34px -18px var(--shadow); animation: rise .8s var(--spring) backwards; }
   .film { border-radius: 8px; }
@@ -26,5 +48,33 @@ const p = paletteFor(title);
   .t { position: relative; display: flex; flex-direction: column; gap: 6px; }
   .t .serif { font-size: 28px; line-height: 1.05; overflow-wrap: anywhere; }
   .by { font-size: 12px; opacity: .85; }
-  @media (max-width: 780px) { .poster { width: 200px; } }
+
+  /* a book with a back cover: the two sides sit back to back and the whole thing turns about its spine side */
+  .flip { position: relative; width: 100%; aspect-ratio: 2 / 3; perspective: 1500px; animation: rise .8s var(--spring) backwards; }
+  .turn { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .8s cubic-bezier(.3, .7, .2, 1); }
+  .flip.is-back .turn { transform: rotateY(180deg); }
+  .side { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .side-rear { transform: rotateY(180deg); }
+  .side .poster { height: 100%; aspect-ratio: auto; animation: none; }
+  .flipbtn { position: absolute; right: 10px; bottom: 10px; z-index: 3; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: var(--card); color: var(--ink); cursor: pointer; box-shadow: 0 6px 16px -6px var(--shadow); transition: transform .2s var(--spring), background-color .2s ease, color .2s ease; }
+  .flipbtn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .8s cubic-bezier(.3, .7, .2, 1); }
+  .flipbtn:hover { background: var(--soft); color: var(--lat); }
+  .flipbtn:active { transform: scale(.94); }
+  .flipbtn:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
+  .flip.is-back .flipbtn svg { transform: rotateY(180deg); }
+  @media (prefers-reduced-motion: reduce) { .turn, .flipbtn svg { transition: none; } }
+  @media (max-width: 780px) { .poster, .flip { width: 200px; } }
 </style>
+<script>
+  // one handler for every flip button on the page (works after page changes too)
+  document.addEventListener('click', (ev) => {
+    const btn = (ev.target as Element).closest<HTMLButtonElement>('[data-flip-btn]');
+    if (!btn) return;
+    const box = btn.closest<HTMLElement>('[data-flip]')!;
+    const back = box.classList.toggle('is-back');
+    btn.setAttribute('aria-pressed', String(back));
+    btn.setAttribute('aria-label', back ? 'Show the front cover' : 'Show the back cover');
+    box.querySelector('.side-front')?.setAttribute('aria-hidden', String(back));
+    box.querySelector('.side-rear')?.setAttribute('aria-hidden', String(!back));
+  });
+</script>
