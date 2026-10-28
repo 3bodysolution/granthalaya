@@ -353,7 +353,11 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       flagErr.hidden = true;
       const r = await post({ section: 'flag', flag: c.dataset.flag, on: c.checked });
       if (!r.ok) { c.checked = !c.checked; flagErr.textContent = r.error || 'That didn’t save.'; flagErr.hidden = false; return; }
-      if (c.dataset.flag === 'is_private') navigate(location.pathname + '#privacy', { history: 'replace' });
+      if (c.dataset.flag === 'is_private') {
+        // the server switched Feature off when the account went private; show that without a reload
+        const feat = document.querySelector<HTMLInputElement>('[data-flag=featured]');
+        if (feat) { if (c.checked) feat.checked = false; feat.disabled = c.checked; }
+      }
     }));
 
     // ——— favourites ———
