@@ -7,7 +7,7 @@ import { loadEnv } from 'vite';
 // except About, Privacy and Terms, which are built ahead of time.
 // When you connect a custom domain, change `site` to it.
 export default defineConfig({
-  site: 'https://granthalaya-sarthak.vercel.app',
+  site: 'https://mygranthalaya.vercel.app',
   output: 'server',
   adapter: vercel({ maxDuration: 60 }), // saving can take a few seconds while it looks a title up
   trailingSlash: 'ignore',
@@ -18,7 +18,7 @@ export default defineConfig({
     // domains listed here. Without this list Astro thinks every page lives at https://localhost,
     // which breaks Google sign-in and every save. Add your custom domain here when you connect one.
     allowedDomains: [
-      { protocol: 'https', hostname: 'granthalaya-sarthak.vercel.app' },
+      { protocol: 'https', hostname: 'mygranthalaya.vercel.app' },
       { protocol: 'https', hostname: '*.vercel.app' }, // preview copies
     ],
   },

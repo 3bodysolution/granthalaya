@@ -2,7 +2,7 @@
 // now lives in each person's profile, edited in Settings, not here.
 export const site = {
   name: 'Granthalaya',
-  url: 'https://granthalaya-sarthak.vercel.app',
+  url: 'https://mygranthalaya.vercel.app',
   description: 'A shelf for everything you read and watch: books, films, TV and essays, and what you thought of each.',
 
   // Who made the site (footer credit), and the shelf that was here first.

@@ -13,7 +13,7 @@ export type Hit = {
   seasons?: { n: number; name: string; episodes?: number; year?: number; cover?: string; aired: boolean }[];
 };
 
-const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; Granthalaya/1.0; +https://granthalaya-sarthak.vercel.app)' };
+const UA = { 'User-Agent': 'Mozilla/5.0 (compatible; Granthalaya/1.0; +https://mygranthalaya.vercel.app)' };
 async function get(url: string, ms = 7000, headers: Record<string, string> = {}) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), ms);

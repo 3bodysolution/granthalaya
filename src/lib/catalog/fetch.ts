@@ -8,7 +8,7 @@ import { mark } from '../timing';
 const source = (url: string) => (url.includes('themoviedb') || url.includes('/3/') ? 'tmdb' : url.includes('openlibrary') ? 'ol' : url.includes('googleapis') ? 'gb' : 'ext');
 const shortPath = (url: string) => { try { return new URL(url).pathname.replace(/^\/3\//, '').slice(0, 40); } catch { return ''; } };
 
-export const UA = 'Mozilla/5.0 (compatible; Granthalaya/1.0; +https://granthalaya-sarthak.vercel.app)';
+export const UA = 'Mozilla/5.0 (compatible; Granthalaya/1.0; +https://mygranthalaya.vercel.app)';
 export const base = {
   tmdb: () => env('TMDB_API_BASE') || 'https://api.themoviedb.org/3',
   ol: () => env('OPENLIBRARY_BASE') || 'https://openlibrary.org',

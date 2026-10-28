@@ -8,7 +8,7 @@
 // Without a key, or if anything fails, it returns null and the entry is simply saved without facts.
 
 // Wikipedia limits requests much more strictly when there is no web address to contact
-const UA = { 'User-Agent': 'Granthalaya/1.0 (https://granthalaya-sarthak.vercel.app; personal library, behind-the-scenes facts)' };
+const UA = { 'User-Agent': 'Granthalaya/1.0 (https://mygranthalaya.vercel.app; personal library, behind-the-scenes facts)' };
 
 async function getJSON(url, init = {}, ms = 8000) {
   const ctl = new AbortController();

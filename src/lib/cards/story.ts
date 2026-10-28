@@ -26,7 +26,7 @@ export interface StoryData {
 }
 
 export const W = 1080, H = 1920;
-export const SITE = 'granthalaya-sarthak.vercel.app';   // printed small on the card; Instagram can't link a story
+export const SITE = 'mygranthalaya.vercel.app';   // printed small on the card; Instagram can't link a story
 export const BG = '#121316', CREAM = '#F4ECDD', GOLD = '#E4BE94', TEAL = '#6CC9BF', GREY = '#A39D92', DIM = '#8D877D';
 
 /* ——— fonts and the painting are built into the function (?inline makes them part of the code), so nothing is fetched at run time ——— */

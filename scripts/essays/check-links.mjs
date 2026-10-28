@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 
 const FILE = new URL('../../docs/essay-candidates.md', import.meta.url)
-const UA = 'GranthalayaLinkCheck/1.0 (+https://granthalaya.vercel.app; checking essay links)'
+const UA = 'GranthalayaLinkCheck/1.0 (+https://mygranthalaya.vercel.app; checking essay links)'
 const MARK = / ⚠ (DEAD|CHECK) \([^)]*\)$/
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
