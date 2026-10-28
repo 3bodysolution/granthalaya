@@ -18,6 +18,11 @@ export const base = {
 type Saved = { at: number; ttl: number; value: unknown };
 const memory = new Map<string, Saved>();
 const MAX = 400;
+// calls that failed lately (timeout, busy, refused) are not asked again for a short while, so one slow page makes one slow call, not two or three
+const FAILED_FOR = 10_000;
+const failedAt = new Map<string, number>();
+// the same address asked twice at once (the page and a background job) shares one call
+const inflight = new Map<string, Promise<{ data: any; state: Source }>>();
 
 /** Open Library (and others) sometimes send letters with the accent as a separate mark ("a" + macron), which
  *  some fonts draw as a loose mark after the letter. Every string we take in is joined up (NFC). */
@@ -42,11 +47,22 @@ export class SourceUnavailable extends Error {
 
 /** JSON from a URL and how it went. Remembered for `ttl` seconds (answers only). A busy answer (429, 5xx) is
  *  asked once more; a timeout is not unless `retry` is set (it would only double the wait), and "not found" (404, 410) is final. */
-export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 6000, retry = false }: { ttl?: number; ms?: number; retry?: boolean } = {}): Promise<{ data: T | null; state: Source }> {
+export function getJSONResult<T = any>(url: string, opts: { ttl?: number; ms?: number; retry?: boolean } = {}): Promise<{ data: T | null; state: Source }> {
+  const key = (opts.retry ? 'retry ' : '') + url;   // a page that retries doesn't share the answer of one that doesn't
+  const going = inflight.get(key);
+  if (going) return going;
+  const p = fetchJSON<T>(url, opts).finally(() => inflight.delete(key));
+  inflight.set(key, p);
+  return p;
+}
+
+async function fetchJSON<T>(url: string, { ttl = 3600, ms = 6000, retry = false }: { ttl?: number; ms?: number; retry?: boolean }): Promise<{ data: T | null; state: Source }> {
   const hit = memory.get(url);
   const t0 = performance.now();
   const note = (tries: number, how: string) => mark(source(url), performance.now() - t0, `${shortPath(url)} ${how}${tries > 1 ? ` (${tries} tries)` : ''}`);
   if (hit && Date.now() - hit.at < hit.ttl * 1000) { note(0, 'memory'); return { data: hit.value as T, state: 'ok' }; }
+  // a page that depends on this answer (retry) always tries; the rest take the recent failure as the answer
+  if (!retry && Date.now() - (failedAt.get(url) ?? 0) < FAILED_FOR) { note(0, 'failed lately'); return { data: null, state: 'failed' }; }
   for (let attempt = 0; attempt < 2; attempt++) {
     const ctl = new AbortController();
     const timer = setTimeout(() => ctl.abort(), ms);
@@ -56,6 +72,7 @@ export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 600
         if (r.status === 404 || r.status === 410) { note(attempt + 1, String(r.status)); return { data: null, state: 'notfound' }; }
         if (attempt === 0 && (r.status === 429 || r.status >= 500)) { await new Promise((x) => setTimeout(x, 500)); continue; }
         note(attempt + 1, String(r.status));
+        remember(url);
         return { data: null, state: 'failed' }; // busy, down, or a refused key: not the same as "no such thing"
       }
       const value = nfc(await r.json()) as T;
@@ -66,6 +83,7 @@ export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 600
     } catch {
       if (retry && attempt === 0) continue; // only for answers that decide a whole page
       note(attempt + 1, 'failed');
+      remember(url);
       return { data: null, state: 'failed' }; // a timeout or a dropped connection: not asked again
     } finally {
       clearTimeout(timer);
@@ -73,6 +91,11 @@ export async function getJSONResult<T = any>(url: string, { ttl = 3600, ms = 600
   }
   note(2, 'failed');
   return { data: null, state: 'failed' };
+}
+
+function remember(url: string) {
+  if (failedAt.size >= MAX) failedAt.delete(failedAt.keys().next().value!);
+  failedAt.set(url, Date.now());
 }
 
 /** JSON from a URL, or null if it fails, says not found, or takes too long (for things a page can do without) */
