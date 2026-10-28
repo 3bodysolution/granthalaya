@@ -118,6 +118,16 @@ function meta(html: string, name: string) {
   const tag = html.match(re)?.[0];
   return tag ? decode(tag.match(/content=["']([^"']*)["']/i)?.[1] ?? '') : '';
 }
+/** a film or show from its IMDb id, through TMDB */
+async function byImdb(tt: string): Promise<Hit[]> {
+  const key = tmdbKey();
+  if (!key) return [];
+  const j = await getJSON(`${base.tmdb()}/find/${tt}?external_source=imdb_id&api_key=${key}`).catch(() => null);
+  const film = j?.movie_results?.[0]?.id, show = j?.tv_results?.[0]?.id;
+  const h = film ? await filmDetails(film) : show ? await showSeasons(show) : null;
+  return h ? [h] : [];
+}
+
 export async function link(raw: string): Promise<Hit[]> {
   const u = checkUrl(raw);
   const host = u.hostname.replace(/^www\./, '');
@@ -125,6 +135,13 @@ export async function link(raw: string): Promise<Hit[]> {
   if (tm) {
     const h = tm[1] === 'movie' ? await filmDetails(+tm[2]) : await showSeasons(+tm[2]);
     if (h) return [h];
+  }
+  // IMDb refuses to be read by servers, but its address holds the id TMDB knows
+  const imdb = /(?:^|\.)imdb\.com$/.test(host) && u.pathname.match(/\/title\/(tt\d{5,12})/);
+  if (imdb) {
+    const hits = await byImdb(imdb[1]);
+    if (hits.length) return hits;
+    throw new Error('unreadable');
   }
   const r = await safeGet(u.href, 9000, { ...UA, Accept: 'text/html' });
   if (!r.ok) throw new Error('unreadable');
