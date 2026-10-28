@@ -14,7 +14,7 @@ const seed = user.name || user.email?.split('@')[0] || 'reader';
 let ideas: string[] = [];
 try { ideas = await suggestUsernames(seed, user.id); } catch (e) { console.error('Welcome: username ideas could not be made', e); }
 const first = ideas[0] ?? '';
-const siteKey = turnstileSiteKey();
+const siteKey = turnstileSiteKey(Astro.url.host);
 ---
 <Base title="Pick your username" noindex>
   {siteKey && <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>}

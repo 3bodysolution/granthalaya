@@ -23,10 +23,7 @@ export async function suggestUsernames(seed: string, me?: string): Promise<strin
   const first = base.split('_')[0];
   const tries = [...new Set([base.replace(/_/g, ''), base, `${first}_reads`, `${first}_watches`, `${base.replace(/_/g, '')}${new Date().getFullYear() % 100}`, `${first}${Math.floor(10 + Math.random() * 89)}`])]
     .filter((u) => !usernameProblem(u));
-  const out: string[] = [];
-  for (const u of tries) {
-    if (out.length >= 3) break;
-    if ((await usernameStatus(u, me)).ok) out.push(u);
-  }
-  return out;
+  // all the ideas are checked together, then the first three free ones are kept in order
+  const free = await Promise.all(tries.map(async (u) => ((await usernameStatus(u, me)).ok ? u : null)));
+  return free.filter((u): u is string => !!u).slice(0, 3);
 }

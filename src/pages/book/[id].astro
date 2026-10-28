@@ -53,9 +53,19 @@ if ('ol' in k) {
 } catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // a catalogue failing is not "not found"
 if (!b) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const row = rows[0];
-const [site, saved] = await Promise.all([
+// what the page needs from the database is asked together: our records, the saved description, the shops' rows, the preview bits
+const shopQuery = async () => {
+  if (!sb || !rows.length) return [];
+  const ids = rows.map((r) => r.id);
+  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages, back_src, cover_src, cover_hidden').in('title_id', ids);
+  if (r.error) r = await sb.from('shop_books').select('shop, url, isbn, publisher').in('title_id', ids) as typeof r;   // before 012
+  return (r.data ?? []) as unknown[];
+};
+const [site, saved, shopData, bits] = await Promise.all([
   sb ? onSite(sb, rows, me) : Promise.resolve({ done: 0, saved: 0, average: null, ratings: 0, collections: [], mine: [] }),
   sb && row ? savedDescription(sb, row.id) : Promise.resolve(null),
+  shopQuery(),
+  pageBits(sb, 'book', param),
 ]);
 // a better description is looked for once, in the background, and only for books already in our catalogue
 if (row && saved && !saved.checked) describeLater(row.id);
@@ -67,13 +77,7 @@ const credit = saved?.text && saved.source !== 'openlibrary'
 // the two bookshops (with their permission): where to buy it, and the credit for a cover or details taken from them
 const SHOP_NAME: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
 type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null; back_src?: string | null; cover_src?: string | null; cover_hidden?: boolean };
-let shopRows: ShopRow[] = [];
-if (sb && rows.length) {
-  const ids = rows.map((r) => r.id);
-  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages, back_src, cover_src, cover_hidden').in('title_id', ids);
-  if (r.error) r = await sb.from('shop_books').select('shop, url, isbn, publisher').in('title_id', ids) as typeof r;   // before 012
-  shopRows = (r.data ?? []) as ShopRow[];
-}
+const shopRows = shopData as ShopRow[];
 const shops = [...new Map(shopRows.map((s) => [s.shop, s])).values()].filter((s) => SHOP_NAME[s.shop]);
 const cover = b.cover ?? row?.cover_url ?? undefined;   // an Open Library book with no cover there may have one from a shop
 // A shop's details win where it has them (publisher, pages, ISBN: its own edition's); the first-publication year is never the shop's.
@@ -110,7 +114,6 @@ const find = [
 ].filter(Boolean) as { label: string; url: string }[];
 const tabs = [{ key: 'details', label: 'Details' }, b.subjects.length && { key: 'subjects', label: 'Subjects' }].filter(Boolean) as { key: string; label: string }[];
 const language = row?.language ? new Intl.DisplayNames(['en'], { type: 'language' }).of(row.language) : null;
-const bits = await pageBits(sb, 'book', param);
 const og = bookOg({ ...b, year }, bits?.creator ?? b.authors.map((a) => a.name).join(', '), bits?.line);
 const paras = description ? description.split(/\n{2,}/) : [];
 const reading = pagesShown ? aboutHours(Math.round(pagesShown * siteConfig.minutesPerPage)) : null;
