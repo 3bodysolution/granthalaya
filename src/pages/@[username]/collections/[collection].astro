@@ -30,9 +30,10 @@ const path = col.data.items.map((i) => {
 });
 const editing = isMe && Astro.url.searchParams.get('edit') === '1';
 const n = (t: string) => path.filter((x) => x.e.data.type === t).length;
+const tvShows = path.filter((x) => x.e.data.type === 'tv' && !x.e.data.season).length, tvSeasons = path.filter((x) => x.e.data.type === 'tv' && x.e.data.season).length;
 const plural = (k: number, w: string) => `${k} ${w}${k > 1 ? 's' : ''}`;
 const total = path.reduce((s, x) => s + minutes(x.e), 0);
-const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), n('tv') && plural(n('tv'), 'TV season'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' | ');
+const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), tvShows && plural(tvShows, 'show'), tvSeasons && plural(tvSeasons, 'TV season'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' | ');
 const fan = path.slice(0, 3).map((x) => palette(x.e));
 const og = collectionOg(col.data.title, name, col.body, path.length);
 const shareData = JSON.stringify({ title: col.data.title, ref: `col=${col.uuid}`, card: `/story/c/${profile.username}/${slug}.png`, wide: false });

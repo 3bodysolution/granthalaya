@@ -132,7 +132,9 @@ export const PATCH: APIRoute = async (ctx) => {
   }
   const { error } = await sb.from('logs').update(change).eq('id', cur.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
-  return json({ ok: true, id: cur.id, href: await entryHref(ctx, me.username, cur.title) });
+  // rating something that wasn't finished marks it finished: the page says so
+  const statusChanged = change.status && change.status !== cur.status ? change.status : undefined;
+  return json({ ok: true, id: cur.id, href: await entryHref(ctx, me.username, cur.title), statusChanged });
 };
 
 export const DELETE: APIRoute = async (ctx) => {

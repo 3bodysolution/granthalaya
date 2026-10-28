@@ -62,7 +62,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
               <Face name={me.display_name || me.username} src={me.avatar_url} size={64} />
               <div class="stack" style="gap: 6px">
                 <span class="lbl">Photo</span>
-                <span class="hint">{me.avatar_url ? 'From your Google account.' : 'No photo: your first letter shows instead.'}</span>
+                <span class="hint">{me.avatar_url ? (googlePhoto && googlePhoto === me.avatar_url ? 'From your Google account.' : 'Your photo.') : 'No photo: your first letter shows instead.'}</span>
                 <div class="flex gap-2">
                   {me.avatar_url && <button type="button" class="gchip" data-photo="none">Remove photo</button>}
                   {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" class="gchip" data-photo="google">Use my Google photo</button>}
@@ -298,6 +298,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       });
     });
     show(location.hash.slice(1) || 'profile', false);
+    window.addEventListener('hashchange', () => show(location.hash.slice(1) || 'profile', false));
 
     const post = async (data: unknown) =>
       fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));

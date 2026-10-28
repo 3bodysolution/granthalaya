@@ -50,7 +50,8 @@ const BAR = 150;
 // tiles
 const rated = inYear.filter((e) => e.data.rating != null)
   .sort((a, b) => b.data.rating! - a.data.rating! || Number(b.data.loved) - Number(a.data.loved) || b.data.date.getTime() - a.data.date.getTime());
-const fav = rated[0];
+// a favourite is something you rated well: with only a 2-star film rated, there is none
+const fav = rated[0] && (rated[0].data.rating ?? 0) >= 3.5 ? rated[0] : undefined;
 const films = inYear.filter((e) => bucket(e) === 'film');
 const filmsKnown = films.filter((e) => e.data.runtime);
 const filmMin = filmsKnown.reduce((s, e) => s + e.data.runtime!, 0);

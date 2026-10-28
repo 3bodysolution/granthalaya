@@ -280,15 +280,24 @@ create table public.review_comments (
 create index review_comments_log on public.review_comments (log_id, created_at);
 create index review_comments_user on public.review_comments (user_id, created_at desc);
 
+-- every comment sent is recorded here (who, when: nothing else, nobody can read it), so deleting comments doesn't free the limit's slots
+create table public.comment_events (
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  at timestamptz not null default now()
+);
+create index comment_events_user on public.comment_events (user_id, at desc);
+
 -- gentle limits, like check_log (the website's own server is exempt)
 create or replace function public.check_review_comment()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare n int; d int;
 begin
   if coalesce(auth.role(), '') <> 'service_role' then
-    select count(*) filter (where created_at > now() - interval '10 minutes'), count(*) into n, d
-      from public.review_comments where user_id = new.user_id and created_at > now() - interval '1 day';
+    select count(*) filter (where at > now() - interval '10 minutes'), count(*) into n, d
+      from public.comment_events where user_id = new.user_id and at > now() - interval '1 day';
     if n >= 10 or d >= 100 then raise exception 'That''s a lot of comments at once. Try again in a little while.' using errcode = 'P0001', hint = 'rate'; end if;
+    delete from public.comment_events where user_id = new.user_id and at < now() - interval '2 days';   -- the table stays small
+    insert into public.comment_events (user_id) values (new.user_id);
   end if;
   return new;
 end $$;
@@ -398,6 +407,7 @@ alter table public.logs enable row level security;
 alter table public.highlights enable row level security;
 alter table public.review_likes enable row level security;
 alter table public.review_comments enable row level security;
+alter table public.comment_events enable row level security;   -- no policies and no grants: only the trigger touches it
 alter table public.threads enable row level security;
 alter table public.thread_items enable row level security;
 alter table public.blocks enable row level security;

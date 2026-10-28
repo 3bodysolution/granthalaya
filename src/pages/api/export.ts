@@ -55,7 +55,7 @@ export const GET: APIRoute = async ({ locals }) => {
   const links = (details?.links ?? {}) as Record<string, string>;
   const profileCsv = csv(['Field', 'Value'], [
     ['Username', me.username], ['Name', me.display_name], ['About', details?.bio ?? ''], ['Photo', me.avatar_url ?? ''],
-    ['Private account', yes(me.is_private)], ['Shelf featured', yes(me.featured)], ['Joined', me.created_at.slice(0, 10)],
+    ['Private account', me.is_private ? 'yes' : 'no'], ['Shelf featured', me.featured ? 'yes' : 'no'], ['Joined', me.created_at.slice(0, 10)],
     ['Favourites', ((details?.favourites ?? []) as string[]).map((id) => titleName.get(id)).filter(Boolean).join(' | ')],
     ...Object.entries(links).map(([k, v]) => [`Link: ${k}`, v]),
   ]);

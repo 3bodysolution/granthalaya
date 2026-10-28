@@ -451,7 +451,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (el.closest('a[data-keep-place]')) { (window as any).__keepPlace = scrollY; setTimeout(() => { (window as any).__keepPlace = null; }, 15000); }
       const rep = el.closest<HTMLElement>('[data-report]');
       if (rep) {
-        rep.closest('details')?.removeAttribute('open');
+        rep.closest('details.menu')?.removeAttribute('open');   // (the menu only: a comment's own thread stays open)
         const target = JSON.parse(rep.dataset.report!);
         const r = await reportBox(target);
         if (r && await send('/api/report', 'POST', { user: target.user, log: target.log, comment: target.comment, ...r })) toast('Thanks. Your report was sent.');
@@ -459,7 +459,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       }
       const bl = el.closest<HTMLElement>('[data-block]');
       if (bl) {
-        bl.closest('details')?.removeAttribute('open');
+        bl.closest('details.menu')?.removeAttribute('open');
         const v = JSON.parse(bl.dataset.block!);
         if (!v.blocked && !(await ask(`Block @${v.who}?`, 'You won’t see each other’s profiles or shelves. They aren’t told. You can unblock them in Settings.', 'Block'))) return;
         const r = await send('/api/block', v.blocked ? 'DELETE' : 'POST', { id: v.id });
@@ -491,7 +491,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       ev.preventDefault();
       const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
       const text = (f.elements.namedItem('body') as HTMLTextAreaElement).value.trim();
-      if (!text) return;
+      if (!text) { toast('Write something first.'); (f.elements.namedItem('body') as HTMLTextAreaElement).focus(); return; }
       busy(btn, true);
       const r = await send('/api/review', 'POST', { action: 'comment', id: f.dataset.comment, body: text });
       if (!r) { busy(btn, false); return; }
@@ -536,7 +536,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         if (panel?.dataset.working) return;
         box.dataset.rating = String(v); paintStars(box, v);
         const save = async () => (src.id ? await send('/api/log', 'PATCH', { id: src.id, rating: v || null }) : await send('/api/log', 'POST', { ...src, status: 'done', rating: v }));
-        if (panel) await inPanel(panel, async () => { await save(); return null; });
+        if (panel) await inPanel(panel, async () => { const j = await save(); if (src.id && j?.statusChanged === 'done') toast('Rated, so it’s marked as finished.'); return null; });
         else if (await save()) reload();
         return;
       }
