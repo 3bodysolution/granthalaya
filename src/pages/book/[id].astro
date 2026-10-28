@@ -7,7 +7,7 @@ import Tabs from '../../components/title/Tabs.astro';
 import Reviews from '../../components/title/Reviews.astro';
 import OnSiteBox from '../../components/title/OnSiteBox.astro';
 import LogPanel from '../../components/LogPanel.astro';
-import { olBook, gbBook, bookKey, bookHref, firstYear, type BookPage } from '../../lib/catalog/books';
+import { olBook, gbBook, bookKey, bookHref, type BookPage } from '../../lib/catalog/books';
 import { slug } from '../../lib/catalog/fetch';
 import { rowsForBook, rowBySlug, onSite, titlePageHref, healBook, ownRecord, type TitleRow } from '../../lib/catalog/onsite';
 import { aboutHours } from '../../lib/data';
@@ -15,6 +15,7 @@ import { site as siteConfig } from '../../data/site';
 import { SourceUnavailable } from '../../lib/catalog/fetch';
 import { pageBits } from '../../lib/cards/titlepage';
 import { bookOg } from '../../lib/share';
+import { shownYear } from '../../lib/catalog/known-years';
 import { cleanBlurb, savedDescription, describeLater } from '../../lib/catalog/describe';
 export const prerender = false;
 
@@ -55,7 +56,7 @@ const [site, saved] = await Promise.all([
 // a better description is looked for once, in the background, and only for books already in our catalogue
 if (row && saved && !saved.checked) describeLater(row.id);
 const description = cleanBlurb(saved?.text ?? b.description);   // saved text too: the cleaner may have learnt something since it was saved
-const year = firstYear(b.year, saved?.text, saved?.source);   // the first publication, not a later edition's
+const year = shownYear({ slug: row?.slug, ol: 'ol' in k ? k.ol : undefined }, b.year, saved?.text, saved?.source);   // the first publication, not a later edition's
 const credit = saved?.text && saved.source !== 'openlibrary'
   ? { adapted: saved.source?.startsWith('ai-'), from: saved.source?.endsWith('wikipedia') ? 'Wikipedia' : 'Open Library', url: saved.url ?? (saved.source?.endsWith('wikipedia') ? undefined : b.sourceLink) }
   : null;

@@ -1,14 +1,15 @@
 // Books from the two bookshops (Akshardhara and BookGanga, with their permission; scripts/shops): our own records in search
 // and the Marathi and Hindi shelves on Books. Read as the visitor: the database shows only matched, unhidden rows.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { bookHref, firstYear, type BookCard } from './books';
+import { bookHref, type BookCard } from './books';
+import { shownYear } from './known-years';
 import { viaCover } from '../images';
 import type { CatalogList, ListItem } from '../lists';
 
 type Joined = { lists: string[]; language: string | null; title: { slug: string; title: string; creator: string | null; year: number | null; ol_key: string | null; cover_url: string | null; description: string | null; description_source: string | null } | null };
 const COLS = 'lists, language, title:titles(slug, title, creator, year, ol_key, cover_url, description, description_source)';
 /** the year the book's page shows: first publication, not a later edition's */
-const yearOf = (t: NonNullable<Joined['title']>) => firstYear(t.year ?? undefined, t.description, t.description_source);
+const yearOf = (t: NonNullable<Joined['title']>) => shownYear({ slug: t.slug, ol: t.ol_key }, t.year, t.description, t.description_source);
 
 /** the page for one of these books: the Open Library page if it has one, else our own record */
 const hrefOf = (t: NonNullable<Joined['title']>) => (t.ol_key ? bookHref(t.ol_key, t.title) : `/book/${t.slug}/`);

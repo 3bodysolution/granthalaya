@@ -34,7 +34,8 @@ function backOf(images) {
   const named = images.map((src) => ({ src: src.split('?')[0], s: side(nameOf(src)) })).filter((x) => x.s);
   const back = named.find((x) => x.s.back && named.some((y) => !y.s.back && y.s.base === x.s.base));
   if (!back || !COVER_OK.test(back.src)) return null;
-  return { src: back.src, swapped: images[0]?.split('?')[0] === back.src };
+  // the shop lists the back first (4 books: two were labelled the wrong way round, one has the same picture twice): looked at by hand, not guessed
+  return images[0]?.split('?')[0] === back.src ? { src: null, swapped: true } : { src: back.src, swapped: false };
 }
 
 const ak = new Map();   // handle → { pages, back, swapped }

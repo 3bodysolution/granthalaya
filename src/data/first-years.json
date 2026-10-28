@@ -1,0 +1,9 @@
+{
+  "note": "First publication years checked by hand against a source. They win over Open Library's year and the Wikipedia-text rule (src/lib/catalog/known-years.ts). A book is matched by its catalogue slug or its Open Library work key.",
+  "books": [
+    { "title": "Godaan", "creator": "Munshi Premchand", "slug": "godaan", "ol": "OL17047576W", "year": 1936, "source": "https://en.wikipedia.org/wiki/Godaan", "said": "\"It was first published in 1936\"" },
+    { "title": "Raag Darbari", "creator": "Shrilal Shukla", "slug": "raag-darbari", "ol": "OL29131003W", "year": 1968, "source": "https://en.wikipedia.org/wiki/Raag_Darbari_(novel)", "said": "\"a satirical Hindi novel ... published in 1968\"; the Shrilal Shukla article also lists it as 1968" },
+    { "title": "Mrityunjay", "creator": "Shivaji Sawant", "slug": "mrityunjay", "ol": "OL15375574W", "year": 1967, "source": "https://mr.wikipedia.org/wiki/%E0%A4%B6%E0%A4%BF%E0%A4%B5%E0%A4%BE%E0%A4%9C%E0%A5%80_%E0%A4%97%E0%A5%8B%E0%A4%B5%E0%A4%BF%E0%A4%82%E0%A4%A6%E0%A4%B0%E0%A4%BE%E0%A4%B5_%E0%A4%B8%E0%A4%BE%E0%A4%B5%E0%A4%82%E0%A4%A4", "said": "Marathi Wikipedia, Shivaji Sawant: \"मृत्युंजय (कादंबरी -१९६७)\" (English Wikipedia gives no year)" },
+    { "title": "Fakira", "creator": "Annabhau Sathe", "slug": "fakira", "ol": "OL26693870W", "year": 1959, "source": "https://en.wikipedia.org/wiki/Annabhau_Sathe", "said": "\"Fakira (1959), which is in its 19th edition\"; Wikidata's 1976 is the Hindi film of the same name" }
+  ]
+}

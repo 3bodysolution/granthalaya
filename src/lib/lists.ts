@@ -1,5 +1,6 @@
 // Prize and classics lists: one JSON file each in src/data/lists, matched to the catalogue by scripts/lists/match.mjs.
-import { bookHref, firstYear } from './catalog/books';
+import { bookHref } from './catalog/books';
+import { shownYear } from './catalog/known-years';
 import { filmHref } from './catalog/tmdb';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { RowItem } from './catalog/rows';
@@ -76,7 +77,7 @@ export async function suggestedLists(sb: SupabaseClient | null | undefined): Pro
     source: { name: 'Suggested by an AI model, checked against real sources', url: '' },
     items: ((data ?? []) as unknown as { language: string; title: { slug: string; title: string; creator: string | null; year: number | null; ol_key: string | null; cover_url: string | null; description: string | null; description_source: string | null } | null }[]).filter((r) => r.language === lang && r.title).map((r): ListItem => ({
       // the same year the book's page shows (first publication, not a later edition's)
-      year: firstYear(r.title!.year ?? undefined, r.title!.description, r.title!.description_source) ?? 0, title: r.title!.title, creator: r.title!.creator || undefined, slug: r.title!.slug,
+      year: shownYear({ slug: r.title!.slug, ol: r.title!.ol_key }, r.title!.year, r.title!.description, r.title!.description_source) ?? 0, title: r.title!.title, creator: r.title!.creator || undefined, slug: r.title!.slug,
       ol: r.title!.ol_key ?? undefined, cover: r.title!.cover_url ?? undefined,
     })),
   })).filter((l) => l.items.length);
