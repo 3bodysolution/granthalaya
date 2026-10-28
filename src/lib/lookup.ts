@@ -196,7 +196,9 @@ export async function link(raw: string): Promise<Hit[]> {
     const clean = title.replace(/\s*[|:–-]\s*(Goodreads|Open Library).*$/i, '');
     const [t, by] = clean.split(/\s+by\s+/i);
     const best = (await books(clean, 3).catch(() => []))[0];
-    if (best) return [{ ...best, link: u.href }];
+    // Goodreads says when it was first published; Open Library's first year can be an earlier printing of part of it
+    const first = +(html.match(/First published[^<\d]{0,20}(?:[A-Za-z]+ \d{1,2}, )?(\d{4})/i)?.[1] ?? 0) || undefined;
+    if (best) return [{ ...best, year: first ?? best.year, link: u.href }];
     return [{ kind: 'book', title: decode(t), creator: by ? decode(by) : undefined, link: u.href, from: site }];
   }
   // anything else: an essay or article

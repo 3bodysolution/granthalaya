@@ -20,6 +20,8 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const hits = type === 'film' ? await films(q) : type === 'tv' ? await shows(q) : await books(q);
     return json({ hits });
   } catch {
-    return oops('We couldn’t look that up. Fill it in by hand instead.', 422);
+    const msg = 'We couldn’t look that up. Fill it in by hand instead.';
+    // a pasted link that can't be read is an error; a search that fails is an empty answer with a note (so the page's console stays clean)
+    return /^https?:\/\//i.test(q) || show ? oops(msg, 422) : json({ hits: [], error: msg });
   }
 };

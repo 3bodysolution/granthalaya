@@ -323,7 +323,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       if (t.cover || t.cover_url) { img.src = t.cover || t.cover_url; img.hidden = false; img.onerror = () => (img.hidden = true); } else img.hidden = true;
       $('pk').textContent = `${({ book: 'Book', film: 'Film', tv: 'TV', essay: 'Essay' } as any)[t.kind]}${t.from && t.from !== 'you' ? ' | from ' + t.from : ''}`;
       $('ptitle').textContent = t.kind === 'tv' && t.season ? `${t.title}, season ${t.season}` : t.title;
-      $('pmeta').textContent = [t.creator, t.year, t.pages ? `${t.pages} pages` : '', t.runtime && t.kind === 'film' ? `${t.runtime} min` : '', t.episodes ? `${t.episodes} episodes` : '', t.source && t.kind === 'essay' ? t.source : ''].filter(Boolean).join(' | ');
+      $('pmeta').textContent = [t.creator, t.year, t.pages ? `${t.pages} pages` : '', t.runtime && t.kind === 'film' ? `${t.runtime} min` : '', t.episodes ? `${t.episodes} episodes` : '', t.source && t.kind === 'essay' ? t.source : ''].filter((x, i, all) => x && all.indexOf(x) === i).join(' | ');   // (a site named twice is said once)
       $('fixed').hidden = false; $('editable').hidden = true;
     }
     function toForm(t: any, isManual = false) {
