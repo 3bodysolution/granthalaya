@@ -7,6 +7,8 @@ import { markRows } from '../../lib/catalog/rows';
 interface Props { list: CatalogList; decade?: number }
 const { list, decade } = Astro.props;
 const shown = list.items.filter((i) => !decade || (i.year >= decade && i.year < decade + 10));
+// a tile with no year keeps the year line's space, so it sits level with its neighbours (a list with no years at all has no such line)
+const anyYear = shown.some((i) => i.year);
 const tiles = shown.map((i) => listTile(list, i));
 const [marked] = await markRows(Astro.locals.supabase, Astro.locals.me, [{ title: list.title, items: tiles.filter((t) => t.href) }]);
 const status = new Map(marked.items.map((t) => [t.href, t]));
@@ -15,7 +17,7 @@ const status = new Map(marked.items.map((t) => [t.href, t]));
   <div class="pgrid lg">
     {tiles.map((t, n) => (
       <div class="cell">
-        {shown[n].year ? <span class="yr">{shown[n].circa ? 'c. ' : ''}{shown[n].year}</span> : null}
+        {anyYear && <span class="yr">{shown[n].year ? <>{shown[n].circa ? 'c. ' : ''}{shown[n].year}</> : null}</span>}
         <PosterTile bare {...t} year={undefined} sub={[...(Array.isArray(t.sub) ? t.sub : [t.sub]), shown[n].note]} status={status.get(t.href)?.status} logId={status.get(t.href)?.logId} />
       </div>
     ))}
@@ -26,7 +28,7 @@ const status = new Map(marked.items.map((t) => [t.href, t]));
   : <p class="credit-line">Source: {list.source.url ? <a href={list.source.url} rel="noopener">{list.source.name}</a> : list.source.name}.{list.kind === 'film' ? ' Film data from TMDB.' : ' Book data from Open Library.'}</p>}
 <style>
   .cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-  .yr { font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .yr { min-height: 1.4em; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
   .none { margin: 0; font-size: 16px; }
   .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }
 </style>
