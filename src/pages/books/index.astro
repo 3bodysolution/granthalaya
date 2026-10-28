@@ -9,7 +9,7 @@ import YearStrip from '../../components/title/YearStrip.astro';
 import Pager from '../../components/title/Pager.astro';
 import FrontRows from '../../components/title/FrontRows.astro';
 import { bookRows, markRows } from '../../lib/catalog/rows';
-import { browseBooks, authorFilter, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
+import { browseBooks, authorFilter, firstYear, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import ListGrid from '../../components/title/ListGrid.astro';
 import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, type CatalogList } from '../../lib/lists';
 import { shopLists, SHOP_LISTS } from '../../lib/catalog/shopbooks';
@@ -60,6 +60,11 @@ const pages = shopPages + list.pages;
 // a book the shops list that Open Library has too shows once, with the shops' pages
 const shopSeen = new Set((shopFull?.items ?? []).flatMap((i) => [i.ol, slugOf(i.title)].filter(Boolean) as string[]));
 const olItems = shopList ? list.items.filter((b) => !shopSeen.has(b.key) && !shopSeen.has(slugOf(b.title))) : list.items;
+// a book we have a Wikipedia text for shows the same first-publication year here as on its page
+if (sb && olItems.length) {
+  const { data: texts } = await sb.from('titles').select('ol_key, description, description_source').in('ol_key', olItems.map((b) => b.key)).not('description', 'is', null);
+  for (const t of texts ?? []) { const b = olItems.find((x) => x.key === t.ol_key); if (b) b.year = firstYear(b.year, t.description, t.description_source); }
+}
 const marks = sb && !front && !picked && !onShops ? await myMarks(sb, Astro.locals.me, olItems.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
 
 // the shops' books run to hundreds: 48 a page like the other grids, the most listed first

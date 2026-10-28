@@ -1,12 +1,14 @@
 // Books from the two bookshops (Akshardhara and BookGanga, with their permission; scripts/shops): our own records in search
 // and the Marathi and Hindi shelves on Books. Read as the visitor: the database shows only matched, unhidden rows.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { bookHref, type BookCard } from './books';
+import { bookHref, firstYear, type BookCard } from './books';
 import { viaCover } from '../images';
 import type { CatalogList, ListItem } from '../lists';
 
-type Joined = { lists: string[]; language: string | null; title: { slug: string; title: string; creator: string | null; year: number | null; ol_key: string | null; cover_url: string | null } | null };
-const COLS = 'lists, language, title:titles(slug, title, creator, year, ol_key, cover_url)';
+type Joined = { lists: string[]; language: string | null; title: { slug: string; title: string; creator: string | null; year: number | null; ol_key: string | null; cover_url: string | null; description: string | null; description_source: string | null } | null };
+const COLS = 'lists, language, title:titles(slug, title, creator, year, ol_key, cover_url, description, description_source)';
+/** the year the book's page shows: first publication, not a later edition's */
+const yearOf = (t: NonNullable<Joined['title']>) => firstYear(t.year ?? undefined, t.description, t.description_source);
 
 /** the page for one of these books: the Open Library page if it has one, else our own record */
 const hrefOf = (t: NonNullable<Joined['title']>) => (t.ol_key ? bookHref(t.ol_key, t.title) : `/book/${t.slug}/`);
@@ -17,7 +19,7 @@ export async function searchShopBooks(sb: SupabaseClient | null | undefined, lik
     .or(`title.ilike.%${like}%,original_title.ilike.%${like}%,author.ilike.%${like}%`).limit(12);
   const seen = new Set<string>();
   return ((data ?? []) as unknown as Joined[]).filter((r) => r.title && !seen.has(r.title.slug) && seen.add(r.title.slug)).slice(0, 5).map((r): BookCard => ({
-    kind: 'book', key: r.title!.ol_key ?? r.title!.slug, title: r.title!.title, author: r.title!.creator ?? undefined, year: r.title!.year ?? undefined,
+    kind: 'book', key: r.title!.ol_key ?? r.title!.slug, title: r.title!.title, author: r.title!.creator ?? undefined, year: yearOf(r.title!),
     cover: r.title!.cover_url ? viaCover(r.title!.cover_url, 200) : undefined, href: hrefOf(r.title!),
   }));
 }
@@ -40,7 +42,7 @@ export async function shopLists(sb: SupabaseClient | null | undefined): Promise<
       intro: `Popular ${title.split(' ')[0]} books.`,
       source: { name: 'Akshardhara and BookGanga', url: '' },
       items: mine.map((r): ListItem => ({
-        year: 0, title: r.title!.title, creator: r.title!.creator || undefined, slug: r.title!.slug,
+        year: yearOf(r.title!) ?? 0, title: r.title!.title, creator: r.title!.creator || undefined, slug: r.title!.slug,
         ol: r.title!.ol_key ?? undefined, cover: r.title!.cover_url ?? undefined,
       })),
     };
