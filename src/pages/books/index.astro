@@ -30,7 +30,8 @@ const SUBJECTS: [string, string][] = [
 const q = Astro.url.searchParams;
 const rawSubject = (q.get('subject') ?? '').toLowerCase();
 const subject = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(rawSubject) && rawSubject.length <= 60 ? rawSubject : undefined;
-const language = /^[a-z]{3}$/.test(q.get('language') ?? '') ? q.get('language')! : undefined;
+const rawLang = q.get('language') ?? '';
+const language = /^[a-z]{3}$/.test(rawLang) && bookLanguageName(rawLang)?.toLowerCase() !== rawLang ? rawLang : undefined;   // an unknown code comes back as itself
 const yr = Number(q.get('year')); const year = Number.isInteger(yr) && yr > 0 && yr < 2100 ? yr : undefined;
 const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && Number.isInteger(dc) && dc >= 1000 && dc < 2100 ? dc - (dc % 10) : undefined;
 const author = authorFilter(q.get('author')) || undefined;
@@ -51,13 +52,18 @@ const { s: suggested, sh: shopAll } = await listsP;
 const bookLists = [...listsOfKind('book'), ...suggested];
 const pickedRaw = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
 const picked = pickedRaw ? await fillCovers(sb, pickedRaw) : undefined;
+// a filter value we don't know (a language or list that isn't there) is said so, instead of showing everything under a wrong heading
+const said = (v: string) => `“${v.slice(0, 40)}”`;
+let unknown = rawLang && !language ? `We don’t have books in a language called ${said(rawLang)}.`
+  : rawSubject && !subject ? `We couldn’t find any books about ${said(rawSubject.replace(/[-_]+/g, ' '))}.`
+  : q.get('list') && !picked ? `We don’t have a list called ${said(q.get('list')!)}.` : '';
 // Marathi or Hindi on its own is one section: the shops' books first (Open Library has few in these languages), then the other books we have in it
 const onlyLanguage = [...q.keys()].filter((k) => k !== 'page' && k !== 'author').join() === 'language';
 const shopFull = onlyLanguage && !picked ? shopAll.find((l) => SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS]?.[2] === language) : undefined;
 const shopList = shopFull && { ...shopFull, items: author ? shopFull.items.filter((i) => i.creator === author) : shopFull.items };
 const shopPages = shopList ? Math.ceil(shopList.items.length / SHOP_PAGE) : 0;
 const onShops = !!shopList && page <= shopPages;
-const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ author, subject, language, year, decade, sort, page: shopList ? Math.max(1, page - shopPages) : page });
+const list = front || picked || unknown ? { items: [], total: 0, pages: 0 } : await browseBooks({ author, subject, language, year, decade, sort, page: shopList ? Math.max(1, page - shopPages) : page });
 const pages = shopPages + list.pages;
 // a page past the last one goes to the last real page
 if (!front && !picked && !list.failed && pages > 0 && page > pages) { const u = new URL(Astro.url); pages > 1 ? u.searchParams.set('page', String(pages)) : u.searchParams.delete('page'); return Astro.redirect(u.pathname + u.search); }
@@ -69,6 +75,9 @@ if (sb && olItems.length) {
   const { data: texts } = await sb.from('titles').select('ol_key, description, description_source').in('ol_key', olItems.map((b) => b.key));
   for (const b of olItems) { const t = (texts ?? []).find((x) => x.ol_key === b.key); b.year = shownYear({ ol: b.key }, b.year, t?.description, t?.description_source); }
 }
+// a subject nobody has filed a book under (Open Library's subjects are free text, so only an empty answer for a subject we don't list counts)
+if (!unknown && subject && !SUBJECTS.some(([s]) => s === subject) && !picked && !shopList && !list.items.length && !list.failed && !list.total) unknown = `We couldn’t find any books about ${said(subject.replace(/-/g, ' '))}.`;
+if (unknown) Astro.response.status = 404;
 const marks = sb && !front && !picked && !onShops ? await myMarks(sb, Astro.locals.me, olItems.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
 
 // the shops' books run to hundreds: 48 a page like the other grids, the most listed first
@@ -81,6 +90,7 @@ let title = subject ? (known ? `${langName ? langName + ' ' : ''}${known.toLower
 title += year ? ` from ${year}` : decade ? ` from the ${decade}s` : '';
 title = title.replace(/^./, (c) => c.toUpperCase());
 if (picked) title = picked.title;
+if (unknown) title = 'Books';
 
 const now = new Date().getUTCFullYear();
 const decades: [string, string][] = Array.from({ length: Math.floor((now - 1850) / 10) + 1 }, (_, i) => { const d = Math.floor(now / 10) * 10 - i * 10; return [String(d), `${d}s`]; });
@@ -116,9 +126,16 @@ const fields = [
     {!front && <p class="eyebrow" style="color: var(--book)">Books</p>}
     <h1 class="title">{title}</h1>
     <Filters fields={fields} />
-    {!picked && !front && <YearStrip decade={decade} year={year} min={1800} total={list.total} line={`There are ${list.total.toLocaleString('en-US')} ${langName ? langName + ' ' : ''}books${known ? ' in ' + known.toLowerCase() : subject ? ' about ' + subjectName.toLowerCase() : ''} first published in ${year ? year : `the ${decade}s`}.`} />}
+    {!picked && !front && !unknown && <YearStrip decade={decade} year={year} min={1800} total={list.total} line={`There are ${list.total.toLocaleString('en-US')} ${langName ? langName + ' ' : ''}books${known ? ' in ' + known.toLowerCase() : subject ? ' about ' + subjectName.toLowerCase() : ''} first published in ${year ? year : `the ${decade}s`}.`} />}
   </section>
-  {front ? (
+  {unknown ? (
+    <section class="pad">
+      <div class="empty">
+        <p class="muted">{unknown}</p>
+        <a href="/books/" class="btn">See all books</a>
+      </div>
+    </section>
+  ) : front ? (
     <section class="pad rows">
       <FrontRows rows={rowsP!} />
       <div class="browse">

@@ -21,7 +21,9 @@ const kind = q.get('kind') === 'tv' ? 'tv' : 'film';
 const genre = q.get('genre') ? genreBySlug(kind, q.get('genre')!) : null;
 const yr = Number(q.get('year')); const year = Number.isInteger(yr) && yr > 1870 && yr < 2100 ? yr : undefined;
 const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && Number.isInteger(dc) && dc >= 1900 && dc < 2100 ? dc - (dc % 10) : undefined;
-const language = /^[a-z]{2}$/.test(q.get('language') ?? '') ? q.get('language')! : undefined;
+const rawLang = q.get('language') ?? '';
+const knownLang = /^[a-z]{2}$/.test(rawLang) && languageName(rawLang)?.toLowerCase() !== rawLang;   // an unknown code comes back as itself
+const language = knownLang ? rawLang : undefined;
 const sv = Number(q.get('service')); const service = Number.isInteger(sv) && sv > 0 ? sv : undefined;
 const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort')) ?? 'popular';
 const page = Math.max(1, Math.min(WIDE_PAGES, Number(q.get('page')) || 1));
@@ -31,11 +33,17 @@ const page = Math.max(1, Math.min(WIDE_PAGES, Number(q.get('page')) || 1));
 const picked = kind === 'film' ? pickList(q.get('list'), 'film') : undefined;
 const front = [...q.keys()].every((k) => k === 'kind');
 const empty = { items: [], pages: 0, total: 0 };
+// a filter value we don't know (a genre, language or list that isn't there) is said so, instead of showing everything under a wrong heading
+const said = (v: string) => `“${v.slice(0, 40)}”`;
+const unknown = q.get('genre') && !genre ? `We don’t have a genre called ${said(q.get('genre')!)}.`
+  : rawLang && !language ? `We don’t have films in a language called ${said(rawLang)}.`
+  : kind === 'film' && q.get('list') && !picked ? `We don’t have a list called ${said(q.get('list')!)}.` : '';
+if (unknown) Astro.response.status = 404;
 const sb = Astro.locals.supabase;
 // the rows are started now and waited for further down the page (FrontRows), so the top of the page is sent first
 const rowsP = front ? filmRows(kind).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
 const [list, svc] = await Promise.all([
-  front || picked ? Promise.resolve(empty) : discoverWide({ kind, genre: genre?.id, year, decade, language, service, sort, page }),
+  front || picked || unknown ? Promise.resolve(empty) : discoverWide({ kind, genre: genre?.id, year, decade, language, service, sort, page }),
   services(),
 ]);
 // a page past the last one goes to the last real page
@@ -48,7 +56,7 @@ const noun = kind === 'tv' ? 'TV' : 'films';
 const head = [language && languageName(language), genre && genre.name.toLowerCase(), noun].filter(Boolean).join(' ');
 const when = year ? ` from ${year}` : decade ? ` from the ${decade}s` : '';
 const where = serviceName ? ` on ${serviceName}` : '';
-const title = picked ? picked.title : (head + when + where).replace(/^./, (c) => c.toUpperCase());
+const title = unknown ? (kind === 'tv' ? 'TV' : 'Films') : picked ? picked.title : (head + when + where).replace(/^./, (c) => c.toUpperCase());
 
 const now = new Date().getUTCFullYear();
 const decades: [string, string][] = Array.from({ length: Math.floor((now - 1920) / 10) + 1 }, (_, i) => { const d = Math.floor(now / 10) * 10 - i * 10; return [String(d), `${d}s`]; });
@@ -84,7 +92,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
     </div>
     <h1 class="title">{title}</h1>
     <Filters fields={fields} keep={kind === 'tv' ? { kind: 'tv' } : {}} />
-    {!picked && !front && <YearStrip decade={decade} year={year} total={list.total} line={`There are ${list.total.toLocaleString('en-US')} ${head}${when}${where}.`} />}
+    {!picked && !front && !unknown && <YearStrip decade={decade} year={year} total={list.total} line={`There are ${list.total.toLocaleString('en-US')} ${head}${when}${where}.`} />}
   </section>
   {picked ? (
     <section class="pad">
@@ -106,6 +114,7 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
   ) : (
   <section class="pad">
     {!tmdbReady() ? <p class="muted">Film search isn’t set up on this copy of the site yet.</p>
+      : unknown ? <div class="nosuch"><p class="muted empty">{unknown}</p><a href={kind === 'tv' ? '/films/?kind=tv' : '/films/'} class="btn">{kind === 'tv' ? 'See all TV' : 'See all films'}</a></div>
       : list.items.length === 0 && list.failed ? <p class="muted empty">The film catalogue couldn’t be reached just now. Please try again shortly.</p>
       : list.items.length === 0 ? <p class="muted empty">Nothing matches all of that. Try fewer filters.</p>
       : (
@@ -124,6 +133,8 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
   .sw.on { color: var(--bg); }
   .lede { margin: 0 0 28px; max-width: 60ch; font-size: 16px; }
   .empty { font-size: 16px; }
+  .nosuch { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }
+  .nosuch p { margin: 0; }
   .rows { display: flex; flex-direction: column; gap: 48px; padding-bottom: 8px; }
   .browse { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 48px; padding-top: 8px; }
   .bset { display: flex; flex-direction: column; gap: 12px; }
