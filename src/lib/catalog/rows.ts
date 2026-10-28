@@ -6,7 +6,7 @@ import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks, type Mark } from './onsite';
 import { savedId } from '../saved';
 import { SHOP_LISTS } from './shopbooks';
-import { getList, listTile, listBrowseHref, type CatalogList } from '../lists';
+import { getList, listTile, listBrowseHref, fillCovers, type CatalogList } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
 export interface RowItem {
@@ -95,7 +95,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
 }
 
 /** the Books front page */
-export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[]> = []): Promise<Row[]> {
+export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[]> = [], sb?: SupabaseClient | null): Promise<Row[]> {
   const pick = (p: Promise<{ items: BookCard[] }>) => safe(p.then((r) => r.items), [] as BookCard[]);
   const [week, fiction, top, suggested] = await Promise.all([
     safe(trendingBooks('weekly'), []),
@@ -103,13 +103,15 @@ export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[
     pick(browseBooks({ sort: 'top' })),
     safe(Promise.resolve(suggestedIn), [] as CatalogList[]),
   ]);
+  // the two list rows pick up covers our catalogue has got since the list files were made
+  const [akademi, classics] = await safe(Promise.all(['sahitya-akademi-marathi', 'marathi-classics'].map((s) => fillCovers(sb, getList(s)!))), [getList('sahitya-akademi-marathi'), getList('marathi-classics')] as CatalogList[]);
   return onceEach([
     { title: 'Popular this week', href: '/books/?sort=popular', tone: 'book', big: true, items: books(week) },
     { title: 'Fiction readers love', href: '/books/?subject=fiction', tone: 'book', items: books(fiction) },
     { title: 'Highest rated', href: '/books/?sort=top', tone: 'book', items: books(top) },
     listRow('booker', 'Booker Prize winners', 'book'),
-    listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book'),
-    listRow('marathi-classics', 'Marathi classics', 'book'),
+    listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book', akademi),
+    listRow('marathi-classics', 'Marathi classics', 'book', classics),
     ...suggested.map((l) => ({ ...listRow(l.slug, l.title, 'book', l), ...(SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS] && { href: `/books/?language=${SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS][2]}` }) })).filter((r) => r.items.length),
   ]);
 }

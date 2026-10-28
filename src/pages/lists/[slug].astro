@@ -2,10 +2,11 @@
 // One prize or classics list on its own page, for sharing. (On Books and Films the same list opens in place.)
 import Base from '../../layouts/Base.astro';
 import ListGrid from '../../components/title/ListGrid.astro';
-import { getList } from '../../lib/lists';
+import { getList, fillCovers } from '../../lib/lists';
 export const prerender = false;
-const list = getList(Astro.params.slug ?? '');
-if (!list) return Astro.redirect('/lists/');
+const found = getList(Astro.params.slug ?? '');
+if (!found) return Astro.redirect('/lists/');
+const list = await fillCovers(Astro.locals.supabase, found);
 ---
 <Base title={list.title} active={list.kind === 'film' ? 'films' : 'books'} description={list.intro}>
   <section class="pad head">

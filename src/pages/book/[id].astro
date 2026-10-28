@@ -62,11 +62,11 @@ const credit = saved?.text && saved.source !== 'openlibrary'
   : null;
 // the two bookshops (with their permission): where to buy it, and the credit for a cover or details taken from them
 const SHOP_NAME: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
-type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null; back_src?: string | null; cover_hidden?: boolean };
+type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null; back_src?: string | null; cover_src?: string | null; cover_hidden?: boolean };
 let shopRows: ShopRow[] = [];
 if (sb && rows.length) {
   const ids = rows.map((r) => r.id);
-  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages, back_src, cover_hidden').in('title_id', ids);
+  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages, back_src, cover_src, cover_hidden').in('title_id', ids);
   if (r.error) r = await sb.from('shop_books').select('shop, url, isbn, publisher').in('title_id', ids) as typeof r;   // before 012
   shopRows = (r.data ?? []) as ShopRow[];
 }
@@ -86,7 +86,7 @@ const usedSource = !!b.sourceLink && (!fromShop || [
   year && year === b.year && !yearInText, !saved?.text && b.description, b.subjects.length, b.languages.length, manyEditions,
   b.pages && pagesShown === b.pages, b.publishers.length && publishers === b.publishers, b.isbn && isbnShown === b.isbn,
 ].some(Boolean));
-const coverFromShop = !!cover && !b.cover;
+const coverFromShop = !!cover && (!b.cover || shopRows.some((s) => s.cover_src === cover));   // the cover shown is a shop's
 // Akshardhara's back cover, only when the cover shown is the shop's and the shop hasn't asked for it to be hidden
 const back = coverFromShop ? shopRows.find((s) => s.back_src && !s.cover_hidden)?.back_src ?? undefined : undefined;
 const gbId = 'gb' in k ? k.gb : null;

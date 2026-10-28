@@ -11,7 +11,7 @@ import FrontRows from '../../components/title/FrontRows.astro';
 import { bookRows, markRows } from '../../lib/catalog/rows';
 import { browseBooks, authorFilter, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import ListGrid from '../../components/title/ListGrid.astro';
-import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, type CatalogList } from '../../lib/lists';
+import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, fillCovers, type CatalogList } from '../../lib/lists';
 import { shopLists, SHOP_LISTS } from '../../lib/catalog/shopbooks';
 import { slug as slugOf } from '../../lib/catalog/fetch';
 import { shownYear } from '../../lib/catalog/known-years';
@@ -46,10 +46,11 @@ const sb = Astro.locals.supabase;
 const listsP = Promise.all([suggestedLists(sb), shopLists(sb)]).then(([s, sh]) => ({ s, sh })).catch(() => ({ s: [] as CatalogList[], sh: [] as CatalogList[] }));
 const suggestedP = listsP.then(({ s, sh }) => [...sh, ...s]);
 // the rows are started now and waited for further down the page (FrontRows), so the top of the page is sent first
-const rowsP = front ? bookRows(suggestedP).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
+const rowsP = front ? bookRows(suggestedP, sb).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
 const { s: suggested, sh: shopAll } = await listsP;
 const bookLists = [...listsOfKind('book'), ...suggested];
-const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
+const pickedRaw = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
+const picked = pickedRaw ? await fillCovers(sb, pickedRaw) : undefined;
 // Marathi or Hindi on its own is one section: the shops' books first (Open Library has few in these languages), then the other books we have in it
 const onlyLanguage = [...q.keys()].filter((k) => k !== 'page' && k !== 'author').join() === 'language';
 const shopFull = onlyLanguage && !picked ? shopAll.find((l) => SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS]?.[2] === language) : undefined;

@@ -3,6 +3,7 @@
 //
 //   node scripts/lists/list-covers.mjs                 dry run: private/catalogues/list-covers-<date>.html (open it in a browser) and .json
 //   node scripts/lists/list-covers.mjs --write         saves the matches Sarthak accepted (only when he asks)
+//   add --pass2 to either for the second pass (records still without a cover, matched on their Devanagari title too; files end -pass2)
 //
 // Where it looks, in this order, stopping at the first sure match:
 //   1. the shop books we already have (shop_books in the database)
@@ -27,6 +28,7 @@ for (const line of fs.readFileSync('.env', 'utf8').split(/\r?\n/)) {
 }
 const db = createClient(process.env.PUBLIC_SUPABASE_URL, process.env.SUPABASE_SECRET_KEY, { auth: { persistSession: false } });
 const write = process.argv.includes('--write');
+const TAG = process.argv.includes('--pass2') ? '-pass2' : '';   // --pass2: a second look at what is still without a cover; its pages are named ...-pass2
 const day = new Date().toLocaleDateString('en-CA');
 const OUT = 'private/catalogues', RAW = `${OUT}/raw`;
 const UA = 'Granthalaya/1.0 (book catalogue, with permission; contact kokanesarthak52@gmail.com)';
@@ -64,19 +66,28 @@ for (const f of fs.readdirSync('src/data/lists')) {
 }
 const { data: sug } = await db.from('book_suggestions').select('language, title:titles(slug)');
 for (const s of sug ?? []) if (s.title?.slug) (lists[s.title.slug] ??= []).push(s.language === 'hi' ? 'Hindi books to try' : 'Marathi books to try');
-const todo = titles.filter((t) => !t.cover_url && (!t.language || ['mr', 'hi'].includes(t.language)) && lists[t.slug]);
+const listOriginal = {};   // the Devanagari title the list file gives, for records that lack one
+for (const f of fs.readdirSync('src/data/lists')) { const l = JSON.parse(fs.readFileSync(`src/data/lists/${f}`, 'utf8')); for (const i of l.items) if (i.slug && i.original_title) listOriginal[i.slug] = i.original_title; }
+const rejected = fs.existsSync(`${OUT}/list-covers-decisions.json`) ? JSON.parse(fs.readFileSync(`${OUT}/list-covers-decisions.json`, 'utf8')).reject ?? [] : [];   // Sarthak said no to these
+const todo = titles.filter((t) => !t.cover_url && !rejected.includes(t.slug) && (!t.language || ['mr', 'hi'].includes(t.language)) && lists[t.slug]);
 const skipped = titles.filter((t) => !t.cover_url && !todo.includes(t));
 console.log(`${todo.length} Marathi or Hindi list records have no cover (${skipped.length} other books without a cover are left alone: other languages, or in no list).`);
 for (const t of todo) {
+  t.original_title ||= listOriginal[t.slug] ?? null;
+  t.dkeys = devaKeys(t.original_title);
   t.tkeys = [...new Set([titleKey(t.title), titleKey(t.original_title), mainKey(t.title), mainKey(t.original_title)].filter((k) => k.length >= 2))];
   t.akey = surnameKey(t.creator);
   t.part = partOf(`${t.title} ${t.original_title ?? ''}`);
 }
 
 /* ——— matching ——— */
+// a Devanagari title compared as it is written: letters only, the nukta, zero-width marks, spaces and punctuation ignored, chandrabindu = anusvara
+function devaKeys(...names) {
+  return [...new Set(names.filter(Boolean).map((n) => String(n).normalize('NFC').replace(/[़‌‍]/g, '').replace(/ँ/g, 'ं').replace(/[^ऀ-ॿ]/g, '').replace(/[।॥]/g, '')).filter((k) => [...k].length >= 2))];
+}
 function judge(t, p) {
   if (t.part !== p.part) return null;
-  const exact = t.tkeys.some((k) => p.tkeys.includes(k));
+  const exact = t.tkeys.some((k) => p.tkeys.includes(k)) || t.dkeys.some((k) => p.dkeys.includes(k));
   const near = !exact && t.tkeys.some((a) => p.tkeys.some((b) => Math.min(a.length, b.length) >= 5 && alike(a, b) >= 0.86));
   if (!exact && !near) return null;
   const author = t.akey && p.akeys.length ? p.akeys.includes(t.akey) : null;   // null: one side names nobody
@@ -87,6 +98,7 @@ function judge(t, p) {
 const prep = (p) => {
   p.tkeys = [...new Set([titleKey(p.title), titleKey(p.original), mainKey(p.title), mainKey(p.original)].filter((k) => k.length >= 2))];
   p.akeys = [...new Set((p.authors ?? []).map(surnameKey).filter((k) => k.length >= 2))];
+  p.dkeys = devaKeys(p.original);
   p.part = partOf(`${p.title} ${p.original}`);
   return p;
 };
@@ -94,6 +106,7 @@ const RANK = { sure: 3, likely: 2, 'title only': 1 };
 const matches = new Map();
 function offer(t, p, how) {
   const c = judge(t, p);
+  if (process.env.DEBUG_SLUG === t.slug) console.log('   offer', how, JSON.stringify({ title: p.title, original: p.original, authors: p.authors, cover: p.cover, tk: p.tkeys, ak: p.akeys, part: p.part }), '→', c, 'target', JSON.stringify({ tk: t.tkeys, dk: t.dkeys, ak: t.akey, part: t.part }));
   if (!c || !COVER_OK.test(p.cover ?? '')) return;
   const had = matches.get(t.slug);
   if (!had || RANK[c] > RANK[had.confidence]) matches.set(t.slug, { confidence: c, from: how, ...p });
@@ -117,7 +130,7 @@ const open = () => todo.filter((t) => (matches.get(t.slug)?.confidence ?? '') !=
 {
   const NOT_A_NAME = /kadambari|katha|story|hindi|top|best|seller|sahitya|akademi|publication|prakashan|house|books?$|novel|poem|kavita|natak|drama|well-known|award|puraskar|fiction|tales|edition|sale|offer|english|combo/i;
   const pool = [];
-  for (let page = 1; page < 60; page++) {
+  for (let page = 1; page < 400; page++) {   // (an earlier cap of 59 pages cut the catalogue short at 14,750 products)
     const text = await get(`https://akshardhara.com/products.json?limit=250&page=${page}`, 3000);
     const ps = text ? JSON.parse(text).products ?? [] : [];
     for (const p of ps) {
@@ -143,7 +156,8 @@ const open = () => todo.filter((t) => (matches.get(t.slug)?.confidence ?? '') !=
     const prod = ld.flat().find((x) => x && x['@type'] === 'Product') ?? {};
     const field = (k) => ((prod.description ?? '').match(new RegExp(`${k}\\s*\\n?\\s*:\\s*([^\\n]+)`)) ?? [])[1]?.trim() ?? '';
     const s = splitTitle(prod.name ?? '');
-    return { title: s.latin, original: s.deva, author: field('Author'), publisher: field('Publisher'), cover: (prod.image?.[0] ?? '').split('?')[0] };
+    const author = field('Author');   // an empty Author field reads as the next label ("Publisher")
+    return { title: s.latin, original: s.deva, author: /^(publisher|language|pages|edition|isbn)/i.test(author) ? '' : author, publisher: field('Publisher'), cover: (prod.image?.[0] ?? '').split('?')[0] };
   };
   const left = open();
   console.log(`3. BookGanga: searching ${left.length} titles, 10 seconds apart (about ${Math.round(left.length * 15 / 60)} minutes)…`);
@@ -151,9 +165,10 @@ const open = () => todo.filter((t) => (matches.get(t.slug)?.confidence ?? '') !=
   for (const t of left) {
     if (++n % 10 === 0) console.log(`   ${n} of ${left.length}`);
     const seen = new Set();
-    for (const q of [t.title, t.original_title].filter(Boolean)) {
+    // by title, by Devanagari title, then by the author's name (the shop's search finds some books only that way)
+    for (const q of [t.title, t.original_title, t.creator].filter(Boolean)) {
       const html = await get(`${BG}/Books/Index?BookSearchTags=${encodeURIComponent(q)}`, 10000);
-      for (const h of html ? hits(html).slice(0, 12) : []) {
+      for (const h of html ? hits(html) : []) {
         if (seen.has(h.key)) continue;
         seen.add(h.key);
         const keys = [titleKey(h.shown), titleKey(h.slug.replace(/-/g, ' ')), mainKey(h.shown)].filter((k) => k.length >= 2);
@@ -186,11 +201,11 @@ const html = `<!doctype html><meta charset="utf-8"><title>List covers ${day}</ti
 <p>${todo.length} records with no cover. Matches: ${found.filter((t) => matches.get(t.slug).confidence === 'sure').length} sure, ${found.filter((t) => matches.get(t.slug).confidence !== 'sure').length} to check by eye. No match: ${none.length}.</p>
 <table><tr><th>Our record</th><th>Shop cover</th><th>Shop book</th><th>Match</th><th>Slug</th></tr>${found.map(row).join('\n')}</table>
 <h2>No match (${none.length})</h2><p>${none.map((t) => `${esc(t.title)}${t.creator ? ' (' + esc(t.creator) + ')' : ''}`).join(' · ')}</p>`;
-fs.writeFileSync(`${OUT}/list-covers-${day}.html`, html);
-fs.writeFileSync(`${OUT}/list-covers-${day}.json`, JSON.stringify({ found: found.map((t) => ({ id: t.id, slug: t.slug, title: t.title, creator: t.creator, ...matches.get(t.slug), tkeys: undefined, akeys: undefined })), none: none.map((t) => ({ slug: t.slug, title: t.title, creator: t.creator })) }, null, 1));
+fs.writeFileSync(`${OUT}/list-covers${TAG}-${day}.html`, html);
+fs.writeFileSync(`${OUT}/list-covers${TAG}-${day}.json`, JSON.stringify({ found: found.map((t) => ({ id: t.id, slug: t.slug, title: t.title, creator: t.creator, ...matches.get(t.slug), tkeys: undefined, akeys: undefined })), none: none.map((t) => ({ slug: t.slug, title: t.title, creator: t.creator })) }, null, 1));
 const count = (c) => found.filter((t) => matches.get(t.slug).confidence === c).length;
 console.log(`\n${todo.length} records: ${count('sure')} sure, ${count('likely')} likely, ${count('title only')} title only, ${none.length} no match.`);
-console.log(`Written: ${OUT}/list-covers-${day}.html (open it in a browser) and .json.`);
+console.log(`Written: ${OUT}/list-covers${TAG}-${day}.html (open it in a browser) and .json.`);
 if (!write) { console.log('Nothing was changed (dry run; --write saves the accepted ones).'); process.exit(0); }
 
 /* ——— --write ——— */

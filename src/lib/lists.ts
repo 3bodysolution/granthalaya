@@ -51,6 +51,18 @@ export function listTile(l: CatalogList, i: ListItem): RowItem {
   };
 }
 
+/**
+ * A list file keeps the covers it was matched with; a book it has no cover for may have got one in our catalogue since (a shop's, saved by
+ * scripts/lists/list-covers.mjs). Items with no cover of their own take the catalogue record's (found by its slug).
+ */
+export async function fillCovers(sb: SupabaseClient | null | undefined, list: CatalogList): Promise<CatalogList> {
+  const slugs = list.items.filter((i) => !i.cover && i.slug).map((i) => i.slug!);
+  if (!sb || !slugs.length) return list;
+  const { data } = await sb.from('titles').select('slug, cover_url').in('slug', slugs).not('cover_url', 'is', null);
+  const cover = new Map((data ?? []).map((r: { slug: string; cover_url: string }) => [r.slug, r.cover_url]));
+  return { ...list, items: list.items.map((i) => (i.slug && !i.cover && cover.has(i.slug) ? { ...i, cover: cover.get(i.slug) } : i)) };
+}
+
 /** a list shown in place on the Books or Films page, under the filters (the shareable page is `listHref`) */
 export const listBrowseHref = (l: Pick<CatalogList, 'slug' | 'kind'>) => `/${l.kind === 'film' ? 'films' : 'books'}/?list=${l.slug}`;
 /** the list in the address, if it exists and belongs on this page */
