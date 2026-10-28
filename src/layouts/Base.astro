@@ -73,10 +73,15 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       function apply() {
         var t = null;
         try { t = localStorage.getItem('theme'); } catch (e) { /* storage */ }
-        document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark';
+        // a saved choice wins; with none, follow the system's light or dark setting
+        if (t !== 'light' && t !== 'dark') t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = t;
+        var m = document.querySelector('meta[name=theme-color]');
+        if (m) m.setAttribute('content', t === 'light' ? '#F8ECD6' : '#15171B');
       }
       apply();
       document.addEventListener('astro:after-swap', apply);
+      try { window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () { if (!localStorage.getItem('theme')) apply(); }); } catch (e) { /* older browsers */ }
     })();
   </script>
   <ClientRouter />
@@ -655,6 +660,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     let sel = 0;
     let timer = 0;
     let asked = '';
+    let before: Element | null = null;   // what had focus before the search opened, so closing it puts focus back there
     const dialog = () => document.getElementById('search') as HTMLDialogElement;
     const esc = (s: unknown) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
     const hi = (s: string, q: string) => {
@@ -719,7 +725,11 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         ...(r.authors ?? []).map((a: any) => row(a.href, thumb(undefined, true), a.name, `Author${a.works ? ` | ${a.works} works` : ''}`, '', q)),
       ];
       const members = (r.members ?? []).map((m: any) => row(m.href, thumb(m.avatar, true), m.name, `@${m.username}`, '', q));
-      const html = group('On your shelf', local) + group('Films and TV', titles) + group('Books', books) + group('People', people) + group('On Granthalaya', members);
+      // films and TV that couldn't be reached are said so (an empty group would look like "nothing found")
+      const filmsGroup = r.failed && !titles.length ? '<li class="search-empty small">Films and TV couldn’t be reached just now. Try again in a moment.</li>' : group('Films and TV', titles);
+      // a member whose username is exactly what was typed comes first
+      const memGroup = group('On Granthalaya', members);
+      const html = group('On your shelf', local) + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('People', people) + (r.exactMember ? '' : memGroup);
       paint(html || `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`);
     }
     function move(d: number) {
@@ -734,6 +744,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const d = dialog();
       if (d.open) return;
       d.dataset.mode = mode;
+      before = document.activeElement;
       const input = d.querySelector('input')!;
       input.value = '';
       input.placeholder = 'Search films, books, people';
@@ -742,6 +753,11 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       await loadMine();
       if (q) { input.value = q; input.dispatchEvent(new Event('input', { bubbles: true })); } else renderEmpty();
     }
+    document.addEventListener('close', (ev) => {
+      if ((ev.target as Element)?.id !== 'search') return;
+      const b = before as HTMLElement | null;
+      if (b && b !== document.body && document.contains(b)) b.focus();
+    }, true);
     document.addEventListener('click', (ev) => {
       const el = ev.target as Element;
       const opener = el.closest<HTMLElement>('[data-search-open]');

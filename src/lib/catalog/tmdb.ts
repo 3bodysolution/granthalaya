@@ -268,14 +268,14 @@ export async function services(): Promise<Provider[]> {
 
 /* ——— search ——— */
 export interface PersonCard { id: number; name: string; photo?: string; known?: string; href: string }
-export async function searchAll(text: string): Promise<{ titles: Card[]; people: PersonCard[] }> {
+export async function searchAll(text: string): Promise<{ titles: Card[]; people: PersonCard[]; failed?: boolean }> {
   if (!key() || !text.trim()) return { titles: [], people: [] };
-  const j = await getJSON(q('/search/multi', { query: text.trim().slice(0, 100), include_adult: 'false' }), { ttl: 600 });
+  const { data: j, state } = await getJSONResult(q('/search/multi', { query: text.trim().slice(0, 100), include_adult: 'false' }), { ttl: 600 });
   const titles: Card[] = [], people: PersonCard[] = [];
   for (const r of j?.results ?? []) {
     if (r.media_type === 'movie') titles.push({ kind: 'film', id: r.id, title: r.title, year: yearOf(r.release_date), poster: img(r.poster_path, 'w185'), href: filmHref(r.id, r.title), popularity: r.popularity });
     else if (r.media_type === 'tv') titles.push({ kind: 'tv', id: r.id, title: r.name, year: yearOf(r.first_air_date), poster: img(r.poster_path, 'w185'), href: showHref(r.id, r.name), popularity: r.popularity });
     else if (r.media_type === 'person') people.push({ id: r.id, name: r.name, photo: img(r.profile_path, 'w185'), known: GROUP_LABEL[r.known_for_department] ?? r.known_for_department, href: personHref(r.id, r.name) });
   }
-  return { titles: titles.slice(0, 8), people: people.slice(0, 5) };
+  return { titles: titles.slice(0, 8), people: people.slice(0, 5), failed: state === 'failed' };
 }
