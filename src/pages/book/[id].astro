@@ -16,6 +16,7 @@ import { SourceUnavailable } from '../../lib/catalog/fetch';
 import { pageBits } from '../../lib/cards/titlepage';
 import { bookOg } from '../../lib/share';
 import { shownYear } from '../../lib/catalog/known-years';
+import moved from '../../data/slug-redirects.json';
 import { cleanBlurb, savedDescription, describeLater } from '../../lib/catalog/describe';
 export const prerender = false;
 
@@ -32,6 +33,9 @@ if ('ol' in k) {
   if (b && param !== `${k.ol.toLowerCase()}-${slug(b.title)}` && slug(b.title)) return Astro.redirect(bookHref(k.ol, b.title) + Astro.url.search, 301);
 } else if ('gb' in k) {
   [b, rows] = await Promise.all([gbBook(k.gb), sb ? rowsForBook(sb, `gb-${k.gb}`) : Promise.resolve([])]);
+} else if ((moved as Record<string, string>)[k.slug]) {
+  // two rows for one book were merged (scripts/merge-titles.mjs): the old address goes to the row that stayed
+  return Astro.redirect(`/book/${(moved as Record<string, string>)[k.slug]}/`, 301);
 } else if (sb) {
   // a book in our catalogue by its address name (added by hand, or before it had an Open Library key)
   const row = await rowBySlug(sb, 'book', k.slug);
