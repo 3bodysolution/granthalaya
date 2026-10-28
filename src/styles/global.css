@@ -288,7 +288,7 @@ textarea.field { height: auto; padding: 12px 14px; line-height: 1.5; resize: ver
 .onoff:checked { background: var(--lat); }
 .onoff:checked::after { transform: translateX(18px); }
 .gchip { display: inline-flex; align-items: center; height: 30px; padding: 0 11px; border-radius: 6px; border: 0; background: var(--soft); font-size: 13px; color: var(--muted); cursor: pointer; transition: background-color .2s ease, color .2s ease, transform .25s var(--spring); }
-@media (pointer: coarse) { .gchip { height: 36px; padding: 0 13px; } }
+@media (pointer: coarse), (max-width: 780px) { .gchip { height: 40px; padding: 0 13px; } }
 .gchip:hover { color: var(--ink); }
 .gchip.on, .gchip[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
 .chip[aria-pressed="true"] { border-color: var(--lat); color: var(--lat); }
@@ -372,3 +372,15 @@ html[data-theme="dark"] :is(.cv.real > .pic, .hc .pic, .pt-cover img) { outline-
 
 /* keyboard tips mean nothing on a touch screen */
 @media (hover: none) { .hide-touch { display: none !important; } }
+
+/* Touch targets: on a phone (or any touch screen) everything you tap is at least 40px high. These are components' own
+   scoped styles, so this one block wins with !important; text links inside a sentence are left as they are. */
+@media (max-width: 780px), (pointer: coarse) {
+  .brand, .foot nav a, .prow-all, .clear, a.ext, a.more, .open, .w-jw, .linkbtn, a.chip, .wl { display: inline-flex !important; align-items: center; min-height: 40px !important; }
+  .sw, .gchip, .btn.sm, summary, [role=tab], button[data-sort], .w-logos a { min-height: 40px !important; }
+  .w-logos a { min-width: 40px; display: inline-flex !important; align-items: center; justify-content: center; }
+  .foot nav a { min-width: 40px; justify-content: center; }
+  .et a { padding-block: 9px; }
+  .shepherd { min-width: 40px; min-height: 40px; margin: -6px 0 0 -6px; }
+  .onoff::before { content: ""; position: absolute; inset: -7px -4px; }
+}

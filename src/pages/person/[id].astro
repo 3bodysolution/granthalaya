@@ -47,8 +47,8 @@ const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted i
         </details>
       )}
       <p class="links">
-        {p.imdb && <a href={`https://www.imdb.com/name/${p.imdb}/`} target="_blank" rel="noopener">IMDb ↗</a>}
-        <a href={`https://www.themoviedb.org/person/${p.id}`} target="_blank" rel="noopener">TMDB ↗</a>
+        {p.imdb && <a href={`https://www.imdb.com/name/${p.imdb}/`} target="_blank" rel="noopener" class="ext">IMDb ↗</a>}
+        <a href={`https://www.themoviedb.org/person/${p.id}`} target="_blank" rel="noopener" class="ext">TMDB ↗</a>
       </p>
     </div>
   </section>

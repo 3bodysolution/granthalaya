@@ -44,7 +44,7 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
       )}
       <p class="links">
         {a.wikipedia && <a href={a.wikipedia} target="_blank" rel="noopener">Wikipedia ↗</a>}
-        <a href={`https://openlibrary.org/authors/${a.key}`} target="_blank" rel="noopener">Open Library ↗</a>
+        <a href={`https://openlibrary.org/authors/${a.key}`} target="_blank" rel="noopener" class="ext">Open Library ↗</a>
       </p>
     </div>
   </section>
