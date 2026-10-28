@@ -8,6 +8,7 @@
 //   · anything else is refused. Our own /covers/ files are static files and never go through here.
 import type { APIRoute } from 'astro';
 import { coverAllowed, safeImage } from '../../lib/cards/covers';
+import { trimFrame } from '../../lib/cards/trim';
 export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
@@ -17,5 +18,8 @@ export const GET: APIRoute = async ({ url }) => {
   if (u.protocol !== 'https:' || u.username || u.password || u.port || !coverAllowed(u)) return no(400);
   const img = await safeImage(u, u.hostname === 'covers.openlibrary.org' || u.hostname === 'www.bookganga.com' ? 4000 : 2300);
   if (!img) return no(502);
-  return new Response(img.body, { headers: { 'Content-Type': img.type, 'Cache-Control': 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400', 'X-Content-Type-Options': 'nosniff' } });
+  // Akshardhara's covers often come inside a plain white frame (with the shop's address under the picture): take the frame off, never cutting into the picture
+  let { body, type } = img;
+  if (u.hostname === 'cdn.shopify.com') { const t = await trimFrame(body).catch(() => null); if (t) ({ body, type } = t); }
+  return new Response(body, { headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400', 'X-Content-Type-Options': 'nosniff' } });
 };

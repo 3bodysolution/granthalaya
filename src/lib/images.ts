@@ -12,7 +12,8 @@ const SHOPIFY = /^https:\/\/cdn\.shopify\.com\//;
 export function viaCover(url: string, width = 400): string {
   if (!SHOP_COVER.test(url)) return url;
   const u = SHOPIFY.test(url) ? `${url}?width=${width}` : url;
-  return `/api/cover?u=${encodeURIComponent(u)}`;
+  // &t=1: the copy with its white frame taken off (a new address, so the CDN's older, untrimmed copies are not used)
+  return `/api/cover?u=${encodeURIComponent(u)}${SHOPIFY.test(url) ? '&t=1' : ''}`;
 }
 
 /** the `src` and `srcset` for a poster or cover shown in a tile */
