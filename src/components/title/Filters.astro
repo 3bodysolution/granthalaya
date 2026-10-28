@@ -7,7 +7,8 @@
 // The empty option ("Any genre") isn't listed: an unchosen part just shows its name, and a chosen one shows "Remove".
 // An option or value written "decade=1980" sets that address part instead of the field's own name, so one Year part can hold decades and years.
 // `text` is what the part shows when that isn't one of its options (a chosen year).
-interface Props { fields: { name: string; label: string; value: string; text?: string; options: [string, string][]; clears?: string[] }[]; keep?: Record<string, string> }
+// `search` is the placeholder of a box at the top of a long list that narrows it as you type (Author).
+interface Props { fields: { name: string; label: string; value: string; text?: string; options: [string, string][]; clears?: string[]; search?: string }[]; keep?: Record<string, string> }
 const { fields, keep = {} } = Astro.props;
 const path = Astro.url.pathname;
 
@@ -41,7 +42,8 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
     {main.map((p, n) => (
       <div class:list={['fpart', p.f.value && 'on', ((p.cols > 1 && n >= 2) || n >= main.length - 2) && 'right']} data-fpart>
         <button type="button" class="fbtn" aria-haspopup="true" aria-expanded="false"><span>{p.text}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg></button>
-        <div class="fmenu" role="menu" aria-label={p.f.label} data-cols={p.cols}>
+        <div class:list={['fmenu', p.f.search && 'has-search']} role="menu" aria-label={p.f.label} data-cols={p.f.search ? 1 : p.cols}>
+          {p.f.search && <input type="search" class="fsearch" placeholder={p.f.search} aria-label={p.f.search} autocomplete="off" spellcheck="false" data-fsearch />}
           {p.f.value && <a class="frm" role="menuitem" href={hrefFor(p.f, '')}>Remove</a>}
           {p.items.map(([v, t]) => <a role="menuitem" href={hrefFor(p.f, v)} aria-current={v === p.f.value ? 'true' : undefined}>{t}</a>)}
         </div>
@@ -84,6 +86,11 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
   .fmenu a[aria-current] { font-weight: 600; background: var(--soft); }
   .fmenu a[aria-current]::after { content: "✓"; margin-left: 8px; color: var(--muted); }
   .fmenu .frm { color: var(--muted); font-size: 12.5px; }
+  .fmenu.has-search { width: 280px; padding-top: 0; }
+  .fsearch { display: block; position: sticky; top: 0; z-index: 1; box-sizing: border-box; width: calc(100% + 12px); height: 42px; margin: 0 -6px 6px; padding: 0 14px; border: 0; border-bottom: 1px solid var(--line); border-radius: 6px 6px 0 0; background: var(--card); color: var(--ink); font: inherit; font-size: 14px; outline: none; transition: background-color .2s ease; }
+  .fsearch:focus { background: var(--soft); }
+  .fsearch::placeholder { color: var(--muted); }
+  .fmenu a[hidden] { display: none; }
   .fpart.open > .fmenu { opacity: 1; visibility: visible; transition-delay: 0s; }
   @media (hover: hover) {
     .fpart:hover { z-index: 7; }
@@ -115,6 +122,7 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
 
   document.addEventListener('click', (ev) => {
     const t = ev.target as Element;
+    if (t.closest('[data-fsearch]')) return; // typing in a list's search box keeps it open
     const btn = t.closest<HTMLElement>('.fbtn');
     const part = btn?.closest<HTMLElement>('[data-fpart]');
     if (btn && part) {
@@ -138,12 +146,21 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
     closeAll();
   });
 
+  // a list's search box narrows its choices as you type (accents and capitals ignored)
+  const fold = (s: string) => s.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  document.addEventListener('input', (ev) => {
+    const box = (ev.target as Element).closest<HTMLInputElement>('[data-fsearch]');
+    if (!box) return;
+    const want = fold(box.value.trim());
+    box.closest('.fmenu')!.querySelectorAll<HTMLAnchorElement>('a:not(.frm)').forEach((a) => { a.hidden = !!want && !fold(a.textContent ?? '').includes(want); });
+  });
+
   document.addEventListener('keydown', (ev) => {
     const part = (ev.target as Element).closest<HTMLElement>('[data-fpart]');
     if (!part) return;
     if (ev.key === 'Escape') { closeAll(); part.querySelector<HTMLElement>('.fbtn')?.focus(); return; }
     if (ev.key !== 'ArrowDown' && ev.key !== 'ArrowUp') return;
-    const items = [...part.querySelectorAll<HTMLElement>('.fmenu a')];
+    const items = [...part.querySelectorAll<HTMLElement>('.fmenu a:not([hidden])')];
     if (!items.length) return;
     ev.preventDefault();
     if (!part.classList.contains('open')) { closeAll(part); part.classList.add('open'); part.querySelector('.fbtn')?.setAttribute('aria-expanded', 'true'); }

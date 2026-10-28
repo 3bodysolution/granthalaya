@@ -42,7 +42,7 @@ const gbCover = (links?: { thumbnail?: string; smallThumbnail?: string }) => {
 };
 
 /* ——— shapes ——— */
-export interface BookCard { kind: 'book'; key: string; title: string; author?: string; year?: number; cover?: string; href: string }
+export interface BookCard { kind: 'book'; key: string; title: string; author?: string; authorKey?: string; year?: number; cover?: string; href: string }
 export interface BookPage {
   kind: 'book'; key: string; title: string; subtitle?: string; authors: { key?: string; name: string; href?: string }[];
   year?: number; pages?: number; languages: { code: string; name: string }[]; subjects: { name: string; slug: string }[];
@@ -186,7 +186,7 @@ export async function author(olid: string): Promise<AuthorPage | null> {
 /* ——— lists and search ——— */
 function card(d: any): BookCard {
   const key = String(d.key ?? '').replace('/works/', '');
-  return { kind: 'book', key, title: d.title, author: d.author_name?.[0], year: d.first_publish_year, cover: cover(d.cover_i, 'L'), href: bookHref(key, d.title) };
+  return { kind: 'book', key, title: d.title, author: d.author_name?.[0], authorKey: d.author_key?.[0], year: d.first_publish_year, cover: cover(d.cover_i, 'L'), href: bookHref(key, d.title) };
 }
 /** what Open Library readers are opening this week: only books with a cover, each title once */
 export async function trendingBooks(window: 'daily' | 'weekly' | 'monthly' = 'weekly'): Promise<BookCard[]> {
@@ -200,7 +200,9 @@ export async function trendingBooks(window: 'daily' | 'weekly' | 'monthly' = 'we
   });
 }
 
-export interface BookFilters { subject?: string; language?: string; year?: number; decade?: number; sort?: 'popular' | 'top' | 'new'; page?: number }
+/** an Open Library author key ("OL23919A") or, for names that come from our own lists, the name */
+export const authorFilter = (v: string | null | undefined) => { const s = String(v ?? '').trim().slice(0, 120); return /^OL\d{1,10}A$/i.test(s) ? s.toUpperCase() : s.replace(/["\\]/g, ''); };
+export interface BookFilters { author?: string; subject?: string; language?: string; year?: number; decade?: number; sort?: 'popular' | 'top' | 'new'; page?: number }
 /* Open Library merges the subjects of every edition into the work, so a famous novel with thousands of editions
    is tagged with almost everything (Robinson Crusoe is "poetry"). Three things keep the lists honest:
    subject keys instead of free text, leaving fiction out of non-fiction subjects, and ordering "Popular" by what
@@ -257,10 +259,12 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
       parts.push(ENGLISH_LIT.map((k) => `-subject:"${k}"`).join(' '));
     }
   }
+  const who = authorFilter(f.author);
+  if (who) parts.push(/^OL\d+A$/.test(who) ? `author_key:${who}` : `author:"${who}"`);
   if (f.year) parts.push(`first_publish_year:${f.year}`);
   else if (f.decade) parts.push(`first_publish_year:[${f.decade} TO ${f.decade + 9}]`);
   else if (f.sort === 'new') parts.push(`first_publish_year:[* TO ${new Date().getFullYear()}]`); // some records say 2098
-  if (!subject && !code && !f.year && !f.decade) parts.push('subject_key:fiction');
+  if (!subject && !code && !who && !f.year && !f.decade) parts.push('subject_key:fiction');
   // few people log Indian-language books or plays on Open Library, so those stay ordered by editions
   const popular = (code && INDIAN.has(code)) || subject === 'drama' ? 'editions' : 'readinglog';
   const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : popular;

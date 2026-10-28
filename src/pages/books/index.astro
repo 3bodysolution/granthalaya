@@ -9,7 +9,7 @@ import YearStrip from '../../components/title/YearStrip.astro';
 import Pager from '../../components/title/Pager.astro';
 import FrontRows from '../../components/title/FrontRows.astro';
 import { bookRows, markRows } from '../../lib/catalog/rows';
-import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
+import { browseBooks, authorFilter, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import ListGrid from '../../components/title/ListGrid.astro';
 import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, type CatalogList } from '../../lib/lists';
 import { shopLists, SHOP_LISTS } from '../../lib/catalog/shopbooks';
@@ -32,6 +32,7 @@ const subject = /^[a-z0-9]+(-[a-z0-9]+)*$/.test(rawSubject) && rawSubject.length
 const language = /^[a-z]{3}$/.test(q.get('language') ?? '') ? q.get('language')! : undefined;
 const yr = Number(q.get('year')); const year = Number.isInteger(yr) && yr > 0 && yr < 2100 ? yr : undefined;
 const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && Number.isInteger(dc) && dc >= 1000 && dc < 2100 ? dc - (dc % 10) : undefined;
+const author = authorFilter(q.get('author')) || undefined;
 const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort')) ?? 'popular';
 const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
 
@@ -49,14 +50,15 @@ const { s: suggested, sh: shopAll } = await listsP;
 const bookLists = [...listsOfKind('book'), ...suggested];
 const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
 // Marathi or Hindi on its own is one section: the shops' books first (Open Library has few in these languages), then the other books we have in it
-const onlyLanguage = [...q.keys()].filter((k) => k !== 'page').join() === 'language';
-const shopList = onlyLanguage && !picked ? shopAll.find((l) => SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS]?.[2] === language) : undefined;
+const onlyLanguage = [...q.keys()].filter((k) => k !== 'page' && k !== 'author').join() === 'language';
+const shopFull = onlyLanguage && !picked ? shopAll.find((l) => SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS]?.[2] === language) : undefined;
+const shopList = shopFull && { ...shopFull, items: author ? shopFull.items.filter((i) => i.creator === author) : shopFull.items };
 const shopPages = shopList ? Math.ceil(shopList.items.length / SHOP_PAGE) : 0;
 const onShops = !!shopList && page <= shopPages;
-const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ subject, language, year, decade, sort, page: shopList ? Math.max(1, page - shopPages) : page });
+const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ author, subject, language, year, decade, sort, page: shopList ? Math.max(1, page - shopPages) : page });
 const pages = shopPages + list.pages;
 // a book the shops list that Open Library has too shows once, with the shops' pages
-const shopSeen = new Set((shopList?.items ?? []).flatMap((i) => [i.ol, slugOf(i.title)].filter(Boolean) as string[]));
+const shopSeen = new Set((shopFull?.items ?? []).flatMap((i) => [i.ol, slugOf(i.title)].filter(Boolean) as string[]));
 const olItems = shopList ? list.items.filter((b) => !shopSeen.has(b.key) && !shopSeen.has(slugOf(b.title))) : list.items;
 const marks = sb && !front && !picked && !onShops ? await myMarks(sb, Astro.locals.me, olItems.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
 
@@ -79,16 +81,26 @@ const langLinks = BOOK_LANGUAGES.slice(0, 14).map(([c, n]) => [`/books/?language
 const decadeLinks = decades.slice(0, 10).map(([d, n]) => [`/books/?decade=${d}`, n]);
 const listDec = picked ? listDecades(picked) : [];
 const dcPicked = picked && decade && listDec.some(([d]) => d === String(decade)) ? decade : undefined;
-const listNames = ['subject', 'language', 'decade', 'year', 'sort'];
-const resets = picked ? ['list'] : undefined; // changing any other filter leaves the list
+const listNames = ['subject', 'language', 'decade', 'year', 'author', 'sort'];
+const resets = picked ? ['list', 'author'] : ['author']; // changing any other filter leaves the list, and the author belongs to the list it was chosen in
+
+// the authors of the books in the current list: the whole list for the shops' books and the prize and classics lists,
+// the books on this page for an Open Library grid (Open Library can't count authors for a search)
+const byName = (a: [string, string], b: [string, string]) => a[1].localeCompare(b[1]);
+const authorOptions: [string, string][] = picked || shopFull
+  ? [...new Set(((picked ?? shopFull)!.items).map((i) => i.creator).filter(Boolean) as string[])].map((n): [string, string] => [n, n]).sort(byName)
+  : front ? [] : [...new Map(list.items.filter((b) => b.authorKey && b.author).map((b) => [b.authorKey!, b.author!])).entries()].sort(byName);
+if (author && !authorOptions.some(([v]) => v === author)) authorOptions.unshift([author, list.items.find((b) => b.authorKey === author)?.author ?? author]);
+const pickedShown = picked && author ? { ...picked, items: picked.items.filter((i) => i.creator === author) } : picked;
 const fields = [
   { name: 'subject', label: 'Subject', value: picked ? '' : subject ?? '', options: subjects, clears: resets },
   { name: 'language', label: 'Language', value: picked ? '' : language ?? '', options: [['', 'Any language'], ...(language && !BOOK_LANGUAGES.some(([c]) => c === language) ? [[language, langName ?? language]] : []), ...BOOK_LANGUAGES] as [string, string][], clears: resets },
   picked
     ? { name: 'decade', label: 'Year', value: dcPicked ? String(dcPicked) : '', options: [['', 'Any year'], ...listDec] as [string, string][] }
-    : { name: 'when', label: 'Year', value: year ? `year=${year}` : decade ? `decade=${decade}` : '', text: year ? String(year) : decade ? `${decade}s` : undefined, options: [['', 'Any year'], ...decades.map(([d, n]) => [`decade=${d}`, n])] as [string, string][] },
+    : { name: 'when', label: 'Year', value: year ? `year=${year}` : decade ? `decade=${decade}` : '', text: year ? String(year) : decade ? `${decade}s` : undefined, options: [['', 'Any year'], ...decades.map(([d, n]) => [`decade=${d}`, n])] as [string, string][], clears: ['author'] },
+  ...(authorOptions.length ? [{ name: 'author', label: 'Author', value: author ?? '', options: [['', 'Any author'], ...authorOptions] as [string, string][], search: 'Find an author' }] : []),
   { name: 'list', label: 'Lists', value: picked?.slug ?? '', options: [['', 'Prizes and classics'], ...bookLists.map((l) => [l.slug, l.title] as [string, string])] as [string, string][], clears: listNames },
-  { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: resets },
+  { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: picked ? ['list'] : undefined },
 ];
 ---
 <Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`}>
@@ -118,7 +130,7 @@ const fields = [
   ) : picked ? (
     <section class="pad">
       <p class="muted lede">{picked.intro}</p>
-      <ListGrid list={picked} decade={dcPicked} />
+      <ListGrid list={pickedShown!} decade={dcPicked} />
     </section>
   ) : (
   <section class="pad">
