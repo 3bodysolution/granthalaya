@@ -61,9 +61,31 @@ const credit = saved?.text && saved.source !== 'openlibrary'
   : null;
 // the two bookshops (with their permission): where to buy it, and the credit for a cover or details taken from them
 const SHOP_NAME: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
-const shopRows = sb && rows.length ? ((await sb.from('shop_books').select('shop, url').in('title_id', rows.map((r) => r.id))).data ?? []) as { shop: string; url: string }[] : [];
+type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null };
+let shopRows: ShopRow[] = [];
+if (sb && rows.length) {
+  const ids = rows.map((r) => r.id);
+  let r = await sb.from('shop_books').select('shop, url, isbn, publisher, pages').in('title_id', ids);
+  if (r.error) r = await sb.from('shop_books').select('shop, url, isbn, publisher').in('title_id', ids) as typeof r;   // before 012
+  shopRows = (r.data ?? []) as ShopRow[];
+}
 const shops = [...new Map(shopRows.map((s) => [s.shop, s])).values()].filter((s) => SHOP_NAME[s.shop]);
 const cover = b.cover ?? row?.cover_url ?? undefined;   // an Open Library book with no cover there may have one from a shop
+// A shop's details win where it has them (publisher, pages, ISBN: its own edition's); the first-publication year is never the shop's.
+const fromShop = shops.length > 0;
+const shopHas = (k: 'publisher' | 'pages' | 'isbn') => shopRows.find((s) => s[k])?.[k] ?? undefined;
+const publishers = (fromShop && shopHas('publisher') ? [String(shopHas('publisher'))] : b.publishers);
+const pagesShown = (fromShop && shopHas('pages')) || b.pages;
+const isbnShown = (fromShop && shopHas('isbn')) || b.isbn;
+// the "Book data from Open Library" line only when something on the page came from there
+const manyEditions = (b.editions ?? 0) >= 2;
+// (a year the credited Wikipedia text states itself is Wikipedia's, not Open Library's)
+const yearInText = !!year && !!saved?.text && !!saved.source?.endsWith('wikipedia') && saved.text.includes(String(year));
+const usedSource = !!b.sourceLink && (!fromShop || [
+  year && year === b.year && !yearInText, !saved?.text && b.description, b.subjects.length, b.languages.length, manyEditions,
+  b.pages && pagesShown === b.pages, b.publishers.length && publishers === b.publishers, b.isbn && isbnShown === b.isbn,
+].some(Boolean));
+const coverFromShop = !!cover && !b.cover;
 const gbId = 'gb' in k ? k.gb : null;
 const hit = {
   kind: 'book', olKey: 'ol' in k ? k.ol : undefined, title: b.title, creator: b.authors[0]?.name, year, pages: b.pages, cover: b.cover,
@@ -81,11 +103,10 @@ const find = [
 ].filter(Boolean) as { label: string; url: string }[];
 const tabs = [{ key: 'details', label: 'Details' }, b.subjects.length && { key: 'subjects', label: 'Subjects' }].filter(Boolean) as { key: string; label: string }[];
 const language = row?.language ? new Intl.DisplayNames(['en'], { type: 'language' }).of(row.language) : null;
-const manyEditions = (b.editions ?? 0) >= 2;
 const bits = await pageBits(sb, 'book', param);
 const og = bookOg({ ...b, year }, bits?.creator ?? b.authors.map((a) => a.name).join(', '), bits?.line);
 const paras = description ? description.split(/\n{2,}/) : [];
-const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerPage)) : null;
+const reading = pagesShown ? aboutHours(Math.round(pagesShown * siteConfig.minutesPerPage)) : null;
 ---
 <Base title={`${b.title}${b.authors[0] ? ` by ${b.authors[0].name}` : ''}`} line={row?.tagline ? { text: row.tagline, source: b.title } : undefined} description={description ? description.slice(0, 180) : `${b.title} on Granthalaya.`} og={og} image={`/og/book/${param}.png`}>
   <TitleLayout>
@@ -116,11 +137,11 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
           <dl class="facts">
             {year && <><dt>First published</dt><dd><a href={`/books/?year=${year}`} class="ul">{year}</a></dd></>}
             {language && <><dt>Language</dt><dd>{language}</dd></>}
-            {b.pages && <><dt>Length</dt><dd>{b.pages} pages{reading ? `, ${reading} to read` : ''}</dd></>}
+            {pagesShown && <><dt>Length</dt><dd>{pagesShown} pages{reading ? `, ${reading} to read` : ''}</dd></>}
             {b.languages.length > 0 && <><dt>Editions in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}
-            {b.publishers.length > 0 && <><dt>Publishers</dt><dd>{b.publishers.join(', ')}</dd></>}
+            {publishers.length > 0 && <><dt>{publishers.length > 1 ? 'Publishers' : 'Publisher'}</dt><dd>{publishers.join(', ')}</dd></>}
             {manyEditions && <><dt>Editions</dt><dd>{b.editions}</dd></>}
-            {b.isbn && <><dt>ISBN</dt><dd class="num">{b.isbn}</dd></>}
+            {isbnShown && <><dt>ISBN</dt><dd class="num">{isbnShown}</dd></>}
           </dl>
         </div>
         {b.subjects.length > 0 && (
@@ -138,8 +159,12 @@ const reading = b.pages ? aboutHours(Math.round(b.pages * siteConfig.minutesPerP
 
     <Fragment slot="below">
       <Reviews site={site} rows={rows} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the book' } : undefined} />
-      {b.sourceLink && <p class="pad credit-line">Book data from {b.source}.</p>}
-      {shops.length > 0 && <p class="pad credit-line">Cover and details from {shops.map((s, i) => <>{i > 0 && ' and '}<a href={s.url} target="_blank" rel="noopener" class="ul">{SHOP_NAME[s.shop]}</a></>)}, with their permission.</p>}
+      {(fromShop || usedSource) && (
+        <p class="pad credit-line">
+          {fromShop && <>{coverFromShop ? 'Cover and details' : 'Details'} from {shops.map((s, i) => <>{i > 0 && ' and '}<a href={s.url} target="_blank" rel="noopener" class="ul">{SHOP_NAME[s.shop]}</a></>)}, with their permission.</>}
+          {fromShop && usedSource && ' '}{usedSource && <>Book data from {b.source}.</>}
+        </p>
+      )}
     </Fragment>
   </TitleLayout>
 </Base>
