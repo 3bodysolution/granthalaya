@@ -5,6 +5,7 @@ import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks, type Mark } from './onsite';
 import { savedId } from '../saved';
+import { SHOP_LISTS } from './shopbooks';
 import { getList, listTile, listBrowseHref, type CatalogList } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
@@ -109,7 +110,7 @@ export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[
     listRow('booker', 'Booker Prize winners', 'book'),
     listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book'),
     listRow('marathi-classics', 'Marathi classics', 'book'),
-    ...suggested.map((l) => listRow(l.slug, l.title, 'book', l)).filter((r) => r.items.length),
+    ...suggested.map((l) => ({ ...listRow(l.slug, l.title, 'book', l), ...(SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS] && { href: `/books/?language=${SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS][2]}` }) })).filter((r) => r.items.length),
   ]);
 }
 

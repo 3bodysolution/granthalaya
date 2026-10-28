@@ -21,7 +21,9 @@ const status = new Map(marked.items.map((t) => [t.href, t]));
     ))}
   </div>
 )}
-<p class="credit-line">Source: {list.source.url ? <a href={list.source.url} rel="noopener">{list.source.name}</a> : list.source.name}.{list.slug.startsWith('shop-') ? ' Covers and details from Akshardhara and BookGanga.' : list.kind === 'film' ? ' Film data from TMDB.' : ' Book data from Open Library.'}</p>
+{list.slug.startsWith('shop-')
+  ? <p class="credit-line">Covers and details from Akshardhara and BookGanga.</p>
+  : <p class="credit-line">Source: {list.source.url ? <a href={list.source.url} rel="noopener">{list.source.name}</a> : list.source.name}.{list.kind === 'film' ? ' Film data from TMDB.' : ' Book data from Open Library.'}</p>}
 <style>
   .cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .yr { font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }

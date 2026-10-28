@@ -22,10 +22,10 @@ export async function searchShopBooks(sb: SupabaseClient | null | undefined, lik
   }));
 }
 
-export const SHOP_LISTS = { 'shop-marathi': ['mr', 'Marathi books from the shops', 'mar'], 'shop-hindi': ['hi', 'Hindi books from the shops', 'hin'] } as const;
+export const SHOP_LISTS = { 'shop-marathi': ['mr', 'Marathi books', 'mar'], 'shop-hindi': ['hi', 'Hindi books', 'hin'] } as const;
 /**
- * The best-selling Marathi and Hindi books on the two shops' lists, as lists like the prize lists: most-listed first, with a cover first.
- * Empty until scripts/shops has run.
+ * The Marathi and Hindi books the two shops list, as lists like the prize lists: most-listed first, with a cover first.
+ * They are the first part of the Marathi and Hindi sections on Books (not a section of their own). Empty until scripts/shops has run.
  */
 export async function shopLists(sb: SupabaseClient | null | undefined): Promise<CatalogList[]> {
   if (!sb) return [];
@@ -37,8 +37,8 @@ export async function shopLists(sb: SupabaseClient | null | undefined): Promise<
       .sort((a, b) => (Number(!!b.title!.cover_url) - Number(!!a.title!.cover_url)) || (b.lists.length - a.lists.length));
     return {
       slug, title, kind: 'book' as const,
-      intro: `The ${title.split(' ')[0]} books that the shops Akshardhara and BookGanga list among their best sellers and favourites. Open Library has few books in Indian languages, so these fill the gap.`,
-      source: { name: 'Akshardhara and BookGanga, with their permission', url: '' },
+      intro: `Popular ${title.split(' ')[0]} books.`,
+      source: { name: 'Akshardhara and BookGanga', url: '' },
       items: mine.map((r): ListItem => ({
         year: 0, title: r.title!.title, creator: r.title!.creator || undefined, slug: r.title!.slug,
         ol: r.title!.ol_key ?? undefined, cover: r.title!.cover_url ?? undefined,

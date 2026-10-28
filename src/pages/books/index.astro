@@ -13,9 +13,11 @@ import { browseBooks, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog
 import ListGrid from '../../components/title/ListGrid.astro';
 import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, type CatalogList } from '../../lib/lists';
 import { shopLists, SHOP_LISTS } from '../../lib/catalog/shopbooks';
+import { slug as slugOf } from '../../lib/catalog/fetch';
 import { myMarks } from '../../lib/catalog/onsite';
 import { savedId } from '../../lib/saved';
 export const prerender = false;
+const SHOP_PAGE = 48;
 
 const SUBJECTS: [string, string][] = [
   ['fiction', 'Fiction'], ['literary-fiction', 'Literary fiction'], ['historical-fiction', 'Historical fiction'], ['mystery', 'Mystery'],
@@ -33,24 +35,33 @@ const dc = parseInt(String(q.get('decade') ?? ''), 10); const decade = !year && 
 const sort = (['popular', 'top', 'new'] as const).find((s) => s === q.get('sort')) ?? 'popular';
 const page = Math.max(1, Math.min(100, Number(q.get('page')) || 1));
 
+// the shops' lists were once a list of their own (?list=shop-marathi): they are the start of the Marathi and Hindi books now
+const oldShop = Object.entries(SHOP_LISTS).find(([s]) => s === q.get('list'));
+if (oldShop) return Astro.redirect(`/books/?language=${oldShop[1][2]}`, 301);
 // a prize or classics list chosen in the filter bar shows in place; the other filters don't apply to it (Decade does)
 const front = [...q.keys()].length === 0;
 const sb = Astro.locals.supabase;
-const suggestedP = Promise.all([suggestedLists(sb), shopLists(sb)]).then((l) => l.flat()).catch(() => [] as CatalogList[]);
+const listsP = Promise.all([suggestedLists(sb), shopLists(sb)]).then(([s, sh]) => ({ s, sh })).catch(() => ({ s: [] as CatalogList[], sh: [] as CatalogList[] }));
+const suggestedP = listsP.then(({ s, sh }) => [...sh, ...s]);
 // the rows are started now and waited for further down the page (FrontRows), so the top of the page is sent first
 const rowsP = front ? bookRows(suggestedP).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
-const suggested = await suggestedP;
+const { s: suggested, sh: shopAll } = await listsP;
 const bookLists = [...listsOfKind('book'), ...suggested];
-// Marathi or Hindi on its own opens the shops' list first (Open Library has few books in them); "More from Open Library" is the same filter with an order
-const shopFirst = [...q.keys()].filter((k) => k !== 'page').join() === 'language' ? Object.entries(SHOP_LISTS).find(([, v]) => v[2] === language)?.[0] : undefined;
-const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === (q.get('list') ?? shopFirst));
-const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ subject, language, year, decade, sort, page });
-const marks = sb && !front && !picked ? await myMarks(sb, Astro.locals.me, list.items.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
+const picked = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
+// Marathi or Hindi on its own is one section: the shops' books first (Open Library has few in these languages), then the other books we have in it
+const onlyLanguage = [...q.keys()].filter((k) => k !== 'page').join() === 'language';
+const shopList = onlyLanguage && !picked ? shopAll.find((l) => SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS]?.[2] === language) : undefined;
+const shopPages = shopList ? Math.ceil(shopList.items.length / SHOP_PAGE) : 0;
+const onShops = !!shopList && page <= shopPages;
+const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ subject, language, year, decade, sort, page: shopList ? Math.max(1, page - shopPages) : page });
+const pages = shopPages + list.pages;
+// a book the shops list that Open Library has too shows once, with the shops' pages
+const shopSeen = new Set((shopList?.items ?? []).flatMap((i) => [i.ol, slugOf(i.title)].filter(Boolean) as string[]));
+const olItems = shopList ? list.items.filter((b) => !shopSeen.has(b.key) && !shopSeen.has(slugOf(b.title))) : list.items;
+const marks = sb && !front && !picked && !onShops ? await myMarks(sb, Astro.locals.me, olItems.map((b) => ({ kind: 'book', ol: b.key }))) : new Map();
 
-// the shops' lists run to hundreds of books: 48 a page like the other grids, the most listed first
-const shopPicked = picked?.slug.startsWith('shop-') ? picked : undefined;
-const shopPages = shopPicked ? Math.ceil(shopPicked.items.length / 48) : 0;
-const shown = shopPicked ? { ...shopPicked, items: shopPicked.items.slice((Math.min(page, shopPages) - 1) * 48, Math.min(page, shopPages) * 48) } : picked;
+// the shops' books run to hundreds: 48 a page like the other grids, the most listed first
+const shown = shopList ? { ...shopList, items: shopList.items.slice((page - 1) * SHOP_PAGE, page * SHOP_PAGE) } : undefined;
 
 const known = SUBJECTS.find(([s]) => s === subject)?.[1];
 const subjectName = subject ? known ?? subject.replace(/-/g, ' ').replace(/^./, (c) => c.toUpperCase()) : '';
@@ -98,31 +109,36 @@ const fields = [
       </div>
       <p class="credit-line">Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.</p>
     </section>
+  ) : onShops ? (
+    <section class="pad">
+      <p class="muted lede">Popular {langName} books first, then more {langName} books we have.</p>
+      <ListGrid list={shown!} />
+      <Pager page={page} pages={pages} />
+    </section>
   ) : picked ? (
     <section class="pad">
       <p class="muted lede">{picked.intro}</p>
-      <ListGrid list={shown!} decade={dcPicked} />
-      {shopPicked && <Pager page={Math.min(page, shopPages)} pages={shopPages} />}
-      {shopFirst && <p class="muted lede"><a class="ul" href={`/books/?language=${language}&sort=top`}>More {langName} books from Open Library</a></p>}
+      <ListGrid list={picked} decade={dcPicked} />
     </section>
   ) : (
   <section class="pad">
-    {list.items.length === 0 && list.failed ? (
+    {shopList && <p class="muted lede">Popular {langName} books first, then more {langName} books we have.</p>}
+    {olItems.length === 0 && list.failed ? (
       <div class="empty">
         <p class="muted">The book catalogue couldn’t be reached just now. Please try again shortly.</p>
       </div>
-    ) : list.items.length === 0 ? (
+    ) : olItems.length === 0 ? (
       <div class="empty">
         <p class="muted">Nothing matches all of that{language ? ', and Open Library has few books in some Indian languages' : ''}. Try fewer filters.</p>
         <a href="/add/?type=book" class="btn">Add a book by hand</a>
       </div>
     ) : (
       <div class="pgrid">
-        {list.items.map((b) => <PosterTile bare href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
+        {olItems.map((b) => <PosterTile bare href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: b.author, year: b.year, cover: b.cover }} />)}
       </div>
     )}
-    <Pager page={page} pages={list.pages} />
-    <p class="credit-line">Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.</p>
+    <Pager page={page} pages={pages} />
+    <p class="credit-line">{shopList ? 'Book data from Open Library.' : 'Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.'}</p>
   </section>
   )}
 </Base>
