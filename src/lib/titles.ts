@@ -85,7 +85,9 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
     q = h.year ? q.eq('year', h.year) : q.is('year', null);
     if (h.creator) q = q.ilike('creator', h.creator.replace(/[%_\\]/g, (c) => `\\${c}`));
   }
-  const { data: found } = await q.maybeSingle();
+  let { data: found } = await q.maybeSingle();
+  // an older row with no TMDB or Open Library id is the same work: give it the id and use it, instead of making a second row
+  if (!found && (h.tmdbId || h.olKey) && (h.kind === 'film' || h.kind === 'book')) found = await adoptOlder(h);
   if (found) {
     // a season added before shows had their own rows learns its show here
     if (showId) await db.from('titles').update({ show_id: showId }).eq('id', found.id).is('show_id', null);
@@ -113,6 +115,25 @@ export async function titleFor(raw: Hit, userId: string): Promise<{ id: string; 
   factsLater(data as any);
   ensureFactsLater(data.id);   // the card line and painting too
   return { id: data.id, slug: data.slug };
+}
+
+/** the same film or book already in the catalogue without an id (copied from the old library): same kind, same title,
+ *  year within one, same creator when both have one. It learns the id, so nothing is split. */
+async function adoptOlder(h: Hit): Promise<{ id: string; slug: string } | null> {
+  const db = adminClient();
+  const idCol = h.kind === 'film' ? 'tmdb_id' : 'ol_key';
+  const idVal = h.kind === 'film' ? h.tmdbId : h.olKey;
+  if (!idVal) return null;
+  let q = db.from('titles').select('id, slug, year, creator').eq('kind', h.kind).is(idCol, null).ilike('title', h.title.replace(/[%_\\]/g, (c) => `\\${c}`));
+  if (h.year) q = q.gte('year', h.year - 1).lte('year', h.year + 1);
+  const { data } = await q.limit(10);
+  const key = (s?: string | null) => slugify(s ?? '');
+  const fits = (data ?? []).filter((r) => !h.creator || !r.creator || key(r.creator).includes(key(h.creator)) || key(h.creator).includes(key(r.creator)));
+  if (!fits.length) return null;
+  const best = fits.find((r) => r.year === h.year) ?? fits[0];
+  const { error } = await db.from('titles').update({ [idCol]: idVal }).eq('id', best.id).is(idCol, null);
+  if (error) return null;   // that id went to another row a moment ago: the caller makes (or finds) it the usual way
+  return { id: best.id, slug: best.slug };
 }
 
 /** a TV show's own row (kind 'tv', no season), above its season rows: found, or made from TMDB. Its slug is the plain name ("dark"). */
