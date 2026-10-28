@@ -119,7 +119,7 @@
       "creator": "Sane Guruji",
       "language": "mr",
       "note": "Memoir of a childhood in the Konkan, told as stories",
-      "ol": "OL41491752W"
+      "slug": "shyamchi-aai"
     },
     {
       "year": 1936,
@@ -183,7 +183,8 @@
       "creator": "V. S. Khandekar",
       "language": "mr",
       "note": "Novel retelling the Mahabharata story of King Yayati",
-      "ol": "OL23748397W"
+      "ol": "OL11821541W",
+      "slug": "yayati"
     },
     {
       "year": 1962,
@@ -239,7 +240,7 @@
       "creator": "V. V. Shirwadkar",
       "language": "mr",
       "note": "Play about an ageing stage actor and his children",
-      "slug": "natsamrat"
+      "slug": "natasamrat"
     },
     {
       "year": 1972,
@@ -277,7 +278,7 @@
       "creator": "Daya Pawar",
       "language": "mr",
       "note": "Autobiography of a Dalit writer, first of its kind in Marathi",
-      "ol": "OL1045812W"
+      "slug": "balut"
     },
     {
       "year": 1979,
@@ -314,7 +315,7 @@
       "creator": "Milind Bokil",
       "language": "mr",
       "note": "Novel of a group of schoolboys in 1975",
-      "ol": "OL23283598W"
+      "slug": "shala"
     }
   ]
 }
