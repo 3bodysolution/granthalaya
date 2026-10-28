@@ -4,12 +4,16 @@
 import PosterTile from './PosterTile.astro';
 import { listTile, type CatalogList } from '../../lib/lists';
 import { markRows } from '../../lib/catalog/rows';
+import { SHOP_COVER } from '../../lib/images';
 interface Props { list: CatalogList; decade?: number }
 const { list, decade } = Astro.props;
 const shown = list.items.filter((i) => !decade || (i.year >= decade && i.year < decade + 10));
 // a tile with no year keeps the year line's space, so it sits level with its neighbours (a list with no years at all has no such line)
 const anyYear = shown.some((i) => i.year);
 const tiles = shown.map((i) => listTile(list, i));
+// the credits follow what the list really shows: Open Library only when a book is its page or cover, the shops when their covers are on show
+const usesOpenLibrary = shown.some((i) => i.ol || /covers\.openlibrary\.org/.test(i.cover ?? ''));
+const usesShops = shown.some((i) => SHOP_COVER.test(i.cover ?? ''));
 const [marked] = await markRows(Astro.locals.supabase, Astro.locals.me, [{ title: list.title, items: tiles.filter((t) => t.href) }]);
 const status = new Map(marked.items.map((t) => [t.href, t]));
 ---
@@ -25,7 +29,7 @@ const status = new Map(marked.items.map((t) => [t.href, t]));
 )}
 {list.slug.startsWith('shop-')
   ? <p class="credit-line">Covers and details from Akshardhara and BookGanga.</p>
-  : <p class="credit-line">Source: {list.source.url ? <a href={list.source.url} rel="noopener">{list.source.name}</a> : list.source.name}.{list.kind === 'film' ? ' Film data from TMDB.' : ' Book data from Open Library.'}</p>}
+  : <p class="credit-line">Source: {list.source.url ? <a href={list.source.url} rel="noopener">{list.source.name}</a> : list.source.name}.{list.kind === 'film' ? ' Film data from TMDB.' : usesOpenLibrary ? ' Book data from Open Library.' : ''}{list.kind === 'book' && usesShops ? ' Some covers from Akshardhara and BookGanga, with their permission.' : ''}</p>}
 <style>
   .cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .yr { min-height: 1.4em; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
