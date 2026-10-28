@@ -128,6 +128,32 @@ async function byImdb(tt: string): Promise<Hit[]> {
   return h ? [h] : [];
 }
 
+/** a Wikipedia article about a film, show or book: use its one-line description to find the real thing on TMDB or Open Library */
+async function fromWikipedia(u: URL): Promise<Hit[]> {
+  const page = decodeURIComponent(u.pathname.replace(/^\/wiki\//, '')).replace(/_/g, ' ');
+  if (!page || page === u.pathname) return [];
+  const s = await getJSON(`https://${u.hostname}/api/rest_v1/page/summary/${encodeURIComponent(page.replace(/ /g, '_'))}`);
+  const desc = String(s.description ?? '');
+  const name = decode(String(s.titles?.normalized ?? page)).replace(/\s*\((?:\d{4} )?(?:[\w-]+ )*?(?:film|TV series|television series|miniseries|novel|book|play|poem|memoir|short story|story collection)\)$/i, '');
+  const year = +(desc.match(/\b(1[5-9]\d\d|20\d\d)\b/)?.[1] ?? 0) || undefined;
+  const pick = (found: Hit[]) => found.find((f) => !year || f.year === year) ?? found[0];
+  if (/\b(film|movie)\b/i.test(desc) && tmdbKey()) {
+    const best = pick(await films(name).catch(() => []));
+    return best ? [best] : [];
+  }
+  if (/\b(television|TV|web) (series|show|miniseries)|\bminiseries\b/i.test(desc) && tmdbKey()) {
+    const best = pick(await shows(name).catch(() => []));
+    return best ? [best] : [];
+  }
+  if (/\b(novel|novella|book|play|poem|poetry|memoir|short story|story collection|autobiography)\b/i.test(desc)) {
+    const by = desc.match(/\bby ([^,;(]+)/i)?.[1]?.trim();
+    const found = await books(by ? `${name} ${by}` : name, 4).catch(() => []);
+    const best = found.find((f) => f.title.toLowerCase().startsWith(name.toLowerCase().slice(0, 12))) ?? null;
+    return best ? [best] : [];
+  }
+  return [];
+}
+
 export async function link(raw: string): Promise<Hit[]> {
   const u = checkUrl(raw);
   const host = u.hostname.replace(/^www\./, '');
@@ -142,6 +168,10 @@ export async function link(raw: string): Promise<Hit[]> {
     const hits = await byImdb(imdb[1]);
     if (hits.length) return hits;
     throw new Error('unreadable');
+  }
+  if (/^[a-z-]+\.wikipedia\.org$/.test(u.hostname)) {
+    const hits = await fromWikipedia(u).catch(() => []);
+    if (hits.length) return hits;
   }
   const r = await safeGet(u.href, 9000, { ...UA, Accept: 'text/html' });
   if (!r.ok) throw new Error('unreadable');
