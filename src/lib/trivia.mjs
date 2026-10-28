@@ -83,8 +83,9 @@ ARTICLE:
 ${page.text}`;
 
 // tries > 1 waits and asks again when the free model is busy (used by `npm run trivia`)
-export async function askGemini(key, model, text, tries = 1) {
-  const models = model ? [model] : ['gemini-flash-latest', 'gemini-2.5-flash'];
+// `fast`: gemini-2.5-flash with its thinking switched off (about 5 seconds for a list of 20 books; gemini-flash-latest can take over a minute)
+export async function askGemini(key, model, text, tries = 1, { fast = false } = {}) {
+  const models = model ? [model] : fast ? ['gemini-2.5-flash'] : ['gemini-flash-latest', 'gemini-2.5-flash'];
   let last;
   for (let i = 0; i < tries; i++) {
     // only wait when the model is busy (503); a used-up allowance (429) won't come back in seconds
@@ -95,7 +96,7 @@ export async function askGemini(key, model, text, tries = 1) {
         const j = await getJSON(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-          body: JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { temperature: 0.4, responseMimeType: 'application/json' } }),
+          body: JSON.stringify({ contents: [{ parts: [{ text }] }], generationConfig: { temperature: 0.4, responseMimeType: 'application/json', ...(fast ? { thinkingConfig: { thinkingBudget: 0 } } : {}) } }),
         }, 20000);
         return j.candidates?.[0]?.content?.parts?.map((p) => p.text ?? '').join('') ?? '';
       } catch (e) { last = e; }

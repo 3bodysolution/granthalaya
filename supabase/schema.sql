@@ -161,7 +161,7 @@ create table public.book_suggestions (
   id uuid primary key default gen_random_uuid(),
   language text not null check (language in ('mr', 'hi')),
   title_id uuid not null references public.titles (id) on delete cascade,
-  checked_with text not null check (checked_with in ('Open Library', 'Google Books', 'Wikipedia')),
+  checked_with text not null check (checked_with in ('Open Library', 'Google Books', 'Wikipedia', 'Our catalogue')),
   hidden boolean not null default false,
   created_at timestamptz not null default now(),
   unique (language, title_id)

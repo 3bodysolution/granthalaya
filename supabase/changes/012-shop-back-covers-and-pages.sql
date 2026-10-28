@@ -9,4 +9,9 @@ alter table public.shop_books
   add column if not exists pages int check (pages is null or pages between 1 and 100000),
   add column if not exists back_src text check (back_src is null or (back_src ~ '^https://cdn\.shopify\.com/s/files/1/0800/1214/9058/' and char_length(back_src) <= 600));
 
+-- A suggested book may also be confirmed by our own catalogue (a record that came from a shop or Open Library): 'Our catalogue'.
+alter table public.book_suggestions drop constraint if exists book_suggestions_checked_with_check;
+alter table public.book_suggestions add constraint book_suggestions_checked_with_check
+  check (checked_with in ('Open Library', 'Google Books', 'Wikipedia', 'Our catalogue'));
+
 commit;
