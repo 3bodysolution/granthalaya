@@ -89,13 +89,12 @@ const dcPicked = picked && decade && listDec.some(([d]) => d === String(decade))
 const listNames = ['subject', 'language', 'decade', 'year', 'author', 'sort'];
 const resets = picked ? ['list', 'author'] : ['author']; // changing any other filter leaves the list, and the author belongs to the list it was chosen in
 
-// the authors of the books in the current list: the whole list for the shops' books and the prize and classics lists,
-// the books on this page for an Open Library grid (Open Library can't count authors for a search)
+// the authors of the books in the current list, shown only where the whole list is known: the shops' books and the prize, classics and
+// suggested lists. An Open Library grid has no full author list (Open Library can't count authors for a search), so it has no Author part.
 const byName = (a: [string, string], b: [string, string]) => a[1].localeCompare(b[1]);
 const authorOptions: [string, string][] = picked || shopFull
   ? [...new Set(((picked ?? shopFull)!.items).map((i) => i.creator).filter(Boolean) as string[])].map((n): [string, string] => [n, n]).sort(byName)
-  : front ? [] : [...new Map(list.items.filter((b) => b.authorKey && b.author).map((b) => [b.authorKey!, b.author!])).entries()].sort(byName);
-if (author && !authorOptions.some(([v]) => v === author)) authorOptions.unshift([author, list.items.find((b) => b.authorKey === author)?.author ?? author]);
+  : [];
 const pickedShown = picked && author ? { ...picked, items: picked.items.filter((i) => i.creator === author) } : picked;
 const fields = [
   { name: 'subject', label: 'Subject', value: picked ? '' : subject ?? '', options: subjects, clears: resets },
