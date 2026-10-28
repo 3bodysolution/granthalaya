@@ -125,7 +125,7 @@ const monthCovers = months.filter((m) => m.sum > 0).map((m) => ({
 }));
 const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '' : `?year=${y}`}`;
 ---
-<Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username}
+<Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username} feed={!profile.is_private}
   description={inYear.length ? `${plural(inYear.length, 'thing')} finished in ${year}.` : `Stats for ${year}.`}
   og={inYear.length && !profile.is_private ? yearOg(name, year, nBooks, nFilms, Math.round(filmMin / 60), fav ? fav.data.title : undefined) : undefined}>
   <section class="hero bleed">

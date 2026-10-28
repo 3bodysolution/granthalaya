@@ -11,7 +11,7 @@ interface Props { logId: string; owner: { id: string; username: string }; likes:
 const { logId, owner, likes, liked, comments, open = false, report = true } = Astro.props;
 const me = Astro.locals.me;
 const mine = me?.id === owner.id;
-const signin = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
+const signin = `/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
 ---
 <div class="rsoc" data-review={logId}>
   <div class="rbar">

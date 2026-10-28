@@ -38,7 +38,7 @@ const og = collectionOg(col.data.title, name, col.body, path.length);
 const shareData = JSON.stringify({ title: col.data.title, ref: `col=${col.uuid}`, card: `/story/c/${profile.username}/${slug}.png`, wide: false });
 const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
 ---
-<Base title={`${col.data.title} | @${profile.username}`} shelf={profile.username} description={`A collection by ${name}: ${col.data.title}. ${meta}.`} og={profile.is_private ? undefined : og}
+<Base title={`${col.data.title} | @${profile.username}`} shelf={profile.username} feed={!profile.is_private} description={`A collection by ${name}: ${col.data.title}. ${meta}.`} og={profile.is_private ? undefined : og}
   image={profile.is_private ? undefined : `/og/c/${profile.username}/${slug}.png`}>
   <section class="pad head">
     <div class="fan" aria-hidden="true">

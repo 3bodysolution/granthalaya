@@ -20,7 +20,7 @@ const all = shelfReviews(await loadShelf(sb, profile));
 const name = profile.display_name || profile.username;
 const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.private).map((r) => [r.logId, profile.id])), Astro.locals.me);
 ---
-<Base title={isMe ? 'Your reviews' : `${name}’s reviews`} shelf={profile.username} description={`Reviews ${name} wrote on Granthalaya.`}>
+<Base title={isMe ? 'Your reviews' : `${name}’s reviews`} shelf={profile.username} feed={!profile.is_private} description={`Reviews ${name} wrote on Granthalaya.`}>
   <section class="pad head">
     <div class="rise stack" style="gap: 10px">
       <p class="eyebrow" style="color: var(--lat)">Reviews</p>

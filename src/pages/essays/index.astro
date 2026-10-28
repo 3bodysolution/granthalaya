@@ -47,6 +47,6 @@ const hasPicks = !picked || picked.name === 'Picks';
   .rows { display: flex; flex-direction: column; gap: 48px; padding-bottom: 8px; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
   .credit-line { margin: 32px 0 0; font-size: 12px; color: var(--muted); }
-  .credit-line a { color: var(--lat); }
+  .credit-line a { color: var(--lat); text-decoration: underline; text-underline-offset: 2px; }
   @media (max-width: 780px) { .head { padding-top: 28px; } .rows { gap: 36px; } .grid { grid-template-columns: 1fr; } }
 </style>

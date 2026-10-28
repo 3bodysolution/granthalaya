@@ -22,7 +22,7 @@ for (const e of all) {
   m.items.push(e);
 }
 ---
-<Base title={isMe ? 'Your diary' : `${name}’s diary`} shelf={profile.username} description={`Everything ${name} has logged, day by day.`}>
+<Base title={isMe ? 'Your diary' : `${name}’s diary`} shelf={profile.username} feed={!profile.is_private} description={`Everything ${name} has logged, day by day.`}>
   <section class="pad head">
     <div class="rise d1" style="margin-bottom: 30px"><ShelfStrip shelf={o.shelf} current="diary" /></div>
     <p class="eyebrow rise" style="color: var(--lat)">Diary</p>

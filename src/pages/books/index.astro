@@ -121,7 +121,7 @@ const fields = [
   { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: picked ? ['list'] : undefined },
 ];
 ---
-<Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`}>
+<Base title={title} active="books" description={`${title} on Granthalaya: browse, save and log.`} og={{ title: `${title} | Granthalaya`, description: picked ? picked.intro : `${title} on Granthalaya: browse, save and log.` }}>
   <section class="pad head">
     {!front && <p class="eyebrow" style="color: var(--book)">Books</p>}
     <h1 class="title">{title}</h1>

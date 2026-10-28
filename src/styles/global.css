@@ -344,8 +344,10 @@ html[data-theme="dark"] :is(.cv.real > .pic, .hc .pic, .pt-cover img) { outline-
 
 /* Drawn: the loader for a page that takes a moment. The outline traces itself, fills, fades. */
 .drawn { overflow: visible; }
-.dr-edge { fill: none; stroke: var(--lat); stroke-width: 5; stroke-linejoin: round; stroke-dasharray: 100; animation: drawedge 3s ease-in-out infinite; }
-.dr-fill { fill: var(--lat); animation: drawfill 3s ease-in-out infinite; }
+.dr-edge { fill: none; stroke: var(--lat); stroke-width: 5; stroke-linejoin: round; stroke-dasharray: 100; }
+.pageload.on .dr-edge, .dr-edge.run { animation: drawedge 3s ease-in-out infinite; }
+.dr-fill { fill: var(--lat); }
+.pageload.on .dr-fill, .dr-fill.run { animation: drawfill 3s ease-in-out infinite; }
 @keyframes drawedge { 0% { stroke-dashoffset: 100; opacity: 1; } 40% { stroke-dashoffset: 0; } 85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
 @keyframes drawfill { 0%, 38% { opacity: 0; } 55%, 85% { opacity: 1; } 100% { opacity: 0; } }
 .pageload { position: fixed; z-index: 70; left: 50%; top: 50%; translate: -50% -50%; padding: 22px; border-radius: 20px; display: flex;

@@ -163,7 +163,7 @@ const hideSpoiler = d.spoiler && !isMe;
 // the shepherd in the footer says the title's own line
 const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
 ---
-<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} description={desc} line={line} noindex={d.private} og={d.private || profile.is_private ? undefined : og}
+<Base title={`${fullTitle(entry)} | @${profile.username}`} shelf={profile.username} feed={!profile.is_private} description={desc} line={line} noindex={d.private} og={d.private || profile.is_private ? undefined : og}
   image={d.private || profile.is_private ? undefined : `/og/e/${profile.username}/${slug}.png`}>
   {d.type !== 'essay' ? (
     <>
@@ -303,7 +303,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
             <>
               <p class="lp-head">Keep your own shelf</p>
               <p class="lp-note">Log what you {verb} and say what you thought of it.</p>
-              <a class="lrow2" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname)}`} data-astro-prefetch="false"><Plus /><span>Sign in to add this</span></a>
+              <a class="lrow2" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} data-astro-prefetch="false"><Plus /><span>Sign in to add this</span></a>
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
             </>
           )}
@@ -354,7 +354,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
           mine.length ? <a class="chip" href={href(mine[0])}>On your shelf | {statusLabel('essay', mine[0].data.status)}</a>
             : <button class="chip" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })} data-saved-label="Saved"><Mark size={15} /><span data-label>Save for later</span></button>
         ) : (
-          <a class="chip" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname)}`} data-astro-prefetch="false">Sign in to save it</a>
+          <a class="chip" href={`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} data-astro-prefetch="false">Sign in to save it</a>
         )}
         {!isMe && me && <PersonMenu username={profile.username} id={profile.id} isMe={false} signedIn={true} blocked={false} logId={entry.logId} />}
       </div>

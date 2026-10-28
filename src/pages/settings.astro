@@ -8,7 +8,7 @@ import { loadShelf, fullTitle, type Details, type Entry } from '../lib/data';
 export const prerender = false;
 
 const me = Astro.locals.me;
-if (!me) return Astro.redirect('/signin/?next=/settings/');
+if (!me) return Astro.redirect(`/signin/?next=${encodeURIComponent('/settings/')}`);
 const sb = Astro.locals.supabase;
 const [{ data: det }, shelf] = await Promise.all([
   sb.from('profile_details').select('*').eq('id', me.id).maybeSingle<Details>(),

@@ -25,7 +25,7 @@ const { kind, parts, selected, share, what, show } = Astro.props;
 const me = Astro.locals.me;
 const ICON: Record<Status, any> = { want: null, reading: BookOpen, watching: Play, done: Check, paused: Pause, dnf: XIcon, dropped: XIcon };
 const pick = selected ?? parts[0]?.key;
-const next = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
+const next = `/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`;
 const film = kind !== 'book';
 // the share window: the public page's address and picture, and (signed in) your entry's story card
 const [, pageKind, pageSeg] = new URL(share).pathname.match(/^\/(film|tv|book)\/([^/]+)\/?$/) ?? [];

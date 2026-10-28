@@ -29,7 +29,10 @@ function oldAddress(path: string): string | null {
 // Pages someone without a username yet may still open.
 const OPEN = /^\/(welcome|signin|auth\/|api\/|privacy|terms|about)/;
 
-export const onRequest = defineMiddleware((ctx, next) => withTiming(() => (CARD.test(ctx.url.pathname) ? logged(ctx.url, () => handle(ctx, next)) : handle(ctx, next)) as Promise<Response>));
+// an address that isn't valid text (a broken %-code such as /film/%E0%A4/) is just a page that isn't there
+const brokenAddress = (path: string) => { try { decodeURIComponent(path); return false; } catch { return true; } };
+
+export const onRequest = defineMiddleware((ctx, next) => brokenAddress(ctx.url.pathname) ? new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }) : withTiming(() => (CARD.test(ctx.url.pathname) ? logged(ctx.url, () => handle(ctx, next)) : handle(ctx, next)) as Promise<Response>));
 
 // Share cards and the cover copies they use: each one writes a line to the function log (Vercel → Logs) with its steps,
 // their times and, when it fails, why. A cold start shows as a long first step.

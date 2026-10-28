@@ -19,6 +19,8 @@ interface Props {
   active?: string;
   /** whose shelf this page belongs to (for the menu and search); defaults to yours */
   shelf?: string;
+  /** this page is a public shelf's page: it advertises the shelf's RSS feed (a private shelf has none) */
+  feed?: boolean;
   /** the shepherd's line in the footer: a title's own line on its pages (else this week's line from site.ts) */
   line?: { text: string; by?: string; source?: string };
   /** keep this page out of search engines */
@@ -51,7 +53,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   <link rel="canonical" href={canonical} />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-  {shelf && <link rel="alternate" type="application/rss+xml" title={`@${shelf} on ${site.name}`} href={`/@${shelf}/rss.xml`} />}
+  {shelf && Astro.props.feed && <link rel="alternate" type="application/rss+xml" title={`@${shelf} on ${site.name}`} href={`/@${shelf}/rss.xml`} />}
   {noindex && <meta name="robots" content="noindex" />}
   <meta property="og:type" content="website" />
   <meta property="og:title" content={og.title} />
@@ -115,7 +117,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
             </details>
           </>
         ) : (
-          <a href={`/signin/?next=${encodeURIComponent(Astro.url.pathname)}`} class="btn primary" data-astro-prefetch="false">Sign in</a>
+          <a href={`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} class="btn primary" data-astro-prefetch="false">Sign in</a>
         )}
       </div>
     </header>

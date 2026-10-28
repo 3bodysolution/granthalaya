@@ -27,7 +27,7 @@ const STATUS_FILTERS: [string, string, (s: Status) => boolean][] = [
 const filters = STATUS_FILTERS.map(([k, label, f]) => ({ k, label, n: all.filter((e) => f(e.data.status)).length })).filter((f) => f.n > 0);
 const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s === 'dropped' ? 'dnf' : s);
 ---
-<Base title={isMe ? 'Your library' : `${name}’s library`} shelf={profile.username} description={`Everything on ${name}’s shelf, by year.`}>
+<Base title={isMe ? 'Your library' : `${name}’s library`} shelf={profile.username} feed={!profile.is_private} description={`Everything on ${name}’s shelf, by year.`}>
   <div class="art melt settle banner bleed" style="--day: url(/art/library-day.webp); --night: url(/art/library-night.webp)" aria-hidden="true"></div>
 
   <div id="lib" data-type="all" data-status="all">
@@ -162,11 +162,8 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
     const q = new URLSearchParams(location.search);
     const qt = q.get('type'), qs = q.get('status');
     if (qt && lib.querySelector(`[data-type-btn="${qt}"]`)) setType(qt, false);
-    if (qs) {
-      lib.dataset.status = qs;
-      lib.querySelectorAll<HTMLElement>('[data-status-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.statusBtn === qs)));
-      apply(false);
-    }
+    // a status that isn't one of the buttons (a mistyped address) shows everything, as All
+    if (qs && lib.querySelector(`[data-status-btn="${CSS.escape(qs)}"]`)) setStatus(qs, false);
   }
   document.addEventListener('astro:page-load', setup);
 </script>

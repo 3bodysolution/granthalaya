@@ -84,7 +84,7 @@ const serviceLinks = svc.slice(0, 10).map((s) => [`${base}service=${s.id}`, s.na
 const decadeLinks = decades.slice(0, 8).map(([d, n]) => [`${base}decade=${d}`, n]);
 const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv') u.set('kind', 'tv'); if (language) u.set('language', language); if (decade) u.set('decade', String(decade)); if (year) u.set('year', String(year)); if (service) u.set('service', String(service)); const s = u.toString(); return `/films/${s ? '?' + s : ''}`; };
 ---
-<Base title={title} active="films" description={`${title} on Granthalaya: browse, save and log.`}>
+<Base title={title} active="films" description={`${title} on Granthalaya: browse, save and log.`} og={{ title: `${title} | Granthalaya`, description: picked ? picked.intro : `${title} on Granthalaya: browse, save and log.` }}>
   <section class="pad head">
     <div class="seg" data-vt role="group" aria-label="Films or TV">
       <a href={switchTo('film')} aria-current={kind === 'film' ? 'page' : undefined} class:list={['sw', kind === 'film' && 'on']}>Films</a>
