@@ -59,6 +59,8 @@ const shopPages = shopList ? Math.ceil(shopList.items.length / SHOP_PAGE) : 0;
 const onShops = !!shopList && page <= shopPages;
 const list = front || picked ? { items: [], total: 0, pages: 0 } : await browseBooks({ author, subject, language, year, decade, sort, page: shopList ? Math.max(1, page - shopPages) : page });
 const pages = shopPages + list.pages;
+// a page past the last one goes to the last real page
+if (!front && !picked && !list.failed && pages > 0 && page > pages) { const u = new URL(Astro.url); pages > 1 ? u.searchParams.set('page', String(pages)) : u.searchParams.delete('page'); return Astro.redirect(u.pathname + u.search); }
 // a book the shops list that Open Library has too shows once, with the shops' pages
 const shopSeen = new Set((shopFull?.items ?? []).flatMap((i) => [i.ol, slugOf(i.title)].filter(Boolean) as string[]));
 const olItems = shopList ? list.items.filter((b) => !shopSeen.has(b.key) && !shopSeen.has(slugOf(b.title))) : list.items;

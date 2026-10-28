@@ -237,12 +237,19 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0, failed: state === 'failed' };
 }
 
-/** the browse grids show 40 to a page: two of TMDB's pages of 20 at once */
-export async function discoverWide(f: Filters): Promise<{ items: Card[]; pages: number; total: number; failed?: boolean }> {
-  const p = Math.max(f.page ?? 1, 1);
+/** the browse grids show 40 to a page: two of TMDB's pages of 20 at once (TMDB stops at its page 500, so 250 of ours).
+ *  A page past the end comes back empty with `lastPage` set to the real last one, so the caller can send the visitor there. */
+export const WIDE_PAGES = 250;
+export async function discoverWide(f: Filters): Promise<{ items: Card[]; pages: number; total: number; failed?: boolean; lastPage?: number }> {
+  const p = Math.min(Math.max(f.page ?? 1, 1), WIDE_PAGES);
   const [a, b] = await Promise.all([discover({ ...f, page: 2 * p - 1 }), discover({ ...f, page: 2 * p })]);
   const seen = new Set<number>();
   const items = [...a.items, ...b.items].filter((c) => !seen.has(c.id) && seen.add(c.id));
+  if (!items.length && p > 1) {
+    // TMDB answers a page past the end with an error, which is not the same as being unreachable: ask for the first page to find out
+    const first = await discover({ ...f, page: 1 });
+    if (first.items.length) return { items: [], pages: Math.ceil(first.pages / 2), total: first.total, lastPage: Math.max(1, Math.ceil(first.pages / 2)) };
+  }
   return { items, pages: Math.ceil(a.pages / 2), total: a.total, failed: items.length === 0 && !!a.failed };
 }
 
