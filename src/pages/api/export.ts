@@ -2,6 +2,7 @@
 import type { APIRoute } from 'astro';
 import { oops } from '../../lib/http';
 import { zip } from '../../lib/zip';
+import { todayIST } from '../../lib/data';
 export const prerender = false;
 
 // spreadsheet cells; a leading = + - @ is defused so a spreadsheet app never runs it as a formula
@@ -59,7 +60,7 @@ export const GET: APIRoute = async ({ locals }) => {
     ...Object.entries(links).map(([k, v]) => [`Link: ${k}`, v]),
   ]);
 
-  const stamp = new Date().toISOString().slice(0, 10);
+  const stamp = todayIST();
   const file = zip([
     { name: 'shelf.csv', text: shelfCsv },
     { name: 'review-comments.csv', text: commentsCsv },

@@ -355,6 +355,13 @@ const D = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const monthNames = M;
 export const short = (d: Date) => `${M[d.getUTCMonth()]} ${d.getUTCDate()}`;
 export const long = (d: Date) => `${M[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+/** today's date (YYYY-MM-DD) in India, where the site's people are: a log made at 2 a.m. IST gets that day, not yesterday's UTC date */
+export const todayIST = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+/** a moment (a comment's time) as a date in India, in the same style as long() */
+export const longIST = (d: Date) => {
+  const [y, m, day] = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d).split('-').map(Number);
+  return `${M[m - 1]} ${day}, ${y}`;
+};
 export const ticketDate = (d: Date) => `${D[d.getUTCDay()]} ${d.getUTCDate()} ${M[d.getUTCMonth()]} ${d.getUTCFullYear()}`.toUpperCase();
 export const timesWord = (n: number, verb: 'read' | 'watch') =>
   n <= 1 ? (verb === 'watch' ? 'First watch' : 'Once') : n === 2 ? 'Twice' : `${n} times`;

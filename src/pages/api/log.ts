@@ -7,9 +7,9 @@ import { ensureFactsLater } from '../../lib/cards/tagline';
 import { statusFits, type Kind, type Status } from '../../lib/kinds';
 import { isPlainSave, isBareEntry } from '../../lib/saved';
 import { warmCover } from '../../lib/cards/covers';
+import { todayIST as today } from '../../lib/data';
 export const prerender = false;
 
-const today = () => new Date().toISOString().slice(0, 10);
 const rating = (v: unknown) => {
   const n = Number(v);
   return v === null || v === undefined || v === '' || !Number.isFinite(n) || n < 0.5 || n > 5 ? null : Math.round(n * 2) / 2;

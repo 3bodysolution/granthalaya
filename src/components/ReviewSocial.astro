@@ -6,7 +6,7 @@ import Heart from '@tabler/icons/outline/heart.svg';
 import HeartFill from '@tabler/icons/filled/heart.svg';
 import Talk from '@tabler/icons/outline/message-circle.svg';
 import type { Comment } from '../lib/reviews';
-import { long } from '../lib/data';
+import { longIST } from '../lib/data';
 interface Props { logId: string; owner: { id: string; username: string }; likes: number; liked: boolean; comments: Comment[]; open?: boolean; report?: boolean }
 const { logId, owner, likes, liked, comments, open = false, report = true } = Astro.props;
 const me = Astro.locals.me;
@@ -31,7 +31,7 @@ const signin = `/signin/?next=${encodeURIComponent(Astro.url.pathname)}`;
               <li class="c">
                 <Face name={c.name} src={c.avatar} size={26} />
                 <div class="cb">
-                  <p class="ch"><a href={`/@${c.username}/`}>{c.name}</a><span class="muted"> | {long(new Date(c.date))}</span></p>
+                  <p class="ch"><a href={`/@${c.username}/`}>{c.name}</a><span class="muted"> | {longIST(new Date(c.date))}</span></p>
                   <p class="ct">{c.body}</p>
                   {me && (
                     <p class="cact">
