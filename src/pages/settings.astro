@@ -51,7 +51,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       <div class="panels">
         <!-- said once: notes became public reviews (dismissed in this browser) -->
         <div class="notice reviews-note" id="reviewsnote" hidden>
-          <p><b>Notes are now reviews.</b> What you write about a film, show or book now shows on its page for everyone, and people can like it and comment. Entries marked Only me, and everything on a private account, never appear there.</p>
+          <p><b>Notes are now reviews.</b> What you write about a film, show or book now shows on its page for everyone, and people can like it and comment. Entries marked Only me, and everything on a private account, never appear there. Comments and likes you leave on someone else’s public review stay public, even on a private account.</p>
           <button type="button" class="gchip" id="reviewsok">Got it</button>
         </div>
         <!-- ——— Profile ——— -->
@@ -122,7 +122,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
         <div class="panel" role="tabpanel" id="privacy" aria-labelledby="tab-privacy" hidden>
           <div class="sec">
             <div class="head"><h2>Privacy</h2><p>Who can see your shelf.</p></div>
-            <label class="row"><span><b>Private account</b><span>Only you see your shelf, reviews, collections and stats. Others see just your name and photo.</span></span><input type="checkbox" class="onoff" data-flag="is_private" checked={me.is_private} /></label>
+            <label class="row"><span><b>Private account</b><span>Only you see your shelf, reviews, collections and stats. Others see just your name and photo. Comments and likes you leave on someone else’s public review stay public.</span></span><input type="checkbox" class="onoff" data-flag="is_private" checked={me.is_private} /></label>
             <label class="row"><span><b>Feature my shelf</b><span>Show your shelf to new visitors on the home page.</span></span><input type="checkbox" class="onoff" data-flag="featured" checked={me.featured} disabled={me.is_private} /></label>
             <p class="notice bad" id="flagerr" hidden></p>
           </div>
