@@ -84,6 +84,9 @@ const layers = [0, 1, 2, 3];
     });
     document.addEventListener('pointerdown', (ev) => { if (!(ev.target as Element).closest?.('.shepherd')) tip.classList.remove('on'); });
 
+    // the loop's state is declared here, before anything can ask for a frame (the weather block below can, at once, when the answer is remembered)
+    let visible = false, raf = 0, last = performance.now();
+
     /* ——— is it raining at home right now? ——— */
     let rain: { x: number; y: number; l: number; s: number }[] = [];
     (async () => {
@@ -159,7 +162,6 @@ const layers = [0, 1, 2, 3];
     }
 
     /* ——— the loop: only while the footer is on screen ——— */
-    let visible = false, raf = 0, last = performance.now();
     const start = performance.now();
     function frameFn(now: number) {
       raf = 0;
