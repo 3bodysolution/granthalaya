@@ -201,9 +201,9 @@ function toCard(kind: 'film' | 'tv', m: any): Card {
 }
 
 /** what people are watching this week, worldwide (TMDB's trending list) */
-export async function trending(kind: 'film' | 'tv'): Promise<Card[]> {
+export async function trending(kind: 'film' | 'tv', page = 1): Promise<Card[]> {
   if (!key()) return [];
-  const j = await getJSON(q(`/trending/${kind === 'tv' ? 'tv' : 'movie'}/week`), { ttl: 3600 });
+  const j = await getJSON(q(`/trending/${kind === 'tv' ? 'tv' : 'movie'}/week`, page > 1 ? { page } : {}), { ttl: 3600 });
   return (j?.results ?? []).filter((m: any) => m.poster_path && !m.adult).map((m: any) => toCard(kind, m));
 }
 
