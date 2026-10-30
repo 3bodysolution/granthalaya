@@ -71,7 +71,7 @@ for (const [slug, path] of listPages) {
   if (!html) { fail(`${slug}: page didn't load`); continue; }
   const inList = html.includes('class="lg') ? html.slice(html.indexOf('class="lg')) : html;
   const links = [...new Set([...inList.matchAll(/<a [^>]*href="(\/(?:film|tv|book)\/[^"#?]+)"/g)].map((m) => m[1]))];
-  const covers = [...new Set([...inList.matchAll(/<img src="(https?:[^"]+)"/g)].map((m) => m[1]))];
+  const covers = [...new Set([...inList.matchAll(/<img src="(https?:[^"]+)"/g)].map((m) => m[1].replaceAll('&amp;', '&')))];
   const items = slugs.includes(slug) ? JSON.parse(fs.readFileSync(`src/data/lists/${slug}.json`, 'utf8')).items.length : null;
   const sample = links.length <= SAMPLE ? links : Array.from({ length: SAMPLE }, (_, i) => links[Math.floor((i * links.length) / SAMPLE)]);
   const dead = [];
