@@ -10,6 +10,7 @@ export default defineConfig({
   output: 'server',
   adapter: vercel({ maxDuration: 60 }), // saving can take a few seconds while it looks a title up
   trailingSlash: 'ignore',
+  compressHTML: true, // Astro 7's new default ('jsx') can drop spaces between inline elements; keep the output as it was
   devToolbar: { enabled: false }, // dev only: on Astro 6 its script answers 504 (outdated optimized dependency) on every page
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   security: {

@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/vercel": "^10.0.8",
+    "@astrojs/vercel": "^11.0.17",
     "@resvg/resvg-js": "^2.6.2",
     "@starwind-ui/astro": "^1.2.1",
     "@supabase/ssr": "^0.12.7",
@@ -28,7 +28,7 @@
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/vite": "^4.3.3",
     "@vercel/functions": "^3.9.11",
-    "astro": "^6.4.8",
+    "astro": "^7.4.4",
     "satori": "^0.63.2",
     "sharp": "^0.35.5",
     "simple-icons": "^16.34.0",
