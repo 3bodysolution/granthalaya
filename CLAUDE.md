@@ -1,6 +1,6 @@
 # Granthalaya — notes for Claude Code
 
-A shelf for everything you read and watch (books, films, TV seasons, essays), in hand-painted scenes. Started as Sarthak's own library; since Phase 1 anyone can sign in with Google and keep a shelf at `/@username`. Astro 5 rendered on request (`output: 'server'`) on Vercel (functions in Mumbai, `bom1`), with a Supabase database. Every push to `main` deploys.
+A shelf for everything you read and watch (books, films, TV seasons, essays), in hand-painted scenes. Started as Sarthak's own library; since Phase 1 anyone can sign in with Google and keep a shelf at `/@username`. Astro 7 rendered on request (`output: 'server'`) on Vercel (functions in Mumbai, `bom1`), with a Supabase database. Every push to `main` deploys.
 
 ## How the project is organised
 
@@ -31,6 +31,7 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - `public/art/` holds the page paintings (day and night), shown as CSS backgrounds with `.art` and `--day`/`--night`. `.melt` fades a painting into the page, `.bleed` runs it full width. `src/components/Valley.astro` is the footer painting; its shepherd says the title's own line on title and entry pages, else a weekly line from `site.lines`.
 - `src/content/` (the old markdown library) is kept as a backup and as the source for `npm run migrate`. The site no longer reads it.
 - `astro.config.mjs` → `security.allowedDomains` lists the site's addresses (the main one and `*.vercel.app` previews). Astro only trusts the address Vercel passes on for these, so a custom domain must be added there too, or sign-in and saving break on it (Astro would think the page is at `https://localhost`).
+- `package.json` pins Node 24.x (Astro 7 needs 22.23.4 or newer). `compressHTML: true` is set on purpose (Astro 7's default would drop spaces between inline elements), and the dev toolbar is off (its script answered 504 on Astro 6). `npm run dev` exempts this computer from the rate limits. `scripts/shots-share.mjs` takes pictures of the share window and fails if the card does not draw.
 - `vercel.json`: functions in `bom1` (next to the database in Mumbai) and a daily cron to `/api/keepalive` so the free database never pauses.
 
 ## How we work (and keep token use low)

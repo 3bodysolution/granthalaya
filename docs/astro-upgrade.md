@@ -1,4 +1,4 @@
-# Astro upgrade plan (planned 2026-10-30, not started)
+# Astro upgrade plan (planned 2026-10-30, built 2026-10-30; see the progress line in plan.md)
 
 Astro 5 → 7, @astrojs/vercel 8 → 11, sharp 0.34.5 → 0.35.5. Planned with Opus; build with Sonnet on a branch `upgrade-astro`, one commit per step.
 
