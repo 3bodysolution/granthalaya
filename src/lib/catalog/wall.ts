@@ -15,9 +15,9 @@ import { listsOfKind } from '../lists';
 export type WallTile = ['f' | 'b', string, string | undefined];
 export interface Wall { tiles: WallTile[]; day: string; full: boolean }
 
-// 4 rows of 24, every tile different: 70% films (about two thirds from our own film lists, a third from this week's trending), 30% books
+// 4 rows of 24, every tile different: 80% films (about two thirds from our own film lists, a third from this week's trending), 30% books
 export const ROWS = 4, PER_ROW = 24;
-const TOTAL = ROWS * PER_ROW, FILMS = Math.round(TOTAL * 0.7), BOOKS = TOTAL - FILMS, FROM_LISTS = Math.round(FILMS * 2 / 3);
+const TOTAL = ROWS * PER_ROW, FILMS = Math.round(TOTAL * 0.8), BOOKS = TOTAL - FILMS, FROM_LISTS = Math.round(FILMS * 2 / 3);
 const HORROR = 27;
 // list films that are horror or adult (scripts/lists/wall-skip.mjs), so the pick never has to ask TMDB about them
 const SKIP = new Set<number>(skip as number[]);
@@ -49,12 +49,19 @@ async function trendingFilms(): Promise<{ id: number; poster: string }[]> {
   return pages.flat().filter((c) => c.poster && !c.genres?.includes(HORROR)).map((c) => ({ id: c.id, poster: c.poster! }));
 }
 
-/** films from our own film lists: the TMDB id and poster saved in the list files, minus horror and adult ones */
+/** how much of the film part each list gives; the Marathi list is kept small because its posters can read as book covers at a glance */
+const LIST_SHARE: Record<string, number> = { 'oscar-best-picture': 0.3, 'palme-dor': 0.15, 'indian-cinema-classics': 0.2, 'national-best-feature': 0.2, 'national-best-marathi': 0.15 };
+
+/** films from our own film lists: the TMDB id and poster saved in the list files, minus horror and adult ones, a share from each list */
 function listFilms(day: string, count: number): { id: number; poster: string }[] {
-  const seen = new Set<number>();
-  return shuffled(listsOfKind('film').flatMap((l) => l.items), day + 'l')
-    .filter((i) => i.tmdb && i.cover && !SKIP.has(i.tmdb) && !seen.has(i.tmdb) && seen.add(i.tmdb))
-    .slice(0, count).map((i) => ({ id: i.tmdb!, poster: i.cover! }));
+  const seen = new Set<number>(), picked: { id: number; poster: string }[] = [], rest: { id: number; poster: string }[] = [];
+  for (const l of listsOfKind('film')) {
+    const own = shuffled(l.items, day + l.slug).filter((i) => i.tmdb && i.cover && !SKIP.has(i.tmdb) && !seen.has(i.tmdb) && seen.add(i.tmdb)).map((i) => ({ id: i.tmdb!, poster: i.cover! }));
+    const take = Math.round(count * (LIST_SHARE[l.slug] ?? 0.1));
+    picked.push(...own.slice(0, take)); rest.push(...own.slice(take));
+  }
+  // a list that is short, or one with no share, leaves room that the others fill
+  return [...picked, ...shuffled(rest, day + 'r')].slice(0, count);
 }
 
 /** covers of the shops' Marathi and Hindi books, then list books; read without anyone's sign-in, so only what is public */
@@ -70,13 +77,13 @@ async function bookCovers(): Promise<{ url: string; title: string }[]> {
   return out;
 }
 
-/** films and books spread evenly: with 30% books, a book comes about every third or fourth tile */
+/** films and books spread evenly: with 20% books, a book comes about every fifth tile */
 function interleave(films: WallTile[], books: WallTile[]): WallTile[] {
   if (!films.length) return books;
-  const n = films.length + books.length, out: WallTile[] = [];
+  const n = films.length + books.length, share = books.length / n, out: WallTile[] = [];
   let f = 0, b = 0;
   for (let i = 0; i < n; i++) {
-    const wantBook = b < books.length && (f >= films.length || Math.floor((i + 1) * 0.3) > Math.floor(i * 0.3));
+    const wantBook = b < books.length && (f >= films.length || Math.floor((i + 1) * share) > Math.floor(i * share));
     out.push(wantBook ? books[b++] : films[f++]);
   }
   return out;
@@ -90,10 +97,10 @@ function build(day: string, fromTrending: { id: number; poster: string }[], cove
   const trend = shuffled(fromTrending, day + 't').slice(0, FILMS - FROM_LISTS);
   const lists = listFilms(day, FILMS - trend.length).filter(poster);
   const films = shuffled([...lists, ...trend.filter(poster)], day + 'f').slice(0, FILMS).map((c) => posterTile(c.poster));
-  // 30% books, no book twice (by cover or by name)
+  // 20% books, no book twice (by cover or by name)
   const seenBook = new Set<string>();
   const unique = shuffled(covers, day + 'b').filter((b) => { const k = same(b.title); return !seenBook.has(b.url) && !seenBook.has(k) && seenBook.add(b.url) && seenBook.add(k); });
-  const books = unique.slice(0, films.length ? Math.min(BOOKS, Math.round(films.length * 3 / 7)) : TOTAL).map((b) => bookTile(b.url));
+  const books = unique.slice(0, films.length ? Math.min(BOOKS, Math.round(films.length / 4)) : TOTAL).map((b) => bookTile(b.url));
   return { tiles: interleave(films, books), day, full: fromTrending.length > 0 && films.length >= 40 && books.length > 0 };
 }
 
