@@ -1,50 +1,52 @@
 ---
-// The top of the home page: a wall of film posters and book covers with the words on the left. The pick (once a day, lib/catalog/wall.ts)
-// is drawn straight into the page, so the covers start loading with the words. Each row is a strip that slides slowly and endlessly
-// (the strip holds its tiles twice, so the end meets the start), rows in turn going left and right. Only transform moves, so the phone's
-// graphics chip does the work. With reduced motion it holds still; hidden or off-screen it stops.
+// The top of the home page: a wall of film posters and book covers with the words on the left. The page starts the lookup and hands over
+// the promise; the words and the button are sent first and the wall follows in the same response, drawn behind them (it never holds the words
+// up). Each row is a strip that slides slowly and endlessly (the strip holds its tiles twice, so the end meets the start), rows in turn going
+// left and right. Only transform moves, so the phone's graphics chip does the work. With reduced motion it holds still; hidden or off-screen it stops.
 import { ROWS, PER_ROW, type Wall } from '../lib/catalog/wall';
-interface Props { mine?: boolean; wall: Wall }
+interface Props { mine?: boolean; wall: Promise<Wall> }
 const { mine = false, wall } = Astro.props;
 // On a phone the words are either above the wall (the default, it reads better) or on a stronger fade over it: add ?wall=fade to look at that one.
 const phone = Astro.url.searchParams.get('wall') === 'fade' ? 'fade' : 'above';
-// 4 rows of the same length, every tile used once (fewer when the pick is short)
-const per = Math.min(PER_ROW, Math.floor(wall.tiles.length / ROWS));
-const rows = per ? Array.from({ length: ROWS }, (_, r) => wall.tiles.slice(r * per, (r + 1) * per)) : [];
+// 4 rows of the same length, every tile used once (fewer when the pick is short); nothing when it could not be made
+const rowsOf = (w: Wall) => {
+  const per = Math.min(PER_ROW, Math.floor(w.tiles.length / ROWS));
+  return per ? Array.from({ length: ROWS }, (_, r) => w.tiles.slice(r * per, (r + 1) * per)) : [];
+};
 ---
-<section class:list={['hero bleed', { mine }]} data-wall data-phone={phone} data-empty={rows.length ? undefined : ''}>
+<section class:list={['hero bleed', { mine }]} data-wall data-phone={phone}>
   <div class="stage">
-    <div class="wall" aria-hidden="true">
-      {rows.map((row, r) => (
-        <div class="wr" data-rev={r % 2 ? '' : undefined}>
-          <div class="track">
-            {[0, 1].map((copy) => (
-              <div class="set">
-                {row.map(([kind, src, srcset], i) => (
-                  <span class={kind === 'b' ? 'wt book' : 'wt'}>
-                    <img src={src} srcset={srcset} alt="" decoding="async"
-                      loading={copy === 0 && r < 3 && i < 8 ? 'eager' : 'lazy'} fetchpriority={copy === 0 && r < 3 && i < 2 ? 'high' : undefined} />
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
     <div class="veil" aria-hidden="true"></div>
     <div class="pad words">
       <slot />
     </div>
+    {wall.then(rowsOf).catch(() => []).then((rows) => rows.length ? (
+      <div class="wall" aria-hidden="true">
+        {rows.map((row, r) => (
+          <div class="wr" data-rev={r % 2 ? '' : undefined}>
+            <div class="track">
+              {[0, 1].map((copy) => (
+                <div class="set">
+                  {row.map(([kind, src, srcset], i) => (
+                    <span class={kind === 'b' ? 'wt book' : 'wt'}>
+                      <img src={src} srcset={srcset} alt="" decoding="async"
+                        loading={copy === 0 && r < 3 && i < 8 ? 'eager' : 'lazy'} fetchpriority={copy === 0 && r < 3 && i < 2 ? 'high' : undefined} />
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : null)}
   </div>
 </section>
-
 <style>
   /* tile size follows the width of the window; a poster is 2 by 3. --n is how many tiles one turn of a strip holds (a strip is at least as wide as the window) */
   .hero { --tw: clamp(84px, 6.4vw, 104px); --th: calc(var(--tw) * 1.5); --gap: 6px; --rows: 4; --n: 24; --dist: calc(var(--n) * (var(--tw) + var(--gap))); --wallh: calc(var(--rows) * var(--th) + (var(--rows) - 1) * var(--gap)); }
   .stage { position: relative; overflow: hidden; min-height: var(--wallh); display: flex; align-items: center; }
   .wall { position: absolute; inset: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--gap); }
-  .hero[data-empty] .wall { display: none; }
   .wr { flex: none; }
   /* bricks: every other row is moved along by half a tile */
   .wr:nth-child(even) { margin-left: calc((var(--tw) + var(--gap)) / 2); }
@@ -68,9 +70,9 @@ const rows = per ? Array.from({ length: ROWS }, (_, r) => wall.tiles.slice(r * p
   }
 
   /* the page's own colour over the left of the wall, so the words are easy to read (dark in dark mode, light in light mode) */
-  .veil { position: absolute; inset: 0; pointer-events: none;
+  .veil { position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: linear-gradient(90deg, var(--bg) 0, color-mix(in srgb, var(--bg) 94%, transparent) 40%, color-mix(in srgb, var(--bg) 70%, transparent) 54%, color-mix(in srgb, var(--bg) 22%, transparent) 70%, transparent 86%); }
-  .words { position: relative; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; text-align: left; padding-top: 40px; padding-bottom: 40px; }
+  .words { position: relative; z-index: 2; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; text-align: left; padding-top: 40px; padding-bottom: 40px; }
   .words > :global(*) { max-width: min(560px, 100%); }
   .words :global(.title) { color: var(--ink); }
   .words :global(.sub) { margin: 0; font-size: 18px; line-height: 1.5; color: var(--ink); }

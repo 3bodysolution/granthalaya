@@ -20,12 +20,11 @@ const sb = Astro.locals.supabase;
 const rowsP = homeRows().then((r) => markRows(sb, me, r)).catch(() => []);
 // the shelves to visit, the visitor's own shelf and their details are independent, so they load together
 const featuredP = sb ? loadFeatured(sb, 6).catch((e) => { console.error('Home: featured shelves could not be loaded', e); return []; }) : Promise.resolve([]);
-// the home wall's daily pick is drawn into the page, so it is asked for alongside the rest
-const wallP = loadWall().catch(() => ({ tiles: [], day: '', full: false }));
-const [featured, shelf, wall] = await Promise.all([
+// the home wall's pick is started here and awaited by the wall itself, so the words never wait for it
+const wall = loadWall().catch(() => ({ tiles: [], day: '', full: false }));
+const [featured, shelf] = await Promise.all([
   featuredP,
   me && sb ? loadShelf(sb, me) : Promise.resolve([] as Awaited<ReturnType<typeof loadShelf>>),
-  wallP,
 ]);
 const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
 const wants = shelf.filter((e) => e.data.status === 'want');

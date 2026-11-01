@@ -7,6 +7,7 @@ import { env, supabaseReady } from '../supabase';
 import { timedFetch } from '../timing';
 import { tileImage, viaCover, SHOP_COVER } from '../images';
 import { trending } from './tmdb';
+import { waitUntil } from '@vercel/functions';
 import skip from '../../data/wall-skip.json';
 import { listsOfKind } from '../lists';
 
@@ -49,11 +50,11 @@ async function trendingFilms(): Promise<{ id: number; poster: string }[]> {
 }
 
 /** films from our own film lists: the TMDB id and poster saved in the list files, minus horror and adult ones */
-function listFilms(day: string): { id: number; poster: string }[] {
+function listFilms(day: string, count: number): { id: number; poster: string }[] {
   const seen = new Set<number>();
   return shuffled(listsOfKind('film').flatMap((l) => l.items), day + 'l')
     .filter((i) => i.tmdb && i.cover && !SKIP.has(i.tmdb) && !seen.has(i.tmdb) && seen.add(i.tmdb))
-    .slice(0, FROM_LISTS).map((i) => ({ id: i.tmdb!, poster: i.cover! }));
+    .slice(0, count).map((i) => ({ id: i.tmdb!, poster: i.cover! }));
 }
 
 /** covers of the shops' Marathi and Hindi books, then list books; read without anyone's sign-in, so only what is public */
@@ -81,23 +82,48 @@ function interleave(films: WallTile[], books: WallTile[]): WallTile[] {
   return out;
 }
 
-let kept: { wall: Wall; at: number } | null = null;
-
-export async function loadWall(): Promise<Wall> {
-  const day = istDay();
-  if (kept && kept.wall.day === day && (kept.wall.full || Date.now() - kept.at < 10 * 60_000)) return kept.wall;
-  const [fromLists, fromTrending, covers] = await Promise.all([listFilms(day), within(trendingFilms(), 2500, []), within(bookCovers(), 2500, [])]);
-  // about two thirds from the lists, a third from trending; no film twice
-  const seenFilm = new Set<number>(), want = FILMS - FROM_LISTS;
+/** the wall from what is at hand: list films, trending films if there are any, and books */
+function build(day: string, fromTrending: { id: number; poster: string }[], covers: { url: string; title: string }[]): Wall {
+  // about two thirds from the lists and a third from trending; with no trending, list films fill the rest. No film twice
+  const seenFilm = new Set<number>();
   const poster = (c: { id: number; poster: string }) => !seenFilm.has(c.id) && seenFilm.add(c.id);
-  const lists = fromLists.filter(poster);
-  const films = shuffled([...lists, ...shuffled(fromTrending, day + 't').filter(poster).slice(0, lists.length ? want : FILMS)], day + 'f')
-    .slice(0, FILMS).map((c) => posterTile(c.poster));
-  // without any film (TMDB is down) the wall is books only; otherwise 30% books, no book twice (by cover or by name)
+  const trend = shuffled(fromTrending, day + 't').slice(0, FILMS - FROM_LISTS);
+  const lists = listFilms(day, FILMS - trend.length).filter(poster);
+  const films = shuffled([...lists, ...trend.filter(poster)], day + 'f').slice(0, FILMS).map((c) => posterTile(c.poster));
+  // 30% books, no book twice (by cover or by name)
   const seenBook = new Set<string>();
   const unique = shuffled(covers, day + 'b').filter((b) => { const k = same(b.title); return !seenBook.has(b.url) && !seenBook.has(k) && seenBook.add(b.url) && seenBook.add(k); });
   const books = unique.slice(0, films.length ? Math.min(BOOKS, Math.round(films.length * 3 / 7)) : TOTAL).map((b) => bookTile(b.url));
-  const wall: Wall = { tiles: interleave(films, books), day, full: films.length >= 40 && books.length > 0 };
-  kept = { wall, at: Date.now() };
-  return wall;
+  return { tiles: interleave(films, books), day, full: fromTrending.length > 0 && films.length >= 40 && books.length > 0 };
+}
+
+let kept: Wall | null = null;                               // today's full pick
+let books: { day: string; covers: { url: string; title: string }[]; at: number } | null = null;
+let trying: Promise<void> | null = null, triedAt = 0;
+
+async function booksToday(day: string) {
+  if (!books || books.day !== day || (!books.covers.length && Date.now() - books.at > 5 * 60_000)) {
+    books = { day, covers: await within(bookCovers(), 1500, []), at: Date.now() };
+  }
+  return books.covers;
+}
+
+/**
+ * Today's wall, without ever waiting for TMDB. When the full pick (with this week's trending films) isn't made yet, the wall is built
+ * at once from list films and books, and the trending films are fetched in the background (waitUntil) for the next visitor.
+ */
+export async function loadWall(): Promise<Wall> {
+  const day = istDay();
+  if (kept?.day === day) return kept;
+  const covers = await booksToday(day);
+  if (!trying && Date.now() - triedAt > 5 * 60_000) {
+    triedAt = Date.now();
+    trying = (async () => {
+      const trend = await within(trendingFilms(), 4000, []);
+      const wall = build(day, trend, books?.day === day ? books.covers : covers);
+      if (wall.full) kept = wall;
+    })().catch(() => {}).finally(() => { trying = null; });
+    try { waitUntil(trying); } catch { /* not on Vercel: the promise just finishes on its own */ }
+  }
+  return build(day, [], covers);
 }
