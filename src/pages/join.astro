@@ -1,14 +1,14 @@
 ---
 // Where "Start your shelf" on the home page leads: what you get, what we take from Google, then the Google button. It is the same button for
-// people who already have a shelf. Signed in already: back to the home page. `next` goes through to Google and back (safeNext keeps it on this site).
+// people who already have a shelf. Signed in already: on to `next` if it is safe, else the home page. `next` goes through to Google and back (safeNext keeps it on this site).
 import Base from '../layouts/Base.astro';
 import GoogleButton from '../components/ui/GoogleButton.astro';
 import { safeNext } from '../lib/nav';
 import { supabaseReady } from '../lib/supabase';
 export const prerender = false;
 
-if (Astro.locals.me) return Astro.redirect('/');
 const next = safeNext(Astro.url.searchParams.get('next'));
+if (Astro.locals.me) return Astro.redirect(next);
 const error = Astro.url.searchParams.get('error');
 const points = [
   'Keep every book, film, show and essay in one place.',
