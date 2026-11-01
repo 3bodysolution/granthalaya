@@ -6,9 +6,9 @@ export const prerender = false;
 export const GET: APIRoute = async ({ locals, url, redirect }) => {
   const code = url.searchParams.get('code');
   const next = safeNext(url.searchParams.get('next'));
-  if (!code || !locals.supabase) return redirect('/signin/?error=google');
+  if (!code || !locals.supabase) return redirect('/join/?error=google');
   const { data, error } = await locals.supabase.auth.exchangeCodeForSession(code);
-  if (error || !data.user) return redirect('/signin/?error=google');
+  if (error || !data.user) return redirect('/join/?error=google');
   const { data: me } = await locals.supabase.from('profiles').select('username').eq('id', data.user.id).maybeSingle();
   if (!me) return redirect(`/welcome/?next=${encodeURIComponent(next)}`);
   return redirect(next);

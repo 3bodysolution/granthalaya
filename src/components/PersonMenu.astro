@@ -16,7 +16,7 @@ const link = new URL(`/@${username}/`, Astro.url).href;
         <button role="menuitem" type="button" data-block={JSON.stringify({ id, who: username, blocked })}>{blocked ? `Unblock @${username}` : `Block @${username}`}</button>
       </>
     )}
-    {!isMe && !signedIn && <a role="menuitem" href={`/signin/?next=/@${username}/`} data-astro-prefetch="false">Sign in to report or block</a>}
+    {!isMe && !signedIn && <a role="menuitem" href={`/join/?next=/@${username}/`} data-astro-prefetch="false">Sign in to report or block</a>}
   </div>
 </details>
 <style>

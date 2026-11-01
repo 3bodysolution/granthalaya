@@ -123,7 +123,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
             </details>
           </>
         ) : (
-          <a href={`/signin/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} class="btn primary" data-astro-prefetch="false">Sign in</a>
+          <a href={`/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} class="btn primary" data-astro-prefetch="false">Sign in</a>
         )}
       </div>
     </header>
@@ -138,7 +138,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     <footer class="foot">
       <div class="foot-in">
         <span>Made with ❤️ by {site.maker}</span>
-        <nav aria-label="Footer"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>{me ? <a href="/add/">Add something</a> : <a href="/signin/" data-astro-prefetch="false">Sign in</a>}</nav>
+        <nav aria-label="Footer"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>{me ? <a href="/add/">Add something</a> : <a href="/join/" data-astro-prefetch="false">Sign in</a>}</nav>
       </div>
     </footer>
   </div>

@@ -8,7 +8,7 @@ export const prerender = false;
 
 const next = safeNext(Astro.url.searchParams.get('next'));
 const user = Astro.locals.user;
-if (!user) return Astro.redirect(`/signin/?next=${encodeURIComponent(next)}`);
+if (!user) return Astro.redirect(`/join/?next=${encodeURIComponent(next)}`);
 if (Astro.locals.me) return Astro.redirect(next);
 const seed = user.name || user.email?.split('@')[0] || 'reader';
 let ideas: string[] = [];

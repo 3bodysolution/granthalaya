@@ -70,7 +70,7 @@ const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
     if (code && /^[0-9a-f-]{36}$/i.test(code)) {
       return ctx.redirect(`/auth/callback?code=${code}&next=${encodeURIComponent(path)}`);
     }
-    if (q.has('error_description') || q.has('error_code')) return ctx.redirect('/signin/?error=google');
+    if (q.has('error_description') || q.has('error_code')) return ctx.redirect('/join/?error=google');
   }
 
   ctx.locals.user = null;

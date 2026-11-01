@@ -8,6 +8,6 @@ export function safeNext(next: string | null | undefined, fallback = '/') {
     const u = new URL(next, 'https://site.invalid');
     if (u.origin !== 'https://site.invalid') return fallback;
   } catch { return fallback; }
-  if (/^\/(auth|signin|welcome)\b/.test(next)) return fallback;
+  if (/^\/(auth|signin|join|welcome)\b/.test(next)) return fallback;
   return next;
 }
