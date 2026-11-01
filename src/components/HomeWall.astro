@@ -86,10 +86,14 @@ const rowsOf = (w: Wall) => {
   .wt.on :global(.wsave) { opacity: 1; pointer-events: auto; }
   .wt :global(.wsave:active) { transform: scale(.92); }
   .wt :global(.wsave.is-saved .mk-edge) { stroke: #fff; }
-  /* the back of a cover: its saved card line, in italics */
-  .wt :global(.wback) { position: absolute; inset: 0; display: grid; place-items: center; padding: 8px; background: var(--card); color: var(--ink); text-align: center; }
+  /* the back of a cover: a real tagline in italics, or its title, year and director or author; the script sizes the text so all of it fits */
+  .wt :global(.wback) { position: absolute; inset: 0; display: grid; place-items: center; padding: 6px; overflow: hidden; background: var(--card); color: var(--ink); text-align: center; }
   .wt :global(.wback[hidden]) { display: none; }
-  .wt :global(.wback em) { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 11px; line-height: 1.3; }
+  .wt :global(.wtxt) { width: 100%; overflow-wrap: normal; line-height: 1.25; }
+  .wt :global(.wtxt.line) { font-family: 'Fraunces', Georgia, serif; font-style: italic; }
+  .wt :global(.wtxt.card) { font-family: 'Instrument Sans', system-ui, sans-serif; }
+  .wt :global(.wtxt.card b) { display: block; font-weight: 600; }
+  .wt :global(.wtxt.card small) { display: block; margin-top: 4px; font-size: .85em; opacity: .8; }
   @keyframes slide { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(calc(var(--dist) * -1), 0, 0); } }
   @media (prefers-reduced-motion: reduce) {
     .track { animation: none; }
@@ -224,17 +228,42 @@ const rowsOf = (w: Wall) => {
       if (now) { swap(t, false); return; }
       turn(t, 0, 90, 'ease-in').then(() => { swap(t, false); return turn(t, -90, 0, 'ease-out'); });
     }
-    async function flip(t: HTMLElement, line: string) {
-      if (!t.querySelector('.wback')) {
-        const face = document.createElement('span');
-        face.className = 'wback';
-        face.hidden = true;
-        const em = document.createElement('em');
-        em.textContent = line;
-        face.append(em);
-        t.append(face);
+    // the back is built when the cover is edge-on, and its text is made as large as will fit (never cut off)
+    function fit(face: HTMLElement, box: HTMLElement, from: number, least: number) {
+      for (let px = from; px >= least; px -= 0.5) {
+        box.style.fontSize = px + 'px';
+        if (box.scrollHeight <= face.clientHeight - 12 && box.scrollWidth <= face.clientWidth - 12) return true;
       }
+      return false;
+    }
+    function makeBack(t: HTMLElement, m: Meta) {
+      t.querySelector('.wback')?.remove();
+      const face = document.createElement('span');
+      face.className = 'wback';
+      const box = document.createElement('span');
+      face.append(box);
+      t.append(face);
+      const card = () => {
+        box.className = 'wtxt card';
+        box.replaceChildren();
+        const b = document.createElement('b');
+        b.textContent = m.t;
+        box.append(b);
+        const sub = [m.y, m.c].filter(Boolean).join(' | ');
+        if (sub) { const sm = document.createElement('small'); sm.textContent = sub; box.append(sm); }
+        fit(face, box, 12, 6.5);
+      };
+      const line = m.l ? tidy(m.l) : '';
+      if (line) {
+        box.className = 'wtxt line';
+        box.textContent = line;
+        if (!fit(face, box, 12.5, 8.5)) card();   // a line too long to read in full gives way to the title card
+      } else card();
+      return face;
+    }
+    async function flip(t: HTMLElement, m: Meta) {
       await turn(t, 0, 90, 'ease-in');
+      makeBack(t, m);
       swap(t, true);
       await turn(t, -90, 0, 'ease-out');
       setTimeout(() => { if (t.isConnected && t.classList.contains('is-back') && !t.classList.contains('on')) unflip(t); }, 3800);
@@ -243,13 +272,12 @@ const rowsOf = (w: Wall) => {
       if (calm.matches || hero.classList.contains('paused')) return;
       const box = hero.getBoundingClientRect();
       const seen = [...hero.querySelectorAll<HTMLElement>('.wt:not(.on):not(.is-back)')].filter((t) => {
-        const m = metaOf(t);
-        if (!m?.l || tidy(m.l).length > 70 || t.closest('.wr')?.classList.contains('held')) return false;
+        if (!metaOf(t) || t.closest('.wr')?.classList.contains('held')) return false;
         const r = t.getBoundingClientRect();
         return r.width > 0 && r.left >= 0 && r.right <= innerWidth && r.top >= Math.max(0, box.top) && r.bottom <= Math.min(innerHeight, box.bottom) && !!t.querySelector('img:not(.gone)');
       });
       const t = seen[Math.floor(Math.random() * seen.length)];
-      if (t) flip(t, tidy(metaOf(t)!.l!));
+      if (t) flip(t, metaOf(t)!);
     }
     setInterval(pick, 4200);
   }

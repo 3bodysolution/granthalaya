@@ -27,7 +27,7 @@ const HORROR = 27;
 const SKIP = new Set<number>(skip as number[]);
 // TMDB's own one-line taglines of the list films (same script); a cover with a line can turn over to show it
 const LINES = savedLines as Record<string, string>;
-const okLine = (l?: string) => (l && l.length >= 12 && !l.startsWith('.') ? l : undefined);
+const okLine = (l?: string) => (l && l.length >= 12 && !l.startsWith('.') && !/(\.\.\.|…)$/.test(l) ? l : undefined);
 /** a source that is slow gives nothing rather than holding up the page */
 const within = <T>(p: Promise<T>, ms: number, none: T): Promise<T> => Promise.race([p.catch(() => none), new Promise<T>((r) => setTimeout(() => r(none), ms))]);
 const same = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
@@ -81,10 +81,10 @@ async function bookCovers(): Promise<Pic[]> {
   const out: Pic[] = [];
   if (supabaseReady()) {
     const sb = createClient(env('PUBLIC_SUPABASE_URL'), env('PUBLIC_SUPABASE_PUBLISHABLE_KEY'), { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: timedFetch } });
-    const { data } = await sb.from('shop_books').select('title:titles(title, creator, year, slug, cover_url, tagline)').eq('hidden', false).eq('cover_hidden', false).limit(1000);
-    type Row = { title: { title: string; creator: string; year: number | null; slug: string; cover_url: string | null; tagline: string | null } | null };
+    const { data } = await sb.from('shop_books').select('title:titles(title, creator, year, slug, cover_url)').eq('hidden', false).eq('cover_hidden', false).limit(1000);
+    type Row = { title: { title: string; creator: string; year: number | null; slug: string; cover_url: string | null } | null };
     for (const { title: t } of (data ?? []) as unknown as Row[]) if (t?.cover_url) {
-      out.push({ url: t.cover_url, title: t.title, meta: { t: t.title, y: t.year ?? undefined, c: t.creator || undefined, h: `/book/${t.slug}/`, l: t.tagline || undefined, s: { kind: 'book', title: t.title, creator: t.creator || undefined, year: t.year ?? undefined, cover: t.cover_url } } });
+      out.push({ url: t.cover_url, title: t.title, meta: { t: t.title, y: t.year ?? undefined, c: t.creator || undefined, h: `/book/${t.slug}/`, k: `s:${t.slug}`, s: { kind: 'book', title: t.title, creator: t.creator || undefined, year: t.year ?? undefined, cover: t.cover_url } } });
     }
   }
   // list books: their own covers (Open Library, Google Books); a shop's cover is only taken from the database above, where a hide is respected
@@ -97,24 +97,30 @@ async function bookCovers(): Promise<Pic[]> {
   return out;
 }
 
-// the saved card line (`titles.tagline`) of the tiles on the wall: asked once for each title, and kept
-const lines = new Map<string, string>(), asked = new Set<string>();
-async function addLines(tiles: WallTile[]): Promise<void> {
-  const want = [...new Set(tiles.map((t) => t[3].k).filter((k): k is string => !!k && !asked.has(k)))];
-  if (want.length && supabaseReady()) {
+// The line on the back of a cover is only ever a real one: TMDB's own tagline (saved for the list films in wall-lines.json) or the tagline of a
+// member's public review (never a spoiler). `titles.tagline` is not used, because it can be written by an AI. A cover with neither shows its
+// title, year and director or author on the back instead.
+let reviewLines: { at: number; byKey: Map<string, string> } | null = null;
+async function reviewTaglines(): Promise<Map<string, string>> {
+  if (reviewLines && Date.now() - reviewLines.at < 3600_000) return reviewLines.byKey;
+  const byKey = new Map<string, string>();
+  if (supabaseReady()) {
     const sb = createClient(env('PUBLIC_SUPABASE_URL'), env('PUBLIC_SUPABASE_PUBLISHABLE_KEY'), { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: timedFetch } });
-    const pick = (p: string) => want.filter((k) => k.startsWith(p)).map((k) => k.slice(2));
-    const [f, o, sl] = await Promise.all([
-      pick('f:').length ? sb.from('titles').select('tmdb_id, tagline').eq('kind', 'film').in('tmdb_id', pick('f:').map(Number)).neq('tagline', '') : null,
-      pick('o:').length ? sb.from('titles').select('ol_key, tagline').in('ol_key', pick('o:')).neq('tagline', '') : null,
-      pick('s:').length ? sb.from('titles').select('slug, tagline').in('slug', pick('s:')).neq('tagline', '') : null,
-    ]);
-    for (const r of (f?.data ?? []) as { tmdb_id: number; tagline: string | null }[]) if (r.tagline) lines.set(`f:${r.tmdb_id}`, r.tagline);
-    for (const r of (o?.data ?? []) as { ol_key: string; tagline: string | null }[]) if (r.tagline) lines.set(`o:${r.ol_key}`, r.tagline);
-    for (const r of (sl?.data ?? []) as { slug: string; tagline: string | null }[]) if (r.tagline) lines.set(`s:${r.slug}`, r.tagline);
-    for (const k of want) asked.add(k);
+    // read as nobody, so only what the database shows to everyone
+    const { data } = await sb.from('logs').select('tagline, title:titles(kind, tmdb_id, ol_key, slug)').neq('tagline', '').eq('spoiler', false).order('created_at', { ascending: false }).limit(500);
+    type Row = { tagline: string; title: { kind: string; tmdb_id: number | null; ol_key: string | null; slug: string } | null };
+    for (const { tagline, title: t } of (data ?? []) as unknown as Row[]) {
+      if (!t || !tagline.trim()) continue;
+      const key = t.kind === 'film' && t.tmdb_id ? `f:${t.tmdb_id}` : t.ol_key ? `o:${t.ol_key}` : `s:${t.slug}`;
+      if (!byKey.has(key)) byKey.set(key, tagline.trim());
+    }
   }
-  for (const t of tiles) if (t[3].k && lines.has(t[3].k)) t[3] = { ...t[3], l: lines.get(t[3].k) };
+  reviewLines = { at: Date.now(), byKey };
+  return byKey;
+}
+async function addLines(tiles: WallTile[]): Promise<void> {
+  const byKey = await reviewTaglines();
+  for (const t of tiles) { const r = t[3].k ? byKey.get(t[3].k) : undefined; if (r) t[3] = { ...t[3], l: r }; }
 }
 
 /** films and books spread evenly: with 20% books, a book comes about every fifth tile */
