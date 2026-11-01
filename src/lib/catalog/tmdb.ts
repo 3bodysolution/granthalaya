@@ -200,13 +200,6 @@ function toCard(kind: 'film' | 'tv', m: any): Card {
   return { kind, id: m.id, genres: m.genre_ids, title, year: yearOf(tv ? m.first_air_date : m.release_date), poster: img(m.poster_path, 'w342'), href: tv ? showHref(m.id, title) : filmHref(m.id, title) };
 }
 
-/** a film's genre ids and whether it is adult, from its short record (null when TMDB doesn't answer) */
-export async function filmGenres(id: number): Promise<{ genres: number[]; adult: boolean } | null> {
-  if (!key()) return null;
-  const m = await getJSON(q(`/movie/${id}`), { ttl: 86400 });
-  return m && Array.isArray(m.genres) ? { genres: m.genres.map((g: any) => g.id), adult: !!m.adult } : null;
-}
-
 /** what people are watching this week, worldwide (TMDB's trending list) */
 export async function trending(kind: 'film' | 'tv', page = 1): Promise<Card[]> {
   if (!key()) return [];

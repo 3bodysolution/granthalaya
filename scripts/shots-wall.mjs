@@ -30,13 +30,13 @@ for (const [size, viewport] of [['desktop', { width: 1440, height: 900 }], ['pho
       const page = await ctx.newPage();
       await page.goto(base + (variant === 'fade' ? '/?wall=fade' : '/'), { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
       await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
-            await page.waitForFunction(() => document.querySelectorAll('[data-wall] img.in').length > 5, null, { timeout: 30000 }).catch(() => console.log('wall did not fill'));
+            await page.waitForFunction(() => [...document.querySelectorAll('[data-wall] .wt img')].filter((i) => i.complete && i.naturalWidth && i.getBoundingClientRect().right > 0 && i.getBoundingClientRect().left < innerWidth).length > 5, null, { timeout: 30000 }).catch(() => console.log('wall did not fill'));
       await page.waitForTimeout(1500);
       const hero = page.locator('[data-wall]');
       const name = `${size}-${theme}${variant === 'fade' ? '-fade' : ''}`;
       await hero.screenshot({ path: `${out}/${name}.png` });
       // contrast
-      const words = await page.evaluate(() => [...document.querySelectorAll('[data-wall] .words h1, [data-wall] .words .sub, [data-wall] .words .free, [data-wall] .credit:not([hidden])')].map((e) => {
+      const words = await page.evaluate(() => [...document.querySelectorAll('[data-wall] .words h1, [data-wall] .words .sub, [data-wall] .words .free')].map((e) => {
         const rg = document.createRange(); rg.selectNodeContents(e); const r = rg.getBoundingClientRect(), h = document.querySelector('[data-wall]').getBoundingClientRect();
         return { name: e.className || e.tagName, color: getComputedStyle(e).color, x: r.left - h.left, y: r.top - h.top, w: r.width, h: r.height };
       }));

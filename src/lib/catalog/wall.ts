@@ -1,28 +1,30 @@
-// The wall of posters and covers at the top of the home page. Picked once a day (the same pick for everyone), kept in the
-// memory of the running copy, and served from /api/wall, which Vercel's CDN keeps until the next morning (India time),
-// so a visit does not call TMDB or the database. Films are about two thirds from our own film lists (classics, National
+// The wall of posters and covers at the top of the home page. Picked once a day (the same pick for everyone) and kept in the
+// memory of the running copy, so most visits do not call TMDB or the database; the home page draws it straight into its HTML. Films are about two thirds from our own film lists (classics, National
 // Awards, Palme d'Or, Oscars) and a third from TMDB's weekly trending list, never horror or adult; no title appears twice. Books are the Marathi and Hindi books from the two shops and the list books that have a cover. A book the shop
 // hid, or whose cover the shop hid, never comes back from the database, and shop covers only go through /api/cover.
 import { createClient } from '@supabase/supabase-js';
 import { env, supabaseReady } from '../supabase';
 import { timedFetch } from '../timing';
 import { tileImage, viaCover, SHOP_COVER } from '../images';
-import { trending, filmGenres } from './tmdb';
+import { trending } from './tmdb';
+import skip from '../../data/wall-skip.json';
 import { listsOfKind } from '../lists';
 
 /** [kind, src, srcset] for one tile; kind is 'f' (film poster) or 'b' (book cover) */
 export type WallTile = ['f' | 'b', string, string | undefined];
 export interface Wall { tiles: WallTile[]; day: string; full: boolean }
 
-// 120 tiles at most, every one different: 70% films (about two thirds from our own film lists, a third from this week's trending), 30% books
-const TOTAL = 120, FILMS = 84, BOOKS = 36, FROM_LISTS = 56;
+// 4 rows of 24, every tile different: 70% films (about two thirds from our own film lists, a third from this week's trending), 30% books
+export const ROWS = 4, PER_ROW = 24;
+const TOTAL = ROWS * PER_ROW, FILMS = Math.round(TOTAL * 0.7), BOOKS = TOTAL - FILMS, FROM_LISTS = Math.round(FILMS * 2 / 3);
 const HORROR = 27;
+// list films that are horror or adult (scripts/lists/wall-skip.mjs), so the pick never has to ask TMDB about them
+const SKIP = new Set<number>(skip as number[]);
+/** a source that is slow gives nothing rather than holding up the page */
+const within = <T>(p: Promise<T>, ms: number, none: T): Promise<T> => Promise.race([p.catch(() => none), new Promise<T>((r) => setTimeout(() => r(none), ms))]);
 const same = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
 const IST = 5.5 * 3600 * 1000;
 export const istDay = (now = Date.now()) => new Date(now + IST).toISOString().slice(0, 10);
-/** seconds until the next morning in India */
-export const untilTomorrow = (now = Date.now()) => Math.max(300, Math.round((Math.floor((now + IST) / 86400000) * 86400000 + 86400000 - (now + IST)) / 1000));
-
 /** the same shuffle for the same day */
 function shuffled<T>(list: T[], seed: string): T[] {
   let h = 1779033703 ^ seed.length;
@@ -33,9 +35,12 @@ function shuffled<T>(list: T[], seed: string): T[] {
   return a;
 }
 
-const bookTile = (url: string): WallTile => SHOP_COVER.test(url)
-  ? ['b', viaCover(url, 200), viaCover(url, 200) === viaCover(url, 360) ? undefined : `${viaCover(url, 200)} 1x, ${viaCover(url, 360)} 2x`]
-  : (({ src, srcset }) => ['b', src, srcset] as WallTile)(tileImage(url));
+/** the smallest picture that looks sharp in a tile (a tile is about 76 to 104 pixels wide) */
+const posterTile = (url: string): WallTile => {
+  const t = url.match(/^(https:\/\/image\.tmdb\.org\/t\/p\/)w\d+(\/.+)$/);
+  return t ? ['f', `${t[1]}w154${t[2]}`, `${t[1]}w154${t[2]} 1x, ${t[1]}w185${t[2]} 2x`] : ['f', url, undefined];
+};
+const bookTile = (url: string): WallTile => ['b', SHOP_COVER.test(url) ? viaCover(url, 200) : tileImage(url).src, undefined];
 
 /** this week's trending films, without horror */
 async function trendingFilms(): Promise<{ id: number; poster: string }[]> {
@@ -43,16 +48,12 @@ async function trendingFilms(): Promise<{ id: number; poster: string }[]> {
   return pages.flat().filter((c) => c.poster && !c.genres?.includes(HORROR)).map((c) => ({ id: c.id, poster: c.poster! }));
 }
 
-/** films from our own film lists, with horror and adult films left out (checked with TMDB; a film TMDB doesn't answer for is left out too) */
-async function listFilms(day: string): Promise<{ id: number; poster: string }[]> {
-  const pool = shuffled(listsOfKind('film').flatMap((l) => l.items).filter((i) => i.tmdb && i.cover), day + 'l');
-  const kept: { id: number; poster: string }[] = [], seen = new Set<number>();
-  for (let at = 0; at < pool.length && kept.length < FROM_LISTS; at += 20) {
-    const batch = pool.slice(at, at + 20).filter((i) => !seen.has(i.tmdb!) && seen.add(i.tmdb!));
-    const info = await Promise.all(batch.map((i) => filmGenres(i.tmdb!).catch(() => null)));
-    batch.forEach((i, k) => { const g = info[k]; if (g && !g.adult && !g.genres.includes(HORROR) && kept.length < FROM_LISTS) kept.push({ id: i.tmdb!, poster: i.cover! }); });
-  }
-  return kept;
+/** films from our own film lists: the TMDB id and poster saved in the list files, minus horror and adult ones */
+function listFilms(day: string): { id: number; poster: string }[] {
+  const seen = new Set<number>();
+  return shuffled(listsOfKind('film').flatMap((l) => l.items), day + 'l')
+    .filter((i) => i.tmdb && i.cover && !SKIP.has(i.tmdb) && !seen.has(i.tmdb) && seen.add(i.tmdb))
+    .slice(0, FROM_LISTS).map((i) => ({ id: i.tmdb!, poster: i.cover! }));
 }
 
 /** covers of the shops' Marathi and Hindi books, then list books; read without anyone's sign-in, so only what is public */
@@ -85,13 +86,13 @@ let kept: { wall: Wall; at: number } | null = null;
 export async function loadWall(): Promise<Wall> {
   const day = istDay();
   if (kept && kept.wall.day === day && (kept.wall.full || Date.now() - kept.at < 10 * 60_000)) return kept.wall;
-  const [fromLists, fromTrending, covers] = await Promise.all([listFilms(day).catch(() => []), trendingFilms().catch(() => []), bookCovers().catch(() => [])]);
+  const [fromLists, fromTrending, covers] = await Promise.all([listFilms(day), within(trendingFilms(), 2500, []), within(bookCovers(), 2500, [])]);
   // about two thirds from the lists, a third from trending; no film twice
-  const seenFilm = new Set<number>(), want = Math.round(FILMS / 3);
+  const seenFilm = new Set<number>(), want = FILMS - FROM_LISTS;
   const poster = (c: { id: number; poster: string }) => !seenFilm.has(c.id) && seenFilm.add(c.id);
   const lists = fromLists.filter(poster);
   const films = shuffled([...lists, ...shuffled(fromTrending, day + 't').filter(poster).slice(0, lists.length ? want : FILMS)], day + 'f')
-    .slice(0, FILMS).map((c): WallTile => { const t = tileImage(c.poster); return ['f', t.src, t.srcset]; });
+    .slice(0, FILMS).map((c) => posterTile(c.poster));
   // without any film (TMDB is down) the wall is books only; otherwise 30% books, no book twice (by cover or by name)
   const seenBook = new Set<string>();
   const unique = shuffled(covers, day + 'b').filter((b) => { const k = same(b.title); return !seenBook.has(b.url) && !seenBook.has(k) && seenBook.add(b.url) && seenBook.add(k); });
