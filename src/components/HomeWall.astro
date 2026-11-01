@@ -2,11 +2,14 @@
 // The top of the home page: a wall of film posters and book covers with the words on the left. The page starts the lookup and hands over
 // the promise; the words and the button are sent first and the wall follows in the same response, drawn behind them (it never holds the words
 // up). Each row is a strip that slides slowly and endlessly (the strip holds its tiles twice, so the end meets the start), rows in turn going
-// left and right. Only transform moves, so the phone's graphics chip does the work. With reduced motion it holds still; hidden or off-screen it stops.
+// left and right. A cover lifts and tells what it is when pointed at or tapped (second tap opens it), a hovered row pauses, and now and then a
+// cover with a saved card line turns over to show it. Only transform moves, so the phone's graphics chip does the work. With reduced motion it holds still; hidden or off-screen it stops.
+import Mark from './ui/Mark.astro';
 import { ROWS, PER_ROW, type Wall } from '../lib/catalog/wall';
 interface Props { mine?: boolean; wall: Promise<Wall> }
 const { mine = false, wall } = Astro.props;
 // On a phone the words are either above the wall (the default, it reads better) or on a stronger fade over it: add ?wall=fade to look at that one.
+const me = !!Astro.locals.me;
 const phone = Astro.url.searchParams.get('wall') === 'fade' ? 'fade' : 'above';
 // 4 rows of the same length, every tile used once (fewer when the pick is short); nothing when it could not be made
 const rowsOf = (w: Wall) => {
@@ -14,7 +17,7 @@ const rowsOf = (w: Wall) => {
   return per ? Array.from({ length: ROWS }, (_, r) => w.tiles.slice(r * per, (r + 1) * per)) : [];
 };
 ---
-<section class:list={['hero bleed', { mine }]} data-wall data-phone={phone}>
+<section class:list={['hero bleed', { mine }]} data-wall data-phone={phone} data-me={me ? '' : undefined}>
   <div class="stage">
     <div class="veil" aria-hidden="true"></div>
     <div class="pad words">
@@ -28,7 +31,7 @@ const rowsOf = (w: Wall) => {
               {[0, 1].map((copy) => (
                 <div class="set">
                   {row.map(([kind, src, srcset], i) => (
-                    <span class={kind === 'b' ? 'wt book' : 'wt'}>
+                    <span class={kind === 'b' ? 'wt book' : 'wt'} data-i={r * row.length + i}>
                       <img src={src} srcset={srcset} alt="" decoding="async"
                         loading={copy === 0 && r < 3 && i < 8 ? 'eager' : 'lazy'} fetchpriority={copy === 0 && r < 3 && i < 2 ? 'high' : undefined} />
                     </span>
@@ -40,7 +43,14 @@ const rowsOf = (w: Wall) => {
         ))}
       </div>
     ) : null)}
+    {wall.then((w) => {
+      const per = Math.min(PER_ROW, Math.floor(w.tiles.length / ROWS));
+      // what each tile says when touched, in the order of its data-i; our own data, with < written out so it can't close the script
+      const meta = w.tiles.slice(0, per * ROWS).map(([, , , m]) => ({ t: m.t, y: m.y, c: m.c, h: m.h, s: m.s, l: m.l }));
+      return per ? <script type="application/json" data-wall-meta set:html={JSON.stringify(meta).replace(/</g, '\\u003c')} /> : null;
+    }).catch(() => null)}
   </div>
+  <template data-wall-mark><Mark size={18} /></template>
 </section>
 <style>
   /* tile size follows the width of the window; a poster is 2 by 3. --n is how many tiles one turn of a strip holds (a strip is at least as wide as the window) */
@@ -59,10 +69,27 @@ const rowsOf = (w: Wall) => {
   .wr[data-rev] .track { animation-direction: reverse; }
   .hero.paused .track { animation-play-state: paused; }
   .set { display: flex; gap: var(--gap); flex: none; }
-  .wt { flex: none; width: var(--tw); height: var(--th); border-radius: 6px; overflow: hidden; background: var(--soft); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent) inset; }
+  .wt { position: relative; flex: none; width: var(--tw); height: var(--th); border-radius: 6px; overflow: hidden; background: var(--soft); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent) inset; cursor: pointer; transition: transform .25s var(--spring), box-shadow .25s ease; }
   .wt.book { border-radius: 2px 6px 6px 2px; }
   .wt img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .wt img.gone { visibility: hidden; }
+  /* pointed at or tapped: the cover lifts and says what it is; a row that is being looked at holds still */
+  .wt.on { z-index: 3; transform: translateY(-5px) scale(1.08); box-shadow: 0 0 0 1px color-mix(in srgb, var(--ink) 12%, transparent) inset, 0 14px 22px -10px var(--shadow); }
+  .wr.held .track { animation-play-state: paused; }
+  @media (hover: hover) { .wr:hover .track { animation-play-state: paused; } }
+  .wt :global(.wcap) { position: absolute; inset: auto 0 0 0; padding: 26px 6px 6px; background: linear-gradient(to top, rgba(10, 11, 14, .92), rgba(10, 11, 14, 0)); color: #F6EEDF; text-align: left; opacity: 0; transition: opacity .2s ease; pointer-events: none; }
+  .wt.on :global(.wcap) { opacity: 1; }
+  .wt :global(.wcap b), .wt :global(.wcap small) { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; font-family: 'Instrument Sans', system-ui, sans-serif; }
+  .wt :global(.wcap b) { -webkit-line-clamp: 2; font-size: 10.5px; line-height: 1.2; font-weight: 600; }
+  .wt :global(.wcap small) { -webkit-line-clamp: 1; margin-top: 2px; font-size: 9.5px; line-height: 1.2; opacity: .85; }
+  .wt :global(.wsave) { position: absolute; top: 4px; right: 4px; z-index: 2; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: rgba(12, 14, 18, .6); color: #fff; cursor: pointer; opacity: 0; pointer-events: none; transition: opacity .2s ease, transform .25s var(--spring); }
+  .wt.on :global(.wsave) { opacity: 1; pointer-events: auto; }
+  .wt :global(.wsave:active) { transform: scale(.92); }
+  .wt :global(.wsave.is-saved .mk-edge) { stroke: #fff; }
+  /* the back of a cover: its saved card line, in italics */
+  .wt :global(.wback) { position: absolute; inset: 0; display: grid; place-items: center; padding: 8px; background: var(--card); color: var(--ink); text-align: center; }
+  .wt :global(.wback[hidden]) { display: none; }
+  .wt :global(.wback em) { display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden; font-family: 'Fraunces', Georgia, serif; font-style: italic; font-size: 11px; line-height: 1.3; }
   @keyframes slide { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(calc(var(--dist) * -1), 0, 0); } }
   @media (prefers-reduced-motion: reduce) {
     .track { animation: none; }
@@ -72,8 +99,8 @@ const rowsOf = (w: Wall) => {
   /* the page's own colour over the left of the wall, so the words are easy to read (dark in dark mode, light in light mode) */
   .veil { position: absolute; inset: 0; z-index: 1; pointer-events: none;
     background: linear-gradient(90deg, var(--bg) 0, color-mix(in srgb, var(--bg) 94%, transparent) 40%, color-mix(in srgb, var(--bg) 70%, transparent) 54%, color-mix(in srgb, var(--bg) 22%, transparent) 70%, transparent 86%); }
-  .words { position: relative; z-index: 2; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; text-align: left; padding-top: 40px; padding-bottom: 40px; }
-  .words > :global(*) { max-width: min(560px, 100%); }
+  .words { position: relative; z-index: 2; pointer-events: none; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; text-align: left; padding-top: 40px; padding-bottom: 40px; }
+  .words > :global(*) { max-width: min(560px, 100%); pointer-events: auto; }
   .words :global(.title) { color: var(--ink); }
   .words :global(.sub) { margin: 0; font-size: 18px; line-height: 1.5; color: var(--ink); }
   .words :global(.cta) { width: 100%; max-width: 320px; margin-top: 8px; }
@@ -103,18 +130,128 @@ const rowsOf = (w: Wall) => {
 </style>
 
 <script>
-  // Stop the strips when the tab is hidden or the wall is off the screen, and hide a tile whose picture will not load.
+  type Meta = { t: string; y?: number; c?: string; h: string; s?: Record<string, unknown>; l?: string };
+
   function start() {
     const hero = document.querySelector<HTMLElement>('[data-wall]');
     if (!hero || hero.dataset.live) return;
     hero.dataset.live = '';
+    // stop the strips when the tab is hidden or the wall is off the screen
     let hidden = document.hidden, away = false;
     const sync = () => hero.classList.toggle('paused', hidden || away);
     document.addEventListener('visibilitychange', () => { hidden = document.hidden; sync(); });
     if ('IntersectionObserver' in window) new IntersectionObserver((e) => { away = !e[e.length - 1].isIntersecting; sync(); }).observe(hero);
     sync();
+    // a tile whose picture will not load is hidden
     hero.addEventListener('error', (e) => { if (e.target instanceof HTMLImageElement) e.target.classList.add('gone'); }, true);
     hero.querySelectorAll<HTMLImageElement>('.wt img').forEach((i) => { if (i.complete && !i.naturalWidth) i.classList.add('gone'); });
+
+    let meta: Meta[] = [];
+    try { meta = JSON.parse(hero.querySelector('script[data-wall-meta]')?.textContent || '[]'); } catch { /* the wall still slides without it */ }
+    const metaOf = (t: Element | null) => (t instanceof HTMLElement && t.dataset.i ? meta[+t.dataset.i] : undefined);
+    const mouse = matchMedia('(hover: hover) and (pointer: fine)');
+    const calm = matchMedia('(prefers-reduced-motion: reduce)');
+    const go = (href: string) => { location.assign(href); };
+
+    // the caption and the save bookmark are made the first time a tile is pointed at
+    function fill(t: HTMLElement) {
+      const m = metaOf(t);
+      if (!m || t.dataset.filled) return;
+      t.dataset.filled = '';
+      const cap = document.createElement('span');
+      cap.className = 'wcap';
+      const b = document.createElement('b');
+      b.textContent = m.t;
+      cap.append(b);
+      const sub = [m.y, m.c].filter(Boolean).join(' | ');
+      if (sub) { const sm = document.createElement('small'); sm.textContent = sub; cap.append(sm); }
+      t.append(cap);
+      if (m.s) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'wsave';
+        btn.tabIndex = -1;
+        btn.setAttribute('aria-label', `Save ${m.t}`);
+        btn.title = 'Save to your shelf';
+        // saving needs a shelf: signed out, the bookmark leads to the sign-up page
+        if (hero.hasAttribute('data-me')) btn.dataset.quickAdd = JSON.stringify({ hit: m.s, status: 'want' });
+        else btn.dataset.wallJoin = '';
+        const mk = hero.querySelector<HTMLTemplateElement>('template[data-wall-mark]')?.content.firstElementChild;
+        if (mk) btn.append(mk.cloneNode(true));
+        t.append(btn);
+      }
+    }
+
+    let active: HTMLElement | null = null;
+    function setActive(t: HTMLElement | null) {
+      if (active === t) return;
+      active?.classList.remove('on');
+      active?.closest('.wr')?.classList.remove('held');
+      active = t;
+      if (!t) return;
+      if (t.classList.contains('is-back')) unflip(t, true);
+      fill(t);
+      t.classList.add('on');
+      t.closest('.wr')?.classList.add('held');
+    }
+    const tileOf = (e: Event) => (e.target as Element).closest<HTMLElement>('.wt');
+    hero.addEventListener('pointerover', (e) => { if (mouse.matches && (e as PointerEvent).pointerType === 'mouse') setActive(tileOf(e)); });
+    hero.addEventListener('pointerleave', (e) => { if (mouse.matches && (e as PointerEvent).pointerType === 'mouse') setActive(null); });
+    hero.addEventListener('click', (e) => {
+      const target = e.target as Element;
+      const save = target.closest('.wsave');
+      if (save) { if (save.hasAttribute('data-wall-join')) go('/join'); return; }   // a signed-in bookmark is handled by the page's own save
+      const t = tileOf(e), m = metaOf(t);
+      if (!t || !m) { setActive(null); return; }
+      // a mouse already showed the caption by pointing; a finger shows it on the first tap and opens the page on the second
+      if (mouse.matches || active === t) go(m.h); else setActive(t);
+    });
+    document.addEventListener('click', (e) => { if (!hero.contains(e.target as Node)) setActive(null); });
+
+    // now and then one visible cover with a saved card line turns over to show it, and back
+    const tidy = (l: string) => l.replace(/^["'“”‘’«»\s]+|["'“”‘’«»\s]+$/g, '');
+    const swap = (t: HTMLElement, back: boolean) => {
+      t.classList.toggle('is-back', back);
+      const face = t.querySelector<HTMLElement>('.wback');
+      if (face) face.hidden = !back;
+      const img = t.querySelector('img');
+      if (img) img.style.visibility = back ? 'hidden' : '';
+    };
+    const turn = (t: HTMLElement, from: number, to: number, ease: string) =>
+      t.animate([{ transform: `perspective(500px) rotateY(${from}deg)` }, { transform: `perspective(500px) rotateY(${to}deg)` }], { duration: 340, easing: ease }).finished.catch(() => {});
+    function unflip(t: HTMLElement, now = false) {
+      if (!t.classList.contains('is-back')) return;
+      if (now) { swap(t, false); return; }
+      turn(t, 0, 90, 'ease-in').then(() => { swap(t, false); return turn(t, -90, 0, 'ease-out'); });
+    }
+    async function flip(t: HTMLElement, line: string) {
+      if (!t.querySelector('.wback')) {
+        const face = document.createElement('span');
+        face.className = 'wback';
+        face.hidden = true;
+        const em = document.createElement('em');
+        em.textContent = line;
+        face.append(em);
+        t.append(face);
+      }
+      await turn(t, 0, 90, 'ease-in');
+      swap(t, true);
+      await turn(t, -90, 0, 'ease-out');
+      setTimeout(() => { if (t.isConnected && t.classList.contains('is-back') && !t.classList.contains('on')) unflip(t); }, 3800);
+    }
+    function pick() {
+      if (calm.matches || hero.classList.contains('paused')) return;
+      const box = hero.getBoundingClientRect();
+      const seen = [...hero.querySelectorAll<HTMLElement>('.wt:not(.on):not(.is-back)')].filter((t) => {
+        const m = metaOf(t);
+        if (!m?.l || tidy(m.l).length > 70 || t.closest('.wr')?.classList.contains('held')) return false;
+        const r = t.getBoundingClientRect();
+        return r.width > 0 && r.left >= 0 && r.right <= innerWidth && r.top >= Math.max(0, box.top) && r.bottom <= Math.min(innerHeight, box.bottom) && !!t.querySelector('img:not(.gone)');
+      });
+      const t = seen[Math.floor(Math.random() * seen.length)];
+      if (t) flip(t, tidy(metaOf(t)!.l!));
+    }
+    setInterval(pick, 4200);
   }
   document.addEventListener('astro:page-load', start);
 </script>
