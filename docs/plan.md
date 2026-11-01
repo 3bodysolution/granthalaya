@@ -118,3 +118,5 @@ Original steps:
 - The profile shows the pinned line, else the latest line.
 - Loaders: Drawn for pages, Ink for buttons.
 - AI models only surface lists and niche books; facts always come from a source.
+
+- Home wall (decisions applied): films are about two thirds from our own film lists and a third from trending, never horror (TMDB genre 27) or adult; every title appears once (fewer tiles rather than repeats); light-mode phone top is the plain page colour. Pushed on phase-1.

@@ -56,7 +56,7 @@ export const idFrom = (param: string | undefined) => { const m = String(param ??
 export interface Person { id: number; name: string; role: string; photo?: string; href: string }
 export interface Provider { id: number; name: string; logo?: string }
 export interface Where { link?: string; stream: Provider[]; free: Provider[]; rent: Provider[]; buy: Provider[] }
-export interface Card { kind: 'film' | 'tv'; id: number; title: string; year?: number; poster?: string; href: string; role?: string; popularity?: number }
+export interface Card { kind: 'film' | 'tv'; id: number; genres?: number[]; title: string; year?: number; poster?: string; href: string; role?: string; popularity?: number }
 interface Common {
   id: number; title: string; original?: string; year?: number; overview: string; tagline?: string;
   poster?: string; backdrop?: string; genres: { id: number; name: string; slug: string }[];
@@ -197,7 +197,14 @@ export async function personPage(id: number): Promise<PersonPage | null> {
 function toCard(kind: 'film' | 'tv', m: any): Card {
   const tv = kind === 'tv';
   const title = tv ? m.name : m.title;
-  return { kind, id: m.id, title, year: yearOf(tv ? m.first_air_date : m.release_date), poster: img(m.poster_path, 'w342'), href: tv ? showHref(m.id, title) : filmHref(m.id, title) };
+  return { kind, id: m.id, genres: m.genre_ids, title, year: yearOf(tv ? m.first_air_date : m.release_date), poster: img(m.poster_path, 'w342'), href: tv ? showHref(m.id, title) : filmHref(m.id, title) };
+}
+
+/** a film's genre ids and whether it is adult, from its short record (null when TMDB doesn't answer) */
+export async function filmGenres(id: number): Promise<{ genres: number[]; adult: boolean } | null> {
+  if (!key()) return null;
+  const m = await getJSON(q(`/movie/${id}`), { ttl: 86400 });
+  return m && Array.isArray(m.genres) ? { genres: m.genres.map((g: any) => g.id), adult: !!m.adult } : null;
 }
 
 /** what people are watching this week, worldwide (TMDB's trending list) */

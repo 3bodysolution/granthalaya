@@ -60,6 +60,8 @@ const phone = Astro.url.searchParams.get('wall') === 'fade' ? 'fade' : 'above';
     .veil { display: none; }
     .hero[data-empty] .wall { display: none; }
     .credit { text-align: left; }
+    /* light mode: the paper painting behind the page is stretched tall on a phone and looks blotchy under the words, so the top of the page is the plain page colour, fading into the paper at the bottom */
+    :global(html[data-theme="light"]) .hero[data-phone="above"] { background: linear-gradient(180deg, var(--bg) calc(100% - 36px), transparent); }
     /* the other choice: the words over the top of the wall, on a fade that is strongest at the top */
     .hero[data-phone="fade"] .stage { flex-direction: row; align-items: flex-start; min-height: calc(var(--wallh) + 170px); }
     .hero[data-phone="fade"] .wall { position: absolute; inset: auto 0 0 0; }
@@ -89,13 +91,15 @@ const phone = Astro.url.searchParams.get('wall') === 'fade' ? 'fade' : 'above';
     const key = rowsN + 'x' + cols;
     if (drift.dataset.built === key || (drift.dataset.built && drift.dataset.built.startsWith(rowsN + 'x') && Number(drift.dataset.built.split('x')[1]) >= cols)) return;
     drift.dataset.built = key;
-    const n = tiles.length, shift = Math.floor(n / rowsN);
+    // every tile is used once: if there are fewer than the window could hold, the rows are shorter
+    const n = tiles.length, per = Math.min(cols, Math.floor(n / rowsN));
+    if (!per) return;
     const frag = document.createDocumentFragment();
     for (let r = 0; r < rowsN; r++) {
       const row = document.createElement('div');
       row.className = 'wr';
-      for (let c = 0; c < cols; c++) {
-        const [kind, src, srcset] = tiles[(c + r * shift) % n];
+      for (let c = 0; c < per; c++) {
+        const [kind, src, srcset] = tiles[r * per + c];
         const t = document.createElement('span');
         t.className = kind === 'b' ? 'wt book' : 'wt';
         const img = new Image();
