@@ -3,41 +3,54 @@ import Policy from '../components/Policy.astro';
 import { site } from '../data/site';
 export const prerender = false;
 ---
-<Policy title="Terms of use" updated="October 6, 2026" description="The simple rules for keeping a shelf on Granthalaya.">
-  <p class="lead">Granthalaya is a free place to keep a shelf of what you read and watch. These are the rules for using it.</p>
+<Policy title="Terms of use" updated="November 3, 2026" description="The simple rules for keeping a shelf on Granthalaya.">
+  <p class="lead">Granthalaya is a free place to keep a shelf of what you read and watch. These are the rules for using it. By signing in or using the site, you agree to them and to the <a href="/privacy/">privacy page</a>.</p>
 
   <h2>Your account</h2>
   <ul>
     <li>You sign in with Google and need to be 18 or older.</li>
     <li>One account per person. Keep your Google account safe; whoever can use it can use your shelf.</li>
-    <li>Pick a username that isn’t pretending to be someone else, and isn’t offensive. Usernames that break this can be changed or removed.</li>
+    <li>Pick a username that is not pretending to be someone else and is not offensive. We can change or remove a username that breaks this.</li>
+    <li>Do not get into anyone else’s account, or make accounts to get around a block or a removal.</li>
+  </ul>
+
+  <h2>What is allowed</h2>
+  <ul>
+    <li>Using the site for your own reading and watching, and for sharing it with others as your settings allow.</li>
+    <li>Not allowed: harassment, hate, threats, sexual content involving anyone under 18, anything illegal, other people’s private information, impersonation, or spam.</li>
+    <li>Not allowed: trying to break, overload or copy the site in bulk, getting round its limits, or using it to feed automated tools without asking.</li>
+    <li>Keep quotes from books and films short, the way you would quote them in a review. Mark a review <b>Contains spoilers</b> when it gives away what happens.</li>
   </ul>
 
   <h2>What you post</h2>
   <ul>
-    <li>Your reviews and comments stay yours. By posting them, you let Granthalaya store them and show them to the people your settings allow, including on each title’s page.</li>
-    <li>Keep quotes from books and films short, the way you’d quote them in a review.</li>
-    <li>Mark a review <b>Contains spoilers</b> when it gives away what happens.</li>
-    <li>Don’t post harassment, hate, threats, sexual content involving anyone under 18, anything illegal, other people’s private information, or spam.</li>
-    <li>Don’t try to break, overload or scrape the site, or get into anyone else’s account.</li>
+    <li>Your reviews, comments, photo and other things you post stay yours. You are responsible for them, and you promise you have the right to post them.</li>
+    <li>By posting them, you give Granthalaya a free, non-exclusive permission to store them and show them to the people your settings allow, including on each title’s page. This is only so the site can work. It ends when you delete the content or your account, apart from short-lived copies in backups.</li>
+    <li>Reviews on a public account, and any comment or like you leave on a public review, can be seen by anyone, even if your own account is private.</li>
+    <li>If you upload a photo, it must be a picture you are allowed to use. Your own face or something you made is best.</li>
   </ul>
 
   <h2>The shared catalogue</h2>
-  <p>Titles, covers, runtimes and the short “Behind the film” facts are shared by everyone who adds the same title. The facts are picked by an AI model from Wikipedia and can be wrong. Covers and posters belong to their publishers and studios.</p>
+  <p>Titles, covers, runtimes and the short “Behind the film” facts are shared by everyone who adds the same title. Details come from outside sources (see the credits at the bottom of every page), and descriptions and facts can be tidied by an AI model, so they can be wrong. Posters and covers belong to their publishers, studios and shops. We show them to describe the title, not to claim them.</p>
 
-  <h2>When things go wrong</h2>
+  <h2>Reports and takedowns</h2>
   <ul>
     <li>Anyone can report a profile, a review or a comment. Reports are read by the person who runs the site.</li>
-    <li>Content or accounts that break these rules can be hidden or removed, sometimes without warning when it’s serious.</li>
+    <li>If you believe something on the site breaks your rights (for example your copyright, or it shares your private information), write to {site.contact ? <a href={`mailto:${site.contact}`}>{site.contact}</a> : 'us'} with where it is, what it is and why. We will look at it quickly and remove it where that is right.</li>
+    <li>Content or accounts that break these rules can be hidden or removed, sometimes without warning when it is serious. If we remove something of yours, you can write to us to ask why.</li>
     <li>You can delete your account at any time in Settings.</li>
   </ul>
 
+  <h2>Sponsor</h2>
+  <p>The Sponsor page lets you give money to help keep the site going. It is entirely voluntary and you get nothing for it: no features, no badge, no special treatment. Payments are made through your own UPI app, not through this site. Because it is a gift, it is not refunded. Granthalaya is not a charity or a registered non-profit, and a Sponsor payment is not a donation for tax purposes, so no tax receipt is given.</p>
+
   <h2>The fine print</h2>
   <ul>
-    <li>Granthalaya is provided as it is, without promises that it will always be available or error-free.</li>
-    <li>It may change or, one day, close. If it closes, you’ll get notice and a way to download your shelf first.</li>
-    <li>These terms may be updated; the site will say so when they change in a way that matters.</li>
-    <li>These terms are governed by the laws of India.</li>
+    <li>Granthalaya is provided as it is, without promises that it will always be available, error-free or keep your data forever. Download your data now and then if it matters to you.</li>
+    <li>To the extent the law allows, we are not responsible for what other people post, for outside sites we link to, or for losses that come from using the site.</li>
+    <li>It may change or, one day, close. If it closes, you will get notice and a way to download your shelf first.</li>
+    <li>We may update these terms. If a change matters, the site will say so before it takes effect, and carrying on using the site after that means you accept it. If you do not, you can delete your account.</li>
+    <li>These terms are governed by the laws of India, and the courts in India decide if a dispute cannot be settled by talking first.</li>
   </ul>
   {site.contact && <p>Questions: <a href={`mailto:${site.contact}`}>{site.contact}</a>.</p>}
 </Policy>

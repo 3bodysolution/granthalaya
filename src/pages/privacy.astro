@@ -3,52 +3,79 @@ import Policy from '../components/Policy.astro';
 import { site } from '../data/site';
 export const prerender = false;
 ---
-<Policy title="Privacy" updated="October 6, 2026" description="What Granthalaya keeps about you, who can see it, and how to take it with you or delete it.">
-  <p class="lead">Granthalaya keeps only what it needs to give you a shelf. It has no ads, no tracking scripts and sells nothing.</p>
+<Policy title="Privacy" updated="November 3, 2026" description="What Granthalaya keeps about you, who can see it, who helps run the site, and how to take your data or delete it.">
+  <p class="lead">Granthalaya keeps only what it needs to give you a shelf. It has no ads and no tracking, and it does not sell or rent anything about you. This page says what we keep, why, who can see it and what you can do about it. It is written to follow India’s Digital Personal Data Protection Act, 2023 (the DPDP Act).</p>
 
-  <h2>What we keep</h2>
+  <h2>Who we are</h2>
+  <p>Granthalaya is run by one person, Sarthak, in India. Under the DPDP Act that makes us the “data fiduciary”, the one who decides why and how your data is used. You can reach us at {site.contact ? <a href={`mailto:${site.contact}`}>{site.contact}</a> : 'the address given below'}.</p>
+
+  <h2>What we keep, and why</h2>
   <ul>
-    <li><b>From Google, when you sign in:</b> your name, email address and profile photo. Your email is never shown to anyone.</li>
-    <li><b>What you add:</b> the things on your shelf, their status, ratings, dates and reviews, the comments and likes you leave on reviews, collections, and your profile (username, bio, links and favourites). Lines you saved before reviews replaced them are kept too.</li>
-    <li><b>Safety records:</b> people you block, and reports you send.</li>
-    <li><b>Technical records:</b> the companies that run the site keep short-lived server logs (like your IP address and browser) to keep it working and secure.</li>
+    <li><b>From Google, when you sign in:</b> your name, email address and profile photo. We use the email to know which account is yours and to reach you about your account if we must. It is never shown to anyone else. We never see your Google password.</li>
+    <li><b>A photo you upload:</b> if you choose a photo in Settings, we keep one square copy of it. We check that it is really a picture, shrink it, and remove everything hidden inside the file, such as the place it was taken. The copy is kept until you replace or remove it, or delete your account.</li>
+    <li><b>What you add:</b> the books, films, shows and essays on your shelf with their status, ratings, dates and notes; your reviews (including the short line and the spoiler switch); the likes and comments you leave on reviews; your collections; and your profile (username, bio, links and favourites). Earlier usernames are remembered for a while so old links to your shelf still work.</li>
+    <li><b>Safety records:</b> the people you block, and the reports you send or that are made about you.</li>
+    <li><b>Technical records:</b> the services that run the site keep short-lived server logs (such as your IP address, browser and the pages asked for) so the site works and stays secure. We use them for nothing else.</li>
   </ul>
+  <p>We use this only to run your shelf and the features around it: showing your pages, letting people like and comment, keeping the site safe, and answering you. We do not use it for advertising and we do not build profiles of you.</p>
+
+  <h2>Your consent</h2>
+  <p>By signing in with Google and making a shelf, you agree to us handling your data as described here, for these purposes. You can withdraw that agreement at any time by deleting your account in Settings. Withdrawing does not undo what was done with your data before, but we will stop using it and remove it as described below.</p>
 
   <h2>Who can see it</h2>
   <ul>
-    <li>Your name, username and photo are visible to everyone, even on a private account, so people can find and block you.</li>
+    <li>Your name, username and photo are visible to everyone, even on a private account, so people can find you and block you.</li>
     <li>With a public account, your shelf, reviews, collections and stats are visible to anyone, except entries you mark <b>Only me</b>. Your reviews also show on each title’s page.</li>
-    <li>With a private account, only you can see your shelf, reviews, collections and stats. Comments and likes you leave on someone else’s public review stay public, even from a private account.</li>
-    <li>Likes and comments on a review are seen by whoever can see that review. A comment you leave shows with your name, even if your account is private.</li>
+    <li>With a private account, only you can see your shelf, reviews, collections and stats.</li>
+    <li><b>Comments and likes are the exception.</b> A comment or like you leave on someone else’s public review is public, even if your account is private. It shows with your name and photo and stays visible to whoever can see that review.</li>
     <li>If you block someone, neither of you can see the other’s profile.</li>
     <li>Your shelf appears on the welcome page for new visitors only if you turn on <b>Feature my shelf</b>.</li>
+    <li>The person who runs the site can see reports and can hide or remove content or accounts that break the terms. They can also remove a profile photo.</li>
   </ul>
+  <p>Anything you make public can be seen, copied or quoted by others, and search engines may keep a copy. Think before you post what you would not want read.</p>
 
   <h2>Who helps run the site</h2>
+  <p>We use these services. Each gets only what it needs for its job.</p>
   <ul>
-    <li><b>Supabase</b> stores the database, on servers in Mumbai, India, and handles signing in.</li>
-    <li><b>Vercel</b> hosts the website.</li>
+    <li><b>Supabase</b> stores the database and your uploaded photo, on servers in Mumbai, India, and handles signing in.</li>
+    <li><b>Vercel</b> hosts the website. The site’s code runs in Mumbai, and its network may serve pages and pictures from other places around the world.</li>
     <li><b>Google</b> confirms who you are when you sign in.</li>
-    <li><b>Cloudflare Turnstile</b> runs a quick check that a person, not a bot, is creating a new shelf.</li>
-    <li><b>Open Library, Google Books, TMDB, Wikipedia, Google Gemini and Groq</b> help look up titles, covers and short facts about them. Our server sends them only what’s being looked up (a title, or what you typed in search), never anything about you.</li>
-    <li><b>Posters, covers, photos and streaming logos</b> load straight from TMDB, Open Library and Google Books, so those services see your browser’s request for the image, as with any picture on the web. Covers from the bookshops Akshardhara and BookGanga do not: our server fetches them and passes them on, so those shops never see your browser.</li>
+    <li><b>Cloudflare Turnstile</b> runs a quick check that a person, not a bot, is making a new shelf.</li>
+    <li><b>TMDB</b> gives us film and TV details and posters. <b>JustWatch</b> gives us where a title can be watched in India. <b>Open Library</b> and <b>Google Books</b> give us book details and covers. <b>Wikipedia</b> gives us book descriptions and the pages the short facts are taken from.</li>
+    <li><b>Google Gemini and Groq</b> (AI services) write the one-line text on share cards and tidy book descriptions and short facts from the sources above. They are sent a title and text about that title, never anything about you or what you wrote.</li>
     <li><b>Akshardhara and BookGanga</b> are Indian bookshops that let us show some of their books and covers. Our server reads their public book lists. Nothing about you is sent to them, unless you follow a “Buy at” link to their site.</li>
+  </ul>
+  <p>Our server sends these services only what is being looked up (a title, or what you typed in search). Posters, covers and streaming logos from TMDB, Open Library and Google Books load straight from those services, so they can see your browser asking for the picture, as with any picture on the web. Covers from the two bookshops do not: our server fetches them and passes them on, so the shops never see your browser. Some of these services are outside India, so your data can leave the country this way. We only send what is listed here.</p>
+
+  <h2>Where it is kept, and for how long</h2>
+  <ul>
+    <li>Your data is kept in the database in Mumbai, India, for as long as you have an account.</li>
+    <li>When you delete your account, your profile, shelf, reviews, comments, likes, collections and uploaded photo are removed right away. Copies can stay in the database provider’s backups for a short time before they are gone too.</li>
+    <li>If you replace or remove your photo, the old file is deleted.</li>
+    <li>Reports and blocks that involve other people can be kept a little longer where that is needed to keep them safe, but they will not carry your content.</li>
+    <li>Server logs are kept by the services that run the site for a short time, then thrown away.</li>
   </ul>
 
   <h2>Cookies</h2>
-  <p>One cookie keeps you signed in for up to 90 days on a device. Your choice of light or dark lives in your browser. There are no advertising or tracking cookies.</p>
+  <p>One cookie keeps you signed in, for up to 90 days on a device. Your choice of light or dark, and a few small settings, are kept in your own browser. There are no advertising, analytics or tracking cookies, so there is no cookie banner to click away.</p>
 
-  <h2>Your choices</h2>
+  <h2>Your rights and choices</h2>
   <ul>
-    <li>Change anything on your profile or shelf at any time.</li>
-    <li>Make your account private, or mark single entries <b>Only me</b>.</li>
-    <li><b>Download your data</b> in Settings: everything you’ve added, as spreadsheets in a zip file you keep.</li>
-    <li><b>Delete your account</b> in Settings. Your profile, shelf, reviews, comments, likes and collections are removed right away. Copies can stay in the database provider’s backups for a short time before they’re gone too.</li>
+    <li><b>See and correct:</b> everything on your profile and shelf can be changed in the site at any time. <b>Download your data</b> in Settings gives you everything you have added, as spreadsheets in a zip file.</li>
+    <li><b>Control who sees it:</b> make your account private, or mark single entries <b>Only me</b>. Remove or replace your photo in Settings.</li>
+    <li><b>Delete:</b> <b>Delete account</b> in Settings removes your data as described above.</li>
+    <li><b>Block and report:</b> block anyone, and report any profile, entry or comment.</li>
+    <li><b>Name someone:</b> the DPDP Act lets you name a person who can use these rights for you if you cannot. Tell us at the address below.</li>
+    <li><b>Complain:</b> if something is wrong, write to us first. We will answer within the period the law sets. If you are not satisfied, you can complain to the Data Protection Board of India.</li>
   </ul>
+  <p>If you cannot do something yourself in Settings, write to us and we will do it for you.</p>
 
   <h2>Age</h2>
-  <p>You need to be 18 or older to make a shelf.</p>
+  <p>You need to be 18 or older to make a shelf. We do not knowingly keep data from anyone younger. If you think a younger person has made one, tell us and we will remove it.</p>
 
-  <h2>Questions</h2>
-  <p>To ask about your data, {site.contact ? <>email <a href={`mailto:${site.contact}`}>{site.contact}</a></> : 'use the options in Settings, or report it from any profile'}. If this policy changes in a way that matters, the site will say so before it takes effect.</p>
+  <h2>Keeping it safe</h2>
+  <p>The rules about who can see what are enforced in the database itself, not only on the pages. Connections are encrypted. No system is perfectly safe. If something goes wrong that affects your data, we will tell you and the authorities as the law requires.</p>
+
+  <h2>Changes and questions</h2>
+  <p>If this page changes in a way that matters, the site will say so before the change takes effect. To ask about your data or make a complaint, {site.contact ? <>email <a href={`mailto:${site.contact}`}>{site.contact}</a></> : 'use the options in Settings'}. This email is also our contact for any grievance under the DPDP Act.</p>
 </Policy>
