@@ -109,6 +109,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         {me ? (
           <>
             <a href="/add/" class="btn primary addbtn" aria-label="Add a book, film, show or essay"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Add</span></a>
+            <a href="/sponsor/" class="sponsor" aria-label="Sponsor"><svg class="sp-heart" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2 10.6 20C5.4 15.3 2 12.2 2 8.4 2 5.4 4.4 3 7.4 3c1.7 0 3.4.8 4.6 2.1C13.2 3.8 14.9 3 16.6 3 19.6 3 22 5.4 22 8.4c0 3.8-3.4 6.9-8.6 11.6L12 21.2z"/></svg><span>Sponsor</span></a>
             <details class="menu">
               <summary class="avatar" aria-label="Your account">
                 <Face name={me.display_name || me.username} src={avatar} size={40} />
@@ -123,6 +124,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
             </details>
           </>
         ) : (
+          <a href="/sponsor/" class="sponsor" aria-label="Sponsor"><svg class="sp-heart" width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2 10.6 20C5.4 15.3 2 12.2 2 8.4 2 5.4 4.4 3 7.4 3c1.7 0 3.4.8 4.6 2.1C13.2 3.8 14.9 3 16.6 3 19.6 3 22 5.4 22 8.4c0 3.8-3.4 6.9-8.6 11.6L12 21.2z"/></svg><span>Sponsor</span></a>
           <a href={`/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} class="btn primary" data-astro-prefetch="false">Sign in</a>
         )}
       </div>

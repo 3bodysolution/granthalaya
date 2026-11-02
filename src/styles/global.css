@@ -102,11 +102,22 @@ p { text-wrap: pretty; }
 :root { --hh: 76px; }
 body:has(main > .still:not(.gone)) .site-wrap { position: absolute; top: 0; left: 0; right: 0; z-index: 20; isolation: isolate; }
 body:has(main > .still:not(.gone)) .site-wrap::before { content: ""; position: absolute; left: 0; right: 0; top: 0; bottom: -30px; z-index: -1; pointer-events: none; background: linear-gradient(to bottom, rgba(8,9,11,.68), rgba(8,9,11,0)); }
-body:has(main > .still:not(.gone)) :is(.brand, .actions) { --bg:#15171B; --card:rgba(31,34,39,.72); --ink:#ECE5D6; --muted:#C9C2B5; --line:rgba(236,229,214,.22); --soft:#24272D; --lat:#6CC9BF; color: #ECE5D6; }
+body:has(main > .still:not(.gone)) :is(.brand, .actions) { --bg:#15171B; --card:rgba(31,34,39,.72); --ink:#ECE5D6; --muted:#C9C2B5; --line:rgba(236,229,214,.22); --soft:#24272D; --lat:#6CC9BF; --on-lat:#0B1A19; color: #ECE5D6; }
 body:has(main > .still:not(.gone)) .menu-list { --card:#1F2227; }
 @media (min-width: 781px) { body:has(main > .still:not(.gone)) .nav { --ink:#ECE5D6; --lat:#6CC9BF; color: #ECE5D6; } }
 /* the home page: the wall of covers runs up behind a see-through header (a computer only; on a phone the wall sits under the words) */
 @media (min-width: 781px) { body:has(main > .hero[data-wall]) .site-wrap { position: absolute; top: 0; left: 0; right: 0; z-index: 20; } }
+/* Sponsor: a green pill (the logo's colour) with a red heart. It lifts a pixel when pointed at and the heart beats once; on a phone it is just the heart in a green circle */
+.sponsor { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px 0 13px; border-radius: 20px; background: var(--lat); color: var(--on-lat); font-size: 14px; font-weight: 600; white-space: nowrap;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 1px 2px color-mix(in srgb, var(--lat) 45%, transparent), 0 4px 10px -4px color-mix(in srgb, var(--lat) 55%, transparent);
+  transition: transform .18s ease-out, box-shadow .18s ease-out; }
+.sponsor:hover { color: var(--on-lat); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 2px 3px color-mix(in srgb, var(--lat) 45%, transparent), 0 7px 14px -5px color-mix(in srgb, var(--lat) 60%, transparent); }
+.sponsor:active { transform: scale(.97); transition-duration: .08s; }
+.sponsor .sp-heart { flex: none; fill: #E5484D; stroke: #FFFFFF; stroke-width: 1.4; paint-order: stroke; stroke-linejoin: round; }
+.sponsor:hover .sp-heart { animation: heartbeat .4s ease-out; }
+@keyframes heartbeat { 0% { transform: scale(1); } 40% { transform: scale(1.28); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .sponsor, .sponsor:hover, .sponsor:active { transition: none; transform: none; } .sponsor:hover .sp-heart { animation: none; } }
+@media (max-width: 780px) { .sponsor { width: 40px; padding: 0; justify-content: center; } .sponsor span { display: none; } .sponsor .sp-heart { width: 18px; height: 18px; } }
 .brand { display: flex; align-items: center; gap: 10px; justify-self: start; }
 .brand span { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
 .nav { display: flex; gap: 32px; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
