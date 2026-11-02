@@ -183,27 +183,3 @@ export async function loadWall(): Promise<Wall> {
   await within(addLines(wall.tiles), 1200, undefined);
   return wall;
 }
-
-/**
- * Two numbers for the line under the home page's headline: how many books and films we hold, and how many of the books are Marathi or
- * Hindi. Counted by the database (nothing is downloaded), read as nobody so only what everyone can see counts, rounded down, and kept
- * for the day with the wall's pick. The Marathi and Hindi count is the two shops' visible books (`shop_books`: matched and not hidden).
- */
-export interface Counts { total: number; marathiHindi: number }
-const floorTo = (n: number) => (n >= 200 ? Math.floor(n / 100) * 100 : Math.floor(n / 10) * 10);
-let counted: { day: string; counts: Counts | null; at: number } | null = null;
-export async function loadCounts(): Promise<Counts | null> {
-  const day = istDay();
-  if (counted?.day === day && (counted.counts || Date.now() - counted.at < 5 * 60_000)) return counted.counts;
-  if (!supabaseReady()) return null;
-  const sb = createClient(env('PUBLIC_SUPABASE_URL'), env('PUBLIC_SUPABASE_PUBLISHABLE_KEY'), { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: timedFetch } });
-  const count = async (q: PromiseLike<{ count: number | null; error: unknown }>) => { const r = await q; return r.error || r.count == null ? null : r.count; };
-  const [books, films, shop] = await within(Promise.all([
-    count(sb.from('titles').select('id', { count: 'exact', head: true }).eq('kind', 'book')),
-    count(sb.from('titles').select('id', { count: 'exact', head: true }).eq('kind', 'film')),
-    count(sb.from('shop_books').select('id', { count: 'exact', head: true })),
-  ]), 2500, [null, null, null] as (number | null)[]);
-  const counts = books == null || films == null || shop == null || books + films < 200 || shop < 50 ? null : { total: floorTo(books + films), marathiHindi: floorTo(shop) };
-  counted = { day, counts, at: Date.now() };
-  return counts;
-}
