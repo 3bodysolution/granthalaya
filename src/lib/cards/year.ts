@@ -22,8 +22,19 @@ const STRIP_X = 500, FRAME_W = 236, FRAME_H = 78, FAV_W = 286, FAV_H = 100, GAP 
 const FILM = '#1B1C20', HOLE = '#E9E3D6';
 
 export async function drawYear(d: YearData, width = W): Promise<Picture> {
-  const [covers, favCover, painting] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
-  if ((d.fav?.cover && !favCover) || d.months.some((m, i) => m?.cover && !covers[i])) throw new CoverMissing();
+  const [covers, favCover0, painting] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
+  // Thirteen covers are needed at once, so on a cold start one of them is often late. The late ones get one more try; if they are
+  // still missing the card is drawn with painted covers for them and marked unfinished (the share window then asks again in a few
+  // seconds, by which time the covers are kept). One slow cover no longer means no card.
+  let favCover = favCover0;
+  const late = d.months.map((m, i) => (m?.cover && !covers[i] ? i : -1)).filter((i) => i >= 0);
+  if (late.length || (d.fav?.cover && !favCover)) {
+    const again = await Promise.all([...late.map((i) => coverData(d.months[i]!.cover, false)), d.fav?.cover && !favCover ? coverData(d.fav.cover, width >= W) : Promise.resolve(favCover)]);
+    late.forEach((i, k) => { covers[i] = again[k]; });
+    favCover = again[late.length];
+  }
+  const missing = d.months.filter((m, i) => m?.cover && !covers[i]).map((m) => m!.cover!);
+  if (d.fav?.cover && !favCover) missing.push(d.fav.cover);
 
   // a column of sprocket holes
   const holes = (height: number) => h('div', { flexDirection: 'column', justifyContent: 'space-between', height, paddingTop: 8, paddingBottom: 8 },
@@ -99,5 +110,6 @@ export async function drawYear(d: YearData, width = W): Promise<Picture> {
   const t = performance.now();
   const svg = await satori(root as never, { width: W, height: H, fonts: FONTS as never });
   mark('layout', performance.now() - t);
-  return render(svg, width);
+  const pic = await render(svg, width);
+  return missing.length ? { ...pic, pending: true, missing } : pic;
 }

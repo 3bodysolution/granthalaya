@@ -7,7 +7,7 @@ import { loadProfile, loadShelf, type Entry } from '../../lib/data';
 import { drawYear } from '../../lib/cards/year';
 import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
 import { picture, coverSlow, type Picture } from '../../lib/cards/output';
-import { CoverMissing, setOrigin } from '../../lib/cards/covers';
+import { CoverMissing, setOrigin, warmCover } from '../../lib/cards/covers';
 import { savedFacts } from '../../lib/cards/tagline';
 import { within } from '../../lib/cards/output';
 export const prerender = false;
@@ -61,6 +61,11 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
     } catch (e) {
       if (e instanceof CoverMissing) return coverSlow();
       throw e;
+    }
+    if (pic.pending) {
+      // some covers were late: keep them coming in the background, and send the card as unfinished (not kept, the share window asks again)
+      for (const c of pic.missing ?? []) warmCover(url.origin, c);
+      return picture(pic, 'no-store', { 'X-Card': 'pending' });
     }
     if (rendered.size > 20) rendered.delete(rendered.keys().next().value!);
     rendered.set(key, pic);

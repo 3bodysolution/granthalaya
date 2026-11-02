@@ -3,7 +3,8 @@
 import { Resvg } from '@resvg/resvg-js';
 import { mark } from '../timing';
 
-export interface Picture { body: Buffer; type: 'image/jpeg' | 'image/png' }
+/** `pending`: drawn with painted covers for the ones that could not be fetched in time (`missing`), so not to be kept */
+export interface Picture { body: Buffer; type: 'image/jpeg' | 'image/png'; pending?: boolean; missing?: string[] }
 
 export async function render(svg: string, width: number, quality = 80): Promise<Picture> {
   const t = performance.now();
