@@ -49,11 +49,6 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       </aside>
 
       <div class="panels">
-        <!-- said once: notes became public reviews (dismissed in this browser) -->
-        <div class="notice reviews-note" id="reviewsnote" hidden>
-          <p><b>Notes are now reviews.</b> What you write about a film, show or book now shows on its page for everyone, and people can like it and comment. Entries marked Only me, and everything on a private account, never appear there. Comments and likes you leave on someone else’s public review stay public, even on a private account.</p>
-          <button type="button" class="gchip" id="reviewsok">Got it</button>
-        </div>
         <!-- ——— Profile ——— -->
         <div class="panel" role="tabpanel" id="profile" aria-labelledby="tab-profile">
           <form class="sec" data-save="profile">
@@ -192,9 +187,6 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
   .sn[aria-selected="true"] { background: var(--soft); color: var(--ink); }
   .sn.view { margin-top: 12px; color: var(--lat); }
   .panels { min-width: 0; }
-  .reviews-note { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 24px; line-height: 1.55; }
-  .reviews-note[hidden] { display: none; }
-  .reviews-note p { margin: 0; }
   .panel { display: flex; flex-direction: column; gap: 24px; }
   .panel:not([hidden]) { animation: fadein .2s ease; }
   @keyframes fadein { from { opacity: 0; transform: translateY(4px); } }
@@ -221,7 +213,8 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
   .row > span > span { font-size: 13px; color: var(--muted); }
   .btn.sm { height: 36px; padding: 0 14px; font-size: 13px; }
   .danger { border-color: color-mix(in srgb, #B4473B 40%, var(--line)); }
-  .btn.delete { background: #B4473B; border-color: #B4473B; color: #fff; }
+  .btn.delete { background: #8E2A22; border-color: #8E2A22; color: #fff; }
+  .btn.delete:hover:not(:disabled) { background: #74201A; border-color: #74201A; color: #fff; }
   .btn.delete:disabled { opacity: .45; cursor: not-allowed; }
 
   /* favourites: four slots */
@@ -273,10 +266,6 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
     const root = document.querySelector<HTMLElement>('.panels');
     if (!root || root.dataset.ready) return;
     root.dataset.ready = '1';
-
-    const note = document.getElementById('reviewsnote')!;
-    try { note.hidden = localStorage.getItem('reviewsNoteSeen') === '1'; } catch (e) { note.hidden = false; }
-    document.getElementById('reviewsok')!.addEventListener('click', () => { note.hidden = true; try { localStorage.setItem('reviewsNoteSeen', '1'); } catch (e) { /* storage */ } });
 
     // ——— tabs, kept in the address (#privacy) so links and the back button work ———
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
