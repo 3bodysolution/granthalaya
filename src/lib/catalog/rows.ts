@@ -95,13 +95,13 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
 }
 
 /** the Books front page */
-export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[]> = [], sb?: SupabaseClient | null): Promise<Row[]> {
+export async function bookRows(shopIn: CatalogList[] | Promise<CatalogList[]> = [], sb?: SupabaseClient | null): Promise<Row[]> {
   const pick = (p: Promise<{ items: BookCard[] }>) => safe(p.then((r) => r.items), [] as BookCard[]);
-  const [week, fiction, top, suggested] = await Promise.all([
+  const [week, fiction, top, shop] = await Promise.all([
     safe(trendingBooks('weekly'), []),
     pick(browseBooks({ subject: 'fiction' })),
     pick(browseBooks({ sort: 'top' })),
-    safe(Promise.resolve(suggestedIn), [] as CatalogList[]),
+    safe(Promise.resolve(shopIn), [] as CatalogList[]),
   ]);
   // the two list rows pick up covers our catalogue has got since the list files were made
   const [akademi, classics] = await safe(Promise.all(['sahitya-akademi-marathi', 'marathi-classics'].map((s) => fillCovers(sb, getList(s)!))), [getList('sahitya-akademi-marathi'), getList('marathi-classics')] as CatalogList[]);
@@ -112,7 +112,7 @@ export async function bookRows(suggestedIn: CatalogList[] | Promise<CatalogList[
     listRow('booker', 'Booker Prize winners', 'book'),
     listRow('sahitya-akademi-marathi', 'Sahitya Akademi, Marathi', 'book', akademi),
     listRow('marathi-classics', 'Marathi classics', 'book', classics),
-    ...suggested.map((l) => ({ ...listRow(l.slug, l.title, 'book', l), ...(SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS] && { href: `/books/?language=${SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS][2]}` }) })).filter((r) => r.items.length),
+    ...shop.map((l) => ({ ...listRow(l.slug, l.title, 'book', l), ...(SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS] && { href: `/books/?language=${SHOP_LISTS[l.slug as keyof typeof SHOP_LISTS][2]}` }) })).filter((r) => r.items.length),
   ]);
 }
 

@@ -1,4 +1,4 @@
-// Acting on a report, hiding a suggested book, or hiding a bookshop's book or cover (admins only).
+// Acting on a report, hiding a bookshop's book or cover (admins only).
 import type { APIRoute } from 'astro';
 import { json, oops, body, sameOrigin } from '../../lib/http';
 import { adminClient } from '../../lib/supabase';
@@ -9,11 +9,6 @@ export const POST: APIRoute = async (ctx) => {
   if (!ctx.locals.me?.is_admin) return oops('Not found.', 404);
   const b = await body<{ id?: string; action?: string }>(ctx.request);
   const db = adminClient();
-  if (b?.action === 'hide_book' || b?.action === 'show_book') {
-    if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which book?');
-    const { error } = await db.from('book_suggestions').update({ hidden: b.action === 'hide_book' }).eq('id', b.id);
-    return error ? oops('Couldn’t change that.', 500) : json({ ok: true });
-  }
   if (b?.action === 'hide_shop' || b?.action === 'show_shop' || b?.action === 'hide_cover') {
     // a shop asked: no Buy link and no cover (hidden rows stay, so scripts/shops never brings them back)
     if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which book?');

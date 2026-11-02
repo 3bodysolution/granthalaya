@@ -1,5 +1,5 @@
 ---
-// Reports, the weekly book suggestions and the bookshops' books (hide a book or a cover), for the person who runs the site (profiles.is_admin, set by hand in the database).
+// Reports, the bookshops' books (hide a book or a cover), for the person who runs the site (profiles.is_admin, set by hand in the database).
 import Base from '../layouts/Base.astro';
 import { adminClient } from '../lib/supabase';
 export const prerender = false;
@@ -11,7 +11,6 @@ const db = adminClient();
 let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug)), comment:review_comments(id, body, author:profiles(username), log:logs(title:titles(title, slug), owner:profiles!logs_user_id_fkey(username)))').order('created_at', { ascending: false }).limit(100);
 if (show === 'open') q = q.eq('status', 'open');
 const { data: reports, error } = await q;
-const { data: picks } = await db.from('book_suggestions').select('id, language, hidden, checked_with, created_at, title:titles(title, creator, slug)').order('created_at', { ascending: false }).limit(200);
 const find = (Astro.url.searchParams.get('shop') ?? '').trim().slice(0, 60).replace(/[%_\,()]/g, ' ').trim();
 const SHOP: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
 let shopQ = db.from('shop_books').select('id, shop, url, title, original_title, author, hidden, cover_hidden, cover_src').order('hidden', { ascending: false }).order('title').limit(60);
@@ -50,19 +49,6 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
         </article>
       ))}
     </div>
-  </section>
-  <section class="pad wrap picks">
-    <h2 class="title">Suggested books</h2>
-    <p class="muted small">Marathi and Hindi books added each week by the AI model, each checked against a real source. Hide one and it never comes back.</p>
-    {(picks ?? []).length === 0 && <p class="muted small">None yet. The first runs are on a Monday (Marathi) and a Thursday (Hindi).</p>}
-    <ul class="plist">
-      {(picks ?? []).map((k: any) => (
-        <li class:list={['pick', k.hidden && 'off']}>
-          <span class="pt">{k.title ? <a class="accent" href={`/book/${k.title.slug}/`}>{k.title.title}</a> : 'Removed book'}<span class="muted"> | {k.title?.creator} | {k.language === 'mr' ? 'Marathi' : 'Hindi'} | checked with {k.checked_with} | {when(k.created_at)}</span></span>
-          <button class="btn sm" data-admin={JSON.stringify({ id: k.id, action: k.hidden ? 'show_book' : 'hide_book' })}>{k.hidden ? 'Show again' : 'Hide'}</button>
-        </li>
-      ))}
-    </ul>
   </section>
   <section class="pad wrap picks">
     <h2 class="title">Bookshop books</h2>

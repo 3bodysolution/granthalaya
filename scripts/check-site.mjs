@@ -64,7 +64,7 @@ await pool(pages, 4, async ([p, want]) => {
 // ───────── 2. lists ─────────
 head(`2. Lists (${SAMPLE === Infinity ? 'every item' : `${SAMPLE} links per list`}, every cover)`);
 const slugs = fs.readdirSync('src/data/lists').filter((f) => f.endsWith('.json')).map((f) => f.replace(/\.json$/, ''));
-const listPages = [...slugs.map((s) => [s, `/lists/${s}/`]), ['suggested-marathi', '/books/?list=suggested-marathi'], ['suggested-hindi', '/books/?list=suggested-hindi']];
+const listPages = [...slugs.map((s) => [s, `/lists/${s}/`])];
 const seenLinks = new Map(), seenCovers = new Map();
 for (const [slug, path] of listPages) {
   const html = await get(BASE + path).then((r) => r.text()).catch(() => '');

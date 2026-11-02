@@ -11,7 +11,7 @@ import FrontRows from '../../components/title/FrontRows.astro';
 import { bookRows, markRows } from '../../lib/catalog/rows';
 import { browseBooks, authorFilter, BOOK_LANGUAGES, bookLanguageName } from '../../lib/catalog/books';
 import ListGrid from '../../components/title/ListGrid.astro';
-import { listsOfKind, pickList, listDecades, listBrowseHref, suggestedLists, fillCovers, type CatalogList } from '../../lib/lists';
+import { listsOfKind, pickList, listDecades, listBrowseHref, fillCovers, type CatalogList } from '../../lib/lists';
 import { shopLists, SHOP_LISTS } from '../../lib/catalog/shopbooks';
 import { slug as slugOf } from '../../lib/catalog/fetch';
 import { shownYear } from '../../lib/catalog/known-years';
@@ -44,13 +44,13 @@ if (oldShop) return Astro.redirect(`/books/?language=${oldShop[1][2]}`, 301);
 // a prize or classics list chosen in the filter bar shows in place; the other filters don't apply to it (Decade does)
 const front = [...q.keys()].length === 0;
 const sb = Astro.locals.supabase;
-const listsP = Promise.all([suggestedLists(sb), shopLists(sb)]).then(([s, sh]) => ({ s, sh })).catch(() => ({ s: [] as CatalogList[], sh: [] as CatalogList[] }));
-const suggestedP = listsP.then(({ s, sh }) => [...sh, ...s]);
+const listsP = shopLists(sb).then((sh) => ({ sh })).catch(() => ({ sh: [] as CatalogList[] }));
+const shopP = listsP.then(({ sh }) => sh);
 // the rows are started now and waited for further down the page (FrontRows), so the top of the page is sent first
-const rowsP = front ? bookRows(suggestedP, sb).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
-const { s: suggested, sh: shopAll } = await listsP;
-const bookLists = [...listsOfKind('book'), ...suggested];
-const pickedRaw = pickList(q.get('list'), 'book') ?? suggested.find((l) => l.slug === q.get('list'));
+const rowsP = front ? bookRows(shopP, sb).then((r) => markRows(sb, Astro.locals.me, r)).catch(() => []) : null;
+const { sh: shopAll } = await listsP;
+const bookLists = listsOfKind('book');
+const pickedRaw = pickList(q.get('list'), 'book');
 const picked = pickedRaw ? await fillCovers(sb, pickedRaw) : undefined;
 // a filter value we don't know (a language or list that isn't there) is said so, instead of showing everything under a wrong heading
 const said = (v: string) => `“${v.slice(0, 40)}”`;
@@ -104,7 +104,7 @@ const listNames = ['subject', 'language', 'decade', 'year', 'author', 'sort'];
 const resets = picked ? ['list', 'author'] : ['author']; // changing any other filter leaves the list, and the author belongs to the list it was chosen in
 
 // the authors of the books in the current list, shown only where the whole list is known: the shops' books and the prize, classics and
-// suggested lists. An Open Library grid has no full author list (Open Library can't count authors for a search), so it has no Author part.
+// lists. An Open Library grid has no full author list (Open Library can't count authors for a search), so it has no Author part.
 const byName = (a: [string, string], b: [string, string]) => a[1].localeCompare(b[1]);
 const authorOptions: [string, string][] = picked || shopFull
   ? [...new Set(((picked ?? shopFull)!.items).map((i) => i.creator).filter(Boolean) as string[])].map((n): [string, string] => [n, n]).sort(byName)
