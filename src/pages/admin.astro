@@ -8,7 +8,7 @@ const me = Astro.locals.me;
 if (!me?.is_admin) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 const show = Astro.url.searchParams.get('show') === 'all' ? 'all' : 'open';
 const db = adminClient();
-let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug)), comment:review_comments(id, body, author:profiles(username), log:logs(title:titles(title, slug), owner:profiles!logs_user_id_fkey(username)))').order('created_at', { ascending: false }).limit(100);
+let q = db.from('reports').select('id, reason, details, status, created_at, reporter:profiles!reports_reporter_fkey(username), target:profiles!reports_target_user_fkey(id, username, display_name, avatar_url, featured, is_private), log:logs(id, notes, only_me, title:titles(title, slug)), comment:review_comments(id, body, author:profiles(username), log:logs(title:titles(title, slug), owner:profiles!logs_user_id_fkey(username)))').order('created_at', { ascending: false }).limit(100);
 if (show === 'open') q = q.eq('status', 'open');
 const { data: reports, error } = await q;
 const find = (Astro.url.searchParams.get('shop') ?? '').trim().slice(0, 60).replace(/[%_\,()]/g, ' ').trim();
@@ -43,6 +43,7 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
             {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'dismiss' })}>Dismiss</button>}
             {r.comment && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'delete_comment' })}>Delete the comment</button>}
             {r.log && !r.log.only_me && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'hide_entry' })}>Hide the entry</button>}
+            {r.target?.avatar_url && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'remove_photo' })}>Remove their photo</button>}
             {r.target?.featured && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'unfeature' })}>Stop featuring them</button>}
             {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'done' })}>Mark as dealt with</button>}
           </div>

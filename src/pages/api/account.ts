@@ -2,6 +2,7 @@
 import type { APIRoute } from 'astro';
 import { json, oops, body, needMe, sameOrigin } from '../../lib/http';
 import { adminClient } from '../../lib/supabase';
+import { removeAllUploaded } from '../../lib/avatar';
 export const prerender = false;
 
 export const DELETE: APIRoute = async (ctx) => {
@@ -11,6 +12,7 @@ export const DELETE: APIRoute = async (ctx) => {
   const b = await body<{ confirm?: string }>(ctx.request);
   if ((b?.confirm ?? '').toLowerCase() !== me.username) return oops('Type your username exactly to confirm.');
   // removing the sign-in removes everything that hangs off it (profile, shelf, reviews, comments, likes, lines, collections, blocks)
+  await removeAllUploaded(adminClient(), me.id);   // the uploaded photo's folder goes too
   const { error } = await adminClient().auth.admin.deleteUser(me.id);
   if (error) return oops('Couldn’t delete the account just now. Please try again.', 500);
   await ctx.locals.supabase.auth.signOut().catch(() => { /* best-effort */ });

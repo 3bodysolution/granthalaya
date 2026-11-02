@@ -63,7 +63,10 @@ create table public.profiles (
   constraint featured_needs_public check (not (is_private and featured)),       -- a private shelf can't be featured
   constraint username_format check (username ~ '^[a-z0-9_]{3,20}$'),
   constraint display_name_length check (char_length(display_name) <= 60),
-  constraint avatar_url_ok check (avatar_url is null or (avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$' and char_length(avatar_url) <= 600))   -- Google's photo host only
+  constraint avatar_url_ok check (avatar_url is null or (char_length(avatar_url) <= 600 and (   -- Google's photo host, or a file in the member's OWN folder of the avatars bucket (015)
+    avatar_url ~ '^https://lh3\.googleusercontent\.com/[A-Za-z0-9_./=+%-]+$'
+    or avatar_url ~ ('^https://[a-z0-9]{15,30}\.supabase\.co/storage/v1/object/public/avatars/' || id::text || '/[A-Za-z0-9_-]{8,64}\.webp$')
+  )))
 );
 create unique index profiles_username_key on public.profiles (username);
 create index profiles_featured on public.profiles (featured) where featured;
@@ -557,5 +560,28 @@ grant execute on function public.blocked_with(uuid), public.can_see_shelf(uuid),
   to anon, authenticated, service_role;
 revoke all on function public.title_reviews(uuid[], text, int, int) from public;
 grant execute on function public.title_reviews(uuid[], text, int, int) to anon, authenticated, service_role;
+
+-- ——— profile photos people upload (015) ———
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('avatars', 'avatars', true, 1048576, array['image/webp'])
+on conflict (id) do update set public = true, file_size_limit = 1048576, allowed_mime_types = array['image/webp'];
+create policy "avatars: write your own folder" on storage.objects for insert to authenticated
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "avatars: replace your own files" on storage.objects for update to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text)
+  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "avatars: delete your own files" on storage.objects for delete to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+create policy "avatars: see your own files" on storage.objects for select to authenticated
+  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);   -- no public select policy: folders cannot be listed
+
+create table public.avatar_uploads (   -- one row per upload, for the 10 an hour limit; nobody can read or write it from the browser
+  user_id uuid not null references public.profiles (id) on delete cascade,
+  at timestamptz not null default now()
+);
+create index avatar_uploads_user on public.avatar_uploads (user_id, at desc);
+alter table public.avatar_uploads enable row level security;
+revoke all on public.avatar_uploads from anon, authenticated;
+grant select, insert, delete on public.avatar_uploads to service_role;
 
 commit;

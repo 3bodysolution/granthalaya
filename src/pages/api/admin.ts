@@ -1,6 +1,7 @@
 // Acting on a report, hiding a bookshop's book or cover (admins only).
 import type { APIRoute } from 'astro';
 import { json, oops, body, sameOrigin } from '../../lib/http';
+import { removeAllUploaded } from '../../lib/avatar';
 import { adminClient } from '../../lib/supabase';
 export const prerender = false;
 
@@ -33,6 +34,10 @@ export const POST: APIRoute = async (ctx) => {
     // the report goes with the comment (on delete cascade)
     const { error } = await db.from('review_comments').delete().eq('id', r.target_comment);
     if (error) return oops('Couldn’t delete that comment.', 500);
+  } else if (b.action === 'remove_photo' && r.target_user) {
+    // their photo goes (the file too); they can choose another
+    await db.from('profiles').update({ avatar_url: null }).eq('id', r.target_user);
+    await removeAllUploaded(db, r.target_user);
   } else if (b.action === 'unfeature' && r.target_user) {
     await db.from('profiles').update({ featured: false }).eq('id', r.target_user);
     await db.from('reports').update({ status: 'actioned' }).eq('id', r.id);

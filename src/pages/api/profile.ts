@@ -2,7 +2,7 @@
 import type { APIRoute } from 'astro';
 import { json, oops, body, str, needMe, sameOrigin } from '../../lib/http';
 import { dbMessage, adminClient } from '../../lib/supabase';
-import { trustedGooglePhoto } from '../../lib/avatar';
+import { trustedGooglePhoto, removeUploaded } from '../../lib/avatar';
 import { usernameStatus } from '../../lib/usernames';
 import { LINKS } from '../../lib/kinds';
 export const prerender = false;
@@ -64,8 +64,10 @@ export const POST: APIRoute = async (ctx) => {
     const url = b.photo === 'google' ? await trustedGooglePhoto(sb) : null;
     if (b.photo === 'google' && !url) return oops('We couldn’t find a Google photo for your account.');
     // people can't write this column themselves (the address is checked here, from their Google sign-in)
-    const { error } = await adminClient().from('profiles').update({ avatar_url: url }).eq('id', me.id);
+    const db = adminClient();
+    const { error } = await db.from('profiles').update({ avatar_url: url }).eq('id', me.id);
     if (error) return oops(dbMessage(error));
+    await removeUploaded(db, me.avatar_url, me.id);   // a photo they uploaded earlier is deleted when it is replaced or removed
     return json({ ok: true });
   }
 

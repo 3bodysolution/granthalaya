@@ -4,6 +4,7 @@ import Face from '../components/Face.astro';
 import Cover from '../components/Cover.astro';
 import { LINKS } from '../lib/kinds';
 import { adminClient } from '../lib/supabase';
+import { avatarsReady, ownAvatarPath } from '../lib/avatar';
 import { loadShelf, fullTitle, type Details, type Entry } from '../lib/data';
 export const prerender = false;
 
@@ -26,6 +27,12 @@ try {
   }
 } catch (e) { console.error('Settings: the blocked list could not be loaded', e); }
 const googlePhoto = Astro.locals.user?.avatar ?? null;
+// uploading needs the avatars bucket (015); until it exists the button says coming soon
+let canUpload = false;
+try { canUpload = await avatarsReady(adminClient()); } catch { /* not ready */ }
+const photoHint = !me.avatar_url ? 'No photo: your first letter shows instead.'
+  : googlePhoto && googlePhoto === me.avatar_url ? 'From your Google account.'
+  : ownAvatarPath(me.avatar_url, me.id) ? 'A photo you uploaded.' : 'Your photo.';
 const nextChange = me.username_changed_at ? new Date(new Date(me.username_changed_at).getTime() + 30 * 86400000) : null;
 const canRename = !nextChange || nextChange < new Date();
 
@@ -53,17 +60,36 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
         <div class="panel" role="tabpanel" id="profile" aria-labelledby="tab-profile">
           <form class="sec" data-save="profile">
             <div class="head"><h2>Profile</h2><p>How you appear to others.</p></div>
-            <div class="photo">
+            <div class="photo" id="photo-zone" data-can-upload={canUpload ? '1' : '0'}>
               <Face name={me.display_name || me.username} src={me.avatar_url} size={64} />
               <div class="stack" style="gap: 6px">
                 <span class="lbl">Photo</span>
-                <span class="hint">{me.avatar_url ? (googlePhoto && googlePhoto === me.avatar_url ? 'From your Google account.' : 'Your photo.') : 'No photo: your first letter shows instead.'}</span>
-                <div class="flex gap-2">
-                  {me.avatar_url && <button type="button" class="gchip" data-photo="none">Remove photo</button>}
+                <span class="hint">{photoHint}</span>
+                <div class="flex gap-2 wrapchips">
+                  {canUpload
+                    ? <button type="button" class="gchip" id="photo-pick">Upload a photo</button>
+                    : <button type="button" class="gchip" disabled title="Coming soon">Upload a photo (coming soon)</button>}
                   {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" class="gchip" data-photo="google">Use my Google photo</button>}
+                  {me.avatar_url && <button type="button" class="gchip" data-photo="none">Remove photo</button>}
                 </div>
+                {canUpload && <span class="hint drop">On a computer you can also drop a photo here. JPEG, PNG or WebP, up to 5 MB.</span>}
+                <span class="hint photo-err" id="photo-err" role="alert" hidden></span>
+                <input type="file" id="photo-file" accept="image/*" hidden />
               </div>
             </div>
+            <dialog class="crop" id="crop" aria-labelledby="crop-t">
+              <h3 id="crop-t">Position your photo</h3>
+              <div class="cropbox" id="cropbox" tabindex="0" role="application" aria-label="Photo position. Drag to move it, or use the arrow keys. Plus and minus zoom in and out.">
+                <canvas id="cropcv" width="280" height="280"></canvas>
+                <span class="cropring" aria-hidden="true"></span>
+              </div>
+              <label class="zoom"><span>Zoom</span><input type="range" id="cropzoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom" /></label>
+              <p class="hint photo-err" id="crop-err" role="alert" hidden></p>
+              <div class="flex gap-2 cropfoot">
+                <button type="button" class="btn" id="crop-cancel">Cancel</button>
+                <button type="button" class="btn primary" id="crop-save">Save photo</button>
+              </div>
+            </dialog>
             <div class="two">
               <label class="fld"><span class="lbl">Name</span><input class="field" name="display_name" value={me.display_name} maxlength="60" required /></label>
               <label class="fld">
@@ -196,6 +222,24 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
   .fld { display: flex; flex-direction: column; gap: 8px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .photo { display: flex; align-items: center; gap: 16px; }
+  .wrapchips { flex-wrap: wrap; }
+  .photo.over { outline: 2px dashed var(--lat); outline-offset: 8px; border-radius: 12px; }
+  .photo-err { color: #B4473B; font-weight: 600; }
+  .hint.drop { display: none; }
+  @media (hover: hover) and (min-width: 781px) { .hint.drop { display: block; } }
+  .crop { width: min(92vw, 360px); padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--ink); }
+  .crop::backdrop { background: var(--scrim); }
+  .crop[open] { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+  .crop h3 { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-weight: 500; font-size: 20px; align-self: flex-start; }
+  .cropbox { position: relative; width: 280px; height: 280px; max-width: 100%; border-radius: 12px; overflow: hidden; cursor: grab; touch-action: none; background: var(--soft); outline-offset: 3px; }
+  .cropbox:active { cursor: grabbing; }
+  .cropbox canvas { display: block; width: 100%; height: 100%; }
+  /* a circle shows what will be kept; the rest is dimmed */
+  .cropring { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at center, transparent 0 138px, rgba(0, 0, 0, .55) 139px); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); }
+  .zoom { display: flex; align-items: center; gap: 12px; width: 100%; font-size: 13px; font-weight: 600; color: var(--muted); }
+  .zoom input { flex: 1; accent-color: var(--lat); min-height: 40px; }
+  .cropfoot { align-self: flex-end; }
+  .crop .photo-err { margin: 0; align-self: flex-start; }
   .uwrap { position: relative; display: block; }
   .at { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
   .u { padding-left: 30px; padding-right: 110px; }
@@ -336,6 +380,107 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       const r = await post({ section: 'photo', photo: b.dataset.photo });
       if (r.ok) navigate(location.pathname + location.hash, { history: 'replace' }); else busy(b, false);
     }));
+    // ——— upload a photo: pick or drop, move and zoom inside a circle, save (the server checks and re-draws it) ———
+    const zone = document.getElementById('photo-zone')!;
+    const perr = document.getElementById('photo-err')!;
+    const say = (el: HTMLElement, m: string) => { el.textContent = m; el.hidden = !m; };
+    const dlg = document.getElementById('crop') as HTMLDialogElement;
+    const box = document.getElementById('cropbox')!;
+    const cv = document.getElementById('cropcv') as HTMLCanvasElement;
+    const zoomEl = document.getElementById('cropzoom') as HTMLInputElement;
+    const cerr = document.getElementById('crop-err')!;
+    const saveBtn = document.getElementById('crop-save') as HTMLButtonElement;
+    const BOX = 280;
+    let img: HTMLImageElement | null = null;
+    let zoom = 1, ox = 0, oy = 0;          // ox, oy: how far the picture's centre is from the box's centre, in box pixels
+    const cover = () => (img ? BOX / Math.min(img.naturalWidth, img.naturalHeight) : 1);
+    const clamp = () => {
+      if (!img) return;
+      const k = cover() * zoom;
+      const mx = Math.max(0, (img.naturalWidth * k - BOX) / 2), my = Math.max(0, (img.naturalHeight * k - BOX) / 2);
+      ox = Math.min(mx, Math.max(-mx, ox)); oy = Math.min(my, Math.max(-my, oy));
+    };
+    const paint = () => {
+      if (!img) return;
+      clamp();
+      const k = cover() * zoom, w = img.naturalWidth * k, h = img.naturalHeight * k;
+      const c = cv.getContext('2d')!;
+      c.clearRect(0, 0, BOX, BOX);
+      c.drawImage(img, BOX / 2 - w / 2 + ox, BOX / 2 - h / 2 + oy, w, h);
+    };
+    const setZoom = (z: number) => { zoom = Math.min(4, Math.max(1, z)); zoomEl.value = String(zoom); paint(); };
+
+    async function choose(file: File | undefined | null) {
+      say(perr, '');
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { say(perr, 'That photo is too big. Please choose one under 5 MB.'); return; }
+      if (file.type && !file.type.startsWith('image/')) { say(perr, 'That doesn’t look like a photo. Please choose a JPEG, PNG or WebP picture.'); return; }
+      const url = URL.createObjectURL(file);
+      const im = new Image();
+      try { im.src = url; await im.decode(); } catch { URL.revokeObjectURL(url); say(perr, 'That doesn’t look like a photo this browser can show. Please choose a JPEG, PNG or WebP picture.'); return; }
+      URL.revokeObjectURL(url);
+      img = im; zoom = 1; ox = 0; oy = 0; zoomEl.value = '1'; say(cerr, '');
+      dlg.showModal(); paint(); box.focus();
+    }
+    document.getElementById('photo-pick')?.addEventListener('click', () => (document.getElementById('photo-file') as HTMLInputElement).click());
+    document.getElementById('photo-file')?.addEventListener('change', (ev) => {
+      const input = ev.target as HTMLInputElement;
+      void choose(input.files?.[0]); input.value = '';
+    });
+    if (zone.dataset.canUpload === '1') {
+      zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('over'); });
+      zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+      zone.addEventListener('drop', (ev) => { ev.preventDefault(); zone.classList.remove('over'); void choose(ev.dataTransfer?.files?.[0]); });
+    }
+    // move: drag with a mouse or a finger; two fingers pinch to zoom
+    const down = new Map<number, { x: number; y: number }>();
+    let pinch = 0;
+    box.addEventListener('pointerdown', (ev) => { box.setPointerCapture(ev.pointerId); down.set(ev.pointerId, { x: ev.clientX, y: ev.clientY }); pinch = 0; });
+    box.addEventListener('pointermove', (ev) => {
+      const p = down.get(ev.pointerId);
+      if (!p) return;
+      if (down.size === 2) {
+        down.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+        const [a, b] = [...down.values()];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (pinch) setZoom(zoom * (d / pinch));
+        pinch = d;
+        return;
+      }
+      ox += ev.clientX - p.x; oy += ev.clientY - p.y;
+      down.set(ev.pointerId, { x: ev.clientX, y: ev.clientY });
+      paint();
+    });
+    const up = (ev: PointerEvent) => { down.delete(ev.pointerId); pinch = 0; };
+    box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+    box.addEventListener('wheel', (ev) => { ev.preventDefault(); setZoom(zoom * (ev.deltaY < 0 ? 1.06 : 1 / 1.06)); }, { passive: false });
+    box.addEventListener('keydown', (ev) => {
+      const step = ev.shiftKey ? 40 : 10;
+      const m: Record<string, () => void> = {
+        ArrowLeft: () => (ox += step), ArrowRight: () => (ox -= step), ArrowUp: () => (oy += step), ArrowDown: () => (oy -= step),
+        '+': () => setZoom(zoom + 0.1), '=': () => setZoom(zoom + 0.1), '-': () => setZoom(zoom - 0.1),
+      };
+      if (m[ev.key]) { ev.preventDefault(); m[ev.key](); paint(); }
+    });
+    zoomEl.addEventListener('input', () => setZoom(Number(zoomEl.value)));
+    document.getElementById('crop-cancel')!.addEventListener('click', () => { dlg.close(); img = null; });
+    saveBtn.addEventListener('click', async () => {
+      if (!img) return;
+      say(cerr, '');
+      // what the circle shows, drawn again at 800 pixels square (the server makes the final 512 itself)
+      const OUT = 800, f = OUT / BOX, k = cover() * zoom * f;
+      const out = document.createElement('canvas'); out.width = OUT; out.height = OUT;
+      out.getContext('2d')!.drawImage(img, OUT / 2 - (img.naturalWidth * k) / 2 + ox * f, OUT / 2 - (img.naturalHeight * k) / 2 + oy * f, img.naturalWidth * k, img.naturalHeight * k);
+      const blob: Blob | null = await new Promise((res) => out.toBlob(res, 'image/webp', 0.9));
+      if (!blob) { say(cerr, 'The upload didn’t work. Please try again.'); return; }
+      busy(saveBtn, true);
+      const fd = new FormData(); fd.append('photo', blob, 'photo.' + (blob.type === 'image/png' ? 'png' : 'webp'));
+      const r = await fetch('/api/avatar', { method: 'POST', body: fd }).then((x) => x.json()).catch(() => ({ error: 'The upload didn’t work. Check your connection and try again.' }));
+      busy(saveBtn, false);
+      if (r.error || !r.ok) { say(cerr, r.error || 'The upload didn’t work. Please try again.'); return; }
+      dlg.close(); img = null;
+      navigate(location.pathname + location.hash, { history: 'replace' });
+    });
 
     // privacy switches save straight away
     const flagErr = document.getElementById('flagerr')!;
