@@ -8,18 +8,15 @@ import Mark from './ui/Mark.astro';
 import { ROWS, PER_ROW, type Wall } from '../lib/catalog/wall';
 interface Props { mine?: boolean; wall: Promise<Wall> }
 const { mine = false, wall } = Astro.props;
-// On a phone the words are either above the wall (the default, it reads better) or on a stronger fade over it: add ?wall=fade to look at that one.
 const me = !!Astro.locals.me;
-const phone = Astro.url.searchParams.get('wall') === 'fade' ? 'fade' : 'above';
 // 4 rows of the same length, every tile used once (fewer when the pick is short); nothing when it could not be made
 const rowsOf = (w: Wall) => {
   const per = Math.min(PER_ROW, Math.floor(w.tiles.length / ROWS));
   return per ? Array.from({ length: ROWS }, (_, r) => w.tiles.slice(r * per, (r + 1) * per)) : [];
 };
 ---
-<section class:list={['hero bleed', { mine }]} data-wall data-phone={phone} data-me={me ? '' : undefined}>
+<section class:list={['hero bleed', { mine }]} data-wall data-me={me ? '' : undefined}>
   <div class="stage">
-    <div class="veil" aria-hidden="true"></div>
     <div class="pad words">
       <slot />
     </div>
@@ -54,9 +51,19 @@ const rowsOf = (w: Wall) => {
 </section>
 <style>
   /* tile size follows the width of the window; a poster is 2 by 3. --n is how many tiles one turn of a strip holds (a strip is at least as wide as the window) */
-  .hero { --tw: clamp(84px, 6.4vw, 104px); --th: calc(var(--tw) * 1.5); --gap: 6px; --rows: 4; --n: 24; --dist: calc(var(--n) * (var(--tw) + var(--gap))); --wallh: calc(var(--rows) * var(--th) + (var(--rows) - 1) * var(--gap)); }
-  .stage { position: relative; overflow: hidden; min-height: var(--wallh); display: flex; align-items: center; }
-  .wall { position: absolute; inset: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--gap); }
+  .hero { --wordsw: 560px; --tw: clamp(84px, 6.4vw, 104px); --th: calc(var(--tw) * 1.5); --gap: 6px; --rows: 4; --n: 24; --dist: calc(var(--n) * (var(--tw) + var(--gap))); --wallh: calc(var(--rows) * var(--th) + (var(--rows) - 1) * var(--gap)); }
+  .stage { position: relative; overflow: hidden; min-height: calc(var(--wallh) + var(--hh)); padding-top: var(--hh); box-sizing: border-box; display: flex; align-items: center; }
+  /* The wall is never covered by a flat colour. It fades itself out with a mask, towards the words (left), at the bottom, and a little at the very top
+     under the bar, so the real page behind it (the paper, or the dark page) shows through everywhere and there is no edge to see.
+     --edge is where the words end; the wall starts to appear there and is whole a little further along. */
+  .wall { position: absolute; inset: 0; overflow: hidden; display: flex; flex-direction: column; gap: var(--gap);
+    --edge: calc(max(0px, (100vw - var(--max)) / 2) + var(--gut) + var(--wordsw));
+    -webkit-mask-image: linear-gradient(90deg, transparent calc(var(--edge) - 40px), rgba(0, 0, 0, .12) calc(var(--edge) + 20px), rgba(0, 0, 0, .55) calc(var(--edge) + 150px), #000 calc(var(--edge) + 330px)),
+      linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .26) 38px, #000 calc(var(--hh) + 56px), #000 calc(100% - 120px), transparent 100%);
+    -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(90deg, transparent calc(var(--edge) - 40px), rgba(0, 0, 0, .12) calc(var(--edge) + 20px), rgba(0, 0, 0, .55) calc(var(--edge) + 150px), #000 calc(var(--edge) + 330px)),
+      linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .26) 38px, #000 calc(var(--hh) + 56px), #000 calc(100% - 120px), transparent 100%);
+            mask-composite: intersect; }
   .wr { flex: none; }
   /* bricks: every other row is moved along by half a tile */
   .wr:nth-child(even) { margin-left: calc((var(--tw) + var(--gap)) / 2); }
@@ -100,9 +107,6 @@ const rowsOf = (w: Wall) => {
     .set + .set { display: none; }
   }
 
-  /* the page's own colour over the left of the wall, so the words are easy to read (dark in dark mode, light in light mode) */
-  .veil { position: absolute; inset: 0; z-index: 1; pointer-events: none;
-    background: linear-gradient(90deg, var(--bg) 0, color-mix(in srgb, var(--bg) 94%, transparent) 40%, color-mix(in srgb, var(--bg) 70%, transparent) 54%, color-mix(in srgb, var(--bg) 22%, transparent) 70%, transparent 86%); }
   .words { position: relative; z-index: 2; pointer-events: none; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; text-align: left; padding-top: 40px; padding-bottom: 40px; }
   .words > :global(*) { max-width: min(560px, 100%); pointer-events: auto; }
   .words :global(.title) { color: var(--ink); }
@@ -118,18 +122,13 @@ const rowsOf = (w: Wall) => {
     .wr { --dur: 42s; }
     .wr:nth-child(2) { --dur: 46s; }
     .wr:nth-child(3) { --dur: 39s; }
-    .stage { display: flex; flex-direction: column; align-items: stretch; min-height: 0; }
+    .stage { display: flex; flex-direction: column; align-items: stretch; min-height: 0; padding-top: 0; }
     .words { padding-top: 28px; padding-bottom: 24px; }
     .words :global(.cta) { max-width: none; }
-    .wall { position: relative; inset: auto; order: 1; height: var(--wallh); }
-    .veil { display: none; }
-    /* light mode: the paper painting behind the page is stretched tall on a phone and looks blotchy under the words, so the top of the page is the plain page colour, fading into the paper at the bottom */
-    :global(html[data-theme="light"]) .hero[data-phone="above"] { background: linear-gradient(180deg, var(--bg) calc(100% - 36px), transparent); }
-    /* the other choice: the words over the top of the wall, on a fade that is strongest at the top */
-    .hero[data-phone="fade"] .stage { flex-direction: row; align-items: flex-start; min-height: calc(var(--wallh) + 170px); }
-    .hero[data-phone="fade"] .wall { position: absolute; inset: auto 0 0 0; }
-    .hero[data-phone="fade"] .veil { display: block; background: linear-gradient(180deg, var(--bg) 0, color-mix(in srgb, var(--bg) 94%, transparent) 62%, color-mix(in srgb, var(--bg) 45%, transparent) 100%); }
-    .hero[data-phone="fade"] .words { padding-bottom: 0; }
+    /* the wall sits under the words here, so it fades at its top (towards the words) and its bottom instead of at its left */
+    .wall { position: relative; inset: auto; order: 1; height: var(--wallh);
+      -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 56px, #000 calc(100% - 64px), transparent 100%);
+              mask-image: linear-gradient(180deg, transparent 0, #000 56px, #000 calc(100% - 64px), transparent 100%); }
   }
 </style>
 

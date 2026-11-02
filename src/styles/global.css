@@ -105,6 +105,8 @@ body:has(main > .still:not(.gone)) .site-wrap::before { content: ""; position: a
 body:has(main > .still:not(.gone)) :is(.brand, .actions) { --bg:#15171B; --card:rgba(31,34,39,.72); --ink:#ECE5D6; --muted:#C9C2B5; --line:rgba(236,229,214,.22); --soft:#24272D; --lat:#6CC9BF; color: #ECE5D6; }
 body:has(main > .still:not(.gone)) .menu-list { --card:#1F2227; }
 @media (min-width: 781px) { body:has(main > .still:not(.gone)) .nav { --ink:#ECE5D6; --lat:#6CC9BF; color: #ECE5D6; } }
+/* the home page: the wall of covers runs up behind a see-through header (a computer only; on a phone the wall sits under the words) */
+@media (min-width: 781px) { body:has(main > .hero[data-wall]) .site-wrap { position: absolute; top: 0; left: 0; right: 0; z-index: 20; } }
 .brand { display: flex; align-items: center; gap: 10px; justify-self: start; }
 .brand span { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 24px; font-weight: 600; letter-spacing: -.01em; }
 .nav { display: flex; gap: 32px; font-size: 13px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
