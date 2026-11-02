@@ -4,9 +4,9 @@
 :root { --spring: cubic-bezier(.2,.8,.2,1); --gut: 56px; --max: 1280px; --ink-faint: color-mix(in srgb, var(--lat) 22%, transparent); }
 
 html[data-theme="light"] {
-  --bg:#F8ECD6; --card:#FFFBF3; --ink:#1F1C18; --muted:#4F4942; --line:#E3D3BA; --soft:#EFE1CA;
-  --lat:#0F6A66; --book:#6B4527; --moss:#46702F; --sky:#285F8A; --haldi:#B8780A;
-  --shadow:rgba(120,70,30,.22); --scrim:rgba(31,28,24,.38);
+  --bg:#F7ECDC; --card:#FCF5E8; --ink:#1F1C18; --muted:#4A443D; --line:#DCC9AC; --soft:#EFE0C9;
+  --lat:#0C615D; --book:#6B4527; --moss:#46702F; --sky:#234F76; --haldi:#B8780A;
+  --shadow:rgba(108,62,24,.26); --scrim:rgba(31,28,24,.38);
   color-scheme: light;
 }
 html[data-theme="dark"] {
@@ -24,7 +24,8 @@ body {
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
 html[data-theme="light"] body { background: transparent; }
-html[data-theme="light"] body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: url(/img/paper-light.webp) center / cover no-repeat; pointer-events: none; }
+/* light mode paper, fixed behind the page: a watercolour-paper tooth (a small seamless tile, repeated at its own size) over soft watercolour washes (centred, covering the screen) over the paper colour */
+html[data-theme="light"] body::before { content: ""; position: fixed; inset: 0; z-index: -1; background: url(/img/paper-tooth.webp) 0 0 / 384px 384px repeat, url(/img/paper-wash-light.webp) center / cover no-repeat, #F7ECDC; pointer-events: none; }
 html[data-theme="dark"] body  { background: #15171B url(/img/grain-dark.webp) repeat; }
 body { overflow-x: clip; }
 main { flex: 1 0 auto; width: 100%; max-width: var(--max); margin: 0 auto; }

@@ -78,7 +78,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         if (t !== 'light' && t !== 'dark') t = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
         document.documentElement.dataset.theme = t;
         var m = document.querySelector('meta[name=theme-color]');
-        if (m) m.setAttribute('content', t === 'light' ? '#F8ECD6' : '#15171B');
+        if (m) m.setAttribute('content', t === 'light' ? '#F7ECDC' : '#15171B');
       }
       apply();
       document.addEventListener('astro:after-swap', apply);
