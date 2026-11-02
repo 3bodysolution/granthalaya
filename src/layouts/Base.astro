@@ -731,11 +731,14 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         ...(r.authors ?? []).map((a: any) => row(a.href, thumb(undefined, true), a.name, `Author${a.works ? ` | ${a.works} works` : ''}`, '', q)),
       ];
       const members = (r.members ?? []).map((m: any) => row(m.href, thumb(m.avatar, true), m.name, `@${m.username}`, '', q));
+      // our own records closest to a misspelt name: "Did you mean" (first when nothing else was found)
+      const near = (r.near ?? []).map((n: any) => row(n.href, thumb(n.cover, n.kind === 'member'), n.title, [n.sub, n.kind === 'film' ? 'Film' : n.kind === 'tv' ? 'TV' : ''].filter(Boolean).join(' | '), '', ''));
+      const nearGroup = group('Did you mean…', near);
       // films and TV that couldn't be reached are said so (an empty group would look like "nothing found")
       const filmsGroup = r.failed && !titles.length ? '<li class="search-empty small">Films and TV couldn’t be reached just now. Try again in a moment.</li>' : group('Films and TV', titles);
       // a member whose username is exactly what was typed comes first
       const memGroup = group('On Granthalaya', members);
-      const html = group('On your shelf', local) + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('People', people) + (r.exactMember ? '' : memGroup);
+      const html = group('On your shelf', local) + nearGroup + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('People', people) + (r.exactMember ? '' : memGroup);
       paint(html || `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`);
     }
     function move(d: number) {

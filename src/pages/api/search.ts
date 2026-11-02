@@ -7,6 +7,8 @@ import { loadProfile, loadShelf, href, palette, radius, kind, fullTitle, coverSr
 import { searchAll } from '../../lib/catalog/tmdb';
 import { searchBooks, type BookCard } from '../../lib/catalog/books';
 import { searchShopBooks } from '../../lib/catalog/shopbooks';
+import { norm, similarity } from '../../lib/fuzzy';
+import { nearest, visibleMembers } from '../../lib/catalog/localindex';
 export const prerender = false;
 type Member = { username: string; display_name: string | null; avatar_url: string | null };
 
@@ -17,13 +19,15 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const like = text.replace(/[%_\\,()]/g, ' ').trim();
     // a member's username can hold an underscore, which in a pattern means "any letter" unless it is escaped
     const likeUser = text.replace(/[%\\,()]/g, ' ').trim().replace(/_/g, '\\_');
-    const [tm, bk, own, mem] = await Promise.all([
+    const [tm, bk, own, mem, close] = await Promise.all([
       searchAll(text).catch(() => ({ titles: [], people: [], failed: true as boolean | undefined })),
       searchBooks(text).catch(() => ({ books: [], authors: [] })),
       searchShopBooks(locals.supabase, like).catch(() => [] as BookCard[]),
       locals.supabase && like
         ? locals.supabase.from('profiles').select('username, display_name, avatar_url').or(`username.ilike.%${likeUser}%,display_name.ilike.%${like}%`).limit(4)
         : Promise.resolve({ data: [] as Member[] }),
+      // the closest of our own titles and members, however it was spelt (kept in memory, so no database call most of the time)
+      nearest(text).catch(() => ({ titles: [], members: [] })),
     ]);
     // a member whose username is exactly what was typed comes first
     const exact = (m: Member) => m.username.toLowerCase() === text.toLowerCase();
@@ -31,7 +35,20 @@ export const GET: APIRoute = async ({ locals, url }) => {
     // books from the two shops come first (Open Library has few in Marathi and Hindi); a book we already listed is not repeated
     const had = new Set(own.map((b) => b.key));
     const books = [...own, ...bk.books.filter((b) => !had.has(b.key))].slice(0, 8);
-    return new Response(JSON.stringify({ ...tm, ...bk, books, members, exactMember: ((mem.data ?? []) as Member[]).some(exact) }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
+    // "Did you mean": our own records closest to what was typed. Shown when nothing else was found, or when one is a very close match that the other results missed.
+    const shown = new Set<string>([...tm.titles.map((t: { href: string }) => t.href), ...books.map((b) => b.href), ...(tm.people ?? []).map((p: { href: string }) => p.href), ...bk.authors.map((a: { href: string }) => a.href)]);
+    // the same name already among the results (another record of it, or the same one with another address) is not offered again
+    const shownTitles = [...tm.titles.map((t: { title: string }) => ({ n: norm(t.title), by: '' })), ...books.map((b) => ({ n: norm(b.title), by: b.author ?? '' }))];
+    const already = (t: { title: string; sub: string }) => shownTitles.some((x) => x.n === norm(t.title) && (!x.by || !t.sub || t.sub.split(' | ').some((p) => similarity(x.by, p) >= 0.6)));
+    const seenMember = new Set(members.map((m) => m.href));
+    const closeMembers = (await visibleMembers(locals.supabase, close.members)).filter((m) => !seenMember.has(m.doc.href));
+    const nearAll = [
+      ...close.titles.filter((t) => !shown.has(t.doc.href) && !already(t.doc)).map((t) => ({ score: t.score, href: t.doc.href, title: t.doc.title, sub: t.doc.sub, cover: t.doc.cover, kind: t.doc.kind })),
+      ...closeMembers.map((m) => ({ score: m.score, href: m.doc.href, title: m.doc.name, sub: `@${m.doc.username}`, cover: m.doc.avatar, kind: 'member' as const })),
+    ].sort((a, b) => b.score - a.score);
+    const nothing = !tm.titles.length && !books.length && !members.length && !(tm.people ?? []).length && !bk.authors.length;
+    const near = nearAll.filter((n, i) => (nothing ? true : n.score >= 0.75 && i < 3)).slice(0, 6).map(({ score, ...n }) => n);
+    return new Response(JSON.stringify({ ...tm, ...bk, books, members, near, exactMember: ((mem.data ?? []) as Member[]).some(exact) }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
   }
   const u = (url.searchParams.get('u') ?? '').toLowerCase();
   if (!locals.supabase || !u) return json([]);
