@@ -139,8 +139,11 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     <Valley line={line} />
     <footer class="foot">
       <div class="foot-in">
-        <span>Made with ❤️ by {site.maker}</span>
+        <div class="foot-row">
+          <span>© {site.name}. Made with ❤️ by {site.maker}.</span>
         <nav aria-label="Footer"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/sponsor/">Sponsor</a>{me ? <a href="/add/">Add something</a> : <a href="/join/" data-astro-prefetch="false">Sign in</a>}</nav>
+        </div>
+        <p class="foot-credits">Film data from <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDB</a>, streaming data from <a href="https://www.justwatch.com" target="_blank" rel="noopener noreferrer">JustWatch</a>, book descriptions from <a href="https://www.wikipedia.org" target="_blank" rel="noopener noreferrer">Wikipedia</a>. Book covers from <a href="https://akshardhara.com" target="_blank" rel="noopener noreferrer">Akshardhara</a> and <a href="https://www.bookganga.com" target="_blank" rel="noopener noreferrer">BookGanga</a>.</p>
       </div>
     </footer>
   </div>

@@ -138,7 +138,6 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
         </section>
       )}
       <Reviews site={site} rows={rows} facts={facts ? { list: facts.trivia, source: facts.trivia_source, label: 'Behind the show' } : undefined} />
-      <p class="pad credit-line">TV data from TMDB. Streaming data from JustWatch.</p>
     </Fragment>
   </TitleLayout>
 </Base>

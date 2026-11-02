@@ -111,7 +111,6 @@ const desc = f.overview ? f.overview.slice(0, 180) : `${f.title}${f.year ? ` (${
 
     <Fragment slot="below">
       <Reviews site={site} rows={rows} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the film' } : undefined} />
-      <p class="pad credit-line">Film data from TMDB. Streaming data from JustWatch.</p>
     </Fragment>
   </TitleLayout>
 </Base>

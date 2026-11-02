@@ -144,7 +144,6 @@ const fields = [
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{bookLists.map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>
       </div>
-      <p class="credit-line">Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.</p>
     </section>
   ) : onShops ? (
     <section class="pad">
@@ -175,7 +174,6 @@ const fields = [
       </div>
     )}
     <Pager page={page} pages={pages} />
-    <p class="credit-line">{shopList ? 'Book data from Open Library.' : 'Book data from Open Library. Some Marathi and Hindi books and covers from Akshardhara and BookGanga, with their permission.'}</p>
   </section>
   )}
 </Base>

@@ -27,9 +27,6 @@ const status = new Map(marked.items.map((t) => [t.href, t]));
     ))}
   </div>
 )}
-{list.slug.startsWith('shop-')
-  ? <p class="credit-line">Covers and details from Akshardhara and BookGanga.</p>
-  : <p class="credit-line">Source: {list.source.url ? <a href={list.source.url} rel="noopener">{list.source.name}</a> : list.source.name}.{list.kind === 'film' ? ' Film data from TMDB.' : usesOpenLibrary ? ' Book data from Open Library.' : ''}{list.kind === 'book' && usesShops ? ' Some covers from Akshardhara and BookGanga, with their permission.' : ''}</p>}
 <style>
   .cell { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .yr { min-height: 1.4em; font-size: 13px; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }

@@ -109,7 +109,6 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
         <div class="bset"><h2 class="eyebrow">By decade</h2><div class="chips">{decadeLinks.map(([h, n]) => <a class="gchip" href={h}>{n}</a>)}</div></div>
         {kind === 'film' && <div class="bset"><h2 class="eyebrow">Prizes and classics</h2><div class="chips">{listsOfKind('film').map((l) => <a class="gchip" href={listBrowseHref(l)}>{l.title}</a>)}<a class="gchip" href="/lists/">All lists</a></div></div>}
       </div>
-      <p class="credit-line">Data from TMDB. Streaming data from JustWatch.</p>
     </section>
   ) : (
   <section class="pad">
@@ -123,7 +122,6 @@ const switchTo = (k: string) => { const u = new URLSearchParams(); if (k === 'tv
         </div>
       )}
     <Pager page={page} pages={list.pages} />
-    <p class="credit-line">Data from TMDB. Streaming data from JustWatch.</p>
   </section>
   )}
 </Base>

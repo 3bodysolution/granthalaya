@@ -39,7 +39,6 @@ const hasPicks = !picked || picked.name === 'Picks';
       ))}
     </section>
   )}
-  {hasPicks && <p class="pad credit-line">Picks were found via <a href={source.url} target="_blank" rel="noopener noreferrer">{source.name}</a>.</p>}
 </Base>
 <style>
   .head { padding-top: 44px; padding-bottom: 28px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px; }

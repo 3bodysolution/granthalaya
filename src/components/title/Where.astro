@@ -16,7 +16,7 @@ const jw = `https://www.justwatch.com/in/search?q=${encodeURIComponent(title)}`;
       <span class="w-logos">{list.slice(0, 6).map((p) => <a href={serviceHref(p.id, title) ?? where!.link ?? jw} target="_blank" rel="noopener" title={p.name} aria-label={`${label} on ${p.name}`}>{p.logo ? <img src={p.logo} alt="" loading="lazy" referrerpolicy="no-referrer" /> : <span class="w-n">{p.name}</span>}</a>)}</span>
     </div>
   )) : <p class="w-none">Not streaming in India right now.</p>}
-  <a class="w-jw" href={where?.link ?? jw} target="_blank" rel="noopener">All services <span aria-hidden="true">↗</span><span class="w-src">JustWatch</span></a>
+  <a class="w-jw" href={where?.link ?? jw} target="_blank" rel="noopener">All services <span aria-hidden="true">↗</span></a>
 </div>
 <style>
   .where { border-radius: 12px; border: 1px solid var(--line); background: var(--card); overflow: hidden; }

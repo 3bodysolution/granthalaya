@@ -71,9 +71,6 @@ const [site, saved, shopData, bits] = await Promise.all([
 if (row && saved && !saved.checked) describeLater(row.id);
 const description = cleanBlurb(saved?.text ?? b.description);   // saved text too: the cleaner may have learnt something since it was saved
 const year = shownYear({ slug: row?.slug, ol: 'ol' in k ? k.ol : undefined }, b.year, saved?.text, saved?.source);   // the first publication, not a later edition's
-const credit = saved?.text && saved.source !== 'openlibrary'
-  ? { adapted: saved.source?.startsWith('ai-'), from: saved.source?.endsWith('wikipedia') ? 'Wikipedia' : 'Open Library', url: saved.url ?? (saved.source?.endsWith('wikipedia') ? undefined : b.sourceLink) }
-  : null;
 // the two bookshops (with their permission): where to buy it, and the credit for a cover or details taken from them
 const SHOP_NAME: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'BookGanga' };
 type ShopRow = { shop: string; url: string; isbn: string | null; publisher: string; pages?: number | null; back_src?: string | null; cover_src?: string | null; cover_hidden?: boolean };
@@ -135,11 +132,6 @@ const reading = pagesShown ? aboutHours(Math.round(pagesShown * siteConfig.minut
       {year && <span><span class="vbar" aria-hidden="true"></span><a href={`/books/?year=${year}`} class="ul">{year}</a></span>}
     </p>
     {paras.length > 0 && <div class="desc">{paras.map((p) => <p>{p}</p>)}</div>}
-    {credit && (
-      <p class="from">
-        {credit.adapted ? 'Adapted from ' : 'From '}{credit.url ? <a href={credit.url} target="_blank" rel="noopener" class="ul">{credit.from}</a> : credit.from}{credit.from === 'Wikipedia' && <>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener license" class="ul">CC BY-SA</a></>}
-      </p>
-    )}
 
     <Fragment slot="more">
       <Tabs id="book" tabs={tabs}>
@@ -169,12 +161,6 @@ const reading = pagesShown ? aboutHours(Math.round(pagesShown * siteConfig.minut
 
     <Fragment slot="below">
       <Reviews site={site} rows={rows} facts={row ? { list: row.trivia ?? [], source: row.trivia_source, label: 'Behind the book' } : undefined} />
-      {(fromShop || usedSource) && (
-        <p class="pad credit-line">
-          {fromShop && <>{coverFromShop ? 'Cover and details' : 'Details'} from {shops.map((s, i) => <>{i > 0 && ' and '}<a href={s.url} target="_blank" rel="noopener" class="ul">{SHOP_NAME[s.shop]}</a></>)}, with their permission.</>}
-          {fromShop && usedSource && ' '}{usedSource && <>Book data from {b.source}.</>}
-        </p>
-      )}
     </Fragment>
   </TitleLayout>
 </Base>
