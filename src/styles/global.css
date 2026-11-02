@@ -107,11 +107,10 @@ body:has(main > .still:not(.gone)) .menu-list { --card:#1F2227; }
 @media (min-width: 781px) { body:has(main > .still:not(.gone)) .nav { --ink:#ECE5D6; --lat:#6CC9BF; color: #ECE5D6; } }
 /* the home page: the wall of covers runs up behind a see-through header (a computer only; on a phone the wall sits under the words) */
 @media (min-width: 781px) { body:has(main > .hero[data-wall]) .site-wrap { position: absolute; top: 0; left: 0; right: 0; z-index: 20; } }
-/* Sponsor: a green pill (the logo's colour) with a red heart. It lifts a pixel when pointed at and the heart beats once; on a phone it is just the heart in a green circle */
-.sponsor { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px 0 13px; border-radius: 20px; background: var(--lat); color: var(--on-lat); font-size: 14px; font-weight: 600; white-space: nowrap;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 1px 2px color-mix(in srgb, var(--lat) 45%, transparent), 0 4px 10px -4px color-mix(in srgb, var(--lat) 55%, transparent);
-  transition: transform .18s ease-out, box-shadow .18s ease-out; }
-.sponsor:hover { color: var(--on-lat); transform: translateY(-1px); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .3), 0 2px 3px color-mix(in srgb, var(--lat) 45%, transparent), 0 7px 14px -5px color-mix(in srgb, var(--lat) 60%, transparent); }
+/* Sponsor: looks like Add (the ink pill), the logo green when pointed at, the heart always bright red and beating once; on a phone it is just the heart in a 40px circle */
+.sponsor { display: inline-flex; align-items: center; gap: 7px; height: 40px; padding: 0 16px 0 13px; border-radius: 20px; border: 1px solid var(--ink); background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600; white-space: nowrap;
+  transition: transform .18s ease-out, background-color .2s ease, border-color .2s ease, color .2s ease; }
+.sponsor:hover { background: var(--lat); border-color: var(--lat); color: var(--on-lat); }
 .sponsor:active { transform: scale(.97); transition-duration: .08s; }
 .sponsor .sp-heart { flex: none; fill: #E5484D; stroke: #FFFFFF; stroke-width: 1.4; paint-order: stroke; stroke-linejoin: round; }
 .sponsor:hover .sp-heart { animation: heartbeat .4s ease-out; }
