@@ -52,9 +52,11 @@ const filled = items.length > 0 || Astro.slots.has('default');
   .prow-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   /* room above and below so a poster can lift on hover without being cut off */
   .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px 2px 14px; display: grid; grid-auto-flow: column; grid-auto-columns: var(--prow-col, 152px); gap: 20px;
-    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px; scrollbar-width: none; }
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px var(--gut, 20px); scrollbar-width: none; }
   .prow-list::-webkit-scrollbar { display: none; }
   .prow-list > li { scroll-snap-align: start; min-width: 0; }
+  /* room after the last poster, as wide as the page gutter, so it can be scrolled fully into view (a margin on the item counts as scrollable space where end padding is dropped) */
+  .prow-list > li:last-child { margin-inline-end: var(--gut, 20px); }
   /* the large row: four across, three on a tablet, two on a phone */
   .big { --prow-col: calc((100% - 60px) / 4); }
   .big .prow-t { font-size: 13px; }
@@ -64,7 +66,7 @@ const filled = items.length > 0 || Astro.slots.has('default');
   @media (max-width: 780px) {
     /* on a phone the row runs to the screen edge, so it's clear there's more to swipe */
     .big { --prow-col: calc((100% - 12px) / 2.25); }
-    .prow-list { grid-auto-columns: var(--prow-col, clamp(108px, 34%, 156px)); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
+    .prow-list { grid-auto-columns: var(--prow-col, clamp(108px, 34%, 156px)); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px) 0; scroll-padding-inline: var(--gut, 20px); }
   }
 </style>
 
