@@ -108,13 +108,39 @@ const rowsOf = (w: Wall) => {
   }
 
   .words { position: relative; z-index: 2; pointer-events: none; width: 100%; max-width: var(--max); margin: 0 auto; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 16px; text-align: left; padding-top: 40px; padding-bottom: 40px; }
-  .words > :global(*) { max-width: min(560px, 100%); pointer-events: auto; }
+  .words > :global(*) { max-width: min(var(--wordsw), 100%); pointer-events: auto; }
   .words :global(.title) { color: var(--ink); }
-  .words :global(.sub) { margin: 0; font-size: 18px; line-height: 1.5; color: var(--ink); }
-  .words :global(.cta) { width: 100%; max-width: 320px; margin-top: 8px; }
-  .words :global(.cta .joinbtn) { width: 100%; height: 48px; border-radius: 24px; font-size: 15px; }
+  .words :global(.sub) { margin: 0; font-size: 18px; line-height: 1.5; color: var(--ink); max-width: min(520px, 100%); }
+  .words :global(.cta) { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 12px; }
+
+  /* the headline: bigger, with "read" and "watch" in Fraunces italic and a brush stroke in marigold drawn under "everything" (once, on load; still with reduced motion) */
+  .words :global(.hl) { font-size: clamp(48px, 2.2vw + 38px, 76px); line-height: 1.04; letter-spacing: -.025em; }
+  .words :global(.hl em) { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-style: italic; font-weight: 400; color: inherit; }
+  .words :global(.ev) { position: relative; display: inline-block; }
+  .words :global(.ul) { position: absolute; left: -2%; width: 104%; bottom: -.08em; height: .24em; overflow: visible; pointer-events: none; fill: none; stroke: #E8990B; stroke-linecap: round; stroke-linejoin: round; stroke-width: 6; clip-path: inset(-20% 100% -20% 0); animation: brush .9s cubic-bezier(.3, .6, .2, 1) .45s forwards; }
+  :global(html[data-theme="dark"]) .words :global(.ul) { stroke: #F2B84B; }
+  .words :global(.ul path) { vector-effect: non-scaling-stroke; }
+  .words :global(.ul .thin) { stroke-width: 2.6; opacity: .75; }
+  @keyframes brush { to { clip-path: inset(-20% 0 -20% 0); } }
+  @media (prefers-reduced-motion: reduce) { .words :global(.ul) { animation: none; clip-path: none; } }
+
+  /* the main button: teal (the action colour), 56px tall, a soft light edge on top and a warm two-part shadow. It lifts when pointed at, the arrow slides, and it shrinks a little when pressed */
+  .words :global(.startbtn) { --hl: rgba(255, 255, 255, .3); display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 56px; padding: 0 28px 0 30px; border-radius: 28px; background: var(--lat); color: #FFFFFF; font-size: 17px; font-weight: 600; letter-spacing: .005em; white-space: nowrap;
+    box-shadow: inset 0 1px 0 var(--hl), 0 1px 2px rgba(108, 62, 24, .3), 0 8px 18px -8px rgba(108, 62, 24, .5);
+    transition: transform .18s ease-out, box-shadow .18s ease-out, background-color .18s ease-out; }
+  :global(html[data-theme="dark"]) .words :global(.startbtn) { color: #0B1A19; --hl: rgba(255, 255, 255, .38); box-shadow: inset 0 1px 0 var(--hl), 0 1px 2px rgba(0, 0, 0, .5), 0 8px 20px -8px rgba(0, 0, 0, .7); }
+  .words :global(.startbtn .arr) { transition: transform .18s ease-out; }
+  .words :global(.startbtn:hover) { color: #FFFFFF; transform: translateY(-2px); box-shadow: inset 0 1px 0 var(--hl), 0 2px 3px rgba(108, 62, 24, .3), 0 14px 26px -8px rgba(108, 62, 24, .55); }
+  :global(html[data-theme="dark"]) .words :global(.startbtn:hover) { color: #0B1A19; box-shadow: inset 0 1px 0 var(--hl), 0 2px 3px rgba(0, 0, 0, .5), 0 14px 28px -8px rgba(0, 0, 0, .8); }
+  .words :global(.startbtn:hover .arr) { transform: translateX(3px); }
+  .words :global(.startbtn:active) { transform: scale(.97); transition-duration: .08s; }
+  .words :global(.startbtn:focus-visible) { outline: 3px solid var(--lat); outline-offset: 3px; border-radius: 28px; }
+  @media (prefers-reduced-motion: reduce) { .words :global(.startbtn), .words :global(.startbtn .arr) { transition: none; } .words :global(.startbtn:hover), .words :global(.startbtn:hover .arr), .words :global(.startbtn:active) { transform: none; } }
+  .words :global(.look) { display: inline-flex; align-items: center; min-height: 44px; padding: 0; font-size: 15px; color: var(--muted); transition: color .2s ease; }
+  .words :global(.look:hover) { color: var(--lat); text-decoration: underline; text-underline-offset: 3px; }
 
   /* a phone: three rows of ten tiles a turn, the words above the wall on the page's own colour */
+  @media (min-width: 1100px) { .hero { --wordsw: 680px; } }
   @media (max-width: 780px) {
     .hero { --tw: 76px; --rows: 3; --n: 10; }
     .wr:nth-child(4) { display: none; }
@@ -124,7 +150,9 @@ const rowsOf = (w: Wall) => {
     .wr:nth-child(3) { --dur: 39s; }
     .stage { display: flex; flex-direction: column; align-items: stretch; min-height: 0; padding-top: 0; }
     .words { padding-top: 28px; padding-bottom: 24px; }
-    .words :global(.cta) { max-width: none; }
+    .words :global(.cta) { width: 100%; align-items: stretch; }
+    .words :global(.startbtn) { width: 100%; }
+    .words :global(.look) { justify-content: center; }
     /* the wall sits under the words here, so it fades at its top (towards the words) and its bottom instead of at its left */
     .wall { position: relative; inset: auto; order: 1; height: var(--wallh);
       -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 56px, #000 calc(100% - 64px), transparent 100%);

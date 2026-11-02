@@ -4,7 +4,7 @@ import Cover from '../components/Cover.astro';
 import Tile from '../components/Tile.astro';
 import Face from '../components/Face.astro';
 import HomeWall from '../components/HomeWall.astro';
-import { loadWall } from '../lib/catalog/wall';
+import { loadWall, loadCounts } from '../lib/catalog/wall';
 import StatusTag from '../components/ui/StatusTag.astro';
 import { loadShelf, loadFeatured, href, short, fullTitle, profileHref, reviewsHref, shelfReviews, excerpt } from '../lib/data';
 import { statusLabel } from '../lib/kinds';
@@ -21,10 +21,14 @@ const rowsP = homeRows().then((r) => markRows(sb, me, r)).catch(() => []);
 const featuredP = sb ? loadFeatured(sb, 6).catch((e) => { console.error('Home: featured shelves could not be loaded', e); return []; }) : Promise.resolve([]);
 // the home wall's pick is started here and awaited by the wall itself, so the words never wait for it
 const wall = loadWall().catch(() => ({ tiles: [], day: '', full: false }));
-const [featured, shelf] = await Promise.all([
+// the numbers in the line under the headline (signed out only): counted once a day, with the wall's pick
+const counts = me ? Promise.resolve(null) : loadCounts().catch(() => null);
+const [featured, shelf, tally] = await Promise.all([
   featuredP,
   me && sb ? loadShelf(sb, me) : Promise.resolve([] as Awaited<ReturnType<typeof loadShelf>>),
+  counts,
 ]);
+const n = (v: number) => v.toLocaleString('en-IN');
 const going = shelf.filter((e) => e.data.status === 'reading' || e.data.status === 'watching');
 const wants = shelf.filter((e) => e.data.status === 'want');
 // what you're in the middle of; if nothing, what you saved for next
@@ -44,9 +48,14 @@ const features = [
 {!me ? (
   <Base>
     <HomeWall wall={wall}>
-      <h1 class="title rise d1">A shelf for everything you read and watch.</h1>
-      <p class="sub rise d2">Books, films, TV and essays, and what you thought of each.</p>
-      {supabaseReady() && <div class="cta rise d3"><a class="btn primary joinbtn" href="/join/" data-astro-prefetch="false">Start your shelf</a></div>}
+      <h1 class="title hl rise d1">A shelf for <span class="ev">everything<svg class="ul" viewBox="0 0 300 24" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M4 15.5C34 7.5 78 6 124 9.5c37 2.8 76 .8 118-4.2 17-2 36-1.4 54 .2" /><path class="thin" d="M16 20.5c46-5 100-6.8 156-4.6 36 1.4 70 .6 100-2.2" /></svg></span> you <em>read</em> and <em>watch</em>.</h1>
+      <p class="sub rise d2">{tally ? `${n(tally.total)} books and films, including ${n(tally.marathiHindi)} Marathi and Hindi books. Rate them, review them, keep them.` : 'Books, films, TV and essays, and what you thought of each.'}</p>
+      {supabaseReady() && (
+        <div class="cta rise d3">
+          <a class="startbtn" href="/join/" data-astro-prefetch="false">Start your shelf<svg class="arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="look" href="/films/">or look around first →</a>
+        </div>
+      )}
     </HomeWall>
 
     <section class="pad rows rise d4">
