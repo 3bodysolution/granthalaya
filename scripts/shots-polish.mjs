@@ -24,12 +24,19 @@ for (const [size, viewport] of [['phone', { width: 390, height: 844 }], ['deskto
     const ctx = await browser.newContext({ viewport, deviceScaleFactor: 1, isMobile: size === 'phone', hasTouch: size === 'phone', reducedMotion: 'reduce', colorScheme: theme });
     await ctx.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch {} }, theme);
     const page = await ctx.newPage();
+    // a phone is a touch screen: a finger, no hover (the Sponsor page shows its amount buttons only then)
+    if (size === 'phone') await (await ctx.newCDPSession(page)).send('Emulation.setEmulatedMedia', { features: [{ name: 'pointer', value: 'coarse' }, { name: 'hover', value: 'none' }, { name: 'prefers-reduced-motion', value: 'reduce' }, { name: 'prefers-color-scheme', value: theme }] });
     for (const n of names) {
       await page.goto(base + paths[n], { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
       await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
       await page.waitForTimeout(1200);
+      // the paper is fixed to the screen; for a whole-page picture only, stretch it over the whole page
+      if (n === 'sponsor') await page.addStyleTag({ content: 'html[data-theme="light"] body { position: relative; } html[data-theme="light"] body::before { position: absolute !important; }' });
       const file = `${out}/${n}-${size}-${theme}${n === 'home' ? '-' + tag : ''}.png`;
-      await page.screenshot({ path: file, fullPage: n === 'sponsor' });
+      // a whole-page picture of the phone is taken by making the window as tall as the page (a full-page capture would drop the touch screen setting)
+      if (n === 'sponsor') { await page.setViewportSize({ width: viewport.width, height: await page.evaluate(() => document.documentElement.scrollHeight) }); await page.waitForTimeout(300); }
+      await page.screenshot({ path: file });
+      if (n === 'sponsor') await page.setViewportSize(viewport);
       console.log(file);
     }
     await ctx.close();

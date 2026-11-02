@@ -6,13 +6,13 @@
 html[data-theme="light"] {
   --bg:#F7ECDC; --card:#FCF5E8; --ink:#1F1C18; --muted:#4A443D; --line:#DCC9AC; --soft:#EFE0C9;
   --lat:#0C615D; --book:#6B4527; --moss:#46702F; --sky:#234F76; --haldi:#B8780A;
-  --shadow:rgba(108,62,24,.26); --scrim:rgba(31,28,24,.38);
+  --shadow:rgba(108,62,24,.26); --scrim:rgba(31,28,24,.38); --on-lat:#FFFFFF;
   color-scheme: light;
 }
 html[data-theme="dark"] {
   --bg:#15171B; --card:#1F2227; --ink:#ECE5D6; --muted:#A39D92; --line:#2D3036; --soft:#24272D;
   --lat:#6CC9BF; --book:#D8AE84; --moss:#9AB685; --sky:#8FB1CC; --haldi:#E7B24C;
-  --shadow:rgba(0,0,0,.5); --scrim:rgba(0,0,0,.55);
+  --shadow:rgba(0,0,0,.5); --scrim:rgba(0,0,0,.55); --on-lat:#0B1A19;
   color-scheme: dark;
 }
 

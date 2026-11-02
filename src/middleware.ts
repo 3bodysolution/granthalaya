@@ -26,6 +26,8 @@ function oldAddress(path: string): string | null {
   m = path.match(/^\/@([^/]+)\/(?:notes|lines)\/?$/);
   if (m) return `/@${m[1]}/reviews/`;
   if (path === '/rss.xml') return `${f}/rss.xml`;
+  // Support became Sponsor
+  if (/^\/support\/?$/.test(path)) return '/sponsor/';
   return null;
 }
 

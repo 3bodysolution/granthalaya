@@ -13,7 +13,7 @@ export const site = {
 
   contact: 'granthalayasupport@gmail.com',
 
-  // The Support page: where UPI payments go. The payee name is only used inside the UPI link, never shown on the page.
+  // The Sponsor page: where UPI payments go. The payee name is only used inside the UPI link, never shown on the page.
   support: { upi: 'granthalaya@upi', payee: 'Sarthak Vijay Kokane' },
 
   // Reading pace used to estimate time spent on books (minutes per page) and essays (words per minute).
