@@ -37,7 +37,7 @@ export const prerender = false;
   <h2>Who helps run the site</h2>
   <p>We use these services. Each gets only what it needs for its job.</p>
   <ul>
-    <li><b>Supabase</b> stores the database and your uploaded photo, on servers in Mumbai, India, and handles signing in.</li>
+    <li><b>Supabase</b> stores the database and your uploaded photo, and handles signing in.</li>
     <li><b>Vercel</b> hosts the website. The site’s code runs in Mumbai, and its network may serve pages and pictures from other places around the world.</li>
     <li><b>Google</b> confirms who you are when you sign in.</li>
     <li><b>Cloudflare Turnstile</b> runs a quick check that a person, not a bot, is making a new shelf.</li>
@@ -47,9 +47,12 @@ export const prerender = false;
   </ul>
   <p>Our server sends these services only what is being looked up (a title, or what you typed in search). Posters, covers and streaming logos from TMDB, Open Library and Google Books load straight from those services, so they can see your browser asking for the picture, as with any picture on the web. Covers from the two bookshops do not: our server fetches them and passes them on, so the shops never see your browser. Some of these services are outside India, so your data can leave the country this way. We only send what is listed here.</p>
 
+  <h2>Sponsor payments</h2>
+  <p>When you pay through UPI, your UPI app shares your name and UPI ID with the receiver, as with any UPI payment. Granthalaya itself stores nothing about payments.</p>
+
   <h2>Where it is kept, and for how long</h2>
   <ul>
-    <li>Your data is kept in the database in Mumbai, India, for as long as you have an account.</li>
+    <li>Your data is kept in the database for as long as you have an account.</li>
     <li>When you delete your account, your profile, shelf, reviews, comments, likes, collections and uploaded photo are removed right away. Copies can stay in the database provider’s backups for a short time before they are gone too.</li>
     <li>If you replace or remove your photo, the old file is deleted.</li>
     <li>Reports and blocks that involve other people can be kept a little longer where that is needed to keep them safe, but they will not carry your content.</li>
