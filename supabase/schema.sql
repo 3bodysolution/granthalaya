@@ -158,11 +158,11 @@ create unique index titles_ol_key on public.titles (ol_key) where ol_key is not 
 create unique index titles_link_key on public.titles (link) where kind = 'essay' and link is not null;
 create index titles_created_by on public.titles (created_by, created_at);
 create index titles_show on public.titles (show_id) where show_id is not null;
--- forgiving search in the database (014; search works without these, in code, for now)
-create extension if not exists pg_trgm with schema extensions;
-create index titles_title_trgm on public.titles using gin (title extensions.gin_trgm_ops);
-create index titles_original_title_trgm on public.titles using gin (original_title extensions.gin_trgm_ops) where original_title is not null;
-create index titles_creator_trgm on public.titles using gin (creator extensions.gin_trgm_ops) where creator <> '';
+-- NOT APPLIED YET (supabase/later/014-search-trigram-index.sql). Forgiving search works in code without these.
+-- create extension if not exists pg_trgm with schema extensions;
+-- create index titles_title_trgm on public.titles using gin (title extensions.gin_trgm_ops);
+-- create index titles_original_title_trgm on public.titles using gin (original_title extensions.gin_trgm_ops) where original_title is not null;
+-- create index titles_creator_trgm on public.titles using gin (creator extensions.gin_trgm_ops) where creator <> '';
 
 -- Marathi and Hindi books suggested each week by a free AI model, each checked against a real source first.
 create table public.book_suggestions (
