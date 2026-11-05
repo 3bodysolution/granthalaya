@@ -28,7 +28,7 @@ export const POST: APIRoute = async (ctx) => {
   if (b.action === 'dismiss') await db.from('reports').update({ status: 'dismissed' }).eq('id', r.id);
   else if (b.action === 'done') await db.from('reports').update({ status: 'actioned' }).eq('id', r.id);
   else if (b.action === 'hide_entry' && r.target_log) {
-    await db.from('logs').update({ only_me: true }).eq('id', r.target_log);
+    await db.from('logs').update({ admin_hidden: true }).eq('id', r.target_log);
     await db.from('reports').update({ status: 'actioned' }).eq('id', r.id);
   } else if (b.action === 'delete_comment' && r.target_comment) {
     // the report goes with the comment (on delete cascade)

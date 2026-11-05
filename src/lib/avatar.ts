@@ -73,8 +73,14 @@ export async function removeUploaded(db: SupabaseClient, url: string | null | un
   if (path) await db.storage.from(AVATAR_BUCKET).remove([path]).catch(() => null);
 }
 
-/** delete every uploaded photo of a person (account deletion, an admin removing a photo) */
+/** delete every uploaded photo of a person (account deletion, an admin removing a photo): the folder is listed 100 at a time
+ *  and emptied until nothing is left (a file that can't be removed ends the loop, so it can't go on for ever) */
 export async function removeAllUploaded(db: SupabaseClient, userId: string) {
-  const { data } = await db.storage.from(AVATAR_BUCKET).list(userId, { limit: 100 }).catch(() => ({ data: null }));
-  if (data?.length) await db.storage.from(AVATAR_BUCKET).remove(data.map((f) => `${userId}/${f.name}`)).catch(() => null);
+  for (let round = 0; round < 500; round++) {
+    const { data } = await db.storage.from(AVATAR_BUCKET).list(userId, { limit: 100 }).catch(() => ({ data: null }));
+    const files = (data ?? []).filter((f) => f.name && f.id !== null);
+    if (!files.length) return;
+    const { data: gone, error } = await db.storage.from(AVATAR_BUCKET).remove(files.map((f) => `${userId}/${f.name}`));
+    if (error || !gone?.length) return;
+  }
 }

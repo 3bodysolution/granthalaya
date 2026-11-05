@@ -38,8 +38,10 @@ begin
   new.logged_on := coalesce(new.finished_on, new.started_on, new.logged_on, (now() at time zone 'utc')::date);
   new.updated_at := now();
   -- people can't backdate created_at (check_log counts rows made in the last hour); the website and direct database work can
+  -- and can't set or clear admin_hidden
   if auth.role() in ('anon', 'authenticated') then
-    if tg_op = 'INSERT' then new.created_at := now(); else new.created_at := old.created_at; end if;
+    if tg_op = 'INSERT' then new.created_at := now(); new.admin_hidden := false;
+    else new.created_at := old.created_at; new.admin_hidden := old.admin_hidden; end if;
   end if;
   return new;
 end $$;
@@ -223,6 +225,7 @@ create table public.logs (
   spoiler boolean not null default false,
   where_seen text not null default '' check (char_length(where_seen) <= 80),
   only_me boolean not null default false,
+  admin_hidden boolean not null default false,   -- set only by the admin page ("Hide the entry"); members can't change it (touch_log), others don't see the entry
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -446,7 +449,7 @@ create policy "shop books: matched and shown" on public.shop_books for select to
 create policy "titles: readable by everyone" on public.titles for select to anon, authenticated using (true);
 
 create policy "logs: yours, or a visible shelf" on public.logs for select to anon, authenticated
-  using (user_id = auth.uid() or (not only_me and public.can_see_shelf(user_id)));
+  using (user_id = auth.uid() or (not only_me and not admin_hidden and public.can_see_shelf(user_id)));
 create policy "logs: add your own" on public.logs for insert to authenticated with check (user_id = auth.uid());
 create policy "logs: edit your own" on public.logs for update to authenticated
   using (user_id = auth.uid()) with check (user_id = auth.uid());
@@ -566,11 +569,7 @@ grant execute on function public.title_reviews(uuid[], text, int, int) to anon, 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('avatars', 'avatars', true, 1048576, array['image/webp'])
 on conflict (id) do update set public = true, file_size_limit = 1048576, allowed_mime_types = array['image/webp'];
-create policy "avatars: write your own folder" on storage.objects for insert to authenticated
-  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
-create policy "avatars: replace your own files" on storage.objects for update to authenticated
-  using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text)
-  with check (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
+-- no insert or update policy: members can't write to the bucket; only the website does (secret key), after its checks (018)
 create policy "avatars: delete your own files" on storage.objects for delete to authenticated
   using (bucket_id = 'avatars' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy "avatars: see your own files" on storage.objects for select to authenticated
