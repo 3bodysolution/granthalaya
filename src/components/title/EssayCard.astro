@@ -1,9 +1,10 @@
 ---
-// One essay as a light card: title (opens the essay), "by" the author (opens their page), one line on what it is about,
-// and a bookmark that shows when it's on your shelf. Used in the Essays rows and grids and on author pages.
+// One essay as a small hardback book: its topic and a thin rule at the top, the title (opens the essay), "by" the author (opens their page),
+// one line on what it is about at the bottom, and a bookmark that shows when it's on your shelf. Used in the Essays rows and grids and on author pages.
+// Drawn in CSS 3D: turned a little so the stacked page edges show; it turns to face you on hover (flat, with reduced motion).
 import Mark from '../ui/Mark.astro';
 import { statusLabel } from '../../lib/kinds';
-import { authorLink, essayHit, type Essay } from '../../lib/essays';
+import { authorLink, essayHit, themes, type Essay } from '../../lib/essays';
 import { savedId } from '../../lib/saved';
 import type { Mark as OnShelf } from '../../lib/catalog/onsite';
 interface Props { e: Essay; mark?: OnShelf }
@@ -13,30 +14,92 @@ const plain = savedId(mark);
 const label = mark ? statusLabel('essay', mark.status as any) : '';
 const words = e.title.split(' ');
 const last = words.pop()!;
+// the cover cloth cycles by topic (rust is a touch darker than #B5652F so cream text reads at 4.5:1 or better)
+const CLOTH = ['#2B3A67', '#8E2F3A', '#4F6B4A', '#A15628'];
+const ti = Math.max(0, themes.findIndex((t) => t.items.some((x) => x.link === e.link)));
+const topic = themes[ti]?.label ?? 'Essay';
+const cloth = CLOTH[ti % CLOTH.length];
 ---
-<article class="ec">
-  <h3 class="serif et"><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
-  <p class="by">by <a href={authorLink(e)}>{e.author}</a></p>
-  <p class="en">{e.note}</p>
-  {me && (mark && !plain
-    ? <span class="es-save is-saved" role="img" title={label} aria-label={`${e.title}: ${label}`}><Mark size={16} /></span>
-    : <button type="button" class:list={['es-save', plain && 'is-saved']} data-quick-add={JSON.stringify({ hit: essayHit(e), status: 'want' })} data-unsave={plain} aria-label={plain ? `Saved: ${e.title}. Tap to remove` : `Save ${e.title}`} title={plain ? 'Saved. Tap to remove' : 'Save to your shelf'}><Mark size={16} /></button>)}
+<article class="eb" style={`--cloth:${cloth}`}>
+  <div class="eb-scene">
+    <div class="eb-shadow" aria-hidden="true"></div>
+    <div class="eb-book">
+      <div class="eb-spine" aria-hidden="true"></div>
+      <div class="eb-pages" aria-hidden="true"></div>
+      <div class="eb-back" aria-hidden="true"></div>
+      <div class="eb-front">
+        <p class="eb-topic"><span>{topic}</span></p>
+        <h3 class="serif eb-title"><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
+        <p class="eb-by">by <a href={authorLink(e)}>{e.author}</a></p>
+        <p class="eb-note">{e.note}</p>
+        {me && (mark && !plain
+          ? <span class="es-save is-saved" role="img" title={label} aria-label={`${e.title}: ${label}`}><Mark size={16} /></span>
+          : <button type="button" class:list={['es-save', plain && 'is-saved']} data-quick-add={JSON.stringify({ hit: essayHit(e), status: 'want' })} data-unsave={plain} aria-label={plain ? `Saved: ${e.title}. Tap to remove` : `Save ${e.title}`} title={plain ? 'Saved. Tap to remove' : 'Save to your shelf'}><Mark size={16} /></button>)}
+      </div>
+    </div>
+  </div>
 </article>
 <style>
-  .ec { position: relative; height: 100%; display: flex; flex-direction: column; gap: 6px; padding: 16px 48px 16px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); }
-  .et { margin: 0; font-size: 18px; line-height: 1.3; font-weight: 500; }
-  .et a:hover { color: var(--lat); }
-  .et a:focus-visible, .by a:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; border-radius: 3px; }
+  .eb { --t: 16px; --cream: #F7EFDF; --turn: -24deg; position: relative; height: 100%; min-height: 270px; }
+  .eb-scene { position: relative; height: 100%; min-height: inherit; padding: 6px calc(var(--t) + 6px) 18px 6px; perspective: 1100px; perspective-origin: 30% 50%; box-sizing: border-box; }
+  .eb-book { position: relative; height: 100%; min-height: 246px; transform-style: preserve-3d; transform: rotateY(var(--turn)); transition: transform .45s cubic-bezier(.2, .7, .2, 1); }
+  .eb:hover .eb-book, .eb:focus-within .eb-book { transform: rotateY(-6deg) translateY(-6px); }
+  /* a soft shadow on the table, not part of the turning book */
+  .eb-shadow { position: absolute; left: 10%; right: 4%; bottom: 8px; height: 18px; border-radius: 50%; background: rgba(20, 14, 8, .5); filter: blur(10px); opacity: .55; transition: opacity .45s ease, transform .45s ease; }
+  .eb:hover .eb-shadow, .eb:focus-within .eb-shadow { opacity: .35; transform: translateY(6px) scaleX(.94); }
+
+  .eb-front, .eb-back { position: absolute; inset: 0; border-radius: 3px 6px 6px 3px; }
+  .eb-front { transform: translateZ(calc(var(--t) / 2)); display: flex; flex-direction: column; gap: 8px; padding: 16px 44px 16px 26px; color: var(--cream); overflow: hidden; backface-visibility: hidden;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, .38) 0, rgba(0, 0, 0, .1) 12px, rgba(0, 0, 0, 0) 34px),
+      linear-gradient(105deg, rgba(255, 255, 255, .13) 0, rgba(255, 255, 255, 0) 38%),
+      repeating-linear-gradient(0deg, rgba(0, 0, 0, .09) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 3px),
+      var(--cloth);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .14), inset -2px 0 3px rgba(255, 255, 255, .08); }
+  /* the paper-tooth texture over the cloth */
+  .eb-front::before { content: ''; position: absolute; inset: 0; background: url(/img/paper-tooth.webp) center / 140px; mix-blend-mode: multiply; opacity: .4; pointer-events: none; }
+  .eb-front > * { position: relative; }
+  /* the spine's hinge groove, so a darker band shows at the left even when the book faces you */
+  .eb-front::after { content: ''; position: absolute; top: 0; bottom: 0; left: 12px; width: 2px; background: linear-gradient(90deg, rgba(0, 0, 0, .35), rgba(255, 255, 255, .12)); pointer-events: none; }
+  .eb-back { transform: translateZ(calc(var(--t) / -2)) rotateY(180deg); background: var(--cloth); filter: brightness(.7); }
+  /* the cloth spine, a darker face on the left */
+  .eb-spine { position: absolute; top: 0; bottom: 0; left: calc(var(--t) / -2); width: var(--t); transform: rotateY(-90deg); border-radius: 3px 0 0 3px; background: linear-gradient(90deg, rgba(0, 0, 0, .35), rgba(0, 0, 0, .1)), var(--cloth); filter: brightness(.62); }
+  /* the stacked page edges on the right, cream */
+  .eb-pages { position: absolute; top: 3px; bottom: 3px; right: calc(var(--t) / -2 + 1px); width: calc(var(--t) - 2px); transform: rotateY(90deg); border-radius: 0 2px 2px 0;
+    background: repeating-linear-gradient(90deg, #F1E8D2 0 1px, #D9CEB4 1px 2px), #EADFC6; box-shadow: inset 0 0 6px rgba(90, 70, 40, .35); }
+
+  .eb-topic { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid rgba(247, 239, 223, .55); }
+  .eb-title { margin: 6px 0 0; font-size: 25px; line-height: 1.15; font-weight: 500; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; overflow-wrap: break-word; }
+  .eb-title a { color: var(--cream); }
+  .eb-title a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .nw { white-space: nowrap; }
-  .out { font-size: .7em; color: var(--muted); }
-  .by { margin: 0; font-size: 14px; color: var(--muted); }
-  .by a { transition: color .2s ease; }
-  .by a:hover { color: var(--lat); }
-  .en { margin: 2px 0 0; font-size: 14.5px; line-height: 1.5; }
-  .es-save { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; border: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--muted); cursor: pointer; opacity: 0; transition: opacity .2s ease, color .2s ease, transform .25s var(--spring); }
-  .ec:hover .es-save, .es-save:focus-visible, .es-save:global(.is-saved) { opacity: 1; }
-  .es-save:hover { color: var(--ink); }
+  .out { font-size: .7em; }
+  .eb-by { margin: 0; font-size: 14px; font-style: italic; }
+  .eb-by a { color: var(--cream); text-decoration: underline; text-decoration-color: rgba(247, 239, 223, .5); text-underline-offset: 3px; transition: text-decoration-color .2s ease; }
+  .eb-by a:hover { text-decoration-color: var(--cream); }
+  .eb-note { margin: auto 0 0; font-size: 13px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .eb a:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; border-radius: 3px; }
+  .es-save { position: absolute; top: 10px; right: 10px; width: 36px; height: 36px; border: 0; border-radius: 50%; display: grid; place-items: center; background: transparent; color: var(--cream); cursor: pointer; opacity: .8; transition: opacity .2s ease, transform .25s var(--spring); }
+  .es-save:hover, .es-save:focus-visible, .es-save:global(.is-saved) { opacity: 1; }
   .es-save:active { transform: scale(.92); }
-  .es-save:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
-  @media (hover: none) { .es-save { opacity: 1; } }
+  .es-save:focus-visible { outline: 2px solid var(--cream); outline-offset: 2px; }
+  .es-save :global(.mk-edge) { stroke: var(--cream); }
+
+  /* phones and touch screens: facing front with a slight spine edge, no turning */
+  @media (max-width: 780px), (hover: none) {
+    .eb-scene { perspective: none; padding-right: 12px; }
+    .eb-book, .eb:hover .eb-book, .eb:focus-within .eb-book { transform: none; transition: none; }
+    .eb-spine { transform: none; left: -5px; width: 5px; }
+    .eb-pages, .eb-back { display: none; }
+    .eb-front { transform: none; }
+    .eb-shadow, .eb:hover .eb-shadow { transition: none; transform: none; opacity: .5; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .eb-book, .eb:hover .eb-book, .eb:focus-within .eb-book { transform: none; transition: none; }
+    .eb-shadow, .eb:hover .eb-shadow { transition: none; transform: none; }
+    .eb-front { transform: none; }
+    .eb-pages, .eb-back { display: none; }
+    .eb-spine { transform: none; left: -5px; width: 5px; }
+  }
 </style>
