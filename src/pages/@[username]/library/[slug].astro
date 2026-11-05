@@ -156,7 +156,7 @@ const shareData = JSON.stringify({
   ...(isMe ? { stories: { entry: { user: profile.username, slug: entry.id } } }
     : aboutKind ? { ref: `title=${aboutKind}:${aboutSeg}`, card: `/story/${aboutKind}/${aboutSeg}.png`, wide: false } : {}),
 });
-// the review: its likes and comments (none on an "Only me" entry, which no one else can see)
+// the review: its likes and comments (none on a hidden entry)
 const hasReview = reviewed(entry) && !isShow;
 const social = hasReview && !d.private ? (await reviewExtras(sb, new Map([[entry.logId, profile.id]]), me)).get(entry.logId) : undefined;
 const hideSpoiler = d.spoiler && !isMe;

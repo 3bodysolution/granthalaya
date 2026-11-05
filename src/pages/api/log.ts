@@ -29,7 +29,6 @@ function fields(b: Record<string, any>, kind: Kind, status: Status) {
     tagline: oneLine(b.tagline),
     spoiler: b.spoiler === true,
     where_seen: str(b.where, 80) ?? '',
-    only_me: b.onlyMe === true,
   };
 }
 /** a review's tagline: one line, at most 140 characters */

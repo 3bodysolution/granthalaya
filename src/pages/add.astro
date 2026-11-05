@@ -21,12 +21,15 @@ if (logId) {
   if (!l) return Astro.redirect('/add/');
   start = {
     mode: 'edit', id: l.id, kind: l.title.kind, title: l.title, status: l.status, rating: l.rating == null ? null : Number(l.rating), loved: l.loved,
-    started: l.started_on, finished: l.finished_on, again: l.again, notes: l.notes, where: l.where_seen, onlyMe: l.only_me,
+    started: l.started_on, finished: l.finished_on, again: l.again, notes: l.notes, where: l.where_seen, onShelf: true,
     tagline: l.tagline ?? '', spoiler: l.spoiler === true,
   };
 } else if (titleId && /^[0-9a-f-]{36}$/i.test(titleId)) {
   const { data: t } = await sb.from('titles').select('*').eq('id', titleId).maybeSingle<any>();
-  if (t) start = { mode: 'title', kind: t.kind, title: t, again: params.get('again') === '1', status: params.get('again') === '1' ? 'done' : undefined };
+  if (t) {
+    const { count } = await sb.from('logs').select('id', { count: 'exact', head: true }).eq('user_id', me.id).eq('title_id', t.id);
+    start = { mode: 'title', kind: t.kind, title: t, again: params.get('again') === '1', status: params.get('again') === '1' ? 'done' : undefined, onShelf: (count ?? 0) > 0 };
+  }
 }
 if (start.title) start.title.bg = paletteFor(start.title.title, start.title.color).bg;
 const kinds = (['book', 'film', 'tv', 'essay'] as const).map((k) => [k, k === 'essay' ? 'Essay' : kindName[k]]);
@@ -110,21 +113,17 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         <label class="stack" style="gap: 8px">
           <span class="lbl" id="noteslbl">Review</span>
           <textarea name="notes" class="field serif" rows="4" maxlength="10000" placeholder="Optional. What did you think?"></textarea>
-          <span class="hint not-essay">Reviews show on the title’s page for everyone. An “Only me” entry, or a private account, keeps it to you.</span>
+          <span class="hint not-essay">Reviews show on the title’s page for everyone. A private account keeps it to you.</span>
         </label>
 
         <div class="opts">
-          <label class="opt">
+          <label class="opt" id="againopt" hidden={!start.onShelf}>
             <span class="stack" style="gap: 2px"><b>Again</b><span class="hint" id="againhint">A re-read or re-watch. Your first time stays as its own entry.</span></span>
             <input type="checkbox" class="onoff" name="again" />
           </label>
           <label class="opt not-essay">
             <span class="stack" style="gap: 2px"><b>Contains spoilers</b><span class="hint">Your review stays hidden until someone taps to read it.</span></span>
             <input type="checkbox" class="onoff" name="spoiler" />
-          </label>
-          <label class="opt">
-            <span class="stack" style="gap: 2px"><b>Only me</b><span class="hint">Hide this one entry from your profile.</span></span>
-            <input type="checkbox" class="onoff" name="onlyMe" />
           </label>
         </div>
 
@@ -446,7 +445,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       const data: any = {
         status, rating: rating || null, loved: $('loved').getAttribute('aria-pressed') === 'true',
         started: f('started').value || null, finished: f('finished').value || null,
-        again: f('again').checked, onlyMe: f('onlyMe').checked, notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value, where: f('where').value,
+        again: f('again').checked, notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value, where: f('where').value,
         tagline: kind === 'essay' ? '' : f('tagline').value, spoiler: kind !== 'essay' && f('spoiler').checked,
       };
       if (start.mode === 'edit') { data.id = start.id; data.full = true; }
@@ -482,7 +481,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         rating = start.rating ?? 0; paintStars();
         $('loved').setAttribute('aria-pressed', String(!!start.loved));
         f('started').value = start.started ?? ''; f('finished').value = start.finished ?? '';
-        f('again').checked = !!start.again; f('onlyMe').checked = !!start.onlyMe;
+        f('again').checked = !!start.again;
         (form.elements.namedItem('notes') as HTMLTextAreaElement).value = start.notes ?? '';
         f('where').value = start.where ?? '';
         f('tagline').value = start.tagline ?? ''; f('spoiler').checked = !!start.spoiler;

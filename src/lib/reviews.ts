@@ -1,5 +1,5 @@
 // Reviews: a log with text or a tagline, shown on title pages with its likes and comments.
-// Everything is read through the visitor's own connection, so "Only me" entries, private accounts and
+// Everything is read through the visitor's own connection, so private accounts and
 // blocks are kept out by the database (title_reviews is security invoker; likes and comments follow their review).
 import type { SupabaseClient } from '@supabase/supabase-js';
 

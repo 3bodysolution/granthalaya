@@ -1,6 +1,6 @@
 // What Granthalaya itself knows about a catalogue title: whether it's in our shared catalogue yet, what
 // people here thought of it, and which collections it's in. Read through the visitor's own connection,
-// so private shelves, "Only me" entries and blocks are respected by the database.
+// so private shelves, hidden entries and blocks are respected by the database.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { filmHref, showHref } from './tmdb';
 import { bookHref } from './books';

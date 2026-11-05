@@ -1,6 +1,6 @@
 // The one door to the data. Pages read shelves, profiles and collections only through this file.
 // Everything comes from the database through the visitor's own connection, so the database's
-// privacy rules (private accounts, "Only me" entries, blocks) always apply.
+// privacy rules (private accounts, blocks) always apply.
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { site } from '../data/site';
 import { kindName, kindColor, type Kind, type Status } from './kinds';

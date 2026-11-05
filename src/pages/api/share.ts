@@ -1,5 +1,5 @@
 // What the share window needs for one thing: its public short link and the text that goes with it (WhatsApp, X).
-// It never waits for the AI: the line is the saved one, if any. Public things only: private accounts, "Only me" entries and blocks give a 404.
+// It never waits for the AI: the line is the saved one, if any. Public things only: private accounts, hidden entries and blocks give a 404.
 //   ?title=film:<address part> | tv:... | book:...   a film, show or book page
 //   ?entry=<username>/<slug>                         a title on someone's shelf
 //   ?year=<username>/<year>                          the My year card

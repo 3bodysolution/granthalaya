@@ -31,9 +31,9 @@ export const GET: APIRoute = async ({ locals }) => {
   const showName = new Map<string, string>(((shows ?? []) as any[]).map((t) => [t.id, t.title]));
 
   const shelfCsv = csv(
-    ['Kind', 'Title', 'Show', 'Season', 'By', 'Year', 'Status', 'Rating', 'Loved', 'Added', 'Started', 'Finished', 'Again', 'Where', 'Only me', 'Tagline', 'Review', 'Contains spoilers', 'Link'],
+    ['Kind', 'Title', 'Show', 'Season', 'By', 'Year', 'Status', 'Rating', 'Loved', 'Added', 'Started', 'Finished', 'Again', 'Where', 'Tagline', 'Review', 'Contains spoilers', 'Link'],
     shelf.map((l) => [l.title?.kind, l.title?.title, showName.get(l.title?.show_id) ?? '', l.title?.season ?? '', l.title?.creator, l.title?.year ?? '', l.status, l.rating ?? '', yes(l.loved),
-      l.logged_on, l.started_on ?? '', l.finished_on ?? '', yes(l.again), l.where_seen, yes(l.only_me), l.tagline ?? '', l.notes, yes(l.spoiler), l.title?.link ?? '']),
+      l.logged_on, l.started_on ?? '', l.finished_on ?? '', yes(l.again), l.where_seen, l.tagline ?? '', l.notes, yes(l.spoiler), l.title?.link ?? '']),
   );
   const linesCsv = csv(
     ['Line', 'From', 'By', 'Where in it', 'My note', 'My own line', 'Pinned'],

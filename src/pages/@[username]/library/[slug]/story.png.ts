@@ -1,5 +1,5 @@
 // The story card for one title on someone's shelf, as a picture: /@username/library/<slug>/story.png (a JPEG, whatever the name).
-// Drawn as the visitor, so the database's privacy rules apply: "Only me" entries, private accounts and blocks give a 404.
+// Drawn as the visitor, so the database's privacy rules apply: private accounts and blocks give a 404.
 // The address may carry ?v=<when the entry last changed>: with it the browser keeps the card for good (a changed rating or status
 // is a new address); without it the current card is sent and kept for a minute only.
 // ?w=540 gives the half-size preview; ?bg=<painting> is for tests (otherwise the title's saved pick, else by genre).

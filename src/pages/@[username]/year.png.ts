@@ -1,5 +1,5 @@
 // The "My year" card for one shelf, as a picture: /@username/year.png?year=2026
-// Drawn as the visitor: private accounts and blocks give a 404, and "Only me" entries are left out (even for the owner,
+// Drawn as the visitor: private accounts and blocks give a 404, and hidden entries are left out (even for the owner,
 // because the card is made to be shared). Counts finished things only, like the Stats page.
 import type { APIRoute } from 'astro';
 import { createHash } from 'node:crypto';
