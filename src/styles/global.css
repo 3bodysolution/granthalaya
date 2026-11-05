@@ -134,8 +134,7 @@ html[data-theme="dark"] .theme-moon { display: none; }
 .foot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 64px var(--gut) 26px; display: flex; justify-content: center; pointer-events: none;
         background: linear-gradient(to bottom, transparent, rgba(12, 16, 22, .42) 55%, rgba(12, 16, 22, .62)); }
 .foot-in { width: 100%; max-width: var(--max); display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #EFE8DA; text-shadow: 0 1px 6px rgba(0,0,0,.45); pointer-events: auto; }
-.foot-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
-.foot-credits { margin: 0; font-size: 12px; line-height: 1.55; opacity: .92; }
+.foot-credits { margin: 0; font-size: 12.5px; line-height: 1.55; opacity: .92; }
 .foot-credits a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: rgba(246, 240, 228, .5); }
 .foot nav { display: flex; gap: 24px; }
 .foot a { color: #F6F0E4; }
@@ -255,9 +254,8 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
   .shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 18px; row-gap: 28px; }
   /* the floating bottom bar (about 76px with its margin) never covers the end of a page: the footer links sit above it, and anything scrolled to or focused stops short of it */
   html { scroll-padding-bottom: 96px; }
-  .foot { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .foot { padding-bottom: calc(112px + env(safe-area-inset-bottom)); }
   .toast { bottom: calc(96px + env(safe-area-inset-bottom)); }
-  .foot-row { flex-direction: column; align-items: flex-start; gap: 10px; }
   .foot nav { gap: 18px; flex-wrap: wrap; }
   .foot-wrap { margin-top: 32px; }
   .hide-sm { display: none !important; }
