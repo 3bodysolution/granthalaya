@@ -53,10 +53,15 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
             ))}
           </div>
           {filters.length > 1 && (
-            <div class="filters" role="group" aria-label="Filter by status">
-              <button class="gchip" data-status-btn="all" aria-pressed="true">All</button>
-              {filters.map((f) => <button class="gchip" data-status-btn={f.k} aria-pressed="false">{f.label}</button>)}
-              <span class="count" aria-live="polite"></span>
+            <div class="filters">
+              <label class="stsel gchip">
+                <span>Status:</span>
+                <select id="status-sel" aria-label="Filter by status">
+                  <option value="all" selected>All</option>
+                  {filters.map((f) => <option value={f.k}>{f.label}</option>)}
+                </select>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </label>
             </div>
           )}
         </div>
@@ -90,7 +95,11 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
   .tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--lat); }
   .tabs button:hover { color: var(--ink); }
   .filters { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-  .count { margin-left: 6px; font-size: 13px; color: var(--muted); }
+  .stsel { position: relative; display: inline-flex; align-items: center; gap: 6px; padding-right: 12px; cursor: pointer; }
+  .stsel select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 600; padding: 8px 18px 8px 0; margin: 0; cursor: pointer; outline: none; }
+  .stsel svg { position: absolute; right: 12px; pointer-events: none; }
+  .stsel:focus-within { outline: 2px solid var(--lat); outline-offset: 2px; }
+  .stsel option { color: initial; background: initial; }
 
   .year { padding-top: 32px; }
   .yr summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 22px; }
@@ -119,10 +128,8 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
     const lib = document.getElementById('lib');
     if (!lib || lib.dataset.ready) return;
     lib.dataset.ready = '1';
-    const count = lib.querySelector<HTMLElement>('.count');
     const apply = (push = true) => {
       const t = lib.dataset.type!, st = lib.dataset.status!;
-      let total = 0;
       lib.querySelectorAll<HTMLElement>('.yr').forEach((yr) => {
         let shown = 0;
         yr.querySelectorAll<HTMLElement>('.cell').forEach((el) => {
@@ -130,11 +137,9 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
           el.classList.toggle('is-hidden', !ok);
           if (ok) shown++;
         });
-        total += shown;
         yr.classList.toggle('empty', shown === 0);
         if (shown && (t !== 'all' || st !== 'all')) (yr as HTMLDetailsElement).open = true;
       });
-      if (count) count.textContent = t === 'all' && st === 'all' ? '' : `${total} shown`;
       if (push) {
         const u = new URL(location.href);
         t === 'all' ? u.searchParams.delete('type') : u.searchParams.set('type', t);
@@ -149,21 +154,21 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
     };
     const setStatus = (s: string, push = true) => {
       lib.dataset.status = s;
-      lib.querySelectorAll<HTMLElement>('[data-status-btn]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.statusBtn === s)));
+      const sel = document.getElementById('status-sel') as HTMLSelectElement | null;
+      if (sel) sel.value = s;
       apply(push);
     };
     lib.addEventListener('click', (ev) => {
       const el = ev.target as Element;
       const t = el.closest<HTMLElement>('[data-type-btn]');
       if (t) setType(t.dataset.typeBtn!);
-      const s = el.closest<HTMLElement>('[data-status-btn]');
-      if (s) setStatus(s.dataset.statusBtn!);
     });
+    document.getElementById('status-sel')?.addEventListener('change', (ev) => setStatus((ev.target as HTMLSelectElement).value));
     const q = new URLSearchParams(location.search);
     const qt = q.get('type'), qs = q.get('status');
     if (qt && lib.querySelector(`[data-type-btn="${qt}"]`)) setType(qt, false);
     // a status that isn't one of the buttons (a mistyped address) shows everything, as All
-    if (qs && lib.querySelector(`[data-status-btn="${CSS.escape(qs)}"]`)) setStatus(qs, false);
+    if (qs && lib.querySelector(`#status-sel option[value="${CSS.escape(qs)}"]`)) setStatus(qs, false);
   }
   document.addEventListener('astro:page-load', setup);
 </script>
