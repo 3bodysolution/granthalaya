@@ -1,4 +1,4 @@
-// A copy of a cover, for the share cards: /api/cover?u=<cover address>. Public, and kept by Vercel's CDN for 30 days, so the next
+// A copy of a cover, for the share cards: /api/cover?u=<cover address>. Public, and kept by Vercel's CDN for 30 days (a shop's covers for 1 day), so the next
 // card that needs the same poster gets it at once. It is a small fetch-for-anyone door, so it is strict:
 //     It also serves the two bookshops' covers to visitors (pages never load them from the shops), with the shops' permission.
 //   · only our cover sources: image.tmdb.org posters, covers.openlibrary.org, Google Books covers, Akshardhara's folder on
@@ -21,5 +21,8 @@ export const GET: APIRoute = async ({ url }) => {
   // Akshardhara's covers often come inside a plain white frame (with the shop's address under the picture): take the frame off, never cutting into the picture
   let { body, type } = img;
   if (u.hostname === 'cdn.shopify.com') { const t = await trimFrame(body).catch(() => null); if (t) ({ body, type } = t); }
-  return new Response(body, { headers: { 'Content-Type': type, 'Cache-Control': 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400', 'X-Content-Type-Options': 'nosniff' } });
+  // a shop's cover is kept for a day only (not 30), with no stale copy afterwards, so one the shop asks us to hide is gone within a day
+  const shop = u.hostname === 'cdn.shopify.com' || u.hostname === 'www.bookganga.com';
+  const cache = shop ? 'public, max-age=86400, s-maxage=86400' : 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400';
+  return new Response(body, { headers: { 'Content-Type': type, 'Cache-Control': cache, 'X-Content-Type-Options': 'nosniff' } });
 };
