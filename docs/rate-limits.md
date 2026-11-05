@@ -27,7 +27,7 @@ The labels in the dashboard change now and then; if a name differs, look for the
 
 ## If your plan allows only one or two rules
 
-Vercel's free plan limits how many custom rules and rate limits you get. Keep the first and the fourth rule (search is the cheapest to abuse and the most expensive to answer), and combine the card rules into one: **Request Path** **Matches regular expression** `^/(og|story)/|\.png$`, 20 per 60 seconds.
+Vercel's free plan allows **two** rules. Use: (1) search, `/api/search`, 30 per 60 seconds; (2) all the drawn cards in one rule, **Request Path** **Matches regular expression** `^/(og|story)/|\.png$`, 20 per 60 seconds. Covers (`/api/cover`) then rely on the code's own limit and on the CDN keeping each cover (a shop's cover for a day, the rest for 30 days).
 
 ## Also worth doing in the same place
 
