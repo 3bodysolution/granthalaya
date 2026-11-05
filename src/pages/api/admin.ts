@@ -10,6 +10,34 @@ export const POST: APIRoute = async (ctx) => {
   if (!ctx.locals.me?.is_admin) return oops('Not found.', 404);
   const b = await body<{ id?: string; action?: string }>(ctx.request);
   const db = adminClient();
+  if (b?.action === 'remove_title') {
+    // take a title out of the shared catalogue, only when nobody has it logged or in a collection (a TV show counts its seasons too)
+    if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which title?');
+    const { data: t } = await db.from('titles').select('id, title, kind').eq('id', b.id).maybeSingle();
+    if (!t) return oops('Couldn’t find that title.', 404);
+    const { data: seasons } = await db.from('titles').select('id').eq('show_id', t.id);
+    const ids = [t.id, ...(seasons ?? []).map((s: { id: string }) => s.id)];
+    const { data: logs } = await db.from('logs').select('user_id').in('title_id', ids);
+    const { count: inCollections } = await db.from('thread_items').select('title_id', { count: 'exact', head: true }).in('title_id', ids);
+    const { count: shopRows } = await db.from('shop_books').select('id', { count: 'exact', head: true }).in('title_id', ids);
+    if (shopRows) return oops('Not removed: it belongs to a bookshop book. Hide that book instead (above).', 409);
+    if ((logs ?? []).length || inCollections) {
+      const people = new Set((logs ?? []).map((l: { user_id: string }) => l.user_id)).size;
+      const parts = [
+        (logs ?? []).length ? `${(logs ?? []).length} log${(logs ?? []).length === 1 ? '' : 's'} by ${people} member${people === 1 ? '' : 's'}` : '',
+        inCollections ? `${inCollections} collection item${inCollections === 1 ? '' : 's'}` : '',
+      ].filter(Boolean).join(' and ');
+      return oops(`Not removed: ${parts} use it.`, 409);
+    }
+    // favourites are a list of title ids on a profile: take it out of any
+    const { data: favs } = await db.from('profile_details').select('id, favourites').overlaps('favourites', ids);
+    for (const f of (favs ?? []) as { id: string; favourites: string[] }[]) {
+      await db.from('profile_details').update({ favourites: f.favourites.filter((x) => !ids.includes(x)) }).eq('id', f.id);
+    }
+    const { error } = await db.from('titles').delete().in('id', ids);
+    if (error) return oops('Couldn’t remove it. Something still refers to it.', 500);
+    return json({ ok: true });
+  }
   if (b?.action === 'hide_shop' || b?.action === 'show_shop' || b?.action === 'hide_cover') {
     // a shop asked: no Buy link and no cover (hidden rows stay, so scripts/shops never brings them back)
     if (!b.id || !/^[0-9a-f-]{36}$/i.test(b.id)) return oops('Which book?');
