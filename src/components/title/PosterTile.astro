@@ -48,7 +48,7 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
   .pt { position: relative; min-width: 0; }
   .pt-link { display: flex; flex-direction: column; gap: 8px; }
   .pt-link:hover { color: inherit; }
-  .pt-cover { position: relative; display: block; width: 100%; aspect-ratio: 2 / 3; overflow: hidden; background: var(--bg); color: #F6EEDF; box-shadow: 0 10px 18px -12px var(--shadow); transition: transform .35s var(--spring), box-shadow .35s ease; }
+  .pt-cover { position: relative; display: block; flex: none; width: 100%; aspect-ratio: 2 / 3; height: auto; overflow: hidden; background: var(--bg); color: #F6EEDF; box-shadow: 0 10px 18px -12px var(--shadow); transition: transform .35s var(--spring), box-shadow .35s ease; }
   .pt-cover.film { border-radius: 6px; }
   .pt-cover.book { border-radius: 2px 6px 6px 2px; }
   .pt-link:hover .pt-cover { transform: translateY(-4px); box-shadow: 0 0 0 2px var(--lat), 0 18px 24px -14px var(--shadow); }
@@ -58,7 +58,7 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
   .hill { left: -20%; width: 140%; bottom: -8px; height: 32%; border-radius: 50% 50% 0 0; background: var(--hill); }
   .pt-w { position: absolute; left: 10px; right: 10px; bottom: 12px; font-size: 15px; line-height: 1.15; overflow-wrap: break-word; hyphens: auto; }
   .real .sun, .real .hill, .real .pt-w { visibility: hidden; }
-  .pt-t { font-size: 14px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .pt-t { min-height: 2.5em; font-size: 14px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .pt-s { margin-top: -4px; font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pt :global(.pt-badge) { position: absolute; top: 8px; right: 8px; z-index: 2; }
   .pt-save { position: absolute; top: 6px; right: 6px; z-index: 2; width: 36px; height: 36px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(12, 14, 18, .55); color: #fff; cursor: pointer; opacity: 0; transition: opacity .2s ease, transform .25s var(--spring); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
@@ -69,7 +69,7 @@ const to = href || (search ? (kind === 'book' ? '/books/' : '/films/') : undefin
   .pt-wa { display: none; margin-top: 4px; font-family: 'Instrument Sans', system-ui, sans-serif; font-size: 11px; font-weight: 500; opacity: .85; }
   /* poster only: the text under it stays for screen readers, and the name shows over the foot of the poster on hover or focus */
   .bare .pt-link { gap: 0; }
-  .bare .pt-t, .bare .pt-s { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .bare .pt-t, .bare .pt-s { min-height: 0; position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
   .bare .pt-w { font-size: 13px; left: 8px; right: 8px; bottom: 10px; }
   .bare.pt .pt-wa, .bare .pt-wa { display: block; }
   .bare .real .pt-wa { display: none; }
