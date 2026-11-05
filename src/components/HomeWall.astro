@@ -93,7 +93,7 @@ const rowsOf = (w: Wall) => {
   .wt.on :global(.wsave) { opacity: 1; pointer-events: auto; }
   .wt :global(.wsave:active) { transform: scale(.92); }
   .wt :global(.wsave.is-saved .mk-edge) { stroke: #fff; }
-  /* the back of a cover: a real tagline in italics, or its title, year and director or author; the script sizes the text so all of it fits */
+  /* the back of a cover: a real tagline in italics (covers without one never flip); the script sizes the text so all of it fits */
   .wt :global(.wback) { position: absolute; inset: 0; display: grid; place-items: center; padding: 6px; overflow: hidden; background: var(--card); color: var(--ink); text-align: center; }
   .wt :global(.wback[hidden]) { display: none; }
   .wt :global(.wtxt) { width: 100%; overflow-wrap: normal; line-height: 1.25; }
@@ -287,22 +287,9 @@ const rowsOf = (w: Wall) => {
       const box = document.createElement('span');
       face.append(box);
       t.append(face);
-      const card = () => {
-        box.className = 'wtxt card';
-        box.replaceChildren();
-        const b = document.createElement('b');
-        b.textContent = m.t;
-        box.append(b);
-        const sub = [m.y, m.c].filter(Boolean).join(' | ');
-        if (sub) { const sm = document.createElement('small'); sm.textContent = sub; box.append(sm); }
-        fit(face, box, 12, 6.5);
-      };
-      const line = m.l ? tidy(m.l) : '';
-      if (line) {
-        box.className = 'wtxt line';
-        box.textContent = line;
-        if (!fit(face, box, 12.5, 8.5)) card();   // a line too long to read in full gives way to the title card
-      } else card();
+      box.className = 'wtxt line';
+      box.textContent = tidy(m.l ?? '');
+      fit(face, box, 12.5, 6.5);   // as large as will fit; a very long line just gets smaller (covers without a line never flip)
       return face;
     }
     async function flip(t: HTMLElement, m: Meta) {
@@ -316,7 +303,7 @@ const rowsOf = (w: Wall) => {
       if (calm.matches || hero.classList.contains('paused')) return;
       const box = hero.getBoundingClientRect();
       const seen = [...hero.querySelectorAll<HTMLElement>('.wt:not(.on):not(.is-back)')].filter((t) => {
-        if (!metaOf(t) || t.closest('.wr')?.classList.contains('held')) return false;
+        if (!tidy(metaOf(t)?.l ?? '') || t.closest('.wr')?.classList.contains('held')) return false;
         const r = t.getBoundingClientRect();
         return r.width > 0 && r.left >= 0 && r.right <= innerWidth && r.top >= Math.max(0, box.top) && r.bottom <= Math.min(innerHeight, box.bottom) && !!t.querySelector('img:not(.gone)');
       });
