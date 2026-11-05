@@ -1,5 +1,5 @@
 ---
-// Google's sign-in button, following Google's branding rules: white button, coloured G, "Continue with Google".
+// Google's sign-in button, following Google's branding rules: white button in light mode, Google's dark button (#131314, #8E918F border, #E3E3E3 text) in dark mode, coloured G, "Continue with Google".
 interface Props { class?: string; next?: string }
 const { class: cls, next = '/' } = Astro.props;
 ---
@@ -12,4 +12,6 @@ const { class: cls, next = '/' } = Astro.props;
 <style>
   /* the site's link colour would otherwise win over these classes; Google's button always has dark text */
   .g-btn, .g-btn:hover { color: #1F1F1F; }
+  :global(html[data-theme='dark']) .g-btn.g-btn { background-color: #131314; border: 1px solid #8E918F; color: #E3E3E3; box-shadow: none; }
+  :global(html[data-theme='dark']) .g-btn.g-btn:hover { background-color: #1E1F20; color: #E3E3E3; }
 </style>
