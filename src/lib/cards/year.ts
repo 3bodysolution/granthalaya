@@ -4,8 +4,8 @@ import satori from 'satori';
 import { mark } from '../timing';
 import { render, type Picture } from './output';
 import { paletteFor } from '../data';
-import { CoverMissing, softShadow, timedPainting, W, H, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
-import { baseColor, PAINT_H, type Background } from './backgrounds';
+import { CoverMissing, softShadow, W, H, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
+import type { Background } from './backgrounds';
 
 export interface YearTitle { title: string; cover?: string; color?: string }
 export interface YearData {
@@ -19,10 +19,11 @@ export interface YearData {
 
 const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 const STRIP_X = 500, FRAME_W = 236, FRAME_H = 78, FAV_W = 286, FAV_H = 100, GAP = 8, TOP = 336;   // the strip starts below where the painting fades out
+const CARD_BG = '#121316';   // plain dark, no painting
 const FILM = '#1B1C20', HOLE = '#E9E3D6';
 
 export async function drawYear(d: YearData, width = W): Promise<Picture> {
-  const [covers, favCover0, painting] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
+  const [covers, favCover0] = await Promise.all([Promise.all(d.months.map((m) => coverData(m?.cover, false))), coverData(d.fav?.cover, width >= W)]);
   // Thirteen covers are needed at once, so on a cold start one of them is often late. The late ones get one more try; if they are
   // still missing the card is drawn with painted covers for them and marked unfinished (the share window then asks again in a few
   // seconds, by which time the covers are kept). One slow cover no longer means no card.
@@ -82,12 +83,7 @@ export async function drawYear(d: YearData, width = W): Promise<Picture> {
     d.essays ? count(d.essays, d.essays === 1 ? 'essay' : 'essays', '#A9C79B') : null,
   ].filter(Boolean);
 
-  const root = h('div', { width: W, height: H, background: baseColor(d.bg), position: 'relative' }, [
-    // a strip of the painting at the top, melting into the card
-    h('div', { position: 'absolute', left: 0, top: 0, width: W, height: 310, overflow: 'hidden' }, [
-      { type: 'img', props: { src: painting, width: W, height: PAINT_H, style: { position: 'absolute', left: 0, top: 0, width: W, height: PAINT_H } } },
-    ]),
-    h('div', { position: 'absolute', left: 0, top: 150, width: W, height: 160, background: `linear-gradient(to bottom, rgba(18,19,22,0), ${baseColor(d.bg)})` }),
+  const root = h('div', { width: W, height: H, background: CARD_BG, position: 'relative' }, [
     h('div', { position: 'absolute', left: 60, top: 350, width: 420, flexDirection: 'column' }, [
       h('div', { fontSize: 88, whiteSpace: 'nowrap', lineHeight: 1.05, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, `My ${d.year}`),
       h('div', { marginTop: 18, flexDirection: 'column', gap: 0 }, stats),
