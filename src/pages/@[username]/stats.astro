@@ -3,6 +3,8 @@ import Base from '../../layouts/Base.astro';
 import ShelfStrip from '../../components/ShelfStrip.astro';
 import { openShelf } from '../../lib/shelfpage';
 import { yearOg } from '../../lib/share';
+import YearShelf, { type ShelfItem } from '../../components/YearShelf.astro';
+import { fillCoverColors } from '../../lib/catalog/covercolor';
 import { loadShelf, monthNames, href, fullTitle, coverSrc, palette, type Entry } from '../../lib/data';
 export const prerender = false;
 
@@ -124,23 +126,62 @@ const monthCovers = months.filter((m) => m.sum > 0).map((m) => ({
   name: m.name, total: m.sum,
   picks: [...m.list].sort((a, b) => (b.data.rating ?? 0) - (a.data.rating ?? 0) || b.data.date.getTime() - a.data.date.getTime()),
 }));
+// the year as a shelf: finished things in date order; a show is one box set with the seasons finished this year
+const PAPER = '#E9E1CE';
+const fresh = await fillCoverColors(inYear.map((e) => ({ id: e.titleId, cover: e.data.cover, known: e.data.coverColor })), Astro.url.origin);
+const colorFor = (e: Entry) => fresh.get(e.titleId) ?? e.data.coverColor ?? palette(e).bg;
+const seasonsText = (ns: number[]) => {
+  const a = [...new Set(ns)].sort((x, y) => x - y);
+  if (!a.length) return undefined;
+  const parts: string[] = [];
+  for (let i = 0; i < a.length; i++) {
+    let j = i;
+    while (j + 1 < a.length && a[j + 1] === a[j] + 1) j++;
+    parts.push(j > i ? `S${a[i]}–${a[j]}` : `S${a[i]}`);
+    i = j;
+  }
+  return parts.join(', ');
+};
+const byTime = [...inYear].sort((a, b) => a.data.date.getTime() - b.data.date.getTime());
+const shelfItems: { at: number; item: ShelfItem }[] = [];
+const shows = new Map<string, { at: number; list: Entry[] }>();
+for (const e of byTime) {
+  const at = e.data.date.getTime();
+  if (e.data.type === 'tv') {
+    const k = e.showId ?? e.data.title;
+    const g = shows.get(k) ?? { at, list: [] };
+    g.at = at; g.list.push(e); shows.set(k, g);
+  } else {
+    shelfItems.push({ at, item: { kind: e.data.type === 'essay' ? 'essay' : e.data.type === 'film' ? 'film' : 'book', title: e.data.title, href: href(e), color: e.data.type === 'essay' ? PAPER : colorFor(e) } });
+  }
+}
+for (const g of shows.values()) {
+  const f = g.list[0];
+  shelfItems.push({ at: g.at, item: { kind: 'tv', title: f.data.title, href: href(f), color: colorFor(f), seasons: seasonsText(g.list.map((x) => x.data.season).filter((n): n is number => n != null)) } });
+}
+shelfItems.sort((a, b) => a.at - b.at);
+const nShows = shows.size;
+const nFilmsOnly = inYear.filter((e) => e.data.type === 'film').length;
+const FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const lastMonth = shelfItems.length ? FULL[new Date(shelfItems[shelfItems.length - 1].at).getUTCMonth()] : '';
 const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '' : `?year=${y}`}`;
 ---
 <Base title={isMe ? 'Your stats' : `${name}’s stats`} shelf={profile.username} feed={!profile.is_private}
   description={inYear.length ? `${plural(inYear.length, 'thing')} finished in ${year}.` : `Stats for ${year}.`}
   og={inYear.length && !profile.is_private ? yearOg(name, year, nBooks, nFilms, Math.round(filmMin / 60), fav ? fav.data.title : undefined) : undefined}>
-  <section class="hero bleed">
-    <div class="art melt bg" style="--day: url(/art/stats-day.webp); --night: url(/art/stats-night.webp)" aria-hidden="true"></div>
-    <div class="pad words">
-      <p class="eyebrow">Your year | {year}</p>
-      {inYear.length ? (
-        <h1 class="title num">
-          In {year} {who} {read.length > 0 && <>read {read.map((r, i) => <>{i > 0 && ' and '}<b class="nb">{r.split(' ')[0]}</b> {r.split(' ').slice(1).join(' ')}</>)}</>}{read.length > 0 && nFilms > 0 && ', and '}{nFilms > 0 && <>{read.length > 0 ? '' : ' '}watched <b class="nf">{nFilms}</b> {nFilms === 1 ? (hasTv ? 'film or show' : 'film') : (hasTv ? 'films and shows' : 'films')}</>}.
+  <section class="pad yearhead">
+    <p class="eyebrow yh-eyebrow">Year {year}</p>
+    {inYear.length ? (
+      <>
+        <h1 class="title num yh-sentence">
+          In {year} {who} {read.length > 0 && <>read {read.map((r, i) => <>{i > 0 && ' and '}<b class="nb">{r.split(' ')[0]}</b> {r.split(' ').slice(1).join(' ')}</>)}</>}{read.length > 0 && (nFilmsOnly > 0 || nShows > 0) && ', and '}{(nFilmsOnly > 0 || nShows > 0) && <>{read.length > 0 ? '' : ' '}watched {nFilmsOnly > 0 && <><b class="nf">{nFilmsOnly}</b> {nFilmsOnly === 1 ? 'film' : 'films'}</>}{nFilmsOnly > 0 && nShows > 0 && ' and '}{nShows > 0 && <><b class="nf">{nShows}</b> {nShows === 1 ? 'show' : 'shows'}</>}</>}.
         </h1>
-      ) : (
-        <h1 class="title">Nothing finished in {year} yet.</h1>
-      )}
-    </div>
+        <YearShelf items={shelfItems.map((x) => x.item)} year={year} />
+        <div class="yh-months" aria-hidden="true"><span>January</span>{lastMonth && lastMonth !== 'January' && <span>{lastMonth}</span>}</div>
+      </>
+    ) : (
+      <h1 class="title">Nothing finished in {year} yet.</h1>
+    )}
   </section>
 
   <section class="pad strip-row rise d1"><ShelfStrip shelf={o.shelf} current="stats" /></section>
@@ -258,17 +299,12 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
 </Base>
 
 <style>
-  .hero { position: relative; aspect-ratio: 2172 / 724; min-height: 380px; max-height: 640px; overflow-x: clip; }
-  .hero .bg { position: absolute; inset: 0; background-position: center bottom; }
-  .words { position: relative; padding-top: clamp(20px, 2.6vw, 40px); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-  .words .eyebrow { color: #0B5552; }
-  .words .title { font-size: clamp(26px, 3.1vw, 42px); line-height: 1.12; max-width: 760px; color: #2A211B; text-shadow: 0 1px 18px rgba(255, 240, 220, .6); }
-  .words .nb { color: #6B4527; font-weight: inherit; }
-  .words .nf { color: #1E4F7A; font-weight: inherit; }
-  :global(html[data-theme="dark"]) .words .eyebrow { color: #8FDCD2; }
-  :global(html[data-theme="dark"]) .words .title { color: #F6EEDF; text-shadow: 0 2px 18px rgba(8, 14, 32, .65); }
-  :global(html[data-theme="dark"]) .words .nb { color: #E4BE94; }
-  :global(html[data-theme="dark"]) .words .nf { color: #A9C8E2; }
+  .yearhead { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; padding-top: clamp(24px, 3vw, 44px); }
+  .yh-eyebrow { color: var(--lat); }
+  .yh-sentence { font-size: clamp(24px, 2.8vw, 36px); line-height: 1.16; max-width: 760px; margin: 0 0 14px; }
+  .yh-sentence .nb { color: var(--book); font-weight: inherit; }
+  .yh-sentence .nf { color: var(--sky); font-weight: inherit; }
+  .yh-months { width: 100%; max-width: 900px; padding: 0 14px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; letter-spacing: .04em; color: var(--muted); }
 
   /* the bars rise from where the painting fades into the page */
   .bars-wrap { position: relative; padding-top: 34px; display: flex; flex-direction: column; gap: 14px; }
@@ -342,9 +378,7 @@ const yearUrl = (y: number) => `/@${profile.username}/stats/${y === thisYear ? '
     .cgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 780px) {
-    .hero { aspect-ratio: auto; min-height: 400px; }
-    .hero .bg { background-position: 60% bottom; }
-    .words { padding-top: 30px; }
+    .yearhead { padding-top: 20px; }
     .favcover { width: 150px; }
     .tiles, .right { gap: 12px; }
     .right { grid-template-columns: repeat(2, minmax(0, 1fr)); }

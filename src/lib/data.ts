@@ -21,7 +21,7 @@ export interface Title {
   id: string; kind: Kind; slug: string; title: string; creator: string; year: number | null; season: number | null;
   episodes: number | null; runtime: number | null; pages: number | null; words: number | null; cover_url: string | null;
   link: string | null; source: string | null; tmdb_id: number | null; ol_key: string | null; trivia: string[];
-  trivia_source: string | null; color: string | null; language: string | null;
+  trivia_source: string | null; color: string | null; cover_color?: string | null; language: string | null;
   show_id?: string | null; seasons?: number | null;   // TV: a season's show row; a show row's number of seasons
   tagline?: string | null;                            // the title's own line (see cards/tagline.ts)
 }
@@ -44,7 +44,7 @@ export interface Entry {
     title: string; type: Kind; creator: string; year?: number; season?: number; episodes?: number;
     date: Date; started?: Date; finished?: Date; status: Status; rating?: number; loved: boolean;
     runtime?: number; pages?: number; words?: number; link?: string; source?: string; where?: string;
-    again: boolean; times: number; color?: string; cover?: string; private: boolean;
+    again: boolean; times: number; color?: string; coverColor?: string; cover?: string; private: boolean;
     trivia: string[]; triviaSource?: string; tmdbId?: number; olKey?: string; language?: string;
     tagline?: string; spoiler: boolean;   // the review's one line, and whether it gives the story away
     cardLine?: string;                    // the title's own line (TMDB's tagline, or one written by the AI), for cards and the footer
@@ -78,7 +78,7 @@ function toEntry(r: LogRow, owner: string): Entry {
       date: day(r.logged_on)!, started: day(r.started_on), finished: day(r.finished_on), status: r.status,
       rating: r.rating == null ? undefined : Number(r.rating), loved: r.loved,
       runtime: opt(t.runtime), pages: opt(t.pages), words: opt(t.words), link: opt(t.link), source: opt(t.source),
-      where: opt(r.where_seen), again: r.again, times: 1, color: opt(t.color), cover: opt(t.cover_url), private: r.only_me,
+      where: opt(r.where_seen), again: r.again, times: 1, color: opt(t.color), coverColor: opt(t.cover_color), cover: opt(t.cover_url), private: r.only_me,
       trivia: Array.isArray(t.trivia) ? t.trivia : [], triviaSource: opt(t.trivia_source), tmdbId: opt(t.tmdb_id), olKey: opt(t.ol_key), language: opt(t.language),
       tagline: opt(r.tagline), spoiler: r.spoiler === true, cardLine: opt(t.tagline),
     },

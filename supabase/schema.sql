@@ -150,6 +150,7 @@ create table public.titles (
   trivia jsonb not null default '[]'::jsonb check (jsonb_typeof(trivia) = 'array'),
   trivia_source text,
   color text check (color is null or color ~ '^#[0-9a-fA-F]{6}$'),
+  cover_color text check (cover_color is null or cover_color ~ '^#[0-9a-fA-F]{6}$'),  -- the cover's main colour, worked out once (the Stats shelf)
   created_by uuid references public.profiles (id) on delete set null,
   created_at timestamptz not null default now()
 );
