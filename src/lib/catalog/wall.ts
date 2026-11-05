@@ -8,6 +8,7 @@ import { timedFetch } from '../timing';
 import { tileImage, viaCover, SHOP_COVER } from '../images';
 import { trending } from './tmdb';
 import { waitUntil } from '@vercel/functions';
+import { site } from '../../data/site';
 import skip from '../../data/wall-skip.json';
 import savedLines from '../../data/wall-lines.json';
 import { listsOfKind, listTile, ownYear } from '../lists';
@@ -98,16 +99,16 @@ async function bookCovers(): Promise<Pic[]> {
 }
 
 // The line on the back of a cover is only ever a real one: TMDB's own tagline (saved for the list films in wall-lines.json) or the tagline of a
-// member's public review (never a spoiler). `titles.tagline` is not used, because it can be written by an AI. A cover with neither shows its
-// title, year and director or author on the back instead.
+// site owner's own public review (never a spoiler, never another member's: those aren't moderated before they reach the home page).
+// `titles.tagline` is not used, because it can be written by an AI. A cover with neither shows its title, year and director or author on the back instead.
 let reviewLines: { at: number; byKey: Map<string, string> } | null = null;
 async function reviewTaglines(): Promise<Map<string, string>> {
   if (reviewLines && Date.now() - reviewLines.at < 3600_000) return reviewLines.byKey;
   const byKey = new Map<string, string>();
   if (supabaseReady()) {
     const sb = createClient(env('PUBLIC_SUPABASE_URL'), env('PUBLIC_SUPABASE_PUBLISHABLE_KEY'), { auth: { persistSession: false, autoRefreshToken: false }, global: { fetch: timedFetch } });
-    // read as nobody, so only what the database shows to everyone
-    const { data } = await sb.from('logs').select('tagline, title:titles(kind, tmdb_id, ol_key, slug)').neq('tagline', '').eq('spoiler', false).order('created_at', { ascending: false }).limit(500);
+    // read as nobody, so only what the database shows to everyone, and only from the site owner's own shelf
+    const { data } = await sb.from('logs').select('tagline, title:titles(kind, tmdb_id, ol_key, slug), owner:profiles!logs_user_id_fkey!inner(username)').eq('owner.username', site.founder).neq('tagline', '').eq('spoiler', false).order('created_at', { ascending: false }).limit(500);
     type Row = { tagline: string; title: { kind: string; tmdb_id: number | null; ol_key: string | null; slug: string } | null };
     for (const { tagline, title: t } of (data ?? []) as unknown as Row[]) {
       if (!t || !tagline.trim()) continue;
