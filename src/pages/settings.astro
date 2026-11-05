@@ -61,21 +61,20 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
           <form class="sec" data-save="profile">
             <div class="head"><h2>Profile</h2><p>How you appear to others.</p></div>
             <div class="photo" id="photo-zone" data-can-upload={canUpload ? '1' : '0'}>
-              <Face name={me.display_name || me.username} src={me.avatar_url} size={64} />
-              <div class="stack" style="gap: 6px">
-                <span class="lbl">Photo</span>
-                <span class="hint">{photoHint}</span>
-                <div class="flex gap-2 wrapchips">
-                  {canUpload
-                    ? <button type="button" class="gchip" id="photo-pick">Upload a photo</button>
-                    : <button type="button" class="gchip" disabled title="Coming soon">Upload a photo (coming soon)</button>}
-                  {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" class="gchip" data-photo="google">Use my Google photo</button>}
-                  {me.avatar_url && <button type="button" class="gchip" data-photo="none">Remove photo</button>}
-                </div>
-                {canUpload && <span class="hint drop">On a computer you can also drop a photo here. JPEG, PNG or WebP, up to 5 MB.</span>}
-                <span class="hint photo-err" id="photo-err" role="alert" hidden></span>
-                <input type="file" id="photo-file" accept="image/*" hidden />
+              <button type="button" class="pbtn" id="photo-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="photo-menu" aria-label="Change photo">
+                <Face name={me.display_name || me.username} src={me.avatar_url} size={96} />
+                <span class="cam" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+              </button>
+              <div class="pmenu-back" id="photo-back" hidden></div>
+              <div class="pmenu" id="photo-menu" role="menu" aria-label="Photo" hidden>
+                {canUpload
+                  ? <button type="button" role="menuitem" id="photo-pick">Upload a photo</button>
+                  : <button type="button" role="menuitem" disabled title="Coming soon">Upload a photo (coming soon)</button>}
+                {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" role="menuitem" data-photo="google">Use my Google photo</button>}
+                {me.avatar_url && <button type="button" role="menuitem" class="danger" data-photo="none">Remove photo</button>}
               </div>
+              <span class="hint photo-err" id="photo-err" role="alert" hidden></span>
+              <input type="file" id="photo-file" accept="image/*" hidden />
             </div>
             <dialog class="crop" id="crop" aria-labelledby="crop-t">
               <h3 id="crop-t">Position your photo</h3>
@@ -221,7 +220,19 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
   .head p { margin: 4px 0 0; font-size: 14px; color: var(--muted); }
   .fld { display: flex; flex-direction: column; gap: 8px; }
   .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .photo { display: flex; align-items: center; gap: 16px; }
+  .photo { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .pbtn { position: relative; display: inline-flex; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; color: var(--ink); }
+  .pbtn .cam { position: absolute; right: -2px; bottom: -2px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--card); border: 1px solid var(--line); box-shadow: 0 1px 4px rgb(0 0 0 / .18); }
+  .pmenu { position: absolute; top: 100%; left: 0; margin-top: 8px; z-index: 30; min-width: 220px; padding: 6px; border-radius: 14px; background: var(--card); border: 1px solid var(--line); box-shadow: 0 10px 30px rgb(0 0 0 / .18); display: flex; flex-direction: column; }
+  .pmenu[hidden], .pmenu-back[hidden] { display: none; }
+  .pmenu button { text-align: left; padding: 11px 12px; min-height: 44px; border: 0; background: none; border-radius: 9px; font: inherit; font-size: 15px; color: var(--ink); cursor: pointer; transition: background-color .2s; }
+  .pmenu button:hover:not(:disabled) { background: var(--wash, rgb(127 127 127 / .12)); }
+  .pmenu button:disabled { opacity: .5; cursor: default; }
+  .pmenu button.danger { color: #B4473B; }
+  @media (max-width: 780px) {
+    .pmenu-back { position: fixed; inset: 0; z-index: 59; background: var(--scrim); }
+    .pmenu { position: fixed; left: 0; right: 0; bottom: 0; top: auto; margin: 0; z-index: 60; border-radius: 18px 18px 0 0; padding: 10px 12px calc(14px + env(safe-area-inset-bottom)); }
+  }
   .wrapchips { flex-wrap: wrap; }
   .photo.over { outline: 2px dashed var(--lat); outline-offset: 8px; border-radius: 12px; }
   .photo-err { color: #B4473B; font-weight: 600; }
@@ -422,7 +433,13 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
       img = im; zoom = 1; ox = 0; oy = 0; zoomEl.value = '1'; say(cerr, '');
       dlg.showModal(); paint(); box.focus();
     }
-    document.getElementById('photo-pick')?.addEventListener('click', () => (document.getElementById('photo-file') as HTMLInputElement).click());
+    const pbtn = document.getElementById('photo-btn')!, pmenu = document.getElementById('photo-menu')!, pback = document.getElementById('photo-back')!;
+    const setMenu = (open: boolean) => { pmenu.hidden = !open; pback.hidden = !open; pbtn.setAttribute('aria-expanded', String(open)); if (open) (pmenu.querySelector('button:not(:disabled)') as HTMLElement | null)?.focus(); };
+    pbtn.addEventListener('click', () => setMenu(pmenu.hidden));
+    pback.addEventListener('click', () => setMenu(false));
+    document.addEventListener('click', (ev) => { if (!pmenu.hidden && !zone.contains(ev.target as Node)) setMenu(false); });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && !pmenu.hidden) { setMenu(false); pbtn.focus(); } });
+    document.getElementById('photo-pick')?.addEventListener('click', () => { setMenu(false); (document.getElementById('photo-file') as HTMLInputElement).click(); });
     document.getElementById('photo-file')?.addEventListener('change', (ev) => {
       const input = ev.target as HTMLInputElement;
       void choose(input.files?.[0]); input.value = '';
