@@ -29,7 +29,7 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - **Contact:** `site.contact` (`src/data/site.ts`) is shown on Privacy and Terms.
 - **Polish rules** (in `global.css`): every interactive thing has hover, pressed (slight shrink), focus and disabled states; transitions name their properties and stay around 0.2s; numbers use tabular figures; covers get a hairline outline; touch targets are at least 40px. Tailwind's reset removes the browser's centring of dialogs, so `global.css` puts it back.
 - `public/art/` holds the page paintings (day and night), shown as CSS backgrounds with `.art` and `--day`/`--night`. `.melt` fades a painting into the page, `.bleed` runs it full width. `src/components/Valley.astro` is the footer painting; its shepherd says the title's own line on title and entry pages, else a weekly line from `site.lines`.
-- `src/content/` (the old markdown library) is kept as a backup and as the source for `npm run migrate`. The site no longer reads it.
+- `src/content/` (the old markdown library) is kept as a backup and as the source of the old `npm run migrate` (never run it again). The site no longer reads it.
 - `astro.config.mjs` → `security.allowedDomains` lists the site's addresses (the main one and `*.vercel.app` previews). Astro only trusts the address Vercel passes on for these, so a custom domain must be added there too, or sign-in and saving break on it (Astro would think the page is at `https://localhost`).
 - `package.json` pins Node 24.x (Astro 7 needs 22.23.4 or newer). `compressHTML: true` is set on purpose (Astro 7's default would drop spaces between inline elements), and the dev toolbar is off (its script answered 504 on Astro 6). `npm run dev` exempts this computer from the rate limits. `scripts/shots-share.mjs` takes pictures of the share window and fails if the card does not draw.
 - `vercel.json`: functions in `bom1` (next to the database in Mumbai) and a daily cron to `/api/keepalive` so the free database never pauses.
@@ -62,5 +62,5 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 
 - `npm run dev` starts a local copy at http://localhost:4321 (needs the Supabase values in `.env`).
 - `npm run build` builds the site. Run it before every commit.
-- `npm run migrate` copies the old markdown library onto the `sarthak` shelf (replaces that shelf; run it once, just before switching over).
+- `npm run migrate` copied the old markdown library onto the `sarthak` shelf. **Never run it again**: it replaces the live shelf with the old files.
 - `npm run trivia` fills in missing "Behind the film" facts.
