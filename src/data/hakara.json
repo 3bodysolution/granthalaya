@@ -6,19 +6,6 @@
   },
   "items": [
     {
-      "title": "हाकारा । hākārā: A Dialogic Open Space",
-      "author": "Ashutosh Potdar",
-      "authorKey": null,
-      "authorSlug": "ashutosh-potdar",
-      "publication": "Hakara",
-      "year": 2026,
-      "link": "https://hakara.in/%e0%a4%b9%e0%a4%be%e0%a4%95%e0%a4%be%e0%a4%b0%e0%a4%be-hakara-a-dialogic-open-space-potdar-harshey/",
-      "note": "Reflection on what a literary magazine is, starting from the society and reading culture it is published in.",
-      "language": "mr",
-      "theme": "Writing",
-      "roman": "hakara hakara a dialogic open space"
-    },
-    {
       "title": "एखादी भाषा जिवंत असणे म्हणजे काय ?",
       "author": "Saee Pawar",
       "authorKey": null,
@@ -26,7 +13,7 @@
       "publication": "Hakara",
       "year": 2026,
       "link": "https://hakara.in/what-does-it-mean-for-a-language-to-live-pawar-marathi/",
-      "note": "Reflection on what it means for a language to be alive, starting from the first word we speak in the mother tongue.",
+      "note": "What it means for a language to be alive, starting from the first word we speak in the mother tongue.",
       "language": "mr",
       "theme": "Writing",
       "roman": "ekhadi bhasha jivant asne mhanje kay"
@@ -39,10 +26,11 @@
       "publication": "Hakara",
       "year": 2026,
       "link": "https://hakara.in/medieval-bhakti-songs-as-hak-pawar-chaudhari/",
-      "note": "Reflection by the writer on bhakti and Sufi songs, which have been part of their life since degree studies.",
+      "note": "The writer's long relationship with bhakti and Sufi songs, which have been part of her life since her degree studies.",
       "language": "mr",
       "theme": "Music",
-      "roman": "madhyayugin bhaktigite ek art hak"
+      "roman": "madhyayugin bhaktigite ek art hak",
+      "translator": "Akshay Chaudhari"
     },
     {
       "title": "हाक आणि हाकेला हाक",
@@ -52,7 +40,7 @@
       "publication": "Hakara",
       "year": 2026,
       "link": "https://hakara.in/the-call-and-the-calling-of-the-call-potdar-marathi/",
-      "note": "Editorial marking twenty-five editions and nine years of the journal, with thanks to writers, artists, scholars and readers.",
+      "note": "Marks twenty-five editions and nine years of the journal, with thanks to writers, artists, scholars and readers.",
       "language": "mr",
       "theme": "Writing",
       "roman": "hak ani hakela hak"
@@ -65,10 +53,11 @@
       "publication": "Hakara",
       "year": 2026,
       "link": "https://hakara.in/poddar-lele-hakara/",
-      "note": "Reflection on what happens when we engage with a painting, a poem or a piece of music, and the closeness we feel to it.",
+      "note": "What happens when we are absorbed in a painting, a poem or music, and the closeness we feel to it.",
       "language": "mr",
       "theme": "Art",
-      "roman": "kalechi hak ek astitvashastriya shodh"
+      "roman": "kalechi hak ek astitvashastriya shodh",
+      "translator": "Gayatri Lele"
     },
     {
       "title": "हाकारा । hākārā : संवादी मुक्तावकाश",
@@ -78,33 +67,33 @@
       "publication": "Hakara",
       "year": 2026,
       "link": "https://hakara.in/hakara-a-dialogic-open-space-marathi/",
-      "note": "Reflection on understanding a literary periodical through the society and the reading culture it appears in.",
+      "note": "What a literary magazine is, starting from the society and reading culture it is published in.",
       "language": "mr",
       "theme": "Writing",
       "roman": "hakara hakara samvadi muktavakash"
     },
     {
       "title": "परतणं म्हणजे जाणिवांचा अन्वयार्थ : तारा वेस्टओव्हरचं एज्युकेटेड",
-      "author": "अभिधा निफाडे",
+      "author": "Abhidha Nifade",
       "authorKey": null,
-      "authorSlug": "h-9uq536",
+      "authorSlug": "abhidha-nifade",
       "publication": "Hakara",
       "year": 2025,
       "link": "https://hakara.in/abhidha-niphade/",
-      "note": "Reflection on returning, using Tara Westover's memoir Educated as its example.",
+      "note": "What returning means, drawing on Tara Westover's memoir Educated.",
       "language": "mr",
       "theme": "Writing",
       "roman": "paratan mhanje janivancha anvayartha tara vestovarche ejukeited"
     },
     {
       "title": "परतणं…हिंदुस्थानी कलासंगीतातलं",
-      "author": "डॉ. केशवचैतन्य कुंटे",
+      "author": "Dr. Keshavchaitanya Kunte",
       "authorKey": null,
-      "authorSlug": "h-umqzh9",
+      "authorSlug": "dr-keshavchaitanya-kunte",
       "publication": "Hakara",
       "year": 2025,
       "link": "https://hakara.in/kunte-chaitanya/",
-      "note": "Reflection on music as a play of sound and pause, with the author's handwritten notes, on returning in Hindustani classical music.",
+      "note": "Music as a play of sound and pause, and its return to pause in Hindustani classical music, with the author's handwritten notes.",
       "language": "mr",
       "theme": "Music",
       "roman": "paratan hindusthani kalasangitatale"
@@ -117,36 +106,37 @@
       "publication": "Hakara",
       "year": 2025,
       "link": "https://hakara.in/return-editorial-marathi/",
-      "note": "Editorial introducing the last issue of 2025, on returning, which the team began preparing the year before.",
+      "note": "Introduces the last issue of 2025, on returning, which the team began preparing the year before.",
       "language": "mr",
       "theme": "Writing",
       "roman": "paratanyache samevar yene"
     },
     {
-      "title": "स्पर्शविश्वाच्या तटबंदी: गायत्री लेले",
+      "title": "स्पर्शविश्वाच्या तटबंदी",
       "author": "Gayatri Lele",
       "authorKey": null,
       "authorSlug": "gayatri-lele",
       "publication": "Hakara",
       "year": 2025,
       "link": "https://hakara.in/gayatri-lele-touch-edition/",
-      "note": "Reflection on the shape of the writer's own world of touch, where common ideas about touch link to fear and shame.",
+      "note": "The shape of the writer's own world of touch, and how common ideas about touch link to fear and shame.",
       "language": "mr",
       "theme": "Philosophy",
-      "roman": "sparshavishvachya tatabandi gayatri lele"
+      "roman": "sparshavishvachya tatabandi"
     },
     {
       "title": "अनुवादात गवसणारा अस्पर्शाचा स्पर्श",
-      "author": "Maya Nirmala",
+      "author": "Sundar Sarukkai",
       "authorKey": null,
-      "authorSlug": "maya-nirmala",
+      "authorSlug": "sundar-sarukkai",
       "publication": "Hakara",
       "year": 2025,
       "link": "https://hakara.in/maya-sundar/",
-      "note": "Reflection on translation and language, a Marathi translation of Sundar Sarukkai's English lecture.",
+      "note": "The touch of the untouched found in translation, in a lecture on translation and language.",
       "language": "mr",
       "theme": "Writing",
-      "roman": "anuvadat gavasnara asparshacha sparsh anuvad ani bhasha ingraji vyakhyan sundar sarukkai marathi anuvad maya nirmala"
+      "roman": "anuvadat gavasnara asparshacha sparsh",
+      "translator": "Maya Nirmala"
     },
     {
       "title": "स्पर्शाचं जग",
@@ -156,7 +146,7 @@
       "publication": "Hakara",
       "year": 2025,
       "link": "https://hakara.in/ashutosh-marathieditorial-touch/",
-      "note": "Editorial on touch and the awareness of touch as part of human life, understood differently by each person.",
+      "note": "Touch and the awareness of touch as part of human life, understood differently by each person.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "sparshacha jag"
@@ -169,7 +159,7 @@
       "publication": "Hakara",
       "year": 2024,
       "link": "https://hakara.in/sahil-kalloli/",
-      "note": "Reflection opening with a complaint that people keep pressuring the government with protests over lynching, sexual abuse, jobs and caste violence.",
+      "note": null,
       "language": "mr",
       "theme": "Society",
       "roman": "soe khet jagae"
@@ -182,20 +172,20 @@
       "publication": "Hakara",
       "year": 2024,
       "link": "https://hakara.in/ashutosh-potdar-silence-editorial/",
-      "note": "Editorial on silence as vast and complex, hard to grasp though everyone says something about it.",
+      "note": "Silence as vast and complex, hard to grasp though everyone has something to say about it.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "maunacha kathan"
     },
     {
       "title": "शांतता ! नाटक सुरू आहे … (नाटक आणि मौन : संज्ञा-संकल्पना आणि संभाव्य अभ्यासदिशा)",
-      "author": "अनघा मांडवकर",
+      "author": "Anagha Mandavkar",
       "authorKey": null,
-      "authorSlug": "h-q1qn1m",
+      "authorSlug": "anagha-mandavkar",
       "publication": "Hakara",
       "year": 2024,
       "link": "https://hakara.in/%e0%a4%b6%e0%a4%a4%e0%a4%a4-%e0%a4%a8%e0%a4%9f%e0%a4%95-%e0%a4%b8%e0%a4%b0-%e0%a4%86%e0%a4%b9-%e0%a4%a8%e0%a4%9f%e0%a4%95-%e0%a4%86%e0%a4%a3-%e0%a4%ae%e0%a4%a8-%e0%a4%b8%e0%a4%9c%e0%a4%9e-%e0%a4%b8/",
-      "note": "Reflection on silence as a stage direction in theatre, beginning with Beckett's Come and Go, where it appears sixteen times.",
+      "note": "Silence as a stage direction in theatre, starting from Beckett's Come and Go, where the direction is given sixteen times.",
       "language": "mr",
       "theme": "Theatre",
       "roman": "shantata natak suru ahe natak ani maun sangya sankalpana ani sambhavya abhyasdisha"
@@ -208,23 +198,23 @@
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/ashutosh-mobility-editorial/",
-      "note": "Editorial on human movement, from the earliest societies' search for food, clothing and shelter.",
+      "note": "Human movement, from the earliest societies' search for food, clothing and shelter.",
       "language": "mr",
       "theme": "Society",
       "roman": "bikat sanchar"
     },
     {
-      "title": "कहाणी ‘गजब कहाणी",
+      "title": "कहाणी ‘गजब कहाणी’ची",
       "author": "Pradeep Vaidya",
       "authorKey": null,
       "authorSlug": "pradeep-vaidya",
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/pradeep-vaiddya/",
-      "note": "Reflection on a novel about an elephant's journey across Europe born of political schemes, and the writer's sketches for it.",
+      "note": "A novel about an elephant's journey across Europe born of political schemes, and the writer's sketches made to follow it.",
       "language": "mr",
       "theme": "Fiction",
-      "roman": "kahani gajab kahani"
+      "roman": "kahani gajab kahanichi"
     },
     {
       "title": "स्थलांतरित मी",
@@ -234,7 +224,7 @@
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/venu-parijat-2/",
-      "note": "Reflection in which stories of migration keep returning, like birds to a tree, to the path of freedom.",
+      "note": "Stories of migration that keep returning, like birds to a tree, to the path of freedom.",
       "language": "mr",
       "theme": "Freedom",
       "roman": "sthalantarit mi"
@@ -247,10 +237,11 @@
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/naik-sikander/",
-      "note": "First-person reflection by a man who returns with Saeed to their camp after a day's work.",
+      "note": null,
       "language": "mr",
       "theme": "Society",
-      "roman": "krutadnyata"
+      "roman": "krutadnyata",
+      "translator": "Manik Naik"
     },
     {
       "title": "आपला ठावो न सांडिता",
@@ -260,23 +251,23 @@
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/smart-camouflage/",
-      "note": "Reflection by playwright Himanshu Bhushan Smart on camouflage, in which beings together exchange colours and sounds without fear.",
+      "note": null,
       "language": "mr",
       "theme": "Art",
       "roman": "apla thavo na sandita"
     },
     {
-      "title": "माळावरच्या पोरंचाळवण्या: सत्पाल गंगलमाले",
+      "title": "माळावरच्या पोरंचाळवण्या",
       "author": "Satpal Gangalmale",
       "authorKey": null,
       "authorSlug": "satpal-gangalmale",
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/gangalmale-camouflage/",
-      "note": "Reflection under the name of Satpal Gangalmale; the opening text supplied is only a general note on the camouflage issue.",
+      "note": null,
       "language": "mr",
       "theme": "Art",
-      "roman": "malavarchya porenchalvanya satpal gangalmale"
+      "roman": "malavarchya porenchalvanya"
     },
     {
       "title": "मिथकांची ताकद",
@@ -286,23 +277,24 @@
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/ashutosh-editorial-2-2/",
-      "note": "Editorial on the pull of myths, which wander through time and settle in villages and cities alike.",
+      "note": "The pull of myths, which wander through time and settle in villages and cities alike.",
       "language": "mr",
       "theme": "Fiction",
       "roman": "mithakanchi takat"
     },
     {
       "title": "दिबांग खोऱ्यातली एक गोष्ट",
-      "author": "Ambika Aiyadurai",
+      "author": "Ambika Aiyadurai and Mamta Pandya",
       "authorKey": null,
-      "authorSlug": "ambika-aiyadurai",
+      "authorSlug": "ambika-aiyadurai-and-mamta-pandya",
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/ambika-mamata/",
-      "note": "Reflection that begins with a tale from the Dibang valley about why the horns of the akru are crooked, set in the village of Etabe.",
+      "note": "A tale from the Dibang valley about why the akru's horns are crooked, set in the village of Etabe.",
       "language": "mr",
       "theme": "India",
-      "roman": "dibang khoryatli ek goshta"
+      "roman": "dibang khoryatli ek goshta",
+      "translator": "Raghavendra Vanjari"
     },
     {
       "title": "मिथकाबरोबरचा नाटकाचा प्रवास",
@@ -312,7 +304,7 @@
       "publication": "Hakara",
       "year": 2023,
       "link": "https://hakara.in/pratiksha-khasnis/",
-      "note": "Reflection on making theatre with myth, beginning with how stories heard and told outlive the people who told them.",
+      "note": "Making theatre with myth, starting from how stories heard and told outlive the people who told them.",
       "language": "mr",
       "theme": "Theatre",
       "roman": "mithakabarobarcha natakacha pravas"
@@ -325,7 +317,7 @@
       "publication": "Hakara",
       "year": 2022,
       "link": "https://hakara.in/mandar-karanjkar/",
-      "note": "Reflection on repetition in raga music, beginning with the close tie between making and repeating, as in laying bricks to build a house.",
+      "note": "Repetition in raga music, starting from the close tie between making and repeating, as in laying bricks to build a house.",
       "language": "mr",
       "theme": "Music",
       "roman": "rag sangitatil punaravrutti"
@@ -338,7 +330,7 @@
       "publication": "Hakara",
       "year": 2022,
       "link": "https://hakara.in/chaitanya-shinkhede/",
-      "note": "Reflection on three kinds of life, public, private and secret, and what keeping a secret means beyond holding back information.",
+      "note": "Three kinds of life, public, private and secret, and what keeping a secret means beyond holding back information.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "guptatecha drushyabhan denara adbhut jag"
@@ -351,10 +343,11 @@
       "publication": "Hakara",
       "year": 2022,
       "link": "https://hakara.in/dalal-gore/",
-      "note": "Reflection on how the writer learned to hide secrets as a child, recalling an unwanted touch from an older man at about age five.",
+      "note": "How the writer learned as a child to keep secrets, recalling an unwanted touch from an older man at about five.",
       "language": "mr",
       "theme": "Memory",
-      "roman": "chorkappa ughadtana"
+      "roman": "chorkappa ughadtana",
+      "translator": "Ashlesha Gore"
     },
     {
       "title": "नर्मदेच्या तीरावरून",
@@ -364,7 +357,7 @@
       "publication": "Hakara",
       "year": 2022,
       "link": "https://hakara.in/priyanka-tupe-2/",
-      "note": "Reflection from the banks of the Narmada by a writer long drawn to rivers, from the Hooghly to the Tapi.",
+      "note": "The banks of the Narmada, by a writer long drawn to rivers from the Hooghly to the Tapi.",
       "language": "mr",
       "theme": "Nature",
       "roman": "narmadechya tiravarun"
@@ -377,23 +370,10 @@
       "publication": "Hakara",
       "year": 2022,
       "link": "https://hakara.in/jai-apte/",
-      "note": "Reflection that opens with pandas and polar bears as part of our virtual surroundings; the title names an African woman's journey in France.",
+      "note": null,
       "language": "mr",
       "theme": "Society",
       "roman": "african sundarichi francemadhil yatra"
-    },
-    {
-      "title": "On Playwriting: Shanta Gokhale in Conversation with Students of FLAME University",
-      "author": "Shanta Gokhale",
-      "authorKey": null,
-      "authorSlug": "shanta-gokhale",
-      "publication": "Hakara",
-      "year": 2022,
-      "link": "https://hakara.in/playwright-shanta-gokhale-2/",
-      "note": "Conversation with Shanta Gokhale and students of FLAME University on playwriting, held on Zoom on 8 February 2022.",
-      "language": "mr",
-      "theme": "Theatre",
-      "roman": "on playwriting shanta gokhale in conversation with students of flame university originally published in avrutti 15 pravas edition 15 journey"
     },
     {
       "title": "अडसर अंतरीचे",
@@ -403,7 +383,7 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/vidya-kulkarni/",
-      "note": "Reflection by a photographer on still being known as one, though it no longer feels like the main identity.",
+      "note": "A photographer who is still known as one, though it no longer feels like her main identity.",
       "language": "mr",
       "theme": "Art",
       "roman": "adsar antarice"
@@ -416,7 +396,7 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/noopur-desai-editorial-2/",
-      "note": "Editorial that begins with a book called Intellectual Birdhouse, on artistic research, read for a workshop.",
+      "note": "Artistic research, starting from a book called Intellectual Birdhouse that the writer was reading for a workshop.",
       "language": "mr",
       "theme": "Art",
       "roman": "adathalyancha avakash"
@@ -429,10 +409,11 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/nilofar-haja-shweta-deshmukh/",
-      "note": "Translated piece on dust as play, setting built sandpits and play areas against the lives of children in housing societies.",
+      "note": "Dust as play, and how built sandpits and play areas affect play among children in housing societies.",
       "language": "mr",
       "theme": "Society",
-      "roman": "jevha dhul ha amcha khel hota mul lekh nilofar shamim haja anuvad"
+      "roman": "jevha dhul ha amcha khel hota",
+      "translator": "Shweta Deshmukh"
     },
     {
       "title": "ये कौनसा गुबार है…",
@@ -442,7 +423,7 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/sharmila-phadke/",
-      "note": "Reflection on dust that opens with a remembered remark by Kamal Desai on the skin tones in a Gauguin painting.",
+      "note": "Dust, starting from a remark remembered from Kamal Desai on the skin tones in a Gauguin painting.",
       "language": "mr",
       "theme": "Art",
       "roman": "ye kaunsa gubar hai"
@@ -455,7 +436,7 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/ashutosh-potdar-9/",
-      "note": "Editorial introducing an issue built around dust, which can choke or hide and settles on roofs, walls, floors, leaves and windows.",
+      "note": "An issue built around dust, which can choke or hide and settles on roofs, walls, floors, leaves and windows.",
       "language": "mr",
       "theme": "Nature",
       "roman": "jatil dhuldhusir"
@@ -468,7 +449,7 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/noopur-desai-14/",
-      "note": "Editorial on the twelfth edition's theme of home, covering how people live and dwell, written while preparing the issue.",
+      "note": "The twelfth edition's theme of home, on how people live and dwell, written while preparing the issue.",
       "language": "mr",
       "theme": "Society",
       "roman": "ghar aat ani baher"
@@ -481,33 +462,34 @@
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/priyanka-tupe/",
-      "note": "Reflection on the school essay My House and the usual drawing of a house with a tree and a small courtyard.",
+      "note": "The school essay My House and the usual drawing of a house with a tree and a small courtyard.",
       "language": "mr",
       "theme": "Society",
       "roman": "gharavishayichya nondi"
     },
     {
-      "title": "घरपण आणि बेघरपण",
+      "title": "घरपण आणि बेघरपण : जगण्याचे छेद-भेद",
       "author": "Sarovar Zaidi",
       "authorKey": null,
       "authorSlug": "sarovar-zaidi",
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/sarovar-zaidi-noopur-desai/",
-      "note": "Translated piece asking what home is: a feeling, a habit, or things and relationships coming together; opens with a line from James Baldwin.",
+      "note": "What home is: a feeling, a habit, or things and relationships coming together.",
       "language": "mr",
       "theme": "Society",
-      "roman": "gharpan ani beghar pan jagnyache chhed bhed mul lekh sarovar zaidi anuvad"
+      "roman": "gharpan ani beghar pan jagnyache chhed bhed",
+      "translator": "Noopur Desai"
     },
     {
-      "title": "रशियातील ‘घर",
+      "title": "रशियातील ‘घर’",
       "author": "Megha Pansare",
       "authorKey": null,
       "authorSlug": "megha-pansare",
       "publication": "Hakara",
       "year": 2021,
       "link": "https://hakara.in/megha-pansare/",
-      "note": "Reflection on shelter as a basic human need and the kinds of shelter people sought across stages of evolution, leading to homes in Russia.",
+      "note": "Shelter as a basic human need and the kinds of shelter people sought across stages of evolution, leading to homes in Russia.",
       "language": "mr",
       "theme": "Society",
       "roman": "rashiyatil ghar"
@@ -520,23 +502,24 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/ashutosh-potdar-editorial-3/",
-      "note": "Editorial on the coronavirus arriving in the street and then the neighbour's house, after hearing of it from others.",
+      "note": "The coronavirus arriving in the street and then the neighbour's house, after hearing of it from others.",
       "language": "mr",
       "theme": "Society",
       "roman": "andhara kal"
     },
     {
-      "title": "क्रांतिकारी आस : जेम्स बॉल्डविन आणि ऑड्रे लॉर्द । मराठी अनुवाद",
-      "author": "James Baldwin",
+      "title": "क्रांतिकारी आस",
+      "author": "James Baldwin and Audre Lorde",
       "authorKey": null,
-      "authorSlug": "james-baldwin",
+      "authorSlug": "james-baldwin-and-audre-lorde",
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/baldwin-lorde/",
-      "note": "Marathi translation of a conversation between James Baldwin and Audre Lorde, republished by the Museum of Contemporary African Diaspora Arts.",
+      "note": "Black writers and thinkers James Baldwin and Audre Lorde in a dialogue republished by the Museum of Contemporary African Diaspora Arts.",
       "language": "mr",
       "theme": "Society",
-      "roman": "krantikari aas james boldvin ani odre lord marathi anuvad"
+      "roman": "krantikari aas",
+      "translator": "Anuj Deshpande"
     },
     {
       "title": "एका फोटोची गोष्ट",
@@ -546,20 +529,20 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/noopur-desai-13/",
-      "note": "Reflection on how a photograph unfolds one story or many, and what those stories tell about truth.",
+      "note": "How a photograph unfolds one story or many, and what those stories tell about truth.",
       "language": "mr",
       "theme": "Art",
       "roman": "eka photochi goshta"
     },
     {
       "title": "निसटत्या सत्याचा पाठपुरावा",
-      "author": "Anuja Ghosalkar",
+      "author": "Anuja Ghosalkar, Kai, Kunal and Shweta",
       "authorKey": null,
-      "authorSlug": "anuja-ghosalkar",
+      "authorSlug": "anuja-ghosalkar-kai-kunal-and-shweta",
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/documentary-theatre-discussion/",
-      "note": "Conversation among two stage performers and a journalist on how documents change, what counts as evidence and the artist's role, held in Mumbai in 2019.",
+      "note": "Two performers and a journalist on how documents change, what counts as evidence and the artist's role, discussed in Mumbai in 2019.",
       "language": "mr",
       "theme": "Theatre",
       "roman": "nisatatya satyacha pathpurava"
@@ -572,10 +555,11 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/naman-ahuja-madhura-joshi/",
-      "note": "Reflection on the Constitution as a handwritten, illustrated document, with a series of signatures at the end.",
+      "note": "The Constitution as a handwritten, illustrated document that ends with a series of signatures.",
       "language": "mr",
       "theme": "India",
-      "roman": "rajyaghatanetil aitihasik kala"
+      "roman": "rajyaghatanetil aitihasik kala",
+      "translator": "Madhura Joshi"
     },
     {
       "title": "दत्ता पाटील : हरवलेली लय आणि गमावलेले भान",
@@ -585,23 +569,23 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/datta-patil/",
-      "note": "Reflection on Datta Patil, opening with a village near Chandwad that became a large urban village beside a four-lane highway.",
+      "note": "A village near Chandwad in Nashik district, once rural and now a large urban village beside a four-lane highway.",
       "language": "mr",
       "theme": "Society",
       "roman": "datta patil haravleli lay ani gamavlele bhan"
     },
     {
-      "title": "चाफा",
+      "title": "‘चाफा’विषयी…",
       "author": "Manasi Jog",
       "authorKey": null,
       "authorSlug": "manasi-jog",
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/manasi-jog/",
-      "note": "Reflection on an artwork as an artist's child, starting from the writer's first piece, the dance performance Ratrandin Aamha.",
+      "note": "Why an artist's work is like a child, starting from the writer's first piece, the dance performance Ratrandin Aamha.",
       "language": "mr",
       "theme": "Art",
-      "roman": "chafa"
+      "roman": "chafavishayi"
     },
     {
       "title": "झगड्याचं बदलणारं अवकाश",
@@ -611,23 +595,10 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/noopur-desai-12/",
-      "note": "Editorial on the tenth edition's theme of friction, written as conflicts of many kinds were unfolding around the world.",
+      "note": "Introduces the tenth edition's theme, friction, written as conflicts of many kinds were unfolding around the world.",
       "language": "mr",
       "theme": "Society",
       "roman": "zagadyache badalnara avakash"
-    },
-    {
-      "title": "हाक १० / Call 10",
-      "author": "हाकारा । hākārā",
-      "authorKey": null,
-      "authorSlug": "hakara",
-      "publication": "Hakara",
-      "year": 2020,
-      "link": "https://hakara.in/hakara-call-10/",
-      "note": "Call for contributions to edition 10, on friction, described as two forces in opposite directions: opposition, disagreement or conflict.",
-      "language": "mr",
-      "theme": "Society",
-      "roman": "hak 10 call 10"
     },
     {
       "title": "प्रतिबिंबाची मुळात गरज का?",
@@ -637,49 +608,39 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/ravindra-lakhe/",
-      "note": "Reflection on the fear of losing proof of our existence when we cannot find our reflection, and on loneliness as living without one.",
+      "note": "The fear of losing proof of our existence when our reflection cannot be found, and loneliness as living without one.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "pratibimbachi mulat garaj ka"
     },
     {
-      "title": "शोध आणि इतर कविता",
-      "author": "Ravindra Damodar Lakhe",
+      "title": "मुंबई प्रॉवर्ब्स",
+      "author": "Sudhir Patwardhan",
       "authorKey": null,
-      "authorSlug": "ravindra-damodar-lakhe",
-      "publication": "Hakara",
-      "year": 2020,
-      "link": "https://hakara.in/ravindra-lakhe-poems/",
-      "note": "Poems by Ravindra Damodar Lakhe; the first, Shodh, begins with a discarded pair of bloodstained jeans found on a road.",
-      "language": "mr",
-      "theme": "Writing",
-      "roman": "shodh ani itar kavita"
-    },
-    {
-      "title": "मुंबई प्रॉवर्ब्स : सुधीर पटवर्धन यांची मुलाखत । मुलाखतकार : प्रज्ञा देसाई । मराठी अनुवाद",
-      "author": "Anuj Deshpande",
-      "authorKey": null,
-      "authorSlug": "anuj-deshpande",
+      "authorSlug": "sudhir-patwardhan",
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/sudhir-patwardhan/",
-      "note": "Marathi translation of Pradnya Desai's interview with Sudhir Patwardhan, opening with his training as a radiologist rather than a painter.",
+      "note": "Sudhir Patwardhan on his training as a radiologist rather than a painter, and his involvement in political thinking from the 1960s.",
       "language": "mr",
       "theme": "Art",
-      "roman": "mumbai proverbs sudhir patvardhan yanchi mulakhat mulakhatkar pradnya desai marathi anuvad"
+      "roman": "mumbai proverbs",
+      "translator": "Anuj Deshpande",
+      "with": "interviewed by Pradnya Desai"
     },
     {
       "title": "मानवी पेच",
-      "author": "Omkar Govardhan",
+      "author": "Albert Camus",
       "authorKey": null,
-      "authorSlug": "omkar-govardhan",
+      "authorSlug": "albert-camus",
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/albert-camus-translation/",
-      "note": "Marathi translation of Albert Camus's lecture of 28 March 1946, in which he says the invitation to speak in America left him puzzled.",
+      "note": "Albert Camus's lecture of 28 March 1946, in which he says the invitation to speak in America left him puzzled.",
       "language": "mr",
       "theme": "Philosophy",
-      "roman": "manavi pech mul bhashan alber kamyu marathi anuvad"
+      "roman": "manavi pech",
+      "translator": "Omkar Govardhan"
     },
     {
       "title": "गोष्ट एका घुंगराची",
@@ -689,7 +650,7 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/sopan-khude/",
-      "note": "Narrative set in 1977 at the Pali fair, where Vithabai Narayangaonkar's tamasha troupe is pitched and the performance is about to begin.",
+      "note": "A scene at the 1977 Pali fair, where Vithabai Narayangaonkar's tamasha troupe is pitched and the show is about to begin.",
       "language": "mr",
       "theme": "Theatre",
       "roman": "gosht eka ghungrachi"
@@ -702,23 +663,10 @@
       "publication": "Hakara",
       "year": 2020,
       "link": "https://hakara.in/ashutosh-potdar-8/",
-      "note": "Editorial on reflection, starting from the childhood story of Ram asking for the moon and Kausalya unsure how to satisfy him.",
+      "note": "Reflection and mirror images, beginning with the childhood story of Ram asking for the moon, which Kausalya cannot easily give.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "pratibimbacha pravas"
-    },
-    {
-      "title": "शून्याच्या शोधात",
-      "author": "Maya Nirmala",
-      "authorKey": null,
-      "authorSlug": "maya-nirmala",
-      "publication": "Hakara",
-      "year": 2019,
-      "link": "https://hakara.in/maya-nirmala/",
-      "note": "Poem in numbered verses about being and absence and the many forms and names of absence.",
-      "language": "mr",
-      "theme": "Writing",
-      "roman": "shunyachya shodhat"
     },
     {
       "title": "दोलायमान दुहेरीपण",
@@ -728,23 +676,23 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/noopur-desai-9/",
-      "note": "Editorial on black and white as more than a duality, since each is made visible by the other.",
+      "note": "Black and white as more than a duality, since each is made visible by the other.",
       "language": "mr",
       "theme": "Art",
       "roman": "dolayman duharipan"
     },
     {
-      "title": "रंगसंवाद : चं. प्र. देशपांडे आणि अभिराम भडकमकर",
-      "author": "C P Deshpande",
+      "title": "रंगसंवाद",
+      "author": "C P Deshpande and Abhiram Bhadkamkar",
       "authorKey": null,
-      "authorSlug": "c-p-deshpande",
+      "authorSlug": "c-p-deshpande-and-abhiram-bhadkamkar",
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/champra-deshpande-abhiram-bhadkamkar/",
-      "note": "Conversation between C. P. Deshpande and Abhiram Bhadkamkar, opening with congratulations on a 2019 lifetime achievement award.",
+      "note": "C. P. Deshpande and Abhiram Bhadkamkar talk about Marathi theatre, starting with congratulations on a 2019 lifetime achievement award.",
       "language": "mr",
       "theme": "Theatre",
-      "roman": "rangsamvad cha pra deshpande ani abhiram bhadkamkar"
+      "roman": "rangsamvad"
     },
     {
       "title": "माटी माटी नु दोरावे, माटी दा चंकार",
@@ -754,10 +702,11 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/nilima-sheikh/",
-      "note": "Translated conversation with the artist Nilima Sheikh, who in the 1980s won a government scholarship to research traditional arts and visited Nathdwara.",
+      "note": "The artist Nilima Sheikh on the government scholarship she won in the 1980s to research traditional arts, and her visit to Nathdwara.",
       "language": "mr",
       "theme": "Art",
-      "roman": "mati mati nu dorave mati da chankar nilima shekh yanchyashi samvad anuvad"
+      "roman": "mati mati nu dorave mati da chankar",
+      "translator": "Noopur Desai"
     },
     {
       "title": "स्टेरिओकार्ड्समधून 3D भारत दर्शन",
@@ -767,23 +716,24 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/renu-savant-film-museum/",
-      "note": "Reflection on stereo cards, opening with a Koli woman from Versova who comes into focus in a square frame seen through a viewer.",
+      "note": "Stereo cards, starting with a Koli woman from Versova who comes into focus in a square frame seen through a viewer.",
       "language": "mr",
       "theme": "Art",
       "roman": "stereocards madhun 3d bharat darshan"
     },
     {
-      "title": "काळा आणि पांढरा असंच का ? : इंग्रजी लेख",
+      "title": "काळा आणि पांढरा असंच का ?",
       "author": "Naresh Dadhich",
       "authorKey": null,
       "authorSlug": "naresh-dadhich",
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/naresh-dadhich-sunil-tambe/",
-      "note": "Reflection asking why black and white, and not a range of greys, as the two opposing colours; an English article.",
+      "note": "Why black and white, and not a range of greys, are taken as the two opposing colours.",
       "language": "mr",
       "theme": "Art",
-      "roman": "kala ani pandhara asach ka ingraji lekh"
+      "roman": "kala ani pandhara asach ka",
+      "translator": "Sunil Tambe"
     },
     {
       "title": "हद्दीच्या अलीकडे आणि पलीकडे",
@@ -793,7 +743,7 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/ashutosh-potdar-7/",
-      "note": "Editorial on how a particular world is made by drawing a boundary, with those on either side sharing in collective action.",
+      "note": "How a particular world is made by drawing a boundary, with those on either side sharing in collective action.",
       "language": "mr",
       "theme": "Society",
       "roman": "haddichya alikade ani palikade"
@@ -806,7 +756,7 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/krishna-kimbahune-dilip-chitre/",
-      "note": "Reflection on Popular Prakashan's recent publication of Dilip Purushottam Chitre's collected poems, Ekun Kavita.",
+      "note": "Popular Prakashan's recent publication of Dilip Purushottam Chitre's collected poems, Ekun Kavita.",
       "language": "mr",
       "theme": "Writing",
       "roman": "ekun kavita dilip purushottam chitre yanchi samagra kavita"
@@ -819,36 +769,38 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/madhuri-dixit-2/",
-      "note": "Reflection on how limits and boundaries come to mean something light in an age of breezy small talk.",
+      "note": null,
       "language": "mr",
       "theme": "Society",
       "roman": "simarekhanna prashnankit karnara trutiya ratna"
     },
     {
       "title": "अंधारातल्या विचारांची रिहर्सल",
-      "author": "Ashutosh Potdar",
+      "author": "Amitesh Grover",
       "authorKey": null,
-      "authorSlug": "ashutosh-potdar",
+      "authorSlug": "amitesh-grover",
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/grover-potdar-marathi/",
-      "note": "Translated piece on theatre direction, noting that Indian discourse on directing is thin and directors rarely write theory.",
+      "note": "Why Indian discourse on theatre direction has not been laid out well, and what directing is and is not.",
       "language": "mr",
       "theme": "Theatre",
-      "roman": "andharatalya vicharanchi riharsal mul lekh amitesh grover anuvad"
+      "roman": "andharatalya vicharanchi riharsal",
+      "translator": "Ashutosh Potdar"
     },
     {
-      "title": "हद्दीवरचे कलाप्रयोग । गोमेज पेना आणि गाब्रीएला सालगादो",
-      "author": "Anuj Deshpande",
+      "title": "हद्दीवरचे कलाप्रयोग",
+      "author": "Guillermo Gomez-Pena and Gabriela Salgado",
       "authorKey": null,
-      "authorSlug": "anuj-deshpande",
+      "authorSlug": "guillermo-gomez-pena-and-gabriela-salgado",
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/deshpande-pena-salgado/",
-      "note": "Conversation between curator Gabriela Salgado and performance artist Guillermo Gomez-Pena on who is excluded from the international art world and why.",
+      "note": "Curator Gabriela Salgado and performance artist Guillermo Gomez-Pena on who is excluded from the international art world, and why.",
       "language": "mr",
       "theme": "Art",
-      "roman": "haddivarche kalaprayog gomej pena ani gabrielaa salgado"
+      "roman": "haddivarche kalaprayog",
+      "translator": "Anuj Deshpande"
     },
     {
       "title": "सत्यशोधक जलसे",
@@ -858,7 +810,7 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/satyashodhak-jalase/",
-      "note": "Two chapters, on jalse and their forms, from a diamond jubilee volume on Satyashodhak edited by Madhav Khanderao Bagal.",
+      "note": "Two chapters, on jalse and their forms, from the diamond jubilee volume Satyashodhak, edited by Madhav Khanderao Bagal.",
       "language": "mr",
       "theme": "Theatre",
       "roman": "satyashodhak jalse"
@@ -871,62 +823,65 @@
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/chaitanya-kunte/",
-      "note": "Translated article on aesthetic ideas of form and content in relation to tala in Hindustani music.",
+      "note": "Ideas of form and content in aesthetics, discussed in relation to tala in Hindustani music.",
       "language": "mr",
       "theme": "Music",
-      "roman": "hindusthani sangitatil rup ani ashay mul lekh sushilkumar saxena anuvad"
+      "roman": "hindusthani sangitatil rup ani ashay",
+      "translator": "Keshavchaitanya Kunte"
     },
     {
       "title": "साहित्यप्रकारांचे राजकारण",
-      "author": "Aarati Ranade",
+      "author": "Stephen Heath",
       "authorKey": null,
-      "authorSlug": "aarati-ranade",
+      "authorSlug": "stephen-heath",
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/literary-types/",
-      "note": "Translated article on the politics of literary genres, noting that literature exists in forms such as poetry and drama.",
+      "note": "The politics of literary genres, starting from the point that literature exists in forms such as poetry and drama.",
       "language": "mr",
       "theme": "Writing",
-      "roman": "sahityaprakaranche rajkaran mul ingraji lekh stiphan hith anuvad"
+      "roman": "sahityaprakaranche rajkaran",
+      "translator": "Aarati Ranade"
     },
     {
-      "title": "सरमिसळीची रूपं: नूपुर देसाई",
+      "title": "सरमिसळीची रूपं",
       "author": "Noopur Desai",
       "authorKey": null,
       "authorSlug": "noopur-desai",
       "publication": "Hakara",
       "year": 2019,
       "link": "https://hakara.in/noopur-desai-6/",
-      "note": "Editorial on how different forms in painting, story, poetry and song take shape, looking beyond difference between cultures or art forms.",
+      "note": "How different forms in painting, story, poetry and song take shape, looking at what produces the difference rather than only noting it.",
       "language": "mr",
       "theme": "Art",
-      "roman": "sarmisalichi rupan nupur desai"
+      "roman": "sarmisalichi rupan"
     },
     {
-      "title": "सामान्य काहीतरी: आशुतोष पोतदार",
+      "title": "सामान्य काहीतरी",
       "author": "Ashutosh Potdar",
       "authorKey": null,
       "authorSlug": "ashutosh-potdar",
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/ashutosh-potdar-6/",
-      "note": "Editorial that opens with a list of ordinary daily repetitions: he wakes, she makes the bed, he starts the car and parks it again.",
+      "note": "The sameness of ordinary days, as a list of daily repetitions: she makes the bed, he starts the car and parks it.",
       "language": "mr",
       "theme": "Society",
-      "roman": "samanya kahitari ashutosh potdar"
+      "roman": "samanya kahitari"
     },
     {
-      "title": "वाद-चर्चा- उदार डावा आणि उदार उजवा: टेरी ईगलटन आणि रॉजर स्क्रुटन / भाषांतर: डॉ० चिन्मय धारूरकर",
-      "author": "Chinmay Dharurkar",
+      "title": "वाद-चर्चा- उदार डावा आणि उदार उजवा",
+      "author": "Terry Eagleton and Roger Scruton",
       "authorKey": null,
-      "authorSlug": "chinmay-dharurkar",
+      "authorSlug": "terry-eagleton-and-roger-scruton",
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/chinmay-dharurkar/",
-      "note": "Translated discussion between Terry Eagleton and Roger Scruton, filmed in 2012 at the Royal Institution, on liberal left and liberal right.",
+      "note": "A filmed discussion between Terry Eagleton and Roger Scruton in 2012 at the Royal Institution, on liberal left and liberal right.",
       "language": "mr",
       "theme": "Society",
-      "roman": "vad charcha udar dava ani udar ujava teri iglatan ani rojar skruton bhashantar dr chinmay dharurkar"
+      "roman": "vad charcha udar dava ani udar ujava",
+      "translator": "Chinmay Dharurkar"
     },
     {
       "title": "खळबळ पाहाताना",
@@ -936,23 +891,24 @@
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/noopur-desai-4/",
-      "note": "Editorial that opens with a 1954 exhibition at Jehangir Art Gallery in Mumbai of artists linked to the Progressive Artists Group, including Akbar Padamsee.",
+      "note": "Begins with a 1954 exhibition at the Jehangir Art Gallery, Mumbai, of artists linked to the Progressive Artists Group, including Akbar Padamsee.",
       "language": "mr",
       "theme": "Art",
       "roman": "khalbal pahatana"
     },
     {
-      "title": "भाषा-संस्कृती आणि भाषांतर । मुलाखत : अविनाश बिनीवाले । मुलाखतकार",
+      "title": "भाषा-संस्कृती आणि भाषांतर",
       "author": "Awinash Biniwale",
       "authorKey": null,
       "authorSlug": "awinash-biniwale",
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/biniwale-interview/",
-      "note": "Interview with lexicographer, translator and linguist Avinash Biniwale, recently given the Dr Ashok Kelkar Award on Marathi Language Day.",
+      "note": "Language, culture and translation, with lexicographer, translator and linguist Awinash Biniwale, recently given the Dr Ashok Kelkar Award on Marathi Language Day.",
       "language": "mr",
       "theme": "Writing",
-      "roman": "bhasha sanskruti ani bhashantar mulakhat avinash biniwale mulakhatkar"
+      "roman": "bhasha sanskruti ani bhashantar",
+      "with": "interviewed by Noopur Desai"
     },
     {
       "title": "नोंदवही ५",
@@ -962,10 +918,11 @@
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/albert-camus/",
-      "note": "Translated notebook entry by Albert Camus on the aesthetics of rebellion, taking classicism to mean control over passionate expression.",
+      "note": "Albert Camus's notebook entry on the aesthetics of rebellion, taking classicism to mean control over passionate expression.",
       "language": "mr",
       "theme": "Philosophy",
-      "roman": "nondvahi 5 mul lekhak albert kamyu anuvadak ashlesha gore"
+      "roman": "nondvahi 5",
+      "translator": "Ashlesha Gore"
     },
     {
       "title": "अस्वस्थतेचं नाट्यमय रूप",
@@ -975,7 +932,7 @@
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/madhuri-dixit/",
-      "note": "Reflection on what we feel when we hear that something has caused a stir: raised ears and a restless wish to know more.",
+      "note": null,
       "language": "mr",
       "theme": "Philosophy",
       "roman": "asvasthatecha natyamay rup"
@@ -988,7 +945,7 @@
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/venu-parijat/",
-      "note": "Reflection introducing Friedrich Nietzsche, the German philosopher (1844-1900) who wrote poems, stories and criticism, and the chaos he showed.",
+      "note": "Introduces Friedrich Nietzsche, the German philosopher (1844 to 1900) who also wrote poems, stories and criticism, and the turmoil he showed.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "nitshene dakhavleli khalbal"
@@ -1001,36 +958,36 @@
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/noopur-desai-3/",
-      "note": "Review of the Mumbai exhibition titled 2020, on contemporary art made in relation to its surroundings in the city.",
+      "note": "A review of the exhibition 2020 in Mumbai, on contemporary art made in response to its surroundings in the city.",
       "language": "mr",
       "theme": "Art",
       "roman": "asangat bhavishyache sandarbhbindu"
     },
     {
-      "title": "आहे आणि नाहीमध्ये ‘आता",
+      "title": "आहे आणि नाहीमध्ये ‘आता’",
       "author": "Ashutosh Potdar",
       "authorKey": null,
       "authorSlug": "ashutosh-potdar",
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/ashutosh-potdar-4/",
-      "note": "Editorial asking whether the present exists, since the past has already happened and the future has not yet come.",
+      "note": "Whether the present exists, since the past has already happened and the future has not yet come.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "ahe ani nahimadhe ata"
     },
     {
-      "title": "बोलावे ते आम्ही…",
+      "title": "‘बोलावे ते आम्ही…’ : कवितेतील भू-दृश्ये आणि नाटकीयता",
       "author": "Ashutosh Potdar",
       "authorKey": null,
       "authorSlug": "ashutosh-potdar",
       "publication": "Hakara",
       "year": 2018,
       "link": "https://hakara.in/ashutosh-potdar-3/",
-      "note": "Reflection on theatricality in the world and in poetry, made up of time, space, body and audience.",
+      "note": "Theatricality in the world and in poetry, made up of time, space, body and audience.",
       "language": "mr",
       "theme": "Theatre",
-      "roman": "bolave te amhi"
+      "roman": "bolave te amhi kavitetil bhu drushye ani natakiyata"
     },
     {
       "title": "द्वंद्व आतलं बाहेरचं",
@@ -1040,7 +997,7 @@
       "publication": "Hakara",
       "year": 2017,
       "link": "https://hakara.in/noopur-desai/",
-      "note": "Editorial that begins with the 1970s video Powers of Ten, which went viral years ago, zooming out from a hand in steps of ten.",
+      "note": "Begins with the 1970s video Powers of Ten, which went viral years ago, zooming out from a hand in steps of ten.",
       "language": "mr",
       "theme": "Philosophy",
       "roman": "dvandva atla bahercha"
@@ -1053,7 +1010,7 @@
       "publication": "Hakara",
       "year": 2017,
       "link": "https://hakara.in/arati-ranade/",
-      "note": "Reflection on a woman scientist whose routine is hypothesis, experiment, data, analysis and failure, with the occasional small success.",
+      "note": "A woman scientist's daily routine of hypothesis, experiment, data, analysis and failure, with the occasional small success.",
       "language": "mr",
       "theme": "Work",
       "roman": "katadikhalchya janiva"
@@ -1066,23 +1023,23 @@
       "publication": "Hakara",
       "year": 2017,
       "link": "https://hakara.in/in-the-city-a-library/",
-      "note": "Reflection on an art exhibition at Project 88 gallery in Colaba by photographer Chirodeep Chaudhuri and writer Jerry Pinto.",
+      "note": "An art exhibition at Project 88 gallery in Colaba by the photographer Chirodeep Chaudhuri and the writer Jerry Pinto.",
       "language": "mr",
       "theme": "Art",
       "roman": "in the city a library"
     },
     {
-      "title": "मराठी गाइड",
+      "title": "‘मराठी गाइड’ची ‘आठवण’",
       "author": "Ashutosh Potdar",
       "authorKey": null,
       "authorSlug": "ashutosh-potdar",
       "publication": "Hakara",
       "year": 2017,
       "link": "https://hakara.in/%e0%a4%ae%e0%a4%b0%e0%a4%be%e0%a4%a0%e0%a5%80-%e0%a4%97%e0%a4%be%e0%a4%87%e0%a4%a1%e0%a4%9a%e0%a5%80-%e0%a4%86%e0%a4%a0%e0%a4%b5%e0%a4%a3/",
-      "note": "Reflection on finding a 1935 book, Matriculation: Marathi Guide by Shi. La. Karandikar, at an old roadside bookseller for one and a quarter rupees.",
+      "note": "Finding Matriculation: Marathi Guide (1935), a book by Shi. La. Karandikar, at an old roadside bookseller for one and a quarter rupees.",
       "language": "mr",
       "theme": "Memory",
-      "roman": "marathi guide"
+      "roman": "marathi guidechi athavan"
     },
     {
       "title": "आठवणं आणि विसरणं । विसरणं आणि आठवणं",
@@ -1092,23 +1049,23 @@
       "publication": "Hakara",
       "year": 2017,
       "link": "https://hakara.in/%e0%a4%86%e0%a4%a0%e0%a4%b5%e0%a4%a3%e0%a4%82-%e0%a4%86%e0%a4%a3%e0%a4%bf-%e0%a4%b5%e0%a4%bf%e0%a4%b8%e0%a4%b0%e0%a4%a3%e0%a4%82-%e0%a4%b5%e0%a4%bf%e0%a4%b8%e0%a4%b0%e0%a4%a3%e0%a4%82/",
-      "note": "Editorial that opens with setting out to find a shop, walking on, remembering its name and owner but not finding it.",
+      "note": "Setting out to find a shop and walking on, remembering its name and owner but never finding it.",
       "language": "mr",
       "theme": "Memory",
       "roman": "athavan ani visaran visaran ani athavan"
     },
     {
-      "title": "इतिहासकारांच्या नजरेतून स्मृती आणि आठवण: प्राची देशपांडे",
+      "title": "इतिहासकारांच्या नजरेतून स्मृती आणि आठवण",
       "author": "Prachi Deshpande",
       "authorKey": null,
       "authorSlug": "prachi-deshpande",
       "publication": "Hakara",
       "year": 2017,
       "link": "https://hakara.in/%e0%a4%b8%e0%a5%8d%e0%a4%ae%e0%a5%83%e0%a4%a4%e0%a5%80-%e0%a4%86%e0%a4%a3%e0%a4%bf-%e0%a4%86%e0%a4%a0%e0%a4%b5%e0%a4%a3/",
-      "note": "Reflection from historians' view of memory and commemoration, starting from the removal of the Ram Ganesh Gadkari statue in Pune.",
+      "note": "Memory and commemoration through historians' eyes, starting from the removal of the Ram Ganesh Gadkari statue in Pune.",
       "language": "mr",
       "theme": "Memory",
-      "roman": "itihaskaranchya najretun smruti ani athavan prachi deshpande"
+      "roman": "itihaskaranchya najretun smruti ani athavan"
     }
   ]
 }

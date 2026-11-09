@@ -4,7 +4,7 @@
 // Drawn in CSS 3D: turned a little so the stacked page edges show; it turns to face you on hover (flat, with reduced motion).
 import Mark from '../ui/Mark.astro';
 import { statusLabel } from '../../lib/kinds';
-import { authorLink, essayHit, themes, collection, hakara, type Essay } from '../../lib/essays';
+import { authorLink, essayHit, themes, collection, hakara, hakaraStories, type Essay } from '../../lib/essays';
 import { savedId } from '../../lib/saved';
 import type { Mark as OnShelf } from '../../lib/catalog/onsite';
 interface Props { e: Essay; mark?: OnShelf }
@@ -18,12 +18,14 @@ const last = words.pop()!;
 const CLOTH = ['#2B3A67', '#8E2F3A', '#4F6B4A', '#A15628'];
 const ti = Math.max(0, themes.findIndex((t) => t.items.some((x) => x.link === e.link)));
 const inTheme = themes.some((t) => t.items.some((x) => x.link === e.link));
-const topic = (inTheme ? themes[ti].label : 'Essay') + (e.language === 'mr' ? ' · Marathi' : '');
+// a story says Story (its theme only files it); an essay says its theme, else Essay
+const topic = (e.kind === 'story' ? 'Story' : inTheme ? themes[ti].label : 'Essay') + (e.language === 'mr' ? ' · Marathi' : '');
+const credit = [e.with, e.translator ? `translated by ${e.translator}` : ''].filter(Boolean).join(' · ');
 // a New Yorker card has no gist: its publication and year instead (nothing is invented)
 const note = e.publication && !e.note ? [e.publication, e.year].filter(Boolean).join(' · ') : e.note;
 const lang = e.language === 'mr' ? 'mr' : undefined;
 // within a topic's row the cloth steps card by card, and each topic starts on a different colour
-const ii = Math.max(0, (inTheme ? themes[ti].items : [...collection.items, ...hakara.items]).findIndex((x) => x.link === e.link));
+const ii = Math.max(0, (inTheme ? themes[ti].items : [...collection.items, ...hakara.items, ...hakaraStories.items]).findIndex((x) => x.link === e.link));
 const cloth = CLOTH[(ti + ii) % CLOTH.length];
 ---
 <article class="eb" style={`--cloth:${cloth}`}>
@@ -37,6 +39,7 @@ const cloth = CLOTH[(ti + ii) % CLOTH.length];
         <p class="eb-topic"><span>{topic}</span></p>
         <h3 class="serif eb-title" lang={lang}><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
         <p class="eb-by">by <a href={authorLink(e)}>{e.author}</a></p>
+        {credit && <p class="eb-credit">{credit}</p>}
         <p class="eb-note">{note}</p>
         {me && (mark && !plain
           ? <span class="es-save is-saved" role="img" title={label} aria-label={`${e.title}: ${label}`}><Mark size={16} /></span>
@@ -82,6 +85,7 @@ const cloth = CLOTH[(ti + ii) % CLOTH.length];
   .nw { white-space: nowrap; }
   .out { font-size: .7em; }
   .eb-by { margin: 0; font-size: 14px; font-style: italic; }
+  .eb-credit { margin: -4px 0 0; font-size: 12.5px; opacity: .85; }
   .eb-by a { color: var(--cream); text-decoration: underline; text-decoration-color: rgba(247, 239, 223, .5); text-underline-offset: 3px; transition: text-decoration-color .2s ease; }
   .eb-by a:hover { text-decoration-color: var(--cream); }
   .eb-note { margin: auto 0 0; font-size: 13px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }

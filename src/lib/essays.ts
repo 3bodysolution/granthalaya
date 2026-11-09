@@ -2,6 +2,7 @@
 import data from '../data/essays.json';
 import ny from '../data/new-yorker.json';
 import hk from '../data/hakara.json';
+import hks from '../data/hakara-stories.json';
 import access from '../data/essay-access.json';
 import { authorHref } from './catalog/books';
 
@@ -10,6 +11,9 @@ export interface Essay {
   link: string; note: string | null; via?: string; theme?: string;
   language?: string;   // 'mr' for Marathi (the card says so, and the Marathi filter uses it)
   roman?: string;      // the title in Roman letters, only for search
+  translator?: string | null;   // "translated by ...", shown apart from the writer
+  with?: string | null;         // another credit ("interviewed by ...")
+  kind?: 'story';               // a story (the card says Story, not Essay)
 }
 export const source = data.source;
 
@@ -34,15 +38,18 @@ const label = (n: string) => (n === 'Picks' ? n : `On ${n === 'India' ? n : n.to
 /** From Hakara: Marathi essays from hakara.in, listed with their permission (src/data/hakara.json); newest first */
 export const hakara = { slug: 'hakara', name: hk.name, credit: hk.credit, items: freeFirst(hk.items as Essay[]) };
 // Hakara's pieces join the themes too; a theme that only Hakara needs (Art, Society, Philosophy, Theatre, Music, Memory) comes after ours
-const extra = [...hakara.items.reduce((m, e) => m.set(e.theme!, (m.get(e.theme!) ?? 0) + 1), new Map<string, number>())]
+const hkThemed = (): Essay[] => [...(hk.items as Essay[]), ...(hks.items as Essay[])].filter((e) => e.theme);
+const extra = [...hkThemed().reduce((m, e) => m.set(e.theme!, (m.get(e.theme!) ?? 0) + 1), new Map<string, number>())]
   .filter(([n]) => !data.themes.some((t) => t.name === n)).sort((a, b) => b[1] - a[1]).map(([n]) => n);
-const themeItems = (name: string, own: Essay[]) => freeFirst([...own, ...collection.items.filter((e) => e.theme === name), ...hakara.items.filter((e) => e.theme === name)]);
+/** Stories from Hakara: Marathi stories and long pieces from its Narrative and Panorama sections; they join a theme only where it is obvious */
+export const hakaraStories = { slug: 'hakara-stories', name: hks.name, credit: hks.credit, items: freeFirst(hks.items as Essay[]) };
+const themeItems = (name: string, own: Essay[]) => freeFirst([...own, ...collection.items.filter((e) => e.theme === name), ...hakara.items.filter((e) => e.theme === name), ...hakaraStories.items.filter((e) => e.theme === name)]);
 export const themes = [
   ...data.themes.map((t) => ({ name: t.name, label: label(t.name), slug: t.name.toLowerCase(), items: themeItems(t.name, t.items as Essay[]) })),
   ...extra.map((n) => ({ name: n, label: label(n), slug: n.toLowerCase(), items: themeItems(n, []) })),
 ];
 /** every essay we list, for author pages and "on your shelf" lookups */
-export const allEssays: Essay[] = [...new Map([...themes.flatMap((t) => t.items), ...collection.items, ...hakara.items].map((e) => [e.link, e])).values()];
+export const allEssays: Essay[] = [...new Map([...themes.flatMap((t) => t.items), ...collection.items, ...hakara.items, ...hakaraStories.items].map((e) => [e.link, e])).values()];
 export const marathi = allEssays.filter((e) => e.language === 'mr');
 /** essays whose title (as written or in Roman letters) or author holds every word typed, for the search box */
 export function findEssays(text: string, n = 4): Essay[] {
