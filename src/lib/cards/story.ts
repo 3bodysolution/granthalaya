@@ -1,12 +1,12 @@
 // The story card: one title on a tall card (1080x1920) for Instagram and WhatsApp stories.
-// Drawn with satori (layout) and resvg (pixels). Fonts and the painting are our own files in src/assets/cards,
-// built into the code.
+// Drawn with satori (layout) and resvg (pixels). Fonts are our own files in src/assets/cards, built into the code.
+// The background is the title's own cover, blurred (blur.ts).
 import satori from 'satori';
 import { mark } from '../timing';
 import { render, type Picture } from './output';
 import { paletteFor } from '../data';
 import type { Kind } from '../kinds';
-import { backgroundData, baseColor, PAINT_H, type Background } from './backgrounds';
+import { blurredBackground } from './blur';
 
 export interface StoryData {
   kind: Kind;
@@ -19,17 +19,19 @@ export interface StoryData {
   status?: string;         // "Watched", "Read" ... (left out for a title that is not on a shelf)
   line?: string;           // the title's short line, or the owner's own line or a saved Line
   owner?: string;          // username; without one the card is signed "GRANTHALAYA" alone
+  noText?: boolean;        // test only (scripts/card-sheet.mjs): hides the words, to measure the background behind them
   meta?: string;           // replaces the line of year and director (a collection says "a collection by ...")
   cover?: string;          // address of the cover image
   color?: string;          // painted cover colour when there's no image
-  bg?: Background;         // the painting behind the card
 }
 
 export const W = 1080, H = 1920;
 export const SITE = 'mygranthalaya.vercel.app';   // printed small on the card; Instagram can't link a story
 export const BG = '#121316', CREAM = '#F4ECDD', GOLD = '#E4BE94', TEAL = '#6CC9BF', GREY = '#A39D92', DIM = '#8D877D';
+/** secondary text on a blurred background: lighter than GREY, so it keeps 4.5:1 on the dark gradient */
+export const ONDARK = '#CFC8BA';
 
-/* ——— fonts and the painting are built into the function (?inline makes them part of the code), so nothing is fetched at run time ——— */
+/* ——— fonts are built into the function (?inline makes them part of the code), so nothing is fetched at run time ——— */
 import fraunces700 from '../../assets/cards/fraunces-latin-700-normal.woff?inline';
 import fraunces700x from '../../assets/cards/fraunces-latin-ext-700-normal.woff?inline';
 import fraunces400i from '../../assets/cards/fraunces-latin-400-italic.woff?inline';
@@ -62,10 +64,10 @@ import { coverData, CoverMissing } from './covers';
 export const softShadow = (left: number, top: number, w: number, hgt: number, radius = 8, dy = 18) =>
   [36, 24, 14, 6].map((grow, i) => h('div', { position: 'absolute', left: left - grow, top: top - grow + dy, width: w + grow * 2, height: hgt + grow * 2, borderRadius: radius + grow, background: `rgba(0,0,0,${[0.08, 0.1, 0.12, 0.16][i]})` }, ''));
 
-/** the painting, timed */
-export async function timedPainting(key: Background) {
+/** the blurred background, timed */
+export async function timedBackground(cover: string | undefined, seed: string, w: number, h: number, shape: 'tall' | 'wide') {
   const t = performance.now();
-  try { return await backgroundData(key); } finally { mark('painting', performance.now() - t, key); }
+  try { return await blurredBackground(cover, seed, w, h, shape); } finally { mark('painting', performance.now() - t, 'blurred cover'); }
 }
 
 /* ——— tiny element helpers (satori takes plain objects) ——— */
@@ -94,8 +96,9 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
   const film = d.kind === 'film' || d.kind === 'tv';
   const accent = film ? TEAL : GOLD;
   const titleColor = film ? CREAM : GOLD;
-  const [cover, painting] = await Promise.all([coverData(d.cover, width >= W), timedPainting(d.bg ?? 'cinema')]);
+  const cover = await coverData(d.cover, width >= W);
   if (d.cover && !cover) throw new CoverMissing();   // a title with a cover never gets a card with a placeholder
+  const background = await timedBackground(cover, d.title, W, H, 'tall');
 
   const title = cut(d.title, 70);
   const size = title.length <= 14 ? 72 : title.length <= 26 ? 60 : title.length <= 44 ? 50 : 42;
@@ -103,13 +106,12 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
   const meta = d.meta ?? [d.year, d.kind === 'tv' && d.season ? `season ${d.season}` : '', d.creator ? `${by} ${d.creator}` : ''].filter(Boolean).join(' | ');
   const full = d.rating == null ? 0 : Math.floor(d.rating), half = d.rating != null && d.rating % 1 >= 0.5;
 
-  // The top 30% (to 576) shows the painting uncovered; Instagram covers the top 13% with its own bar. The poster starts below that,
-  // and text stays above 87% (1670).
+  // Instagram covers the top 13% (250) with its own bar and the bottom 13% with its reply box: the poster starts below that, text stays above 87% (1670).
   const p = paletteFor(d.title, d.color);
-  const CW = 400, CH = 600, CT = 600;
+  const CW = 480, CH = 720, CT = 290;
   const coverBox = h('div', {
-    position: 'absolute', left: (W - CW) / 2, top: CT, width: CW, height: CH, borderRadius: 8, overflow: 'hidden',
-    border: '2px solid rgba(255,255,255,.2)', background: p.bg,
+    position: 'absolute', left: (W - CW) / 2, top: CT, width: CW, height: CH, borderRadius: Math.round(CW * 0.03), overflow: 'hidden',
+    border: '2px solid rgba(255,255,255,.16)', background: p.bg,
   }, cover
     ? { type: 'img', props: { src: cover, width: CW, height: CH, style: { width: CW, height: CH, objectFit: 'cover' } } }
     : [
@@ -117,13 +119,13 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
       h('div', { position: 'absolute', left: 32, right: 32, top: 56, fontSize: 46, lineHeight: 1.15, color: '#F6EEDF', fontFamily: SERIF, fontWeight: 700 }, cut(d.title, 40)),
     ]);
 
-  const root = h('div', { width: W, height: H, background: baseColor(d.bg), flexDirection: 'column', alignItems: 'center', position: 'relative' }, [
-    { type: 'img', props: { src: painting, width: W, height: PAINT_H, style: { position: 'absolute', left: 0, top: 0, width: W, height: PAINT_H } } },
-    ...softShadow((W - CW) / 2, CT, CW, CH),
+  const root = h('div', { width: W, height: H, background: BG, flexDirection: 'column', alignItems: 'center', position: 'relative' }, [
+    { type: 'img', props: { src: background, width: W, height: H, style: { position: 'absolute', left: 0, top: 0, width: W, height: H } } },
+    ...softShadow((W - CW) / 2, CT, CW, CH, Math.round(CW * 0.03), 40),
     coverBox,
-    h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 34, flexDirection: 'column', alignItems: 'center' }, [
+    h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 34, flexDirection: 'column', alignItems: 'center', opacity: d.noText ? 0 : 1 }, [
       h('div', { fontSize: size, lineHeight: 1.12, color: titleColor, fontFamily: SERIF, fontWeight: 700, textAlign: 'center', justifyContent: 'center' }, title),
-      meta ? h('div', { marginTop: 12, fontSize: 30, color: GREY, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
+      meta ? h('div', { marginTop: 12, fontSize: 30, color: ONDARK, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
       d.status || full || half || (d.loved && d.kind === 'essay') ? h('div', { marginTop: 22, alignItems: 'center', gap: 22 }, [
         d.loved && d.kind === 'essay'
           ? h('div', { fontSize: 38, color: accent, fontFamily: SANS }, '♥ Loved')
@@ -134,9 +136,9 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
       ].filter(Boolean)) : null,
       d.line ? h('div', { marginTop: 22, fontSize: 36, lineHeight: 1.25, color: CREAM, fontStyle: 'italic', fontFamily: SERIF, textAlign: 'center', justifyContent: 'center' }, cut(d.line, 90)) : null,
     ].filter(Boolean)),
-    h('div', { position: 'absolute', left: 0, right: 0, top: 1722, flexDirection: 'column', alignItems: 'center' }, [
-      h('div', { fontSize: 24, letterSpacing: 6, color: DIM, fontFamily: SANS }, (d.owner ? `@${d.owner} ON GRANTHALAYA` : 'GRANTHALAYA').toUpperCase()),
-      h('div', { marginTop: 8, fontSize: 22, color: DIM, fontFamily: SANS }, SITE),
+    h('div', { position: 'absolute', left: 0, right: 0, top: 1722, flexDirection: 'column', alignItems: 'center', opacity: d.noText ? 0 : 1 }, [
+      h('div', { fontSize: 24, letterSpacing: 6, color: ONDARK, fontFamily: SANS }, (d.owner ? `@${d.owner} ON GRANTHALAYA` : 'GRANTHALAYA').toUpperCase()),
+      h('div', { marginTop: 8, fontSize: 22, color: ONDARK, fontFamily: SANS }, SITE),
     ]),
   ]);
 

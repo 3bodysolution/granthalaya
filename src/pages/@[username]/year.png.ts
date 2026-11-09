@@ -5,7 +5,6 @@ import type { APIRoute } from 'astro';
 import { createHash } from 'node:crypto';
 import { loadProfile, loadShelf, type Entry } from '../../lib/data';
 import { drawYear } from '../../lib/cards/year';
-import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
 import { picture, coverSlow, type Picture } from '../../lib/cards/output';
 import { CoverMissing, setOrigin, warmCover } from '../../lib/cards/covers';
 import { savedFacts } from '../../lib/cards/tagline';
@@ -44,14 +43,12 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   const fav = [...withArt].filter((e) => e.data.rating != null).sort(better)[0];
   const favourite = fav ? months.findIndex((e) => e?.logId === fav.logId) : -1;
   const width = url.searchParams.get('w') === '540' ? 540 : 1080;
-  const bgAsked = url.searchParams.get('bg');
-  const key = createHash('sha1').update(`${profile.id}:${year}:${bgAsked ?? ''}:${width}:${list.map((e) => `${e.logId}/${e.data.rating}`).sort().join(',')}`).digest('hex');
+  const key = createHash('sha1').update(`${profile.id}:${year}:${width}:${list.map((e) => `${e.logId}/${e.data.rating}`).sort().join(',')}`).digest('hex');
   let pic = rendered.get(key);
   if (!pic) {
     const kind = (t: string) => list.filter((e) => (t === 'film' ? e.data.type === 'film' || e.data.type === 'tv' : e.data.type === t)).length;
     try {
     pic = await drawYear({
-      bg: isBackground(bgAsked) ? bgAsked : fav ? ((await savedFacts(sb, fav.titleId)).bg ?? await within(backgroundOf(fav), 2500, 'cinema' as const)) : 'cinema',
       year, owner: profile.username,
       books: kind('book'), films: kind('film'), essays: kind('essay'),
       months: months.map((e) => e && { title: e.data.title, cover: e.data.cover, color: e.data.color }),

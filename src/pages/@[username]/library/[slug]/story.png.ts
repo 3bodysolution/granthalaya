@@ -2,7 +2,7 @@
 // Drawn as the visitor, so the database's privacy rules apply: private accounts and blocks give a 404.
 // The address may carry ?v=<when the entry last changed>: with it the browser keeps the card for good (a changed rating or status
 // is a new address); without it the current card is sent and kept for a minute only.
-// ?w=540 gives the half-size preview; ?bg=<painting> is for tests (otherwise the title's saved pick, else by genre).
+// ?w=540 gives the half-size preview. The background is the title's own cover, blurred.
 // The line on it: the entry's review tagline (unless the review has spoilers), else the title's saved line.
 // It never waits for the AI: with no saved line it draws without one, and the AI step runs in the background for next time.
 import type { APIRoute } from 'astro';
@@ -11,7 +11,6 @@ import { statusLabel } from '../../../../lib/kinds';
 import { drawStory } from '../../../../lib/cards/story';
 import { creditFor } from '../../../../lib/cards/credits';
 import { cardFacts } from '../../../../lib/cards/tagline';
-import { backgroundOf, isBackground } from '../../../../lib/cards/backgrounds';
 import { picture, within, coverSlow, type Picture } from '../../../../lib/cards/output';
 import { CoverMissing, setOrigin } from '../../../../lib/cards/covers';
 import { timed, mark } from '../../../../lib/timing';
@@ -42,28 +41,23 @@ export const GET: APIRoute = async ({ params, url, locals }) => {
   // old one, the current card is sent straight away (no redirect, which costs a whole extra round trip on a phone) and not kept
   const current = url.searchParams.get('v') === v;
 
-  const asked = url.searchParams.get('bg');
   const width = url.searchParams.get('w') === '540' ? 540 : 1080;
-  const key = `${entry.logId}:${v}:${asked ?? ''}:${width}`;
+  const key = `${entry.logId}:${v}:${width}`;
   const cached = rendered.get(key);
   // the picture is for this visitor's browser only (a shared cache could not tell a blocked person from anyone else)
   const keep = current ? 'private, max-age=31536000, immutable' : 'private, max-age=60';
   if (cached) return picture(cached, keep);
 
   const d = entry.data;
-  const facts = await timed('line', 'saved line and painting', cardFacts(sb, entry));
+  const facts = await timed('line', 'saved line', cardFacts(sb, entry));
   const line = (!d.spoiler && d.tagline) || facts.line;
-  // with no saved painting yet: by genre, but only for a moment (the catalogue may be slow)
-  const [bg, credit] = await Promise.all([
-    isBackground(asked) ? asked : facts.bg ?? within(timed('genre', 'painting by genre', backgroundOf(entry)), 2500, d.type === 'book' ? 'reading' as const : 'cinema' as const),
-    within(creditFor(entry), 2000, d.creator),
-  ]);
+  const credit = await within(creditFor(entry), 2000, d.creator);
   let pic: Picture;
   try {
     pic = await drawStory({
     kind: d.type, title: d.title, year: d.year, creator: credit || undefined, season: d.season,
     rating: d.rating, loved: d.loved, status: statusLabel(d.type, d.status), line,
-    owner: profile.username, cover: d.cover, color: d.color, bg,
+    owner: profile.username, cover: d.cover, color: d.color,
     }, width);
   } catch (e) {
     if (e instanceof CoverMissing) return coverSlow();

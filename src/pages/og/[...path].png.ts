@@ -7,9 +7,7 @@ import { loadProfile, loadDetails, loadVisits, loadCollections } from '../../lib
 import { statusLabel } from '../../lib/kinds';
 import { creditFor } from '../../lib/cards/credits';
 import { pageBits } from '../../lib/cards/titlepage';
-import { backgroundOf, isBackground } from '../../lib/cards/backgrounds';
 import { drawPreview, type PreviewData } from '../../lib/cards/preview';
-import { savedFacts } from '../../lib/cards/tagline';
 import { picture, within, coverSlow } from '../../lib/cards/output';
 import { CoverMissing, setOrigin } from '../../lib/cards/covers';
 export const prerender = false;
@@ -29,7 +27,7 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
     if (type === 'film' || type === 'tv' || type === 'book') {
       const p = await pageBits(sb, type, a ?? '');
       if (p) card = {
-        kicker: KIND[type], title: p.title, accent: type === 'book' ? 'book' : 'film', line: p.line, bg: p.bg,
+        kicker: KIND[type], title: p.title, accent: type === 'book' ? 'book' : 'film', line: p.line,
         meta: meta(p.year, type === 'film' ? 'directed by' : type === 'tv' ? 'created by' : 'by', p.creator),
         covers: [{ src: p.cover, title: p.title, color: p.color }],
       };
@@ -45,7 +43,7 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
         const { data } = await sb.from('logs').select('title:titles(title, cover_url, color)').eq('user_id', profile.id).eq('only_me', false)
           .order('logged_on', { ascending: false }).limit(3);
         card = {
-          kicker: 'Shelf', bg: 'reading', title: name, meta: `@${profile.username}`, line: details?.bio || undefined,
+          kicker: 'Shelf', title: name, meta: `@${profile.username}`, line: details?.bio || undefined,
           covers: (data ?? []).map((r: any) => ({ src: r.title?.cover_url ?? undefined, title: r.title?.title ?? '', color: r.title?.color ?? undefined })),
         };
       } else if (type === 'e') {
@@ -53,7 +51,7 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
         if (!e || e.data.private) return gone();
         const d = e.data;
         card = {
-          kicker: `@${profile.username} | ${statusLabel(d.type, d.status)}`, title: d.title, rating: d.rating, bg: (await savedFacts(sb, e.titleId)).bg ?? await within(backgroundOf(e), 2500, d.type === 'book' ? 'reading' as const : 'cinema' as const),
+          kicker: `@${profile.username} | ${statusLabel(d.type, d.status)}`, title: d.title, rating: d.rating,
           accent: d.type === 'book' ? 'book' : d.type === 'essay' ? 'plain' : 'film',
           meta: meta(d.year, d.type === 'film' ? 'directed by' : d.type === 'tv' ? 'created by' : 'by', await within(creditFor(e), 2000, d.creator)),
           covers: [{ src: d.cover, title: d.title, color: d.color }],
@@ -62,17 +60,16 @@ export const GET: APIRoute = async ({ params, locals, url }) => {
         const col = (await loadCollections(sb, profile)).find((c) => c.id === b);
         if (!col) return gone();
         card = {
-          kicker: 'Collection', bg: 'reading', title: col.data.title, meta: `by ${name} | ${col.data.items.length} titles`, line: col.body || undefined,
+          kicker: 'Collection', title: col.data.title, meta: `by ${name} | ${col.data.items.length} titles`, line: col.body || undefined,
           covers: col.data.items.slice(0, 3).map((i) => ({ src: i.title.cover_url ?? undefined, title: i.title.title, color: i.title.color ?? undefined })),
         };
       }
     }
   } catch { return gone(); }
   if (!card) return gone();
-  const asked = url.searchParams.get('bg');
-  if (isBackground(asked)) card.bg = asked;
 
   let pic;
+  if (import.meta.env.DEV && url.searchParams.has('notext')) card.noText = true;   // test only
   try { pic = await drawPreview(card); } catch (e) { if (e instanceof CoverMissing) return coverSlow(); throw e; }
   // catalogue cards are the same for everyone: Vercel's CDN may keep them a long time (a day while the title has no line yet,
   // which the AI may still add). Cards about someone's shelf stay short.

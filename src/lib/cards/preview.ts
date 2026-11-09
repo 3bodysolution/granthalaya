@@ -3,8 +3,7 @@ import satori from 'satori';
 import { mark } from '../timing';
 import { render, type Picture } from './output';
 import { paletteFor } from '../data';
-import { BG, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData, timedPainting, softShadow, CoverMissing } from './story';
-import { type Background } from './backgrounds';
+import { BG, CREAM, GOLD, TEAL, ONDARK, FONTS, SITE, SERIF, SANS, h, cut, coverData, timedBackground, softShadow, CoverMissing } from './story';
 
 export interface PreviewData {
   kicker: string;                  // "Film", "Book", "Shelf" ...
@@ -12,7 +11,7 @@ export interface PreviewData {
   meta?: string;                   // "1953 | directed by ..."
   line?: string;                   // a short line under the meta
   rating?: number;
-  bg?: Background;
+  noText?: boolean;                // test only: hides the words
   accent?: 'film' | 'book' | 'plain';
   covers: { src?: string; title: string; color?: string }[];   // one poster, or up to 3 for a shelf or collection
 }
@@ -22,8 +21,9 @@ export async function drawPreview(d: PreviewData): Promise<Picture> {
   const accent = d.accent === 'film' ? TEAL : d.accent === 'book' ? GOLD : CREAM;
   const one = d.covers.length <= 1;
   const CW = one ? 290 : 190, CH = one ? 435 : 285;
-  const [covers, painting] = await Promise.all([Promise.all(d.covers.slice(0, 3).map(async (c) => ({ ...c, data: await coverData(c.src, false) }))), timedPainting(d.bg ?? 'cinema')]);
+  const covers = await Promise.all(d.covers.slice(0, 3).map(async (c) => ({ ...c, data: await coverData(c.src, false) })));
   if (covers.some((c) => c.src && !c.data)) throw new CoverMissing();   // no placeholder when the title has a cover
+  const background = await timedBackground(covers[0]?.data, d.title, PW, PH, 'wide');
   const title = cut(d.title, 80);
   const size = title.length <= 18 ? 76 : title.length <= 36 ? 62 : 50;
   const full = d.rating == null ? 0 : Math.floor(d.rating), half = d.rating != null && d.rating % 1 >= 0.5;
@@ -31,8 +31,8 @@ export async function drawPreview(d: PreviewData): Promise<Picture> {
   const tile = (c: (typeof covers)[number], i: number) => {
     const p = paletteFor(c.title, c.color);
     return h('div', {
-      position: 'absolute', left: one ? 775 : 640 + i * 175, top: one ? 98 : 150 + (i === 1 ? 40 : 0), width: CW, height: CH, borderRadius: 6, overflow: 'hidden',
-      background: p.bg, border: '2px solid rgba(255,255,255,.2)',
+      position: 'absolute', left: one ? 775 : 640 + i * 175, top: one ? 98 : 150 + (i === 1 ? 40 : 0), width: CW, height: CH, borderRadius: Math.round(CW * 0.03), overflow: 'hidden',
+      background: p.bg, border: '2px solid rgba(255,255,255,.16)',
     }, c.data
       ? { type: 'img', props: { src: c.data, width: CW, height: CH, style: { width: CW, height: CH, objectFit: 'cover' } } }
       : [
@@ -42,20 +42,19 @@ export async function drawPreview(d: PreviewData): Promise<Picture> {
   };
 
   const root = h('div', { width: PW, height: PH, background: BG, position: 'relative' }, [
-    // the top of the painting fills the card
-    { type: 'img', props: { src: painting, width: PW, height: 1222, style: { position: 'absolute', left: 0, top: 0, width: PW, height: 1222 } } },
-    h('div', { position: 'absolute', left: 0, top: 0, width: 860, height: PH, background: `linear-gradient(to right, ${BG} 0%, ${BG} 30%, rgba(18,19,22,0) 100%)` }),
-    ...covers.flatMap((c, i) => [...softShadow(one ? 775 : 640 + i * 175, one ? 98 : 150 + (i === 1 ? 40 : 0), CW, CH, 6, 14), tile(c, i)]),
-    h('div', { position: 'absolute', left: 64, top: 70, width: 640, height: 490, flexDirection: 'column' }, [
+    // the first cover, blurred, fills the card
+    { type: 'img', props: { src: background, width: PW, height: PH, style: { position: 'absolute', left: 0, top: 0, width: PW, height: PH } } },
+    ...covers.flatMap((c, i) => [...softShadow(one ? 775 : 640 + i * 175, one ? 98 : 150 + (i === 1 ? 40 : 0), CW, CH, Math.round(CW * 0.03), 26), tile(c, i)]),
+    h('div', { position: 'absolute', left: 64, top: 70, width: 640, height: 490, flexDirection: 'column', opacity: d.noText ? 0 : 1 }, [
       h('div', { fontSize: 24, letterSpacing: 8, color: accent, fontFamily: SANS }, d.kicker.toUpperCase()),
       h('div', { marginTop: 22, fontSize: size, lineHeight: 1.1, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, title),
-      d.meta ? h('div', { marginTop: 18, fontSize: 30, color: GREY, fontFamily: SANS }, cut(d.meta, 70)) : null,
+      d.meta ? h('div', { marginTop: 18, fontSize: 30, color: ONDARK, fontFamily: SANS }, cut(d.meta, 70)) : null,
       full || half ? h('div', { marginTop: 14, fontSize: 38, color: accent, fontFamily: SANS, letterSpacing: 4 }, '★'.repeat(full) + (half ? '½' : '')) : null,
       d.line ? h('div', { marginTop: 22, fontSize: 32, lineHeight: 1.3, color: CREAM, fontStyle: 'italic', fontFamily: SERIF }, cut(d.line, 100)) : null,
       h('div', { flexGrow: 1 }, ''),
       h('div', { flexDirection: 'column' }, [
-        h('div', { fontSize: 24, letterSpacing: 6, color: DIM, fontFamily: SANS }, 'GRANTHALAYA'),
-        h('div', { marginTop: 6, fontSize: 22, color: DIM, fontFamily: SANS }, SITE),
+        h('div', { fontSize: 24, letterSpacing: 6, color: ONDARK, fontFamily: SANS }, 'GRANTHALAYA'),
+        h('div', { marginTop: 6, fontSize: 22, color: ONDARK, fontFamily: SANS }, SITE),
       ]),
     ].filter(Boolean)),
   ]);

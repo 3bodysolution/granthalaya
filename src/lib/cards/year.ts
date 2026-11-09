@@ -5,14 +5,12 @@ import { mark } from '../timing';
 import { render, type Picture } from './output';
 import { paletteFor } from '../data';
 import { CoverMissing, softShadow, W, H, CREAM, GOLD, TEAL, GREY, DIM, FONTS, SITE, SERIF, SANS, h, cut, coverData } from './story';
-import type { Background } from './backgrounds';
 
 export interface YearTitle { title: string; cover?: string; color?: string }
 export interface YearData {
   year: number; owner: string;
   books: number; films: number; essays: number;
   months: (YearTitle | null)[];     // 12 entries: the month's best title, or null when nothing was finished
-  bg?: Background;
   fav?: YearTitle;                  // the favourite of the year, shown large on the left
   favourite?: number;               // index (0 to 11) of the month holding the favourite of the year
 }
