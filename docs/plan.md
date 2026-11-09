@@ -144,16 +144,16 @@ Environment variables for Production in Vercel (names only): `PUBLIC_SUPABASE_UR
 4. [x] The TMDB sentence ("This product uses the TMDB API but is not endorsed or certified by TMDB.") ends the About page.
 5. [-] Sponsor hidden at launch (see the note below). Was: scan the QR on the preview with your own UPI app, check the payee name, send 1 rupee and see that it arrives.
 6. [ ] Read Privacy and Terms once more.
-7. [ ] Vercel → Settings → Environment Variables → Production: the names above; delete `CRON_SECRET`; make sure the three `*_BASE` test addresses are not set.
+7. [x] Vercel → Settings → Environment Variables → Production: the names above; delete `CRON_SECRET`; make sure the three `*_BASE` test addresses are not set.
 8. [x] Vercel → Firewall: **two** rate-limit rules, set up (the free plan allows only two): "Limit search" (`/api/search`, 30 a minute per IP) and "Limit covers" (`/api/cover`, 300 a minute per IP). A rule for the drawn cards couldn't be added on the free plan, so cards rely on the code's own limit (`src/lib/ratelimit.ts`, 30 a minute per visitor address per running copy) and on the CDN; watch the function usage after launch. (`docs/rate-limits.md`.)
-9. [ ] Supabase → Authentication → URL Configuration: Site URL `https://mygranthalaya.vercel.app`; Redirect URLs only that address's `/auth/callback**`, localhost, and your own preview pattern. Remove `granthalaya-sarthak.vercel.app` and any `*.vercel.app` wildcard (someone else could claim the old name and receive sign-in codes).
-10. [ ] Google Cloud → OAuth client: remove the old address from the authorised origins; add `https://mygranthalaya.vercel.app`. OAuth consent screen: home page, privacy (`/privacy/`) and terms (`/terms/`) links on the new address, then Publish app.
-11. [ ] Cloudflare Turnstile: the widget's hostnames are `mygranthalaya.vercel.app` (and `localhost` only if needed). Remove the old address.
+9. [x] Supabase → Authentication → URL Configuration: Site URL `https://mygranthalaya.vercel.app`; Redirect URLs only that address's `/auth/callback**`, localhost, and your own preview pattern. Remove `granthalaya-sarthak.vercel.app` and any `*.vercel.app` wildcard (someone else could claim the old name and receive sign-in codes).
+10. [x] Google Cloud → OAuth client: remove the old address from the authorised origins; add `https://mygranthalaya.vercel.app`. OAuth consent screen: home page, privacy (`/privacy/`) and terms (`/terms/`) links on the new address, then Publish app.
+11. [x] Cloudflare Turnstile: the widget's hostnames are `mygranthalaya.vercel.app` (and `localhost` only if needed). Remove the old address.
 12. [ ] Vercel → Domains: add `granthalaya-sarthak.vercel.app` as a redirect to the new address if Vercel allows it.
-13. [ ] Main checkout (`Documents\granthalaya`): set aside or discard the two uncommitted old-site changes (`src/pages/404.astro` wording and `src/pages/add.astro` "Publishing, about a minute…" wait; neither is needed), then `git pull`.
-14. [ ] Take a backup (`node scripts/backup-db.mjs --name=before-launch`).
-15. [ ] Clear the owner's test data: `node scripts/backup-db.mjs --name=before-clear-my-data`, then `node scripts/clear-my-data.mjs` (look at the counts), then `node scripts/clear-my-data.mjs --write`.
-16. [ ] Merge `phase-1` into `main` (a fast-forward: `origin/main` holds nothing that phase-1 lacks) and push. Vercel deploys production.
+13. [x] Main checkout (`Documents\granthalaya`): set aside or discard the two uncommitted old-site changes (`src/pages/404.astro` wording and `src/pages/add.astro` "Publishing, about a minute…" wait; neither is needed), then `git pull`.
+14. [x] Take a backup (`node scripts/backup-db.mjs --name=before-launch`). Done 2026-11-09 (298 KB).
+15. [x] Clear the owner's test data: `node scripts/backup-db.mjs --name=before-clear-my-data`, then `node scripts/clear-my-data.mjs` (look at the counts), then `node scripts/clear-my-data.mjs --write`.
+16. [x] Done 2026-11-09 (6f1e41c; production deployed, check:site passed against the live address, headers checked). Merge `phase-1` into `main` (a fast-forward: `origin/main` holds nothing that phase-1 lacks) and push. Vercel deploys production.
 17. [ ] On the live address: sign in with Google in a fresh browser, save a title, write a review, upload a photo, share a card and "Share my year", sign out. Check the headers (`curl -sI https://mygranthalaya.vercel.app/` shows X-Frame-Options and the others). Open `/%zz` (should be a 404).
 18. [ ] Rotate the Supabase secret key: make a new one, put it in Vercel (Production and Preview) and `.env`, redeploy, check saving and the admin page, then delete the old key in Supabase.
 19. [ ] Next day: Vercel → Cron Jobs shows the keepalive ran; look at the firewall log.
