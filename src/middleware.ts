@@ -60,6 +60,8 @@ async function logged(url: URL, run: () => unknown) {
 
 const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
   const path = ctx.url.pathname;
+  // Sponsor is switched off in src/data/site.ts: its pages are not found
+  if (!site.sponsor.enabled && /^\/(sponsor|support)\/?$/.test(path)) return ctx.rewrite('/404');
   const old = oldAddress(path);
   if (old) return ctx.redirect(old, 301);
   if (ctx.isPrerendered) return next();

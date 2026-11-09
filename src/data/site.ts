@@ -14,6 +14,8 @@ export const site = {
   contact: 'granthalayasupport@gmail.com',
 
   // The Sponsor page: where UPI payments go. The payee name is only used inside the UPI link, never shown on the page.
+  // Sponsor is hidden at launch. Set enabled to true to bring back the button, the footer and About links and the /sponsor page.
+  sponsor: { enabled: false },
   support: { upi: 'granthalaya@upi', payee: 'Sarthak Vijay Kokane' },
 
   // Reading pace used to estimate time spent on books (minutes per page) and essays (words per minute).
