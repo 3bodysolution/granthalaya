@@ -1,0 +1,11 @@
+{
+  "about": "Titles that the request answers of search (\"best animated movies\" and the like, in the dropdown and on /search/) never show. Add a title to the list below, one line each, exactly as it is written on its page (capitals, accents and punctuation do not matter). The title can still be found by typing its own name. Why each is here is in the notes.",
+  "titles": [
+    "Zakir Khan: Haq Se Single",
+    "One Direction: This Is Us"
+  ],
+  "notes": {
+    "Zakir Khan: Haq Se Single": "a stand-up special; TMDB does not tag it as one, so the keyword filter cannot catch it",
+    "One Direction: This Is Us": "a concert film; TMDB does not tag it as one"
+  }
+}

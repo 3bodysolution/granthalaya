@@ -11,6 +11,7 @@ import { searchShopBooks, shopListBooks } from './shopbooks';
 import { themes as essayThemes, allEssays, freeFirst, type Essay } from '../essays';
 import { allowed } from '../ratelimit';
 import { parseSimple } from './wordlist';
+import { isHidden } from './hidden';
 
 export type Kind = 'film' | 'tv' | 'book' | 'essay';
 export interface Intent { kind: Kind; genres: string[]; keywords: string[]; subjects: string[]; themes: string[]; language?: string; decade?: number; sort?: 'top' | 'new' | 'popular'; form?: 'story' }
@@ -236,6 +237,13 @@ function essays(i: Intent, limit = 8): Hit[] {
 
 /** the filters, made into a heading and up to 8 real results; null when fewer than 4 good ones remain */
 export async function resultsFor(i: Intent, sb: SupabaseClient | null | undefined, limit = 8): Promise<Answer | null> {
+  const a = await rawResults(i, sb, limit);
+  if (!a) return null;
+  // the hand-kept list of titles request answers never show (src/data/search-hidden.json); fewer than 4 left means no block
+  const items = a.items.filter((h) => !isHidden(h.title));
+  return items.length >= ENOUGH ? { ...a, items } : null;
+}
+async function rawResults(i: Intent, sb: SupabaseClient | null | undefined, limit: number): Promise<Answer | null> {
   if (i.kind === 'film' || i.kind === 'tv') {
     const r = await screen(i, limit);
     return r ? { heading: headingFor({ ...i, genres: r.applied.genres, sort: i.sort ?? 'top' }, { keywords: r.applied.keywords }), items: r.items } : null;
