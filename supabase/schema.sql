@@ -250,6 +250,14 @@ begin
   ) then
     raise exception 'That status doesn''t fit a %.', case when k = 'tv' and s is null then 'whole show' else k end using errcode = 'P0001';
   end if;
+  -- the same title in the same status from the same member within 30 seconds is a double save: refuse it ("watch it again" is exempt).
+  -- The lock makes two saves that arrive at the same moment take turns, so the second one sees the first.
+  if tg_op = 'INSERT' and new.again is not true then
+    perform pg_advisory_xact_lock(hashtextextended('log' || new.user_id::text || new.title_id::text, 0));
+    if exists (select 1 from public.logs where user_id = new.user_id and title_id = new.title_id and status = new.status and again is not true and created_at > now() - interval '30 seconds') then
+      raise exception 'That was just saved.' using errcode = 'P0001';
+    end if;
+  end if;
   -- a gentle limit on how fast one account can add things (the website's own server is exempt)
   if tg_op = 'INSERT' and coalesce(auth.role(), '') <> 'service_role' then
     select count(*) into n from public.logs where user_id = new.user_id and created_at > now() - interval '1 hour';
@@ -304,6 +312,11 @@ create or replace function public.check_review_comment()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare n int; d int;
 begin
+  -- the same words from the same member on the same review within 30 seconds is a double send: refuse it (two arriving at the same moment take turns)
+  perform pg_advisory_xact_lock(hashtextextended('comment' || new.user_id::text || new.log_id::text, 0));
+  if exists (select 1 from public.review_comments where user_id = new.user_id and log_id = new.log_id and body = new.body and created_at > now() - interval '30 seconds') then
+    raise exception 'You just posted that.' using errcode = 'P0001';
+  end if;
   if coalesce(auth.role(), '') <> 'service_role' then
     select count(*) filter (where at > now() - interval '10 minutes'), count(*) into n, d
       from public.comment_events where user_id = new.user_id and at > now() - interval '1 day';

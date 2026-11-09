@@ -161,6 +161,9 @@ const shareData = JSON.stringify({
 const hasReview = reviewed(entry) && !isShow;
 const social = hasReview && !d.private ? (await reviewExtras(sb, new Map([[entry.logId, profile.id]]), me)).get(entry.logId) : undefined;
 const hideSpoiler = d.spoiler && !isMe;
+// the big first letter needs room: only a long review (about 300 characters) whose first paragraph fills a few lines
+const firstPara = entry.body.trim().split(/\n\s*\n/)[0] ?? '';
+const dropCap = entry.body.trim().length > 300 && firstPara.length >= 120;
 // the shepherd in the footer says the title's own line
 const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
 ---
@@ -221,12 +224,12 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
               {hideSpoiler ? (
                 <SpoilerGate id={entry.logId}>
                   {d.tagline && <p class="tagl">{d.tagline}</p>}
-                  {notes && <div class="note" set:html={notes} />}
+                  {notes && <div class:list={['note', dropCap && 'cap']} set:html={notes} />}
                 </SpoilerGate>
               ) : (
                 <>
                   {d.tagline && <p class="tagl">{d.tagline}</p>}
-                  {notes && <div class="note" set:html={notes} />}
+                  {notes && <div class:list={['note', dropCap && 'cap']} set:html={notes} />}
                 </>
               )}
               {social && <ReviewSocial logId={entry.logId} owner={{ id: profile.id, username: profile.username }} likes={social.likes} liked={social.liked} comments={social.comments} report={false} />}
@@ -414,7 +417,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
   .note { max-width: 660px; display: flex; flex-direction: column; gap: 14px; }
   .note :global(p) { margin: 0; font-size: 16px; line-height: 1.7; color: var(--muted); }
   .note :global(p:first-child) { margin-top: 6px; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 23px; line-height: 1.6; color: var(--ink); }
-  .note :global(p:first-child::first-letter) { float: left; font-size: 72px; line-height: .85; padding: 6px 10px 0 0; color: var(--lat); }
+  .note.cap :global(p:first-child::first-letter) { float: left; font-size: 72px; line-height: .85; padding: 6px 3px 0 0; margin-right: 0; color: var(--lat); }
   .chips { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
 
   .block { padding-top: 64px; display: flex; flex-direction: column; gap: 24px; }

@@ -534,6 +534,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const f = (ev.target as Element).closest<HTMLFormElement>('form[data-comment]');
       if (!f) return;
       ev.preventDefault();
+      if (f.dataset.sending) return;   // one comment is on its way: a second tap or event can never send it again
       const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
       const field = f.elements.namedItem('body') as HTMLTextAreaElement;
       const err = f.querySelector<HTMLElement>('.cerr')!;
@@ -543,6 +544,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (!text) { fail('Write something first.'); field.focus({ preventScroll: true }); return; }
       const had = document.activeElement as HTMLElement | null;
       const was = btn.textContent;
+      f.dataset.sending = '1';
       busy(btn, true); btn.textContent = 'Posting…'; field.readOnly = true;
       let r: any = null;
       try {
@@ -551,6 +553,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         if (res.ok) r = j; else fail(j.error || 'That didn’t work. Please try again.');
       } catch { fail('Couldn’t reach the site. Check your connection.'); }
       busy(btn, false); btn.textContent = was; field.readOnly = false;
+      delete f.dataset.sending;
       const box = f.closest<HTMLElement>('[data-review]');
       if (r) {
         const tpl = f.querySelector<HTMLTemplateElement>('template[data-comment-tpl]');
@@ -628,6 +631,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       }
       const write = el.closest<HTMLButtonElement>('[data-write]');
       if (write) {
+        if (write.closest<HTMLElement>('.logpanel')?.dataset.working) return;   // the panel is still saving: its entry doesn't exist yet
         busy(write, true);
         const r = await send('/api/title', 'POST', JSON.parse(write.dataset.write!));
         if (r?.id) navigate(`/add/?title=${r.id}`); else busy(write, false);

@@ -27,8 +27,11 @@ if (logId) {
 } else if (titleId && /^[0-9a-f-]{36}$/i.test(titleId)) {
   const { data: t } = await sb.from('titles').select('*').eq('id', titleId).maybeSingle<any>();
   if (t) {
-    const { count } = await sb.from('logs').select('id', { count: 'exact', head: true }).eq('user_id', me.id).eq('title_id', t.id);
-    start = { mode: 'title', kind: t.kind, title: t, again: params.get('again') === '1', status: params.get('again') === '1' ? 'done' : undefined, onShelf: (count ?? 0) > 0 };
+    const { data: mineNow } = await sb.from('logs').select('id').eq('user_id', me.id).eq('title_id', t.id).order('logged_on', { ascending: false }).order('created_at', { ascending: false }).limit(1);
+    const count = mineNow?.length ?? 0;
+    // already on your shelf: change that entry. "Watch it again" (?again=1) is the only way to a second one.
+    if (count > 0 && params.get('again') !== '1') return Astro.redirect(`/add/?log=${mineNow![0].id}`);
+    start = { mode: 'title', kind: t.kind, title: t, again: params.get('again') === '1', status: params.get('again') === '1' ? 'done' : undefined, onShelf: count > 0 };
   }
 }
 if (start.title) start.title.bg = paletteFor(start.title.title, start.title.color).bg;
@@ -458,6 +461,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       } else if (pick) data.hit = pick;
       else { at('find'); return; }
       const btn = $('savebtn') as HTMLButtonElement;
+      if (btn.disabled) return;   // already saving: never send it twice
       const label = btn.textContent;
       btn.disabled = true; btn.textContent = 'Saving…';
       const r = await fetch('/api/log', { method: start.mode === 'edit' ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })

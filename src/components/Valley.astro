@@ -82,7 +82,10 @@ const layers = [0, 1, 2, 3];
       tip.style.top = (r.top - o.top - 6) + 'px';
       tip.classList.add('on'); clearTimeout((tip as any)._t); (tip as any)._t = setTimeout(() => tip.classList.remove('on'), 6500);
     });
-    document.addEventListener('pointerdown', (ev) => { if (!(ev.target as Element).closest?.('.shepherd')) tip.classList.remove('on'); });
+    const w = window as any;
+    if (w.__valleyDown) document.removeEventListener('pointerdown', w.__valleyDown);   // (the last page's one: they would pile up with every page visit)
+    w.__valleyDown = (ev: Event) => { if (!(ev.target as Element).closest?.('.shepherd')) tip.classList.remove('on'); };
+    document.addEventListener('pointerdown', w.__valleyDown);
 
     // the loop's state is declared here, before anything can ask for a frame (the weather block below can, at once, when the answer is remembered)
     let visible = false, raf = 0, last = performance.now();

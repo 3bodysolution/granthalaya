@@ -76,6 +76,22 @@ export const POST: APIRoute = async (ctx) => {
 
   const sb = ctx.locals.supabase;
   const row = { user_id: me.id, title_id: titleId, ...fields(b, t.kind, status) };
+  // a second save of the same title, in the same status, within 30 seconds is the first one again (a double tap, or a rating and a
+  // review sent one after the other): it fills in the entry that is there and makes no new one. "Watch it again" is never merged.
+  if (!row.again) {
+    const { data: recent } = await sb.from('logs').select('id').eq('user_id', me.id).eq('title_id', titleId).eq('status', row.status).eq('again', false)
+      .gte('created_at', new Date(Date.now() - 30_000).toISOString()).order('created_at', { ascending: false }).limit(1);
+    if (recent?.length) {
+      const fill: Record<string, unknown> = {};
+      if (row.rating != null) fill.rating = row.rating;
+      if (row.notes) fill.notes = row.notes;
+      if (row.tagline) { fill.tagline = row.tagline; fill.spoiler = row.spoiler; }
+      if (row.where_seen) fill.where_seen = row.where_seen;
+      if (row.started_on) fill.started_on = row.started_on;
+      if (Object.keys(fill).length) await sb.from('logs').update(fill).eq('id', recent[0].id).eq('user_id', me.id);
+      return json({ ok: true, id: recent[0].id, href: await entryHref(ctx, me.username, t), merged: true });
+    }
+  }
   const { data, error } = await sb.from('logs').insert(row).select('id').single();
   if (error || !data) return oops(dbMessage(error));
   // the first season logged replaces "want to watch" on the whole show

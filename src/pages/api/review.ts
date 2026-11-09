@@ -32,6 +32,10 @@ export const POST: APIRoute = async (ctx) => {
   if (b?.action === 'comment') {
     const text = str(b.body, 1000);
     if (!text) return oops('Write something first.');
+    // the same words from the same member on the same review within 30 seconds is a double send: refuse it
+    const { data: dup } = await sb.from('review_comments').select('id').eq('log_id', id).eq('user_id', me.id).eq('body', text)
+      .gte('created_at', new Date(Date.now() - 30_000).toISOString()).limit(1);
+    if (dup?.length) return oops('You just posted that.', 409);
     const { data, error } = await sb.from('review_comments').insert({ log_id: id, user_id: me.id, body: text }).select('id, created_at').maybeSingle();
     if (error) return oops(dbMessage(error, 'Couldn’t post that comment.'));
     return json({ ok: true, comment: data ? { id: data.id, date: data.created_at, body: text } : null });
