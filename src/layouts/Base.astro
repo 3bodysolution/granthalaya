@@ -447,7 +447,13 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         if (!(await ask('Delete this comment?', 'It can’t be brought back.', 'Delete'))) return;
         busy(unc, true);
         const box = unc.closest<HTMLElement>('[data-review]');
-        if (await send('/api/review', 'DELETE', { comment: unc.dataset.uncomment })) { toast('Comment deleted'); if (box) await refreshReview(box); } else busy(unc, false);
+        if (await send('/api/review', 'DELETE', { comment: unc.dataset.uncomment })) {
+          const field = box?.querySelector<HTMLTextAreaElement>('form[data-comment] textarea');
+          unc.closest('li')?.remove();
+          if (box) setCommentCount(box, -1);
+          toast('Comment deleted');
+          field?.focus({ preventScroll: true });
+        } else busy(unc, false);
         return;
       }
       // Popular, Recent and More under a title's reviews: the page stays where it is
@@ -516,19 +522,55 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         box.replaceWith(document.importNode(next, true));
       } catch { reload(); }
     }
+    // the comment count on a review's "comments" button
+    function setCommentCount(box: HTMLElement, by: number) {
+      const sum = box.querySelector('details.cmt > summary'); if (!sum) return;
+      const num = sum.querySelector('.num'); const word = sum.querySelector('.rbl');
+      const n = Math.max(0, Number(num?.textContent || 0) + by);
+      if (num) num.textContent = n ? String(n) : '';
+      if (word) word.textContent = n === 1 ? 'comment' : 'comments';
+    }
     document.addEventListener('submit', async (ev) => {
       const f = (ev.target as Element).closest<HTMLFormElement>('form[data-comment]');
       if (!f) return;
       ev.preventDefault();
       const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
-      const text = (f.elements.namedItem('body') as HTMLTextAreaElement).value.trim();
-      if (!text) { toast('Write something first.'); (f.elements.namedItem('body') as HTMLTextAreaElement).focus(); return; }
-      busy(btn, true);
-      const r = await send('/api/review', 'POST', { action: 'comment', id: f.dataset.comment, body: text });
-      if (!r) { busy(btn, false); return; }
+      const field = f.elements.namedItem('body') as HTMLTextAreaElement;
+      const err = f.querySelector<HTMLElement>('.cerr')!;
+      const text = field.value.trim();
+      const fail = (msg: string) => { err.textContent = msg; err.hidden = false; };
+      err.hidden = true;
+      if (!text) { fail('Write something first.'); field.focus({ preventScroll: true }); return; }
+      const had = document.activeElement as HTMLElement | null;
+      const was = btn.textContent;
+      busy(btn, true); btn.textContent = 'Posting…'; field.readOnly = true;
+      let r: any = null;
+      try {
+        const res = await fetch('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'comment', id: f.dataset.comment, body: text }) });
+        const j = await res.json().catch(() => ({}));
+        if (res.ok) r = j; else fail(j.error || 'That didn’t work. Please try again.');
+      } catch { fail('Couldn’t reach the site. Check your connection.'); }
+      busy(btn, false); btn.textContent = was; field.readOnly = false;
       const box = f.closest<HTMLElement>('[data-review]');
-      if (box) await refreshReview(box); else reload();
-    });
+      if (r) {
+        const tpl = f.querySelector<HTMLTemplateElement>('template[data-comment-tpl]');
+        const list = box?.querySelector('[data-clist]');
+        if (!r.comment?.id || !tpl || !list) { if (box) await refreshReview(box); else reload(); return; }   // (no new comment to show: fetch the thread again)
+        const li = (tpl.content.cloneNode(true) as DocumentFragment).querySelector('li')!;
+        const name = f.dataset.meName || '', user = f.dataset.meUsername || '', pic = f.dataset.meAvatar || '';
+        const face = li.querySelector<HTMLElement>('.face')!;
+        face.style.setProperty('--fh', String([...name].reduce((n, c) => (n * 31 + c.charCodeAt(0)) % 360, 7)));
+        const letter = face.querySelector('.face-l'); if (letter) letter.textContent = ([...name.trim()][0] || '?').toUpperCase();
+        const img = face.querySelector('img'); if (img) { if (pic) img.setAttribute('src', pic); else img.remove(); }
+        const a = li.querySelector('.ch a')!; a.textContent = name; a.setAttribute('href', `/@${user}/`);
+        li.querySelector('.ct')!.textContent = text;
+        li.querySelector<HTMLElement>('[data-uncomment]')!.dataset.uncomment = r.comment.id;
+        list.appendChild(li);
+        field.value = '';
+        if (box) setCommentCount(box, 1);
+      }
+      if (had && had.isConnected) had.focus({ preventScroll: true });
+    }, true);   // (capture: before Astro's page router, which would otherwise take the form as a page navigation and reload)
     // a season's date and review, edited in place on a show's entry page (components/SeasonList.astro)
     document.addEventListener('submit', async (ev) => {
       const f = (ev.target as Element).closest<HTMLFormElement>('form[data-season-edit]');
@@ -539,7 +581,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const r = await send('/api/log', 'PATCH', { id: f.dataset.seasonEdit, notes: (f.elements.namedItem('notes') as HTMLTextAreaElement).value, tagline: (f.elements.namedItem('tagline') as HTMLInputElement | null)?.value ?? '', finished: (f.elements.namedItem('day') as HTMLInputElement).value });
       busy(btn, false);
       if (r) toast('Saved');
-    });
+    }, true);
     const paintStars = (box: HTMLElement, v: number) => box.querySelectorAll<HTMLElement>('.st').forEach((s, i) => {
       s.classList.toggle('full', v >= i + 1);
       s.classList.toggle('half', v === i + 0.5);

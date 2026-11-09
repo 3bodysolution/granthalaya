@@ -32,9 +32,9 @@ export const POST: APIRoute = async (ctx) => {
   if (b?.action === 'comment') {
     const text = str(b.body, 1000);
     if (!text) return oops('Write something first.');
-    const { error } = await sb.from('review_comments').insert({ log_id: id, user_id: me.id, body: text });
+    const { data, error } = await sb.from('review_comments').insert({ log_id: id, user_id: me.id, body: text }).select('id, created_at').maybeSingle();
     if (error) return oops(dbMessage(error, 'Couldn’t post that comment.'));
-    return json({ ok: true });
+    return json({ ok: true, comment: data ? { id: data.id, date: data.created_at, body: text } : null });
   }
   return oops('Unknown action.');
 };

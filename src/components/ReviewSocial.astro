@@ -25,8 +25,7 @@ const signin = `/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.
     <details class="cmt" open={open || undefined}>
       <summary class="rb"><Talk aria-hidden="true" /><span class="num">{comments.length || ''}</span><span class="rbl">{comments.length === 1 ? 'comment' : 'comments'}</span></summary>
       <div class="cbox">
-        {comments.length > 0 && (
-          <ul class="clist">
+        <ul class="clist" data-clist>
             {comments.map((c) => (
               <li class="c">
                 <Face name={c.name} src={c.avatar} size={26} />
@@ -42,13 +41,23 @@ const signin = `/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.
                 </div>
               </li>
             ))}
-          </ul>
-        )}
+        </ul>
         {me ? (
-          <form class="cform" data-comment={logId}>
+          <form class="cform" data-comment={logId} data-me-name={me.display_name || me.username} data-me-username={me.username} data-me-avatar={me.avatar_url ?? ''}>
             <label class="sr-only" for={`c-${logId}`}>Your comment</label>
-            <textarea id={`c-${logId}`} name="body" rows="2" maxlength="1000" required placeholder="Add a comment"></textarea>
+            <textarea id={`c-${logId}`} name="body" rows="2" maxlength="1000" required placeholder="Add a comment" aria-describedby={`ce-${logId}`}></textarea>
             <button type="submit" class="btn sm">Post</button>
+            <p class="cerr" id={`ce-${logId}`} role="alert" hidden></p>
+            <template data-comment-tpl>
+              <li class="c">
+                <Face name="?" src="x" size={26} />
+                <div class="cb">
+                  <p class="ch"><a href="/">Name</a><span class="muted"> | just now</span></p>
+                  <p class="ct"></p>
+                  <p class="cact"><button type="button" class="lk" data-uncomment="">Delete</button></p>
+                </div>
+              </li>
+            </template>
           </form>
         ) : (
           <p class="muted small"><a class="accent" href={signin}>Sign in</a> to comment.</p>
@@ -76,6 +85,7 @@ const signin = `/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.
   .cmt { flex: 1 1 auto; min-width: 0; }
   .cmt[open] { flex-basis: 100%; order: 3; }
   .cbox { display: flex; flex-direction: column; gap: 14px; padding: 10px 0 4px; }
+  .clist:empty { display: none; }
   .clist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
   .c { display: flex; gap: 10px; align-items: flex-start; }
   .cb { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -88,7 +98,10 @@ const signin = `/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.
   .lk { border: 0; background: none; padding: 6px 0; min-height: 32px; font: inherit; font-size: 12.5px; color: var(--muted); cursor: pointer; transition: color .2s ease; }
   .lk:hover { color: var(--ink); }
   .lk:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
-  .cform { display: flex; gap: 10px; align-items: flex-end; }
-  .cform textarea { flex: 1; min-height: 44px; resize: vertical; }
+  .cform { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+  .cform textarea { flex: 1; min-width: 0; min-height: 44px; resize: vertical; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); caret-color: var(--ink); font: inherit; font-size: 15px; line-height: 1.5; }
+  .cform textarea:focus { border-color: var(--lat); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--lat) 30%, transparent); }
+  .cerr { flex: 1 0 100%; margin: 0; font-size: 13px; color: #B4473B; }
+  :global(html[data-theme="dark"]) .cerr { color: #E58A7E; }
   .small { font-size: 13.5px; margin: 0; }
 </style>
