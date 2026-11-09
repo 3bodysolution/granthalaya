@@ -289,11 +289,11 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
   return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 48), failed: failed && !items.length };
 }
 
-export async function searchBooks(text: string): Promise<{ books: BookCard[]; authors: { key: string; name: string; href: string; works?: number }[] }> {
+export async function searchBooks(text: string, limit = 8): Promise<{ books: BookCard[]; authors: { key: string; name: string; href: string; works?: number }[] }> {
   const t = text.trim().slice(0, 100);
   if (!t) return { books: [], authors: [] };
   const [s, a] = await Promise.all([
-    getJSON(ol(`/search.json?q=${encodeURIComponent(t)}&fields=${SEARCH_FIELDS}&limit=8`), { ttl: 600 }),
+    getJSON(ol(`/search.json?q=${encodeURIComponent(t)}&fields=${SEARCH_FIELDS}&limit=${limit}`), { ttl: 600 }),
     getJSON(ol(`/search/authors.json?q=${encodeURIComponent(t)}&limit=4`), { ttl: 600 }),
   ]);
   let books: BookCard[] = (s?.docs ?? []).map(card).filter((b: BookCard) => b.key);
@@ -316,7 +316,7 @@ export async function searchBooks(text: string): Promise<{ books: BookCard[]; au
   }
   const authors = (a?.docs ?? []).filter((x: any) => x.key && x.name && (x.work_count ?? 0) > 0)
     .map((x: any) => ({ key: x.key, name: x.name, href: authorHref(x.key, x.name), works: x.work_count }));
-  return { books: books.slice(0, 8), authors: authors.slice(0, 3) };
+  return { books: books.slice(0, limit), authors: authors.slice(0, 3) };
 }
 
 /** The year a book was first published: Open Library's, unless the Wikipedia intro says an earlier one in the two plain ways (years.mjs). */

@@ -4,6 +4,7 @@
 type Rule = { match: RegExp; limit: number; per: number; name: string };
 const RULES: Rule[] = [
   { name: 'search', match: /^\/api\/search$/, limit: 60, per: 60_000 },   // the typed words and the request question are two asks
+  { name: 'searchpage', match: /^\/search\/?$/, limit: 30, per: 60_000 },   // the full results page (it also asks TMDB, Open Library and the model once per visit)
   { name: 'cards', match: /^\/(og\/|story\/)|\/(story|year)\.png$/, limit: 30, per: 60_000 },
   { name: 'covers', match: /^\/api\/cover$/, limit: 240, per: 60_000 },
 ];

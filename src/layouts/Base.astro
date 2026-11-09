@@ -148,12 +148,12 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   <dialog class="search" id="search" aria-label="Search" data-src={me ? `/api/search?u=${me.username}` : ''}>
     <div class="search-top">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input type="search" placeholder="Search films, books, people" aria-label="Search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="search-list" />
+      <input type="search" placeholder="Search films, books, people" aria-label="Search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="search-list" enterkeyhint="search" />
       <span class="search-wait" hidden><span class="ink" aria-hidden="true"></span></span>
       <kbd>esc</kbd>
     </div>
     <ul class="search-list" id="search-list" role="listbox" aria-label="Results"></ul>
-    <div class="search-foot"><span>↑ ↓ to move</span><span>↵ to open</span>{me ? <a href="/add/" class="search-add">Add something by hand →</a> : <span style="margin-left:auto">⌘K anywhere</span>}</div>
+    <div class="search-foot"><span>↑ ↓ to pick</span><span>↵ to see all results</span>{me ? <a href="/add/" class="search-add">Add something by hand →</a> : <span style="margin-left:auto">⌘K anywhere</span>}</div>
   </dialog>
 
   <dialog class="box coll" id="coll-box" aria-labelledby="coll-h">
@@ -734,7 +734,8 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     type Mine = { title: string; creator: string; kind: string; href: string; bg: string; r: string; year: string; cover?: string };
     let mine: Mine[] | null = null;
     let mineFrom = '';
-    let sel = 0;
+    let sel = -1;        // the option picked with the arrow keys (-1: none; Enter then opens the full results page)
+    let picked = false;
     let timer = 0;
     let asked = '';
     let before: Element | null = null;   // what had focus before the search opened, so closing it puts focus back there
@@ -762,19 +763,23 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     const row = (href: string, th: string, title: string, sub: string, tag: string, q: string, ext = false) =>
       `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''} role="option" aria-selected="false">${th}<span class="stext"><span class="serif st1">${hi(title, q)}</span><span class="st2">${esc(sub)}</span></span>${tag ? `<span class="eyebrow stag">${esc(tag)}</span>` : ''}</a></li>`;
     const group = (label: string, items: string[]) => (items.length ? `<li class="sgroup eyebrow">${esc(label)}</li>${items.join('')}` : '');
+    // the last row of the list: the full results page for what was typed
+    const seeAll = (raw: string) => `<li class="search-all"><a href="/search/?q=${encodeURIComponent(raw.trim())}" role="option" aria-selected="false"><span class="stext"><span class="st1">See all results for “${esc(raw.trim())}”</span></span><span class="eyebrow stag">Enter</span></a></li>`;
     function paint(html: string) {
       const list = document.getElementById('search-list')!;
+      const keep = picked ? list.querySelector('[aria-selected="true"]')?.getAttribute('href') : null;   // a pick survives the list being redrawn
       list.innerHTML = html;
-      sel = 0;
+      sel = -1; picked = false;
       // the rows and headings in between are not options: only the links are
       list.querySelectorAll('li').forEach((li) => li.setAttribute('role', 'presentation'));
       const opts = [...list.querySelectorAll<HTMLElement>('[role=option]')];
       opts.forEach((o, i) => { o.id = `search-opt-${i}`; });
-      opts[0]?.setAttribute('aria-selected', 'true');
-      // the input points at the highlighted option, so a screen reader reads it as the arrows move
+      // nothing is highlighted until an arrow key picks it (then the input points at it, so a screen reader reads it as the arrows move)
       const input = dialog().querySelector('input')!;
       input.setAttribute('aria-expanded', String(opts.length > 0));
-      if (opts[0]) input.setAttribute('aria-activedescendant', opts[0].id); else input.removeAttribute('aria-activedescendant');
+      input.removeAttribute('aria-activedescendant');
+      const at = keep ? opts.findIndex((o) => o.getAttribute('href') === keep) : -1;
+      if (at >= 0) { sel = at; picked = true; opts[at].setAttribute('aria-selected', 'true'); input.setAttribute('aria-activedescendant', opts[at].id); }
     }
     function shelfRows(q: string, n: number) {
       const all = mine || [];
@@ -833,13 +838,14 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       // a member whose username is exactly what was typed comes first
       const memGroup = group('On Granthalaya', members);
       const html = group('On your shelf', local) + nearGroup + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('Essays', essayRows) + group('People', people) + (r.exactMember ? '' : memGroup);
-      normalHtml = html || (askHtml ? '' : `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`);
+      normalHtml = (html || (askHtml ? '' : `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`)) + (dialog().dataset.mode === 'add' ? '' : seeAll(raw));
       show();
     }
     function move(d: number) {
       const opts = [...document.querySelectorAll<HTMLElement>('#search-list [role=option]')];
       if (!opts.length) return;
-      sel = (sel + d + opts.length) % opts.length;
+      picked = true;
+      sel = sel < 0 ? (d > 0 ? 0 : opts.length - 1) : (sel + d + opts.length) % opts.length;
       opts.forEach((o, i) => o.setAttribute('aria-selected', String(i === sel)));
       dialog().querySelector('input')!.setAttribute('aria-activedescendant', opts[sel].id);
       opts[sel].scrollIntoView({ block: 'nearest' });
@@ -878,11 +884,24 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const typing = (ev.target as Element).closest('input, textarea, select, [contenteditable]');
       if (ev.key === '/' && !typing && !d.open) { ev.preventDefault(); open(); return; }
       if (!d.open) return;
+      // one Esc closes the search (in a search box the browser's own Esc would only clear the typed words first)
+      if (ev.key === 'Escape') { ev.preventDefault(); d.close(); return; }
       if (ev.key === 'ArrowDown') { ev.preventDefault(); move(1); }
       if (ev.key === 'ArrowUp') { ev.preventDefault(); move(-1); }
       if (ev.key === 'Enter') {
-        const a = document.querySelector<HTMLAnchorElement>('#search-list [aria-selected="true"]');
-        if (a) { ev.preventDefault(); d.close(); navigate(a.getAttribute('href')!); }
+        // Enter on its own opens the full results page (/search/?q=), like Letterboxd; only a result picked with the arrow keys opens directly.
+        // (The Add window keeps its old way: Enter takes the first result.)
+        const input = d.querySelector('input')!;
+        const text = input.value.trim();
+        const adding = d.dataset.mode === 'add';
+        const a = document.querySelector<HTMLAnchorElement>(picked || adding ? '#search-list [aria-selected="true"]' : '#search-list .never');
+        const first = adding && !a ? document.querySelector<HTMLAnchorElement>('#search-list [role=option]') : null;
+        const target = a ?? first;
+        if (target) {
+          ev.preventDefault(); d.close();
+          if (target.target === '_blank') window.open(target.href, '_blank', 'noopener');
+          else navigate(target.getAttribute('href')!);
+        } else if (text && !adding) { ev.preventDefault(); d.close(); navigate(`/search/?q=${encodeURIComponent(text)}`); }
       }
     });
     document.addEventListener('input', (ev) => {

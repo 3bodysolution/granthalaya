@@ -1,0 +1,172 @@
+---
+// The full search results page, /search/?q=<words>, like Letterboxd's: opened by pressing Enter in the search box.
+// A request ("best animated movies") is answered first, under its heading, as a poster grid (up to 24, then "Show more" up to 48);
+// then the normal matches in groups (Films, TV, Books, Essays and stories, People, Members) with quick links to each.
+// Drawn for the visitor, so the database's privacy and block rules apply exactly as in the dropdown (searchEverything, answerRequest).
+// Not for search engines (noindex). The address can be shared, refreshed and reached with Back.
+import Base from '../../layouts/Base.astro';
+import PosterTile from '../../components/title/PosterTile.astro';
+import EssayCard from '../../components/title/EssayCard.astro';
+import { searchEverything } from '../../lib/catalog/searchall';
+import { answerRequest, type Hit } from '../../lib/catalog/ask';
+import { findEssays, allEssays } from '../../lib/essays';
+export const prerender = false;
+
+const q = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 100);
+const sb = Astro.locals.supabase;
+let ip: string | undefined;
+try { ip = Astro.clientAddress; } catch { ip = undefined; }
+const [all, asked] = q.length >= 2
+  ? await Promise.all([
+    searchEverything(sb, q, { big: true }).catch(() => null),
+    answerRequest(q, sb, ip, 48).catch(() => ({ answer: null, how: 'error' })),
+  ])
+  : [null, { answer: null, how: '' }];
+const answer = asked.answer;
+const films = (all?.titles ?? []).filter((t: any) => t.kind === 'film');
+const shows = (all?.titles ?? []).filter((t: any) => t.kind === 'tv');
+const books = all?.books ?? [];
+const essays = q.length >= 2 ? findEssays(q, 24) : [];
+const people = [...(all?.people ?? []), ...(all?.authors ?? [])];
+const members = all?.members ?? [];
+const near = all?.near ?? [];
+const total = (answer?.items.length ?? 0) + films.length + shows.length + books.length + essays.length + people.length + members.length;
+
+// a request hit's year: films and shows say "2019 | Film", books "Author | 1979"
+const yearOf = (h: Hit) => Number((h.sub.split(' | ').find((p) => /^\d{4}$/.test(p))) ?? '') || undefined;
+const authorOf = (h: Hit) => h.sub.split(' | ').find((p) => !/^\d{4}$/.test(p));
+const essayFor = (h: Hit) => allEssays.find((e) => e.link === h.href);
+const SHOWN = 24;
+
+const groups = [
+  answer && { id: 'request', label: 'Your request', n: answer.items.length },
+  films.length && { id: 'films', label: 'Films', n: films.length },
+  shows.length && { id: 'tv', label: 'TV', n: shows.length },
+  books.length && { id: 'books', label: 'Books', n: books.length },
+  essays.length && { id: 'essays', label: 'Essays and stories', n: essays.length },
+  people.length && { id: 'people', label: 'People', n: people.length },
+  members.length && { id: 'members', label: 'Members', n: members.length },
+].filter(Boolean) as { id: string; label: string; n: number }[];
+---
+<Base title={q ? `Search: ${q}` : 'Search'} noindex description="Search results">
+  <section class="pad head">
+    <form class="sx-form" action="/search/" method="get" role="search">
+      <input type="search" name="q" value={q} placeholder="Search films, books, people, or ask for something" aria-label="Search" enterkeyhint="search" autocomplete="off" spellcheck="false" />
+      <button type="submit" class="btn primary">Search</button>
+    </form>
+    {q && total > 0 && <p class="muted count" aria-live="polite">Results for “{q}”</p>}
+  </section>
+
+  <section class="pad body">
+    {groups.length > 1 && (
+      <nav class="sx-nav" aria-label="Jump to a group of results">
+        {groups.map((g) => <a href={`#${g.id}`}>{g.label} <span class="num">{g.n}</span></a>)}
+      </nav>
+    )}
+    <div class="results">
+      {!q || q.length < 2 ? (
+        <p class="muted none">Type a title, a person, or something like “best animated movies”.</p>
+      ) : total === 0 ? (
+        <div class="none">
+          <h2 class="serif nf">Nothing found for “{q}”.</h2>
+          {near.length > 0 && (
+            <p>Did you mean {near.slice(0, 3).map((n: any, i: number) => <><a href={n.href}>{n.title}</a>{i < Math.min(near.length, 3) - 1 ? ', ' : ''}</>)}?</p>
+          )}
+          <p class="muted">Check the spelling, try fewer words, or ask for a kind of thing, like “best sports movies” or “Marathi stories”.{Astro.locals.me ? <> Or <a href="/add/">add it by hand</a>.</> : null}</p>
+        </div>
+      ) : (
+        <>
+          {answer && (
+            <section id="request" class="grp" aria-labelledby="h-request">
+              <h2 class="serif gh" id="h-request">{answer.heading}</h2>
+              <div class={answer.items.every((h) => h.kind === 'essay') ? 'egrid' : 'rgrid'} data-grid>
+                {answer.items.map((h, n) => {
+                  const e = h.kind === 'essay' ? essayFor(h) : undefined;
+                  return (
+                    <div class="cell" hidden={n >= SHOWN} data-extra={n >= SHOWN ? '' : undefined}>
+                      {e ? <EssayCard e={e} /> : <PosterTile href={h.href} title={h.title} year={yearOf(h)} poster={h.cover} kind={h.kind === 'essay' ? 'book' : h.kind} sub={h.kind === 'book' ? authorOf(h) : undefined} />}
+                    </div>
+                  );
+                })}
+              </div>
+              {answer.items.length > SHOWN && <button type="button" class="btn more" data-more>Show more</button>}
+            </section>
+          )}
+          {films.length > 0 && (
+            <section id="films" class="grp" aria-labelledby="h-films"><h2 class="serif gh" id="h-films">Films</h2>
+              <div class="rgrid">{films.map((t: any) => <div class="cell"><PosterTile href={t.href} title={t.title} year={t.year} poster={t.poster} kind="film" /></div>)}</div></section>
+          )}
+          {shows.length > 0 && (
+            <section id="tv" class="grp" aria-labelledby="h-tv"><h2 class="serif gh" id="h-tv">TV</h2>
+              <div class="rgrid">{shows.map((t: any) => <div class="cell"><PosterTile href={t.href} title={t.title} year={t.year} poster={t.poster} kind="tv" /></div>)}</div></section>
+          )}
+          {books.length > 0 && (
+            <section id="books" class="grp" aria-labelledby="h-books"><h2 class="serif gh" id="h-books">Books</h2>
+              <div class="rgrid">{books.map((b: any) => <div class="cell"><PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" sub={b.author} /></div>)}</div></section>
+          )}
+          {essays.length > 0 && (
+            <section id="essays" class="grp" aria-labelledby="h-essays"><h2 class="serif gh" id="h-essays">Essays and stories</h2>
+              <div class="egrid">{essays.map((e) => <EssayCard e={e} />)}</div></section>
+          )}
+          {people.length > 0 && (
+            <section id="people" class="grp" aria-labelledby="h-people"><h2 class="serif gh" id="h-people">People</h2>
+              <ul class="plist">{people.map((p: any) => <li><a href={p.href}><span class="av">{p.photo ? <img src={p.photo} alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" /> : null}</span><span class="serif nm">{p.name}</span><span class="muted sb">{p.known ?? `Author${p.works ? ` | ${p.works} works` : ''}`}</span></a></li>)}</ul></section>
+          )}
+          {members.length > 0 && (
+            <section id="members" class="grp" aria-labelledby="h-members"><h2 class="serif gh" id="h-members">Members</h2>
+              <ul class="plist">{members.map((m: any) => <li><a href={m.href}><span class="av round">{m.avatar ? <img src={m.avatar} alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()" /> : null}</span><span class="serif nm">{m.name}</span><span class="muted sb">@{m.username}</span></a></li>)}</ul></section>
+          )}
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+<script>
+  // "Show more": the first 24 of a request's answer are showing, the rest (up to 48) are already in the page
+  document.querySelectorAll<HTMLButtonElement>('[data-more]').forEach((b) => b.addEventListener('click', () => {
+    const grid = b.closest('section')?.querySelector('[data-grid]');
+    grid?.querySelectorAll<HTMLElement>('[data-extra]').forEach((c) => { c.hidden = false; });
+    b.remove();
+  }));
+</script>
+<style>
+  .head { padding-top: 36px; padding-bottom: 8px; display: flex; flex-direction: column; gap: 10px; }
+  .sx-form { display: flex; gap: 10px; max-width: 720px; }
+  .sx-form input { flex: 1; min-width: 0; height: 48px; padding: 0 16px; font-size: 17px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); }
+  .sx-form input:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; }
+  .sx-form .btn { height: 48px; padding: 0 22px; }
+  .count { margin: 0; font-size: 14px; }
+  .body { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 36px; padding-top: 18px; padding-bottom: 60px; align-items: start; }
+  .body:has(> .results:only-child) { grid-template-columns: minmax(0, 1fr); }
+  .sx-nav { position: sticky; top: 88px; display: flex; flex-direction: column; gap: 2px; }
+  .sx-nav a { display: flex; justify-content: space-between; gap: 10px; min-height: 40px; align-items: center; padding: 0 12px; border-radius: 10px; font-size: 14px; font-weight: 600; transition: background-color .2s ease; }
+  .sx-nav a:hover, .sx-nav a:focus-visible { background: var(--soft); color: inherit; }
+  .sx-nav .num { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
+  .results { display: flex; flex-direction: column; gap: 44px; min-width: 0; }
+  .grp { scroll-margin-top: 90px; }
+  .gh { margin: 0 0 16px; font-size: 24px; font-weight: 500; }
+  .rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 22px 16px; }
+  .rgrid .cell { min-width: 0; }
+  .rgrid .cell[hidden] { display: none; }
+  .egrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+  .more { margin-top: 22px; }
+  .plist { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 20px; }
+  .plist a { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 6px 8px; border-radius: 12px; }
+  .plist a:hover { background: var(--soft); color: inherit; }
+  .av { width: 40px; height: 40px; flex: none; border-radius: 8px; background: var(--soft); overflow: hidden; }
+  .av.round { border-radius: 50%; }
+  .av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .nm { font-size: 17px; }
+  .sb { font-size: 13px; margin-left: auto; text-align: right; }
+  .none { padding: 24px 0; max-width: 60ch; }
+  .nf { margin: 0 0 10px; font-size: 26px; font-weight: 500; }
+  @media (max-width: 780px) {
+    .head { padding-top: 24px; }
+    .body { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+    .sx-nav { position: static; flex-direction: row; overflow-x: auto; gap: 8px; padding-bottom: 4px; scrollbar-width: none; }
+    .sx-nav a { flex: none; border: 1px solid var(--line); background: var(--card); }
+    .rgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 10px; }
+    .egrid { grid-template-columns: 1fr; }
+    .sx-form .btn { padding: 0 16px; }
+  }
+</style>

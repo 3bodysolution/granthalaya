@@ -14,12 +14,12 @@ const yearOf = (t: NonNullable<Joined['title']>) => shownYear({ slug: t.slug, ol
 /** the page for one of these books: the Open Library page if it has one, else our own record */
 const hrefOf = (t: NonNullable<Joined['title']>) => (t.ol_key ? bookHref(t.ol_key, t.title) : `/book/${t.slug}/`);
 
-export async function searchShopBooks(sb: SupabaseClient | null | undefined, like: string): Promise<BookCard[]> {
+export async function searchShopBooks(sb: SupabaseClient | null | undefined, like: string, n = 5): Promise<BookCard[]> {
   if (!sb || !like) return [];
   const { data } = await sb.from('shop_books').select(COLS)
-    .or(`title.ilike.%${like}%,original_title.ilike.%${like}%,author.ilike.%${like}%`).limit(12);
+    .or(`title.ilike.%${like}%,original_title.ilike.%${like}%,author.ilike.%${like}%`).limit(Math.max(12, n * 2));
   const seen = new Set<string>();
-  return ((data ?? []) as unknown as Joined[]).filter((r) => r.title && !seen.has(r.title.slug) && seen.add(r.title.slug)).slice(0, 5).map((r): BookCard => ({
+  return ((data ?? []) as unknown as Joined[]).filter((r) => r.title && !seen.has(r.title.slug) && seen.add(r.title.slug)).slice(0, n).map((r): BookCard => ({
     kind: 'book', key: r.title!.ol_key ?? r.title!.slug, title: r.title!.title, author: r.title!.creator ?? undefined, year: yearOf(r.title!),
     cover: r.title!.cover_url ? viaCover(r.title!.cover_url, 200) : undefined, href: hrefOf(r.title!),
   }));

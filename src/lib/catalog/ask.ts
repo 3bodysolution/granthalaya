@@ -151,7 +151,7 @@ const unwantedKeywordIds = () => (unwanted ??= Promise.all(['stand-up comedy', '
 
 /* Films and TV: TMDB discover. "Highest rated" needs a real number of votes: about 300 for English, 20 for Indian and other languages
    (Marathi films rarely have more on TMDB). Adult titles are always left out (discover is asked with include_adult=false). */
-async function screen(i: Intent): Promise<{ items: Hit[]; applied: { genres: string[]; keywords: string[] } } | null> {
+async function screen(i: Intent, limit = 8): Promise<{ items: Hit[]; applied: { genres: string[]; keywords: string[] } } | null> {
   const kind = i.kind as 'film' | 'tv';
   const names = kind === 'tv' ? TV_GENRES : FILM_GENRES;
   // a keyword that only repeats a genre ("action", "drama") adds nothing
@@ -178,15 +178,22 @@ async function screen(i: Intent): Promise<{ items: Hit[]; applied: { genres: str
     if (at.keywords.length && !keywords.length && !genres.length) continue;
     // the high bar for a broad request first; a small genre (documentaries) that can't fill the list at that bar is asked again at 1000, then 300 votes
     const floors = minVotes && minVotes > 300 ? [minVotes, ...(minVotes > 1000 ? [1000] : []), 300] : [minVotes];
+    let used = floors[0];
     let found = await discover({ kind, genres, keywords, language: i.language, decade: i.decade, sort, minVotes: floors[0], retry: true, ms: 3500, released: true, minRuntime: allowShort ? undefined : 40, without });
     for (const v of floors.slice(1)) {
       if (found.items.filter((c) => c.poster).length >= ENOUGH) break;
+      used = v;
       found = await discover({ kind, genres, keywords, language: i.language, decade: i.decade, sort, minVotes: v, retry: true, ms: 3500, released: true, minRuntime: allowShort ? undefined : 40, without });
+    }
+    // the results page asks for up to 48: TMDB gives 20 a page, so a second page is asked for when the first was full
+    if (limit > 20 && found.items.length >= 20) {
+      const more = await discover({ kind, genres, keywords, language: i.language, decade: i.decade, sort, minVotes: used, retry: true, ms: 3500, released: true, minRuntime: allowShort ? undefined : 40, without, page: 2 }).catch(() => null);
+      if (more) found = { ...found, items: [...found.items, ...more.items] };
     }
     const { items, failed, total } = found;
     if (import.meta.env.DEV) lastDebug += ` screen ${JSON.stringify({ genres, keywords, minVotes })} items ${items.length} total ${total} failed ${failed};`;
     const thisYear = new Date().getFullYear();
-    const hits = items.filter((c) => c.poster && (!c.year || c.year <= thisYear)).slice(0, 8).map((c): Hit => ({ href: c.href, title: c.title, sub: [c.year, kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), cover: c.poster, kind }));
+    const hits = items.filter((c) => c.poster && (!c.year || c.year <= thisYear)).slice(0, limit).map((c): Hit => ({ href: c.href, title: c.title, sub: [c.year, kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), cover: c.poster, kind }));
     if (hits.length >= ENOUGH) return { items: hits, applied: at };
   }
   return null;
@@ -194,7 +201,7 @@ async function screen(i: Intent): Promise<{ items: Hit[]; applied: { genres: str
 
 /* Books: a book is shown only when the subject is one of its main subjects and it is a well-known book (many editions or ratings),
    and for Marathi and Hindi with no subject asked for, the shops' books come first (Open Library has few). */
-async function shelves(i: Intent, sb: SupabaseClient | null | undefined): Promise<{ hits: Hit[]; applied: string[] }> {
+async function shelves(i: Intent, sb: SupabaseClient | null | undefined, limit = 8): Promise<{ hits: Hit[]; applied: string[] }> {
   const code = i.language ? LANG2[i.language] : undefined;
   const indian = code === 'mar' || code === 'hin';
   const subject = i.subjects[0];
@@ -202,20 +209,20 @@ async function shelves(i: Intent, sb: SupabaseClient | null | undefined): Promis
   const toHit = (b: { href: string; title: string; author?: string; year?: number; cover?: string }): Hit => ({ href: b.href, title: b.title, sub: [b.author, b.year].filter(Boolean).join(' | '), cover: b.cover, kind: 'book' });
   const sort = i.sort === 'new' ? 'new' : 'popular';   // Open Library's own star ratings are too thin to order by, so "best" means most read
   let hits: Hit[] = [];
-  if (indian && fictionish) hits = (await shopListBooks(sb, code === 'mar' ? 'mr' : 'hi').catch(() => [])).map(toHit);
-  if (!indian || !fictionish || hits.length < 8) {
+  if (indian && fictionish) hits = (await shopListBooks(sb, code === 'mar' ? 'mr' : 'hi', limit).catch(() => [])).map(toHit);
+  if (!indian || !fictionish || hits.length < limit) {
     const r = await browseBooks({ subject, language: code, decade: i.decade, sort, main: !!subject }).catch(() => null);
     const seen = new Set(hits.map((h) => h.href));
     hits = [...hits, ...(r?.items ?? []).filter((b) => b.cover && !seen.has(b.href)).map(toHit)];
   }
-  hits = hits.slice(0, 8);
+  hits = hits.slice(0, limit);
   if (import.meta.env.DEV) lastDebug += ` books ${hits.length};`;
   return { hits: hits.length >= ENOUGH ? hits : [], applied: subject && hits.length >= ENOUGH ? [subject] : [] };
 }
 
 /* Essays and stories: our own, from the essays data (the Marathi ones are Hakara's). "essays" leaves stories out, and the story form keeps only them. */
 const themesOf = (e: Essay) => essayThemes.filter((t) => t.items.some((x) => x.link === e.link)).map((t) => t.name);
-function essays(i: Intent): Hit[] {
+function essays(i: Intent, limit = 8): Hit[] {
   const want = new Set(i.themes);
   let pool: Essay[] = allEssays.filter((e) => (i.form === 'story' ? e.kind === 'story' : e.kind !== 'story'));
   if (want.size) pool = pool.filter((e) => themesOf(e).some((t) => want.has(t)));
@@ -224,25 +231,25 @@ function essays(i: Intent): Hit[] {
   else if (i.language) pool = [];
   if (i.decade) pool = pool.filter((e) => e.year != null && e.year >= i.decade! && e.year < i.decade! + 10);
   pool = i.sort === 'new' ? [...pool].sort((a, b) => (b.year ?? 0) - (a.year ?? 0)) : freeFirst(pool);
-  return pool.slice(0, 8).map((e) => ({ href: e.link, title: e.title, sub: [e.author, e.year].filter(Boolean).join(' | '), kind: 'essay' as const, external: true, tag: e.kind === 'story' ? 'Story' : 'Essay' }));
+  return pool.slice(0, limit).map((e) => ({ href: e.link, title: e.title, sub: [e.author, e.year].filter(Boolean).join(' | '), kind: 'essay' as const, external: true, tag: e.kind === 'story' ? 'Story' : 'Essay' }));
 }
 
 /** the filters, made into a heading and up to 8 real results; null when fewer than 4 good ones remain */
-export async function resultsFor(i: Intent, sb: SupabaseClient | null | undefined): Promise<Answer | null> {
+export async function resultsFor(i: Intent, sb: SupabaseClient | null | undefined, limit = 8): Promise<Answer | null> {
   if (i.kind === 'film' || i.kind === 'tv') {
-    const r = await screen(i);
+    const r = await screen(i, limit);
     return r ? { heading: headingFor({ ...i, genres: r.applied.genres, sort: i.sort ?? 'top' }, { keywords: r.applied.keywords }), items: r.items } : null;
   }
   if (i.kind === 'book') {
-    const { hits, applied } = await shelves(i, sb);
+    const { hits, applied } = await shelves(i, sb, limit);
     return hits.length ? { heading: headingFor(i, { subjects: applied }), items: hits } : null;
   }
-  const items = essays(i);
+  const items = essays(i, limit);
   return items.length >= ENOUGH ? { heading: headingFor(i), items } : null;
 }
 
 /** the whole thing for one typed request; never throws. The word list reads common requests (no AI); the model is asked only for the rest. */
-export async function answerRequest(raw: string, sb: SupabaseClient | null | undefined, ip?: string): Promise<{ answer: Answer | null; how: string }> {
+export async function answerRequest(raw: string, sb: SupabaseClient | null | undefined, ip?: string, limit = 8): Promise<{ answer: Answer | null; how: string }> {
   try {
     const norm = normalise(raw);
     if (!looksLikeRequest(norm)) return { answer: null, how: 'not a request' };
@@ -250,7 +257,7 @@ export async function answerRequest(raw: string, sb: SupabaseClient | null | und
     if (!intent) ({ intent, how } = await intentFor(norm, ip));
     if (!intent) return { answer: null, how };
     lastDebug = '';
-    const answer = await resultsFor(intent, sb);
+    const answer = await resultsFor(intent, sb, limit);
     return { answer, how: !answer && import.meta.env.DEV ? `${how}; filters ${JSON.stringify(intent)};${lastDebug}` : how };
   } catch { return { answer: null, how: 'error' }; }
 }

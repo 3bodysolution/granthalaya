@@ -231,6 +231,9 @@ dialog.coll { width: min(480px, calc(100vw - 32px)); }
 .coll-new { display: flex; gap: 8px; }
 .coll-new .field { height: 44px; }
 .search-list mark { background: transparent; color: var(--lat); }
+.search-all { margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--line); }
+.search-all a { min-height: 44px; font-weight: 600; color: var(--lat); }
+.search-all .stag { color: var(--muted); }
 .search-empty { padding: 28px; text-align: center; color: var(--muted); font-size: 15px; }
 .search-foot { display: flex; gap: 18px; padding: 10px 18px; border-top: 1px solid var(--line); font-size: 12px; color: var(--muted); }
 
