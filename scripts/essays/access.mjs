@@ -28,7 +28,7 @@ const NO_PAYWALL = new Set([
 const ours = JSON.parse(fs.readFileSync('src/data/essays.json', 'utf8')).themes.flatMap((t) => t.items.map((e) => e.link));
 let ny = [];
 try { ny = JSON.parse(fs.readFileSync('private/catalogues/tetw-new-yorker/list.json', 'utf8')).map((x) => x.url); } catch { /* none yet */ }
-const hk = JSON.parse(fs.readFileSync('src/data/hakara.json', 'utf8')).items.map((e) => e.link);   // Hakara's Marathi essays
+const hk = ['hakara.json', 'hakara-stories.json'].flatMap((f) => JSON.parse(fs.readFileSync('src/data/' + f, 'utf8')).items.map((e) => e.link));   // Hakara's essays and stories
 const wanted = [...new Set([...(only === 'ours' || only === 'hakara' ? [] : ny), ...(only === 'newyorker' || only === 'hakara' ? [] : ours), ...(only && only !== 'hakara' ? [] : hk)])];
 const known = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT, 'utf8')) : {};
 const today = new Date().toISOString().slice(0, 10);

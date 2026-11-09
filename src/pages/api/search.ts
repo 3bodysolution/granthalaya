@@ -60,7 +60,7 @@ export const GET: APIRoute = async ({ locals, url, clientAddress }) => {
     const nothing = !tm.titles.length && !books.length && !members.length && !(tm.people ?? []).length && !bk.authors.length;
     const near = nearAll.filter((n, i) => (nothing ? true : n.score >= 0.75 && i < 3)).slice(0, 6).map(({ score, ...n }) => n);
     // our own essays, found by their title as written, in Roman letters, or by the writer (they open at the original, in a new tab)
-    const essays = findEssays(text).map((e) => ({ href: e.link, title: e.title, sub: [e.author, e.year].filter(Boolean).join(' | ') }));
+    const essays = findEssays(text).map((e) => ({ href: e.link, title: e.title, sub: [e.author, e.year].filter(Boolean).join(' | '), tag: e.kind === 'story' ? 'Story' : 'Essay' }));
     return new Response(JSON.stringify({ ...tm, ...bk, books, essays, members, near, exactMember: ((mem.data ?? []) as Member[]).some(exact) }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
   }
   const u = (url.searchParams.get('u') ?? '').toLowerCase();

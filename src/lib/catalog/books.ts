@@ -202,7 +202,7 @@ export async function trendingBooks(window: 'daily' | 'weekly' | 'monthly' = 'we
 
 /** an Open Library author key ("OL23919A") or, for names that come from our own lists, the name */
 export const authorFilter = (v: string | null | undefined) => { const s = String(v ?? '').trim().slice(0, 120); return /^OL\d{1,10}A$/i.test(s) ? s.toUpperCase() : s.replace(/["\\]/g, ''); };
-export interface BookFilters { author?: string; subject?: string; language?: string; year?: number; decade?: number; sort?: 'popular' | 'top' | 'new'; page?: number }
+export interface BookFilters { author?: string; subject?: string; language?: string; year?: number; decade?: number; sort?: 'popular' | 'top' | 'new'; page?: number; main?: boolean }
 /* Open Library merges the subjects of every edition into the work, so a famous novel with thousands of editions
    is tagged with almost everything (Robinson Crusoe is "poetry"). Three things keep the lists honest:
    subject keys instead of free text, leaving fiction out of non-fiction subjects, and ordering "Popular" by what
@@ -270,13 +270,22 @@ export async function browseBooks(f: BookFilters): Promise<{ items: BookCard[]; 
   const sort = f.sort === 'top' ? 'rating' : f.sort === 'new' ? 'new' : popular;
   const page = Math.min(Math.max(f.page ?? 1, 1), 100);
   let failed = false;
-  const run = async (q: string) => { const r = await getJSONResult(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS}&limit=48&page=${page}`), { ttl: 21600, ms: 9000 }); failed = r.state === 'failed'; return r.data; };
+  const run = async (q: string) => { const r = await getJSONResult(ol(`/search.json?q=${encodeURIComponent(q)}&sort=${sort}&fields=${SEARCH_FIELDS},ratings_count&limit=${f.main ? 60 : 48}&page=${page}`), { ttl: 21600, ms: f.main ? 5000 : 9000 }); failed = r.state === 'failed'; return r.data; };
   let j = await run(parts.join(' '));
   // a subject from a book page ("mahabharata", "indic-fiction") may not be a subject key: try it as words
   if (subject && j && !j.numFound) j = await run(parts.join(' ').replace(/\(subject_key:[^)]*\)|subject_key:[a-z0-9_]+/, `subject:"${subject.replace(/-/g, ' ')}"`));
   const total = j?.numFound ?? 0;
   // books with a cover first, keeping Open Library's order within each group
-  const items: BookCard[] = (j?.docs ?? []).map(card).filter((b: BookCard) => b.key);
+  let docs: any[] = j?.docs ?? [];
+  // `main`: the subject must be one of the book's first subjects (Open Library tags a book with every subject of every edition), and the
+  // book must be a well-known one (many editions or ratings). Used by request search, which would rather show less than show a wrong book.
+  if (f.main && subject) {
+    const word = subject.replace(/-/g, ' ');
+    // (the first three subjects, as whole words: a book that merely mentions war in its fifth subject is not a war book)
+    const rx = new RegExp(`(^|[^a-z])${word.replace(/[^a-z ]/g, '')}([^a-z]|$)`, 'i');
+    docs = docs.filter((d) => (d.subject ?? []).slice(0, 3).some((s: string) => rx.test(s)) && ((d.edition_count ?? 0) >= 15 || (d.ratings_count ?? 0) >= 20));
+  }
+  const items: BookCard[] = docs.map(card).filter((b: BookCard) => b.key);
   return { items: [...items.filter((b) => b.cover), ...items.filter((b) => !b.cover)], total, pages: Math.ceil(Math.min(total, 3600) / 48), failed: failed && !items.length };
 }
 

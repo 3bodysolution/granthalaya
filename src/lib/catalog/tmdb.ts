@@ -209,7 +209,7 @@ export async function trending(kind: 'film' | 'tv', page = 1): Promise<Card[]> {
 
 /** `language` may list several with "|" ("ml|ta|te"); `since` keeps titles released after a date;
     `streaming` keeps titles on any subscription service in India */
-export interface Filters { kind: 'film' | 'tv'; genre?: number; genres?: number[]; keywords?: number[]; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean; minVotes?: number; retry?: boolean }
+export interface Filters { kind: 'film' | 'tv'; genre?: number; genres?: number[]; keywords?: number[]; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean; minVotes?: number; retry?: boolean; ms?: number }
 export async function discover(f: Filters): Promise<{ items: Card[]; pages: number; total: number; failed?: boolean }> {
   if (!key()) return { items: [], pages: 0, total: 0 };
   const tv = f.kind === 'tv';
@@ -233,7 +233,7 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   if (f.since && !params[`${date}.gte`]) { params[`${date}.gte`] = f.since; params[`${date}.lte`] ??= today; }
   if (f.service) { params.watch_region = REGION; params.with_watch_providers = f.service; params.with_watch_monetization_types = 'flatrate|free|ads'; }
   else if (f.streaming) { params.watch_region = REGION; params.with_watch_monetization_types = 'flatrate'; }
-  const { data: j, state } = await getJSONResult(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600, retry: f.retry });   // retry: TMDB sometimes drops a first connection
+  const { data: j, state } = await getJSONResult(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600, retry: f.retry, ms: f.ms });   // retry: TMDB sometimes drops a first connection
   const items = (j?.results ?? []).map((m: any) => toCard(f.kind, m));
   return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0, failed: state === 'failed' };
 }

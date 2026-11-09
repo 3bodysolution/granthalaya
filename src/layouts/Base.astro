@@ -751,8 +751,14 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (!mine || mineFrom !== src) { mine = await fetch(src).then((r) => r.json()).catch(() => []); mineFrom = src; }
       return mine!;
     }
-    const thumb = (src: string | undefined, round = false, bg = 'var(--soft)') =>
-      `<span class="sthumb${round ? ' round' : ''}" style="background:${bg}">${src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
+    const thumb = (src: string | undefined, round = false, bg = 'var(--soft)', eager = false) =>
+      `<span class="sthumb${round ? ' round' : ''}" style="background:${bg ?? 'var(--soft)'}">${src ? `<img src="${esc(src)}" alt="" ${eager ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
+    // an essay or story has no cover: a small cloth-bound book with the first letter, like its card
+    const CLOTH = ['#2B3A67', '#8E2F3A', '#4F6B4A', '#A15628'];
+    const bookTile = (title: string) => {
+      let n = 0; for (const c of title) n = (n * 31 + c.codePointAt(0)!) >>> 0;
+      return `<span class="sthumb" style="background:${CLOTH[n % CLOTH.length]};color:#F7EFDF;display:grid;place-items:center;font:700 20px/1 var(--serif, Georgia, serif)">${esc([...title.trim()][0] ?? '')}</span>`;
+    };
     const row = (href: string, th: string, title: string, sub: string, tag: string, q: string, ext = false) =>
       `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''} role="option" aria-selected="false">${th}<span class="stext"><span class="serif st1">${hi(title, q)}</span><span class="st2">${esc(sub)}</span></span>${tag ? `<span class="eyebrow stag">${esc(tag)}</span>` : ''}</a></li>`;
     const group = (label: string, items: string[]) => (items.length ? `<li class="sgroup eyebrow">${esc(label)}</li>${items.join('')}` : '');
@@ -801,7 +807,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         fetch(`/api/search?ask=${encodeURIComponent(q)}`).then((x) => x.json()).then((x) => {
           const a = x?.answer;
           if (!a?.items?.length) return;
-          askHtml = group(a.heading, a.items.map((t: any) => row(t.href, thumb(t.cover), t.title, t.sub, t.kind === 'essay' ? 'Essay' : '', '', t.external)));
+          askHtml = group(a.heading, a.items.map((t: any) => row(t.href, t.kind === 'essay' ? bookTile(t.title) : thumb(t.cover, false, undefined, true), t.title, t.sub, t.kind === 'essay' ? (t.tag || 'Essay') : '', '', t.external)));
           show();
         }).catch(() => {});
       }
@@ -813,7 +819,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (!r) { paint(group('On your shelf', local) + '<li class="search-empty">Search isn’t answering right now. Try again in a moment.</li>'); return; }
       const titles = (r.titles ?? []).map((t: any) => row(t.href, thumb(t.poster), t.title, [t.year, t.kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), '', q));
       const books = (r.books ?? []).map((b: any) => row(b.href, thumb(b.cover), b.title, [b.author, b.year].filter(Boolean).join(' | '), '', q));
-      const essayRows = (r.essays ?? []).map((t: any) => row(t.href, thumb(undefined), t.title, t.sub, 'Essay', q, true));
+      const essayRows = (r.essays ?? []).map((t: any) => row(t.href, bookTile(t.title), t.title, t.sub, t.tag || 'Essay', q, true));
       const people = [
         ...(r.people ?? []).map((p: any) => row(p.href, thumb(p.photo, true), p.name, p.known ?? 'Films and TV', '', q)),
         ...(r.authors ?? []).map((a: any) => row(a.href, thumb(undefined, true), a.name, `Author${a.works ? ` | ${a.works} works` : ''}`, '', q)),
