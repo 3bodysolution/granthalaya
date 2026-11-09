@@ -313,6 +313,15 @@ textarea.field { height: auto; padding: 12px 14px; line-height: 1.5; resize: ver
 /* form controls styled by Tailwind's forms plugin: use our accent, not its blue */
 input, select, textarea { --tw-ring-color: color-mix(in srgb, var(--lat) 40%, transparent); }
 input[type="checkbox"], input[type="radio"] { color: var(--lat); }
+/* text fields in our colours, in both modes (the forms plugin's white boxes with dark-mode light text were nearly unreadable).
+   :where() keeps this as a floor: any field with its own look (.field, search, the season editor) still wins. */
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"], [type="hidden"]), textarea, select) {
+  background-color: var(--card); color: var(--ink); border-color: var(--line); caret-color: var(--ink);
+}
+:where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"], [type="hidden"]), textarea, select):focus {
+  border-color: var(--lat); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--lat) 30%, transparent);
+}
+::placeholder { color: var(--muted); opacity: 1; }
 
 /* small dialogs: report, confirm */
 dialog.box { width: min(460px, calc(100vw - 32px)); padding: 26px; border-radius: 18px; border: 1px solid var(--line); background: var(--card); color: var(--ink); box-shadow: 0 30px 60px -20px var(--shadow); }
