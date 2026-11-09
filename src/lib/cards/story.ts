@@ -108,7 +108,7 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
 
   // Instagram covers the top 13% (250) with its own bar and the bottom 13% with its reply box: the poster starts below that, text stays above 87% (1670).
   const p = paletteFor(d.title, d.color);
-  const CW = 480, CH = 720, CT = 290;
+  const CW = 640, CH = 960, CT = 262;
   const coverBox = h('div', {
     position: 'absolute', left: (W - CW) / 2, top: CT, width: CW, height: CH, borderRadius: Math.round(CW * 0.03), overflow: 'hidden',
     border: '2px solid rgba(255,255,255,.16)', background: p.bg,
@@ -123,7 +123,7 @@ export async function drawStory(d: StoryData, width = W): Promise<Picture> {
     { type: 'img', props: { src: background, width: W, height: H, style: { position: 'absolute', left: 0, top: 0, width: W, height: H } } },
     ...softShadow((W - CW) / 2, CT, CW, CH, Math.round(CW * 0.03), 40),
     coverBox,
-    h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 34, flexDirection: 'column', alignItems: 'center', opacity: d.noText ? 0 : 1 }, [
+    h('div', { position: 'absolute', left: 60, right: 60, top: CT + CH + 30, flexDirection: 'column', alignItems: 'center', opacity: d.noText ? 0 : 1 }, [
       h('div', { fontSize: size, lineHeight: 1.12, color: titleColor, fontFamily: SERIF, fontWeight: 700, textAlign: 'center', justifyContent: 'center' }, title),
       meta ? h('div', { marginTop: 12, fontSize: 30, color: ONDARK, fontFamily: SANS, textAlign: 'center', justifyContent: 'center' }, meta) : null,
       d.status || full || half || (d.loved && d.kind === 'essay') ? h('div', { marginTop: 22, alignItems: 'center', gap: 22 }, [

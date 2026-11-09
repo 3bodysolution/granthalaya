@@ -20,7 +20,7 @@ const PW = 1200, PH = 630;
 export async function drawPreview(d: PreviewData): Promise<Picture> {
   const accent = d.accent === 'film' ? TEAL : d.accent === 'book' ? GOLD : CREAM;
   const one = d.covers.length <= 1;
-  const CW = one ? 290 : 190, CH = one ? 435 : 285;
+  const CW = one ? 290 : 170, CH = one ? 435 : 255, STEP = 150, SHELF_X = 666;   // a shelf's covers end 64px from the right edge, like the text starts 64px from the left
   const covers = await Promise.all(d.covers.slice(0, 3).map(async (c) => ({ ...c, data: await coverData(c.src, false) })));
   if (covers.some((c) => c.src && !c.data)) throw new CoverMissing();   // no placeholder when the title has a cover
   const background = await timedBackground(covers[0]?.data, d.title, PW, PH, 'wide');
@@ -31,7 +31,7 @@ export async function drawPreview(d: PreviewData): Promise<Picture> {
   const tile = (c: (typeof covers)[number], i: number) => {
     const p = paletteFor(c.title, c.color);
     return h('div', {
-      position: 'absolute', left: one ? 775 : 640 + i * 175, top: one ? 98 : 150 + (i === 1 ? 40 : 0), width: CW, height: CH, borderRadius: Math.round(CW * 0.03), overflow: 'hidden',
+      position: 'absolute', left: one ? 775 : SHELF_X + i * STEP, top: one ? 98 : 160 + (i === 1 ? 40 : 0), width: CW, height: CH, borderRadius: Math.round(CW * 0.03), overflow: 'hidden',
       background: p.bg, border: '2px solid rgba(255,255,255,.16)',
     }, c.data
       ? { type: 'img', props: { src: c.data, width: CW, height: CH, style: { width: CW, height: CH, objectFit: 'cover' } } }
@@ -44,8 +44,8 @@ export async function drawPreview(d: PreviewData): Promise<Picture> {
   const root = h('div', { width: PW, height: PH, background: BG, position: 'relative' }, [
     // the first cover, blurred, fills the card
     { type: 'img', props: { src: background, width: PW, height: PH, style: { position: 'absolute', left: 0, top: 0, width: PW, height: PH } } },
-    ...covers.flatMap((c, i) => [...softShadow(one ? 775 : 640 + i * 175, one ? 98 : 150 + (i === 1 ? 40 : 0), CW, CH, Math.round(CW * 0.03), 26), tile(c, i)]),
-    h('div', { position: 'absolute', left: 64, top: 70, width: 640, height: 490, flexDirection: 'column', opacity: d.noText ? 0 : 1 }, [
+    ...covers.flatMap((c, i) => [...softShadow(one ? 775 : SHELF_X + i * STEP, one ? 98 : 160 + (i === 1 ? 40 : 0), CW, CH, Math.round(CW * 0.03), 26), tile(c, i)]),
+    h('div', { position: 'absolute', left: 64, top: 70, width: one ? 640 : 570, height: 490, flexDirection: 'column', opacity: d.noText ? 0 : 1 }, [
       h('div', { fontSize: 24, letterSpacing: 8, color: accent, fontFamily: SANS }, d.kicker.toUpperCase()),
       h('div', { marginTop: 22, fontSize: size, lineHeight: 1.1, color: CREAM, fontFamily: SERIF, fontWeight: 700 }, title),
       d.meta ? h('div', { marginTop: 18, fontSize: 30, color: ONDARK, fontFamily: SANS }, cut(d.meta, 70)) : null,

@@ -37,7 +37,7 @@ function overlay(w: number, h: number, shape: Shape): Buffer {
   const text = shape === 'tall'
     ? `<linearGradient id="s" x1="0" y1="0" x2="0" y2="1">${SHADE.tall}</linearGradient><rect width="${w}" height="${h}" fill="url(#s)"/>`
     // link preview: the text is on the left, so the dark is on the left and fades out under the poster on the right
-    : `<linearGradient id="s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c0c0f" stop-opacity=".93"/><stop offset=".5" stop-color="#0c0c0f" stop-opacity=".88"/><stop offset=".75" stop-color="#0c0c0f" stop-opacity=".5"/><stop offset="1" stop-color="#0c0c0f" stop-opacity=".3"/></linearGradient><rect width="${w}" height="${h}" fill="url(#s)"/>`;
+    : `<linearGradient id="s" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#0c0c0f" stop-opacity=".86"/><stop offset=".5" stop-color="#0c0c0f" stop-opacity=".78"/><stop offset=".75" stop-color="#0c0c0f" stop-opacity=".4"/><stop offset="1" stop-color="#0c0c0f" stop-opacity=".2"/></linearGradient><rect width="${w}" height="${h}" fill="url(#s)"/>`;
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
     <defs><radialGradient id="v" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".45"/></radialGradient></defs>
     <rect width="${w}" height="${h}" fill="url(#v)"/>${text}</svg>`);
@@ -65,7 +65,7 @@ export async function blurredBackground(cover: string | undefined, seed: string,
     const src = Buffer.from(cover.slice(cover.indexOf(',') + 1), 'base64');
     // blur on a small copy (the blur is the same to the eye and far cheaper), then scale up: a blur of 3% of the card width
     const sw = Math.max(48, Math.round(w / 6)), sh = Math.round(sw * h / w);
-    const small = await sharp(src).resize(sw, sh, { fit: 'cover' }).blur(Math.max(1, sw * 0.03)).modulate({ saturation: 1.25, brightness: 0.92 }).toBuffer();
+    const small = await sharp(src).resize(sw, sh, { fit: 'cover' }).blur(Math.max(1, sw * 0.055)).modulate({ saturation: 1.25, brightness: 0.92 }).toBuffer();
     base = sharp(small).resize(w, h, { kernel: 'cubic' });
   } else {
     const [a, b] = pairFor(seed);

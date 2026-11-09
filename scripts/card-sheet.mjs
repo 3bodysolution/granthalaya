@@ -23,7 +23,7 @@ const TITLES = [
 const lum = ([r, g, b]) => { const f = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
 const hex = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 // where text sits (x, y, w, h) and its colour: tall card 1080x1920, wide card 1200x630
-const TALL = [[60, 1040, 960, 330, '#F4ECDD'], [60, 1370, 960, 60, '#CFC8BA'], [0, 1710, 1080, 100, '#CFC8BA']];
+const TALL = [[60, 1250, 960, 400, '#CFC8BA'], [60, 1250, 960, 300, '#F4ECDD'], [0, 1710, 1080, 100, '#CFC8BA']];
 const WIDE = [[64, 70, 640, 400, '#F4ECDD'], [64, 480, 640, 80, '#CFC8BA']];
 async function worst(buf, boxes, w, h) {
   const results = [];
