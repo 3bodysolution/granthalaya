@@ -4,7 +4,7 @@
 // Drawn in CSS 3D: turned a little so the stacked page edges show; it turns to face you on hover (flat, with reduced motion).
 import Mark from '../ui/Mark.astro';
 import { statusLabel } from '../../lib/kinds';
-import { authorLink, essayHit, themes, type Essay } from '../../lib/essays';
+import { authorLink, essayHit, themes, collection, type Essay } from '../../lib/essays';
 import { savedId } from '../../lib/saved';
 import type { Mark as OnShelf } from '../../lib/catalog/onsite';
 interface Props { e: Essay; mark?: OnShelf }
@@ -17,9 +17,12 @@ const last = words.pop()!;
 // the cover cloth cycles card by card (rust is a touch darker than #B5652F so cream text reads at 4.5:1 or better)
 const CLOTH = ['#2B3A67', '#8E2F3A', '#4F6B4A', '#A15628'];
 const ti = Math.max(0, themes.findIndex((t) => t.items.some((x) => x.link === e.link)));
-const topic = themes[ti]?.label ?? 'Essay';
+const inTheme = themes.some((t) => t.items.some((x) => x.link === e.link));
+const topic = inTheme ? themes[ti].label : 'Essay';
+// a New Yorker card has no gist: its publication and year instead (nothing is invented)
+const note = e.publication && !e.note ? [e.publication, e.year].filter(Boolean).join(' · ') : e.note;
 // within a topic's row the cloth steps card by card, and each topic starts on a different colour
-const ii = Math.max(0, themes[ti]?.items.findIndex((x) => x.link === e.link) ?? 0);
+const ii = Math.max(0, (inTheme ? themes[ti].items : collection.items).findIndex((x) => x.link === e.link));
 const cloth = CLOTH[(ti + ii) % CLOTH.length];
 ---
 <article class="eb" style={`--cloth:${cloth}`}>
@@ -33,7 +36,7 @@ const cloth = CLOTH[(ti + ii) % CLOTH.length];
         <p class="eb-topic"><span>{topic}</span></p>
         <h3 class="serif eb-title"><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
         <p class="eb-by">by <a href={authorLink(e)}>{e.author}</a></p>
-        <p class="eb-note">{e.note}</p>
+        <p class="eb-note">{note}</p>
         {me && (mark && !plain
           ? <span class="es-save is-saved" role="img" title={label} aria-label={`${e.title}: ${label}`}><Mark size={16} /></span>
           : <button type="button" class:list={['es-save', plain && 'is-saved']} data-quick-add={JSON.stringify({ hit: essayHit(e), status: 'want' })} data-unsave={plain} aria-label={plain ? `Saved: ${e.title}. Tap to remove` : `Save ${e.title}`} title={plain ? 'Saved. Tap to remove' : 'Save to your shelf'}><Mark size={16} /></button>)}

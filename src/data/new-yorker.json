@@ -1,0 +1,1219 @@
+{
+  "name": "Best of The New Yorker",
+  "curator": {
+    "name": "The Electric Typewriter",
+    "url": "https://tetw.org/"
+  },
+  "items": [
+    {
+      "title": "The Really Big One",
+      "author": "Kathryn Schulz",
+      "authorKey": null,
+      "authorSlug": "kathryn-schulz",
+      "publication": "The New Yorker",
+      "year": 2015,
+      "link": "https://www.newyorker.com/magazine/2015/07/20/the-really-big-one",
+      "note": null
+    },
+    {
+      "title": "When Things Go Missing",
+      "author": "Kathryn Schulz",
+      "authorKey": null,
+      "authorSlug": "kathryn-schulz",
+      "publication": "The New Yorker",
+      "year": 2017,
+      "link": "https://www.newyorker.com/magazine/2017/02/13/when-things-go-missing",
+      "note": null
+    },
+    {
+      "title": "The Secrets of Suspense",
+      "author": "Kathryn Schulz",
+      "authorKey": null,
+      "authorSlug": "kathryn-schulz",
+      "publication": "The New Yorker",
+      "year": 2024,
+      "link": "https://www.newyorker.com/magazine/2024/05/27/the-secrets-of-suspense",
+      "note": null
+    },
+    {
+      "title": "The End of Children",
+      "author": "Gideon Lewis-Kraus",
+      "authorKey": null,
+      "authorSlug": "gideon-lewis-kraus",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/03/03/the-population-implosion",
+      "note": null
+    },
+    {
+      "title": "How Harmful Is Social Media?",
+      "author": "Gideon Lewis-Kraus",
+      "authorKey": null,
+      "authorSlug": "gideon-lewis-kraus",
+      "publication": "The New Yorker",
+      "year": 2022,
+      "link": "https://www.newyorker.com/culture/annals-of-inquiry/we-know-less-about-social-media-than-we-think",
+      "note": null
+    },
+    {
+      "title": "What Is Claude?",
+      "author": "Gideon Lewis-Kraus",
+      "authorKey": null,
+      "authorSlug": "gideon-lewis-kraus",
+      "publication": "The New Yorker",
+      "year": 2026,
+      "link": "https://www.newyorker.com/magazine/2026/02/16/what-is-claude-anthropic-doesnt-know-either",
+      "note": null
+    },
+    {
+      "title": "The Age of Instagram Face",
+      "author": "Jia Tolentino",
+      "authorKey": null,
+      "authorSlug": "jia-tolentino",
+      "publication": "The New Yorker",
+      "year": 2019,
+      "link": "https://www.newyorker.com/culture/decade-in-review/the-age-of-instagram-face",
+      "note": null
+    },
+    {
+      "title": "Somewhere Worse",
+      "author": "Jia Tolentino",
+      "authorKey": null,
+      "authorSlug": "jia-tolentino",
+      "publication": "The New Yorker",
+      "year": 2022,
+      "link": "https://www.newyorker.com/magazine/2022/07/04/we-are-not-going-back-to-the-time-before-roe-we-are-going-somewhere-worse",
+      "note": null
+    },
+    {
+      "title": "Losing Religion and Finding Ecstasy in Houston",
+      "author": "Jia Tolentino",
+      "authorKey": null,
+      "authorSlug": "jia-tolentino",
+      "publication": "The New Yorker",
+      "year": 2019,
+      "link": "https://www.newyorker.com/magazine/2019/05/27/losing-religion-and-finding-ecstasy-in-houston",
+      "note": null
+    },
+    {
+      "title": "The Age of Algorithmic Anxiety",
+      "author": "Kyle Chayka",
+      "authorKey": null,
+      "authorSlug": "kyle-chayka",
+      "publication": "The New Yorker",
+      "year": 2022,
+      "link": "https://www.newyorker.com/culture/infinite-scroll/the-age-of-algorithmic-anxiety",
+      "note": null
+    },
+    {
+      "title": "Why the Internet Isn’t Fun Anymore",
+      "author": "Kyle Chayka",
+      "authorKey": null,
+      "authorSlug": "kyle-chayka",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/culture/infinite-scroll/why-the-internet-isnt-fun-anymore",
+      "note": null
+    },
+    {
+      "title": "Coming of Age at the Dawn of the Social Internet",
+      "author": "Kyle Chayka",
+      "authorKey": null,
+      "authorSlug": "kyle-chayka",
+      "publication": "The New Yorker",
+      "year": 2024,
+      "link": "https://www.newyorker.com/culture/the-weekend-essay/coming-of-age-at-the-dawn-of-the-social-internet",
+      "note": null
+    },
+    {
+      "title": "The Lost City of Z",
+      "author": "David Grann",
+      "authorKey": null,
+      "authorSlug": "david-grann",
+      "publication": "The New Yorker",
+      "year": 2005,
+      "link": "https://www.newyorker.com/archive/2005/09/19/050919fa_fact_grann",
+      "note": null
+    },
+    {
+      "title": "Trial by Fire",
+      "author": "David Grann",
+      "authorKey": null,
+      "authorSlug": "david-grann",
+      "publication": "The New Yorker",
+      "year": 2009,
+      "link": "https://www.newyorker.com/magazine/2009/09/07/trial-by-fire",
+      "note": null
+    },
+    {
+      "title": "City of Water",
+      "author": "David Grann",
+      "authorKey": null,
+      "authorSlug": "david-grann",
+      "publication": "The New Yorker",
+      "year": 2003,
+      "link": "https://www.newyorker.com/magazine/2003/09/01/city-of-water",
+      "note": null
+    },
+    {
+      "title": "Thanksgiving in Mongolia",
+      "author": "Ariel Levy",
+      "authorKey": null,
+      "authorSlug": "ariel-levy",
+      "publication": "The New Yorker",
+      "year": 2013,
+      "link": "https://www.newyorker.com/reporting/2013/11/18/131118fa_fact_levy",
+      "note": null
+    },
+    {
+      "title": "Trial by Twitter",
+      "author": "Ariel Levy",
+      "authorKey": null,
+      "authorSlug": "ariel-levy",
+      "publication": "The New Yorker",
+      "year": 2013,
+      "link": "https://www.newyorker.com/magazine/2013/08/05/trial-by-twitter",
+      "note": null
+    },
+    {
+      "title": "The Perfect Wife",
+      "author": "Ariel Levy",
+      "authorKey": null,
+      "authorSlug": "ariel-levy",
+      "publication": "The New Yorker",
+      "year": 2013,
+      "link": "https://www.newyorker.com/magazine/2013/09/30/the-perfect-wife",
+      "note": null
+    },
+    {
+      "title": "Atchafalaya",
+      "author": "John McPhee",
+      "authorKey": null,
+      "authorSlug": "john-mcphee",
+      "publication": "The New Yorker",
+      "year": 1987,
+      "link": "https://www.newyorker.com/magazine/1987/02/23/atchafalaya",
+      "note": null,
+      "theme": "Nature"
+    },
+    {
+      "title": "A Fleet of One",
+      "author": "John McPhee",
+      "authorKey": null,
+      "authorSlug": "john-mcphee",
+      "publication": "The New Yorker",
+      "year": 2003,
+      "link": "https://www.newyorker.com/archive/2003/02/17/030217fa_fact4",
+      "note": null
+    },
+    {
+      "title": "The Conching Rooms",
+      "author": "John McPhee",
+      "authorKey": null,
+      "authorSlug": "john-mcphee",
+      "publication": "The New Yorker",
+      "year": 1972,
+      "link": "https://www.newyorker.com/archive/1972/05/13/1972_05_13_032_TNY_CARDS_000303286",
+      "note": null
+    },
+    {
+      "title": "Letting Go",
+      "author": "David Sedaris",
+      "authorKey": null,
+      "authorSlug": "david-sedaris",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/reporting/2008/05/05/080505fa_fact_sedaris",
+      "note": null
+    },
+    {
+      "title": "Now We Are Five",
+      "author": "David Sedaris",
+      "authorKey": null,
+      "authorSlug": "david-sedaris",
+      "publication": "The New Yorker",
+      "year": 2013,
+      "link": "https://www.newyorker.com/magazine/2013/10/28/now-we-are-five",
+      "note": null
+    },
+    {
+      "title": "Why Aren’t You Laughing?",
+      "author": "David Sedaris",
+      "authorKey": null,
+      "authorSlug": "david-sedaris",
+      "publication": "The New Yorker",
+      "year": 2017,
+      "link": "https://www.newyorker.com/magazine/2017/06/19/why-arent-you-laughing",
+      "note": null
+    },
+    {
+      "title": "Feel Me",
+      "author": "Adam Gopnik",
+      "authorKey": null,
+      "authorSlug": "adam-gopnik",
+      "publication": "The New Yorker",
+      "year": 2016,
+      "link": "https://www.newyorker.com/magazine/2016/05/16/what-the-science-of-touch-says-about-us",
+      "note": null
+    },
+    {
+      "title": "The Information",
+      "author": "Adam Gopnik",
+      "authorKey": null,
+      "authorSlug": "adam-gopnik",
+      "publication": "The New Yorker",
+      "year": 2011,
+      "link": "https://www.newyorker.com/magazine/2011/02/14/the-information",
+      "note": null
+    },
+    {
+      "title": "Does It Help to Know History?",
+      "author": "Adam Gopnik",
+      "authorKey": null,
+      "authorSlug": "adam-gopnik",
+      "publication": "The New Yorker",
+      "year": 2014,
+      "link": "https://www.newyorker.com/news/daily-comment/help-know-history",
+      "note": null
+    },
+    {
+      "title": "The Efficiency Dilemma",
+      "author": "David Owen",
+      "authorKey": null,
+      "authorSlug": "david-owen",
+      "publication": "The New Yorker",
+      "year": 2010,
+      "link": "https://www.newyorker.com/magazine/2010/12/20/the-efficiency-dilemma",
+      "note": null
+    },
+    {
+      "title": "What Happens to All the Stuff We Return?",
+      "author": "David Owen",
+      "authorKey": null,
+      "authorSlug": "david-owen",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/08/21/the-hidden-cost-of-free-returns",
+      "note": null
+    },
+    {
+      "title": "Call Me Loyd",
+      "author": "David Owen",
+      "authorKey": null,
+      "authorSlug": "david-owen",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/magazine/2008/02/11/call-me-loyd",
+      "note": null
+    },
+    {
+      "title": "Magic Mountain",
+      "author": "Nick Paumgarten",
+      "authorKey": null,
+      "authorSlug": "nick-paumgarten",
+      "publication": "The New Yorker",
+      "year": 2012,
+      "link": "https://www.newyorker.com/magazine/2012/03/05/magic-mountain",
+      "note": null
+    },
+    {
+      "title": "The Long Flight to Teach an Endangered Ibis Species to Migrate",
+      "author": "Nick Paumgarten",
+      "authorKey": null,
+      "authorSlug": "nick-paumgarten",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/02/17/the-long-flight-to-teach-an-endangered-ibis-species-to-migrate",
+      "note": null,
+      "theme": "Nature"
+    },
+    {
+      "title": "Up and Then Down",
+      "author": "Nick Paumgarten",
+      "authorKey": null,
+      "authorSlug": "nick-paumgarten",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/reporting/2008/04/21/080421fa_fact_paumgarten",
+      "note": null
+    },
+    {
+      "title": "Hutong Karma",
+      "author": "Peter Hessler",
+      "authorKey": null,
+      "authorSlug": "peter-hessler",
+      "publication": "The New Yorker",
+      "year": 2006,
+      "link": "https://www.newyorker.com/archive/2006/02/13/060213fa_fact_hessler",
+      "note": null
+    },
+    {
+      "title": "Learning to Speak Lingerie",
+      "author": "Peter Hessler",
+      "authorKey": null,
+      "authorSlug": "peter-hessler",
+      "publication": "The New Yorker",
+      "year": 2015,
+      "link": "https://www.newyorker.com/magazine/2015/08/10/learning-to-speak-lingerie",
+      "note": null
+    },
+    {
+      "title": "Cairo: A Type of Love Story",
+      "author": "Peter Hessler",
+      "authorKey": null,
+      "authorSlug": "peter-hessler",
+      "publication": "The New Yorker",
+      "year": 2018,
+      "link": "https://www.newyorker.com/magazine/2018/05/07/cairo-a-type-of-love-story",
+      "note": null
+    },
+    {
+      "title": "The Grand Tour",
+      "author": "Evan Osnos",
+      "authorKey": null,
+      "authorSlug": "evan-osnos",
+      "publication": "The New Yorker",
+      "year": 2011,
+      "link": "https://www.newyorker.com/reporting/2011/04/18/110418fa_fact_osnos",
+      "note": null
+    },
+    {
+      "title": "China’s Age of Malaise",
+      "author": "Evan Osnos",
+      "authorKey": null,
+      "authorSlug": "evan-osnos",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/10/30/chinas-age-of-malaise",
+      "note": null
+    },
+    {
+      "title": "The Haves and the Have-Yachts",
+      "author": "Evan Osnos",
+      "authorKey": null,
+      "authorSlug": "evan-osnos",
+      "publication": "The New Yorker",
+      "year": 2022,
+      "link": "https://www.newyorker.com/magazine/2022/07/25/the-haves-and-the-have-yachts",
+      "note": null
+    },
+    {
+      "title": "The Egg Men",
+      "author": "Burkhard Bilger",
+      "authorKey": null,
+      "authorSlug": "burkhard-bilger",
+      "publication": "The New Yorker",
+      "year": 2005,
+      "link": "https://www.newyorker.com/magazine/2005/09/05/the-egg-men",
+      "note": null
+    },
+    {
+      "title": "The Height Gap",
+      "author": "Burkhard Bilger",
+      "authorKey": null,
+      "authorSlug": "burkhard-bilger",
+      "publication": "The New Yorker",
+      "year": 2004,
+      "link": "https://www.newyorker.com/archive/2004/04/05/040405fa_fact",
+      "note": null
+    },
+    {
+      "title": "We Are Sleepwalking Into Autocracy",
+      "author": "David Remnick",
+      "authorKey": null,
+      "authorSlug": "david-remnick",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/podcast/the-new-yorker-radio-hour/senator-chris-murphy-this-is-how-democracy-dies-everybody-just-gets-scared",
+      "note": null,
+      "theme": "Freedom"
+    },
+    {
+      "title": "In the Cities of Killing",
+      "author": "David Remnick",
+      "authorKey": null,
+      "authorSlug": "david-remnick",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/11/06/israel-gaza-war-hamas",
+      "note": null
+    },
+    {
+      "title": "How to Practice",
+      "author": "Ann Patchett",
+      "authorKey": null,
+      "authorSlug": "ann-patchett",
+      "publication": "The New Yorker",
+      "year": 2021,
+      "link": "https://www.newyorker.com/magazine/2021/03/08/how-to-practice",
+      "note": null
+    },
+    {
+      "title": "My Three Fathers",
+      "author": "Ann Patchett",
+      "authorKey": null,
+      "authorSlug": "ann-patchett",
+      "publication": "The New Yorker",
+      "year": 2020,
+      "link": "https://www.newyorker.com/magazine/2020/10/05/my-three-fathers",
+      "note": null
+    },
+    {
+      "title": "Glowworms",
+      "author": "Ann Patchett",
+      "authorKey": null,
+      "authorSlug": "ann-patchett",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/10/06/glowworms",
+      "note": null
+    },
+    {
+      "title": "The Fourth State of Matter",
+      "author": "Jo Ann Beard",
+      "authorKey": null,
+      "authorSlug": "jo-ann-beard",
+      "publication": "The New Yorker",
+      "year": 1996,
+      "link": "https://www.newyorker.com/magazine/1996/06/24/the-fourth-state-of-matter",
+      "note": null
+    },
+    {
+      "title": "The Comfort Zone",
+      "author": "Jonathan Franzen",
+      "authorKey": null,
+      "authorSlug": "jonathan-franzen",
+      "publication": "The New Yorker",
+      "year": 2004,
+      "link": "https://www.newyorker.com/archive/2004/11/29/041129fa_fact",
+      "note": null
+    },
+    {
+      "title": "Countdown",
+      "author": "Jonathan Franzen",
+      "authorKey": null,
+      "authorSlug": "jonathan-franzen",
+      "publication": "The New Yorker",
+      "year": 2005,
+      "link": "https://www.newyorker.com/archive/2005/04/18/050418fa_fact1",
+      "note": null
+    },
+    {
+      "title": "My Father’s Brain",
+      "author": "Jonathan Franzen",
+      "authorKey": null,
+      "authorSlug": "jonathan-franzen",
+      "publication": "The New Yorker",
+      "year": 2001,
+      "link": "https://www.newyorker.com/magazine/2001/09/10/jonathan-franzen-my-fathers-brain",
+      "note": null
+    },
+    {
+      "title": "Letter from a Region in My Mind",
+      "author": "James Baldwin",
+      "authorKey": null,
+      "authorSlug": "james-baldwin",
+      "publication": "The New Yorker",
+      "year": 1962,
+      "link": "https://www.newyorker.com/magazine/1962/11/17/letter-from-a-region-in-my-mind",
+      "note": null
+    },
+    {
+      "title": "Fire Season in Los Angeles",
+      "author": "Joan Didion",
+      "authorKey": null,
+      "authorSlug": "joan-didion",
+      "publication": "The New Yorker",
+      "year": 1989,
+      "link": "https://www.newyorker.com/magazine/1989/09/04/joan-didion-letter-from-los-angeles-fire-season",
+      "note": null
+    },
+    {
+      "title": "My Misspent Youth",
+      "author": "Meghan Daum",
+      "authorKey": null,
+      "authorSlug": "meghan-daum",
+      "publication": "The New Yorker",
+      "year": 1999,
+      "link": "https://www.newyorker.com/magazine/1999/10/18/my-misspent-youth",
+      "note": null
+    },
+    {
+      "title": "The Art of the Impersonal Essay",
+      "author": "Zadie Smith",
+      "authorKey": null,
+      "authorSlug": "zadie-smith",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/09/29/the-art-of-the-impersonal-essay",
+      "note": null,
+      "theme": "Writing"
+    },
+    {
+      "title": "Sweet Charity",
+      "author": "Zadie Smith",
+      "authorKey": null,
+      "authorSlug": "zadie-smith",
+      "publication": "The New Yorker",
+      "year": 2010,
+      "link": "https://www.newyorker.com/magazine/2010/10/11/sweet-charity",
+      "note": null
+    },
+    {
+      "title": "On Killing Charles Dickens",
+      "author": "Zadie Smith",
+      "authorKey": null,
+      "authorSlug": "zadie-smith",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/07/10/on-killing-charles-dickens",
+      "note": null
+    },
+    {
+      "title": "Secret Skin",
+      "author": "Michael Chabon",
+      "authorKey": null,
+      "authorSlug": "michael-chabon",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/magazine/2008/03/10/secret-skin",
+      "note": null
+    },
+    {
+      "title": "The Ill-Defined Plot",
+      "author": "John Jeremiah Sullivan",
+      "authorKey": null,
+      "authorSlug": "john-jeremiah-sullivan",
+      "publication": "The New Yorker",
+      "year": 2014,
+      "link": "https://www.newyorker.com/books/page-turner/ill-defined-plot",
+      "note": null
+    },
+    {
+      "title": "Farewell, My Lovely!",
+      "author": "E.B. White",
+      "authorKey": null,
+      "authorSlug": "e-b-white",
+      "publication": "The New Yorker",
+      "year": 1936,
+      "link": "https://www.newyorker.com/archive/1936/05/16/1936_05_16_020_TNY_CARDS_000161110",
+      "note": null
+    },
+    {
+      "title": "Learning By Degrees",
+      "author": "Rebecca Mead",
+      "authorKey": null,
+      "authorSlug": "rebecca-mead",
+      "publication": "The New Yorker",
+      "year": 2010,
+      "link": "https://www.newyorker.com/talk/comment/2010/06/07/100607taco_talk_mead",
+      "note": null
+    },
+    {
+      "title": "The British Museum’s Blockbuster Scandals",
+      "author": "Rebecca Mead",
+      "authorKey": null,
+      "authorSlug": "rebecca-mead",
+      "publication": "The New Yorker",
+      "year": 2024,
+      "link": "https://www.newyorker.com/magazine/2024/05/13/the-british-museums-blockbuster-scandals",
+      "note": null
+    },
+    {
+      "title": "The End of the English Major",
+      "author": "Nathan Heller",
+      "authorKey": null,
+      "authorSlug": "nathan-heller",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/03/06/the-end-of-the-english-major",
+      "note": null
+    },
+    {
+      "title": "Is Venture Capital Worth the Risk?",
+      "author": "Nathan Heller",
+      "authorKey": null,
+      "authorSlug": "nathan-heller",
+      "publication": "The New Yorker",
+      "year": 2020,
+      "link": "https://www.newyorker.com/magazine/2020/01/27/is-venture-capital-worth-the-risk",
+      "note": null,
+      "theme": "Work"
+    },
+    {
+      "title": "The Numbing Sameness of War Footage",
+      "author": "Jay Caspian Kang",
+      "authorKey": null,
+      "authorSlug": "jay-caspian-kang",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/news/our-columnists/the-numbing-sameness-of-war-footage",
+      "note": null
+    },
+    {
+      "title": "Carnal Knowledge",
+      "author": "Bill Buford",
+      "authorKey": null,
+      "authorSlug": "bill-buford",
+      "publication": "The New Yorker",
+      "year": 2006,
+      "link": "https://www.newyorker.com/archive/2006/05/01/060501fa_fact",
+      "note": null
+    },
+    {
+      "title": "Baking Bread in Lyon",
+      "author": "Bill Buford",
+      "authorKey": null,
+      "authorSlug": "bill-buford",
+      "publication": "The New Yorker",
+      "year": 2020,
+      "link": "https://www.newyorker.com/magazine/2020/04/13/baking-bread-in-lyon",
+      "note": null
+    },
+    {
+      "title": "The Pasta Station",
+      "author": "Bill Buford",
+      "authorKey": null,
+      "authorSlug": "bill-buford",
+      "publication": "The New Yorker",
+      "year": 2004,
+      "link": "https://www.newyorker.com/magazine/2004/09/06/the-pasta-station",
+      "note": null
+    },
+    {
+      "title": "Speaking of Soup",
+      "author": "Calvin Trillin",
+      "authorKey": null,
+      "authorSlug": "calvin-trillin",
+      "publication": "The New Yorker",
+      "year": 2005,
+      "link": "https://www.newyorker.com/archive/2005/09/05/050905fa_fact",
+      "note": null
+    },
+    {
+      "title": "By Meat Alone",
+      "author": "Calvin Trillin",
+      "authorKey": null,
+      "authorSlug": "calvin-trillin",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/reporting/2008/11/24/081124fa_fact_trillin",
+      "note": null
+    },
+    {
+      "title": "The List",
+      "author": "Sarah Stillman",
+      "authorKey": null,
+      "authorSlug": "sarah-stillman",
+      "publication": "The New Yorker",
+      "year": 2016,
+      "link": "https://www.newyorker.com/magazine/2016/03/14/when-kids-are-accused-of-sex-crimes",
+      "note": null
+    },
+    {
+      "title": "The Throwaways",
+      "author": "Sarah Stillman",
+      "authorKey": null,
+      "authorSlug": "sarah-stillman",
+      "publication": "The New Yorker",
+      "year": 2012,
+      "link": "https://www.newyorker.com/reporting/2012/09/03/120903fa_fact_stillman",
+      "note": null
+    },
+    {
+      "title": "The Detectives Who Never Forget a Face",
+      "author": "Patrick Radden Keefe",
+      "authorKey": null,
+      "authorSlug": "patrick-radden-keefe",
+      "publication": "The New Yorker",
+      "year": 2016,
+      "link": "https://www.newyorker.com/magazine/2016/08/22/londons-super-recognizer-police-force",
+      "note": null
+    },
+    {
+      "title": "Where the Bodies Are Buried",
+      "author": "Patrick Radden Keefe",
+      "authorKey": null,
+      "authorSlug": "patrick-radden-keefe",
+      "publication": "The New Yorker",
+      "year": 2015,
+      "link": "https://www.newyorker.com/magazine/2015/03/16/where-the-bodies-are-buried",
+      "note": null
+    },
+    {
+      "title": "Surviving the Crackdown in Xinjiang",
+      "author": "Raffi Khatchadourian",
+      "authorKey": null,
+      "authorSlug": "raffi-khatchadourian",
+      "publication": "The New Yorker",
+      "year": 2021,
+      "link": "https://www.newyorker.com/magazine/2021/04/12/surviving-the-crackdown-in-xinjiang",
+      "note": null
+    },
+    {
+      "title": "The Stolen Forests",
+      "author": "Raffi Khatchadourian",
+      "authorKey": null,
+      "authorSlug": "raffi-khatchadourian",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/reporting/2008/10/06/081006fa_fact_khatchadourian",
+      "note": null,
+      "theme": "Nature"
+    },
+    {
+      "title": "The Lie Factory",
+      "author": "Jill Lepore",
+      "authorKey": null,
+      "authorSlug": "jill-lepore",
+      "publication": "The New Yorker",
+      "year": 2012,
+      "link": "https://www.newyorker.com/reporting/2012/09/24/120924fa_fact_lepore",
+      "note": null
+    },
+    {
+      "title": "The Disruption Machine",
+      "author": "Jill Lepore",
+      "authorKey": null,
+      "authorSlug": "jill-lepore",
+      "publication": "The New Yorker",
+      "year": 2014,
+      "link": "https://www.newyorker.com/magazine/2014/06/23/the-disruption-machine",
+      "note": null
+    },
+    {
+      "title": "Among the Insurrectionists",
+      "author": "Luke Mogelson",
+      "authorKey": null,
+      "authorSlug": "luke-mogelson",
+      "publication": "The New Yorker",
+      "year": 2021,
+      "link": "https://www.newyorker.com/magazine/2021/01/25/among-the-insurrectionists",
+      "note": null
+    },
+    {
+      "title": "The Heart of the Uprising in Minneapolis",
+      "author": "Luke Mogelson",
+      "authorKey": null,
+      "authorSlug": "luke-mogelson",
+      "publication": "The New Yorker",
+      "year": 2020,
+      "link": "https://www.newyorker.com/magazine/2020/06/22/the-heart-of-the-uprising-in-minneapolis",
+      "note": null
+    },
+    {
+      "title": "Trapped in the Trenches",
+      "author": "Luke Mogelson",
+      "authorKey": null,
+      "authorSlug": "luke-mogelson",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/01/02/trapped-in-the-trenches-in-ukraine",
+      "note": null
+    },
+    {
+      "title": "Six Degrees of Lois Weisberg",
+      "author": "Malcolm Gladwell",
+      "authorKey": null,
+      "authorSlug": "malcolm-gladwell",
+      "publication": "The New Yorker",
+      "year": 1999,
+      "link": "https://www.newyorker.com/magazine/1999/01/11/six-degrees-of-lois-weisberg/",
+      "note": null
+    },
+    {
+      "title": "What the Dog Saw",
+      "author": "Malcolm Gladwell",
+      "authorKey": null,
+      "authorSlug": "malcolm-gladwell",
+      "publication": "The New Yorker",
+      "year": 2006,
+      "link": "https://www.newyorker.com/magazine/2006/05/22/what-the-dog-saw",
+      "note": null
+    },
+    {
+      "title": "The Science of the Sleeper",
+      "author": "Malcolm Gladwell",
+      "authorKey": null,
+      "authorSlug": "malcolm-gladwell",
+      "publication": "The New Yorker",
+      "year": 1999,
+      "link": "https://www.newyorker.com/magazine/1999/10/04/the-science-of-the-sleeper",
+      "note": null
+    },
+    {
+      "title": "When It’s Bad to Have Good Choices",
+      "author": "Maria Konnikova",
+      "authorKey": null,
+      "authorSlug": "maria-konnikova",
+      "publication": "The New Yorker",
+      "year": 2014,
+      "link": "https://www.newyorker.com/science/maria-konnikova/bad-good-choices",
+      "note": null
+    },
+    {
+      "title": "Why Are Babies So Dumb If Humans Are So Smart?",
+      "author": "Maria Konnikova",
+      "authorKey": null,
+      "authorSlug": "maria-konnikova",
+      "publication": "The New Yorker",
+      "year": 2016,
+      "link": "https://www.newyorker.com/science/maria-konnikova/why-are-babies-so-dumb-if-humans-are-so-smart",
+      "note": null
+    },
+    {
+      "title": "Problems Too Disgusting to Solve",
+      "author": "Maria Konnikova",
+      "authorKey": null,
+      "authorSlug": "maria-konnikova",
+      "publication": "The New Yorker",
+      "year": 2015,
+      "link": "https://www.newyorker.com/science/maria-konnikova/recycled-water-problems-disgusting-solve",
+      "note": null
+    },
+    {
+      "title": "How Should We Think About Our Different Styles of Thinking?",
+      "author": "Joshua Rothman",
+      "authorKey": null,
+      "authorSlug": "joshua-rothman",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/01/16/how-should-we-think-about-our-different-styles-of-thinking",
+      "note": null
+    },
+    {
+      "title": "Why Is It So Hard to Be Ordinary?",
+      "author": "Joshua Rothman",
+      "authorKey": null,
+      "authorSlug": "joshua-rothman",
+      "publication": "The New Yorker",
+      "year": 2026,
+      "link": "https://www.newyorker.com/culture/open-questions/why-is-it-so-hard-to-be-ordinary",
+      "note": null
+    },
+    {
+      "title": "What Can You Learn from Photographing Your Life?",
+      "author": "Joshua Rothman",
+      "authorKey": null,
+      "authorSlug": "joshua-rothman",
+      "publication": "The New Yorker",
+      "year": 2024,
+      "link": "https://www.newyorker.com/culture/open-questions/what-can-you-learn-from-photographing-your-life",
+      "note": null
+    },
+    {
+      "title": "The Legacy of Childhood Trauma",
+      "author": "Junot Díaz",
+      "authorKey": null,
+      "authorSlug": "junot-diaz",
+      "publication": "The New Yorker",
+      "year": 2018,
+      "link": "https://www.newyorker.com/magazine/2018/04/16/the-silence-the-legacy-of-childhood-trauma",
+      "note": null
+    },
+    {
+      "title": "Mary Had Schizophrenia—Then Suddenly She Didn’t",
+      "author": "Rachel Aviv",
+      "authorKey": null,
+      "authorSlug": "rachel-aviv",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/07/28/mary-had-schizophrenia-then-suddenly-she-didnt",
+      "note": null
+    },
+    {
+      "title": "God Knows Where I Am",
+      "author": "Rachel Aviv",
+      "authorKey": null,
+      "authorSlug": "rachel-aviv",
+      "publication": "The New Yorker",
+      "year": 2011,
+      "link": "https://www.newyorker.com/magazine/2011/05/30/god-knows-where-i-am",
+      "note": null
+    },
+    {
+      "title": "The Challenge of Going Off Psychiatric Drugs",
+      "author": "Rachel Aviv",
+      "authorKey": null,
+      "authorSlug": "rachel-aviv",
+      "publication": "The New Yorker",
+      "year": 2019,
+      "link": "https://www.newyorker.com/magazine/2019/04/08/the-challenge-of-going-off-psychiatric-drugs",
+      "note": null
+    },
+    {
+      "title": "The Climate of Man",
+      "author": "Elizabeth Kolbert",
+      "authorKey": null,
+      "authorSlug": "elizabeth-kolbert",
+      "publication": "The New Yorker",
+      "year": 2005,
+      "link": "https://www.newyorker.com/magazine/2005/04/25/the-climate-of-man-i",
+      "note": null,
+      "theme": "Nature"
+    },
+    {
+      "title": "The Fate of Earth",
+      "author": "Elizabeth Kolbert",
+      "authorKey": null,
+      "authorSlug": "elizabeth-kolbert",
+      "publication": "The New Yorker",
+      "year": 2017,
+      "link": "https://www.newyorker.com/tech/elements/the-fate-of-earth",
+      "note": null
+    },
+    {
+      "title": "Phosphorus Saved Our Way of Life—and Now Threatens to End It",
+      "author": "Elizabeth Kolbert",
+      "authorKey": null,
+      "authorSlug": "elizabeth-kolbert",
+      "publication": "The New Yorker",
+      "year": 2023,
+      "link": "https://www.newyorker.com/magazine/2023/03/06/phosphorus-saved-our-way-of-life-and-now-threatens-to-end-it",
+      "note": null
+    },
+    {
+      "title": "Our Very Strange Search for “Sea Level”",
+      "author": "Brooke Jarvis",
+      "authorKey": null,
+      "authorSlug": "brooke-jarvis",
+      "publication": "The New Yorker",
+      "year": 2024,
+      "link": "https://www.newyorker.com/magazine/2024/08/26/our-very-strange-search-for-sea-level",
+      "note": null
+    },
+    {
+      "title": "What Happens When You Breathe",
+      "author": "Brooke Jarvis",
+      "authorKey": null,
+      "authorSlug": "brooke-jarvis",
+      "publication": "The New Yorker",
+      "year": 2021,
+      "link": "https://www.newyorker.com/magazine/2021/01/25/what-happens-when-you-breathe",
+      "note": null
+    },
+    {
+      "title": "Where Do Eels Come From?",
+      "author": "Brooke Jarvis",
+      "authorKey": null,
+      "authorSlug": "brooke-jarvis",
+      "publication": "The New Yorker",
+      "year": 2020,
+      "link": "https://www.newyorker.com/magazine/2020/05/25/where-do-eels-come-from",
+      "note": null,
+      "theme": "Nature"
+    },
+    {
+      "title": "Silent Spring",
+      "author": "Rachel Carson",
+      "authorKey": null,
+      "authorSlug": "rachel-carson",
+      "publication": "The New Yorker",
+      "year": 1962,
+      "link": "https://www.newyorker.com/magazine/1962/06/16/silent-spring-part-1",
+      "note": null,
+      "theme": "Nature"
+    },
+    {
+      "title": "The Itch",
+      "author": "Atul Gawande",
+      "authorKey": "OL1485501A",
+      "authorSlug": "atul-gawande",
+      "publication": "The New Yorker",
+      "year": 2008,
+      "link": "https://www.newyorker.com/reporting/2008/06/30/080630fa_fact_gawande",
+      "note": null
+    },
+    {
+      "title": "Slow Ideas",
+      "author": "Atul Gawande",
+      "authorKey": "OL1485501A",
+      "authorSlug": "atul-gawande",
+      "publication": "The New Yorker",
+      "year": 2013,
+      "link": "https://www.newyorker.com/magazine/2013/07/29/slow-ideas",
+      "note": null
+    },
+    {
+      "title": "Personal Best",
+      "author": "Atul Gawande",
+      "authorKey": "OL1485501A",
+      "authorSlug": "atul-gawande",
+      "publication": "The New Yorker",
+      "year": 2011,
+      "link": "https://www.newyorker.com/reporting/2011/10/03/111003fa_fact_gawande",
+      "note": null
+    },
+    {
+      "title": "The Plastic Panic",
+      "author": "Jerome Groopman",
+      "authorKey": null,
+      "authorSlug": "jerome-groopman",
+      "publication": "The New Yorker",
+      "year": 2010,
+      "link": "https://www.newyorker.com/magazine/2010/05/31/the-plastic-panic",
+      "note": null
+    },
+    {
+      "title": "The Peanut Puzzle",
+      "author": "Jerome Groopman",
+      "authorKey": null,
+      "authorSlug": "jerome-groopman",
+      "publication": "The New Yorker",
+      "year": 2011,
+      "link": "https://www.newyorker.com/magazine/2011/02/07/the-peanut-puzzle",
+      "note": null
+    },
+    {
+      "title": "Sex And the Superbug",
+      "author": "Jerome Groopman",
+      "authorKey": null,
+      "authorSlug": "jerome-groopman",
+      "publication": "The New Yorker",
+      "year": 2012,
+      "link": "https://www.newyorker.com/magazine/2012/10/01/sex-and-the-superbug",
+      "note": null
+    },
+    {
+      "title": "Inside the Data Centers That Train A.I. and Drain the Electrical Grid",
+      "author": "Stephen Witt",
+      "authorKey": null,
+      "authorSlug": "stephen-witt",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/11/03/inside-the-data-centers-that-train-ai-and-drain-the-electrical-grid",
+      "note": null
+    },
+    {
+      "title": "The World-Changing Race to Develop the Quantum Computer",
+      "author": "Stephen Witt",
+      "authorKey": null,
+      "authorSlug": "stephen-witt",
+      "publication": "The New Yorker",
+      "year": 2022,
+      "link": "https://www.newyorker.com/magazine/2022/12/19/the-world-changing-race-to-develop-the-quantum-computer",
+      "note": null
+    },
+    {
+      "title": "How the Fridge Changed Flavor",
+      "author": "Nicola Twilley",
+      "authorKey": null,
+      "authorSlug": "nicola-twilley",
+      "publication": "The New Yorker",
+      "year": 2024,
+      "link": "https://www.newyorker.com/culture/the-weekend-essay/how-the-fridge-changed-flavor",
+      "note": null
+    },
+    {
+      "title": "How the First Gravitational Waves Were Found",
+      "author": "Nicola Twilley",
+      "authorKey": null,
+      "authorSlug": "nicola-twilley",
+      "publication": "The New Yorker",
+      "year": 2016,
+      "link": "https://www.newyorker.com/tech/elements/gravitational-waves-exist-heres-how-scientists-finally-found-them",
+      "note": null
+    },
+    {
+      "title": "Hiroshima",
+      "author": "John Hersey",
+      "authorKey": null,
+      "authorSlug": "john-hersey",
+      "publication": "The New Yorker",
+      "year": 1946,
+      "link": "https://www.newyorker.com/magazine/1946/08/31/hiroshima",
+      "note": null
+    },
+    {
+      "title": "Is the U.S. Ready for the Next War?",
+      "author": "Dexter Filkins",
+      "authorKey": null,
+      "authorSlug": "dexter-filkins",
+      "publication": "The New Yorker",
+      "year": 2025,
+      "link": "https://www.newyorker.com/magazine/2025/07/21/is-the-us-ready-for-the-next-war",
+      "note": null
+    },
+    {
+      "title": "Blood and Soil in Narendra Modi’s India",
+      "author": "Dexter Filkins",
+      "authorKey": null,
+      "authorSlug": "dexter-filkins",
+      "publication": "The New Yorker",
+      "year": 2019,
+      "link": "https://www.newyorker.com/magazine/2019/12/09/blood-and-soil-in-narendra-modis-india",
+      "note": null,
+      "theme": "India"
+    },
+    {
+      "title": "Tuesday, and After",
+      "author": "Various Authors",
+      "authorKey": null,
+      "authorSlug": "various-authors",
+      "publication": "The New Yorker",
+      "year": 2001,
+      "link": "https://www.newyorker.com/magazine/2001/09/24/tuesday-and-after-talk-of-the-town",
+      "note": null
+    },
+    {
+      "title": "The Case Against Civilization",
+      "author": "John Lanchester",
+      "authorKey": null,
+      "authorSlug": "john-lanchester",
+      "publication": "The New Yorker",
+      "year": 2017,
+      "link": "https://www.newyorker.com/magazine/2017/09/18/the-case-against-civilization",
+      "note": null
+    },
+    {
+      "title": "Cover Story",
+      "author": "Elif Batuman",
+      "authorKey": null,
+      "authorSlug": "elif-batuman",
+      "publication": "The New Yorker",
+      "year": 2016,
+      "link": "https://www.newyorker.com/magazine/2016/02/08/cover-story-personal-history-elif-batuman",
+      "note": null
+    },
+    {
+      "title": "Japan’s Rent-a-Family Industry",
+      "author": "Elif Batuman",
+      "authorKey": null,
+      "authorSlug": "elif-batuman",
+      "publication": "The New Yorker",
+      "year": 2018,
+      "link": "https://www.newyorker.com/magazine/2018/04/30/japans-rent-a-family-industry",
+      "note": null
+    },
+    {
+      "title": "Off Diamond Head",
+      "author": "William Finnegan",
+      "authorKey": null,
+      "authorSlug": "william-finnegan",
+      "publication": "The New Yorker",
+      "year": 2015,
+      "link": "https://www.newyorker.com/magazine/2015/06/01/off-diamond-head-finnegan",
+      "note": null
+    },
+    {
+      "title": "Playing Doc’s Games",
+      "author": "William Finnegan",
+      "authorKey": null,
+      "authorSlug": "william-finnegan",
+      "publication": "The New Yorker",
+      "year": 1992,
+      "link": "https://www.newyorker.com/magazine/1992/08/24/playing-docs-games-part-one",
+      "note": null
+    },
+    {
+      "title": "This Old Man",
+      "author": "Roger Angell",
+      "authorKey": null,
+      "authorSlug": "roger-angell",
+      "publication": "The New Yorker",
+      "year": 2014,
+      "link": "https://www.newyorker.com/magazine/2014/02/17/roger-angell-this-old-man",
+      "note": null
+    }
+  ]
+}
