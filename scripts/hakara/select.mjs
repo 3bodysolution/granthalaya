@@ -11,7 +11,7 @@ const day = (p) => p.date.slice(0, 10);
 const split = (t) => {
   const tr = t.match(/मराठी अनुवाद\s*:\s*([^|।’]+)/)?.[1]?.trim() ?? null;
   const orig = t.match(/(?:मूळ[^:]*|मूळ इंग्रजी[^:]*)\s*:\s*([^।|’]+)/)?.[1]?.trim() ?? null;
-  let title = t.split(/’|\s\|\s|\s\|/)[0].trim();
+  let title = t.split(/’|\s\|\s|\s\|/)[0].replace(/\s*[:।]\s*(मूळ|अनुवाद|Original|English Translation).*$/, '').replace(/\s*\((Originally Published|मूळ)[^)]*$/, '').trim();
   let by = null;
   const c = title.match(/^(.*\S)\s+:\s+([^:]+)$/);       // "title : author" with no closing quote
   if (!t.includes('’') && c && dev(c[2]) && c[2].split(' ').length <= 4) { title = c[1].trim(); by = c[2].trim(); }
@@ -27,8 +27,12 @@ const pair = (p) => en.filter((e) => e.author === p.author && Math.abs(Date.pars
   .sort((a, b) => Math.abs(a.words - p.words) - Math.abs(b.words - p.words))[0];
 const shape = (p) => { const s = split(p.title), e = pair(p); return { id: p.id, ...s, rawTitle: p.title, author: p.author, date: day(p), link: p.link, categories: p.categories, words: p.words, excerpt: p.excerpt,
   english: e && { title: split(e.title).title, excerpt: e.excerpt, link: e.link } }; };
-const main = mr.filter((p) => isEssay(p) && p.words >= 600).map(shape);
+// issue contents pages (found by hand in the first look) are not essays
+const CONTENTS = new Set([11003, 10083, 9953, 9949]);
+const main = mr.filter((p) => isEssay(p) && p.words >= 600 && !CONTENTS.has(p.id)).map(shape);
+const contents = mr.filter((p) => CONTENTS.has(p.id)).map(shape);
 const maybe = mr.filter((p) => other(p) && p.words >= 1000).map(shape);
-fs.writeFileSync(`${dir}/candidates.json`, JSON.stringify({ main, maybe }, null, 1));
+fs.writeFileSync(`${dir}/candidates.json`, JSON.stringify({ main, maybe, contents }, null, 1));
+console.log(`contents pages left out: ${contents.length}`);
 console.log(`Marathi posts ${mr.length}; essays/editorials >=600 words: ${main.length}; other long Marathi pieces (maybe): ${maybe.length}; short essays skipped: ${mr.filter((p) => isEssay(p) && p.words < 600).length}`);
 console.log(`with an English twin: ${main.filter((m) => m.english).length}/${main.length}`);
