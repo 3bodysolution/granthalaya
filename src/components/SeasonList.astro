@@ -6,6 +6,7 @@
 // and the in-place edit too (data-season-edit).
 import StatusTag from './ui/StatusTag.astro';
 import { md } from '../lib/md';
+import SpoilerGate from './SpoilerGate.astro';
 import { STATUSES, statusLabel, type Status } from '../lib/kinds';
 
 export interface SeasonRow {
@@ -69,7 +70,7 @@ const stars = (r?: number) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r
           </form>
         )}
         {mode === 'view' && (m?.notes || m?.tagline) && (m.spoiler ? (
-          <details class="sl-spoil"><summary class="gchip">Contains spoilers. Show the review</summary>{m.tagline && <p class="sl-tag">{m.tagline}</p>}{m.notes && <div class="sl-notes" set:html={md(m.notes)} />}</details>
+          <SpoilerGate id={m.logId}>{m.tagline && <p class="sl-tag">{m.tagline}</p>}{m.notes && <div class="sl-notes" set:html={md(m.notes)} />}</SpoilerGate>
         ) : (
           <>{m.tagline && <p class="sl-tag">{m.tagline}</p>}{m.notes && <div class="sl-notes" set:html={md(m.notes)} />}</>
         ))}
@@ -109,10 +110,6 @@ const stars = (r?: number) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r
   .sl-line { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 14px; color: var(--muted); }
   .sl-stars { color: var(--haldi); letter-spacing: .05em; }
   .sl-tag { margin: 0; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 18px; font-weight: 600; line-height: 1.35; }
-  .sl-spoil { display: flex; flex-direction: column; gap: 10px; }
-  .sl-spoil summary { list-style: none; width: fit-content; min-height: 40px; }
-  .sl-spoil summary::-webkit-details-marker { display: none; }
-  .sl-spoil[open] summary { display: none; }
   .sl-notes { max-width: 660px; display: flex; flex-direction: column; gap: 10px; }
   .sl-notes :global(p) { margin: 0; font-size: 16px; line-height: 1.65; }
   .sl-edit { display: flex; flex-direction: column; gap: 10px; max-width: 660px; }

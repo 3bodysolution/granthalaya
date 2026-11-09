@@ -160,7 +160,7 @@ const since = new Date(profile.created_at).toLocaleString('en-GB', { month: 'sho
             {reviews.slice(0, 3).map((r) => (
               <a href={r.href} class="lotw">
                 <span class="hint rt">{r.entry.data.title}{r.season ? `, season ${r.season}` : ''}{r.rating != null && <span class="rst"><Stars rating={r.rating} /></span>}</span>
-                {r.spoiler && !isMe ? <span class="hint">Contains spoilers</span> : <span class="serif q">{r.tagline || excerpt({ body: r.text }, 120)}</span>}
+                {r.spoiler && !isMe ? <span class="hint">This review gives away the story.</span> : <span class="serif q">{r.tagline || excerpt({ body: r.text }, 120)}</span>}
               </a>
             ))}
           </section>

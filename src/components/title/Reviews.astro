@@ -4,6 +4,7 @@
 import Face from '../Face.astro';
 import Stars from '../ui/Stars.astro';
 import ReviewSocial from '../ReviewSocial.astro';
+import SpoilerGate from '../SpoilerGate.astro';
 import type { OnSite } from '../../lib/catalog/onsite';
 import { loadReviews, type ReviewSort } from '../../lib/reviews';
 import { long } from '../../lib/data';
@@ -46,11 +47,10 @@ const at = (p: Record<string, string | null>) => {
             <span class="muted vs">{r.season != null && <>Season {r.season} | </>}{long(new Date(`${r.date}T00:00:00Z`))}{r.again && ' | again'}</span>
           </header>
           {r.spoiler ? (
-            <details class="spoil">
-              <summary class="gchip">Contains spoilers. Show the review</summary>
+            <SpoilerGate id={r.id}>
               {r.tagline && <p class="tl">{r.tagline}</p>}
               {r.notes && <div class="vt" set:html={md(r.notes)} />}
-            </details>
+            </SpoilerGate>
           ) : (
             <>
               {r.tagline && <p class="tl">{r.tagline}</p>}
@@ -89,11 +89,6 @@ const at = (p: Record<string, string | null>) => {
   .vt { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
   .vt :global(p) { margin: 0 0 .8em; }
   .vt :global(p:last-child) { margin: 0; }
-  .spoil { display: flex; flex-direction: column; gap: 12px; }
-  .spoil summary { list-style: none; width: fit-content; min-height: 40px; }
-  .spoil summary::-webkit-details-marker { display: none; }
-  .spoil[open] summary { display: none; }
-  .spoil[open] { gap: 12px; }
   .open { font-size: 13px; width: fit-content; }
   .open:hover { color: var(--lat); }
   .morebtn { align-self: flex-start; }

@@ -1,0 +1,19 @@
+---
+// A review that gives away the story: one quiet line and a button. The review itself is not in the page until it is asked for
+// (it sits in a <template>, which isn't shown, searched or read out). The click is handled in Base.astro (data-spoiler-open).
+interface Props { id?: string }
+const { id = '' } = Astro.props;
+---
+<div class="spgate" data-spoiler={id}>
+  <p class="spline"><span>This review gives away the story.</span> <button type="button" class="spbtn" aria-expanded="false" data-spoiler-open>Read it anyway</button></p>
+  <template><slot /></template>
+</div>
+<style>
+  .spgate { display: flex; flex-direction: column; gap: 12px; }
+  .spline { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0 10px; font-size: 14.5px; color: var(--muted); }
+  .spbtn { border: 0; background: none; padding: 0; min-height: 40px; font: inherit; color: var(--lat); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; transition: color .2s ease, transform .2s ease; }
+  .spbtn:hover { color: var(--ink); }
+  .spbtn:active { transform: scale(.97); }
+  .spbtn:focus-visible { outline: 2px solid var(--lat); outline-offset: 2px; border-radius: 4px; }
+  .spgate :global(.sp-body) { display: flex; flex-direction: column; gap: 12px; outline: none; }
+</style>

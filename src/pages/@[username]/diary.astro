@@ -41,7 +41,7 @@ for (const e of all) {
               <span class="stack grow" style="gap: 3px">
                 <span class="serif t">{fullTitle(e)}</span>
                 <span class="muted s">{e.data.creator}{e.data.year ? ` | ${e.data.year}` : ''}</span>
-                {(e.data.tagline || e.body) && <span class="ex">{e.data.spoiler ? 'Review with spoilers' : e.data.tagline || excerpt(e, 140)}</span>}
+                {(e.data.tagline || e.body) && <span class="ex">{e.data.spoiler ? 'This review gives away the story.' : e.data.tagline || excerpt(e, 140)}</span>}
               </span>
               <span class="k" style={`color: ${typeColor(e.data.type)}`}>{kind(e)}</span>
               <span class="r">{e.data.status === 'done' ? <span class="stars" role="img" aria-label={starsLabel(e)}>{stars(e) || ''}</span> : <span class="muted">{statusLabel(e.data.type, e.data.status)}</span>}{e.data.again && <span class="again" title="Again">↻</span>}</span>

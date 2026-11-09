@@ -9,6 +9,7 @@ import { openShelf } from '../../lib/shelfpage';
 import { loadShelf, long, shelfReviews } from '../../lib/data';
 import { reviewExtras } from '../../lib/reviews';
 import { md } from '../../lib/md';
+import SpoilerGate from '../../components/SpoilerGate.astro';
 export const prerender = false;
 
 const o = await openShelf(Astro, '/reviews/');
@@ -44,11 +45,10 @@ const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.pr
             </span>
           </a>
           {r.spoiler && !isMe ? (
-            <details class="spoil">
-              <summary class="gchip">Contains spoilers. Show the review</summary>
+            <SpoilerGate id={r.logId}>
               {r.tagline && <p class="tl">{r.tagline}</p>}
               {r.text && <div class="vt" set:html={md(r.text)} />}
-            </details>
+            </SpoilerGate>
           ) : (
             <>
               {r.tagline && <p class="tl">{r.tagline}</p>}
@@ -79,10 +79,6 @@ const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.pr
   .vt { font-family: 'Fraunces Fix', Fraunces, Georgia, serif; font-size: 17px; line-height: 1.6; overflow-wrap: anywhere; }
   .vt :global(p) { margin: 0 0 .8em; }
   .vt :global(p:last-child) { margin: 0; }
-  .spoil { display: flex; flex-direction: column; gap: 12px; }
-  .spoil summary { list-style: none; width: fit-content; min-height: 40px; }
-  .spoil summary::-webkit-details-marker { display: none; }
-  .spoil[open] summary { display: none; }
   .foot2 { margin: 0; font-size: 13px; }
   @media (max-width: 780px) { .head { padding-top: 36px; } .rv { padding: 18px 16px; } }
 </style>

@@ -477,6 +477,34 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const panel = pickS.closest('.logpanel')!;
       panel.querySelectorAll<HTMLElement>('[data-season-panel]').forEach((p) => (p.hidden = p.dataset.seasonPanel !== pickS.value));
     });
+    // a review that gives away the story (components/SpoilerGate.astro): its text is only in the page once asked for,
+    // then it appears in place and stays shown for that review while the pages are open
+    const revealed = new Set<string>();
+    function reveal(g: HTMLElement) {
+      const t = g.querySelector('template');
+      const btn = g.querySelector<HTMLElement>('[data-spoiler-open]');
+      if (!t || !btn) return null;
+      const body = document.createElement('div');
+      body.className = 'sp-body'; body.tabIndex = -1; body.setAttribute('role', 'group'); body.setAttribute('aria-label', 'Review');
+      body.id = btn.getAttribute('aria-controls') || `sp-${Math.random().toString(36).slice(2, 8)}`;
+      body.appendChild(t.content.cloneNode(true));
+      t.replaceWith(body);
+      btn.setAttribute('aria-expanded', 'true');
+      g.querySelector('.spline')?.setAttribute('hidden', '');
+      return body;
+    }
+    document.addEventListener('click', (ev) => {
+      const open = (ev.target as Element).closest<HTMLElement>('[data-spoiler-open]');
+      const g = open?.closest<HTMLElement>('[data-spoiler]');
+      if (!open || !g) return;
+      const body = reveal(g);
+      if (!body) return;
+      if (g.dataset.spoiler) revealed.add(g.dataset.spoiler);
+      body.focus({ preventScroll: true });
+    });
+    document.addEventListener('astro:page-load', () => {
+      document.querySelectorAll<HTMLElement>('[data-spoiler]').forEach((g) => { if (g.dataset.spoiler && revealed.has(g.dataset.spoiler)) reveal(g); });
+    });
     // likes and comments under one review (components/ReviewSocial.astro): fetched again quietly and swapped, comments left open
     async function refreshReview(box: HTMLElement) {
       try {
