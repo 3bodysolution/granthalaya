@@ -10,6 +10,7 @@ import { searchShopBooks } from '../../lib/catalog/shopbooks';
 import { norm, similarity } from '../../lib/fuzzy';
 import { nearest, visibleMembers } from '../../lib/catalog/localindex';
 import { answerRequest } from '../../lib/catalog/ask';
+import { findEssays } from '../../lib/essays';
 export const prerender = false;
 type Member = { username: string; display_name: string | null; avatar_url: string | null };
 
@@ -58,7 +59,9 @@ export const GET: APIRoute = async ({ locals, url, clientAddress }) => {
     ].sort((a, b) => b.score - a.score);
     const nothing = !tm.titles.length && !books.length && !members.length && !(tm.people ?? []).length && !bk.authors.length;
     const near = nearAll.filter((n, i) => (nothing ? true : n.score >= 0.75 && i < 3)).slice(0, 6).map(({ score, ...n }) => n);
-    return new Response(JSON.stringify({ ...tm, ...bk, books, members, near, exactMember: ((mem.data ?? []) as Member[]).some(exact) }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
+    // our own essays, found by their title as written, in Roman letters, or by the writer (they open at the original, in a new tab)
+    const essays = findEssays(text).map((e) => ({ href: e.link, title: e.title, sub: [e.author, e.year].filter(Boolean).join(' | ') }));
+    return new Response(JSON.stringify({ ...tm, ...bk, books, essays, members, near, exactMember: ((mem.data ?? []) as Member[]).some(exact) }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=60' } });
   }
   const u = (url.searchParams.get('u') ?? '').toLowerCase();
   if (!locals.supabase || !u) return json([]);

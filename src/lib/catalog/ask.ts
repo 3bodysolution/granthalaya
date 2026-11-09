@@ -190,7 +190,7 @@ async function shelves(i: Intent, sb: SupabaseClient | null | undefined): Promis
 function essays(i: Intent): Hit[] {
   const want = new Set(i.themes);
   let pool: Essay[] = want.size ? allEssays.filter((e) => themesOf(e).some((t) => want.has(t))) : allEssays;
-  if (i.language === 'mr') pool = pool.filter((e) => (e as any).language === 'mr');
+  if (i.language === 'mr') pool = pool.filter((e) => e.language === 'mr');
   else if (i.language && i.language !== 'en') pool = [];
   if (i.decade) pool = pool.filter((e) => e.year != null && e.year >= i.decade! && e.year < i.decade! + 10);
   if (i.sort === 'new') pool = [...pool].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));

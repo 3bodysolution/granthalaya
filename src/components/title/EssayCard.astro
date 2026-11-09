@@ -4,7 +4,7 @@
 // Drawn in CSS 3D: turned a little so the stacked page edges show; it turns to face you on hover (flat, with reduced motion).
 import Mark from '../ui/Mark.astro';
 import { statusLabel } from '../../lib/kinds';
-import { authorLink, essayHit, themes, collection, type Essay } from '../../lib/essays';
+import { authorLink, essayHit, themes, collection, hakara, type Essay } from '../../lib/essays';
 import { savedId } from '../../lib/saved';
 import type { Mark as OnShelf } from '../../lib/catalog/onsite';
 interface Props { e: Essay; mark?: OnShelf }
@@ -18,11 +18,12 @@ const last = words.pop()!;
 const CLOTH = ['#2B3A67', '#8E2F3A', '#4F6B4A', '#A15628'];
 const ti = Math.max(0, themes.findIndex((t) => t.items.some((x) => x.link === e.link)));
 const inTheme = themes.some((t) => t.items.some((x) => x.link === e.link));
-const topic = inTheme ? themes[ti].label : 'Essay';
+const topic = (inTheme ? themes[ti].label : 'Essay') + (e.language === 'mr' ? ' · Marathi' : '');
 // a New Yorker card has no gist: its publication and year instead (nothing is invented)
 const note = e.publication && !e.note ? [e.publication, e.year].filter(Boolean).join(' · ') : e.note;
+const lang = e.language === 'mr' ? 'mr' : undefined;
 // within a topic's row the cloth steps card by card, and each topic starts on a different colour
-const ii = Math.max(0, (inTheme ? themes[ti].items : collection.items).findIndex((x) => x.link === e.link));
+const ii = Math.max(0, (inTheme ? themes[ti].items : [...collection.items, ...hakara.items]).findIndex((x) => x.link === e.link));
 const cloth = CLOTH[(ti + ii) % CLOTH.length];
 ---
 <article class="eb" style={`--cloth:${cloth}`}>
@@ -34,7 +35,7 @@ const cloth = CLOTH[(ti + ii) % CLOTH.length];
       <div class="eb-back" aria-hidden="true"></div>
       <div class="eb-front">
         <p class="eb-topic"><span>{topic}</span></p>
-        <h3 class="serif eb-title"><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
+        <h3 class="serif eb-title" lang={lang}><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
         <p class="eb-by">by <a href={authorLink(e)}>{e.author}</a></p>
         <p class="eb-note">{note}</p>
         {me && (mark && !plain

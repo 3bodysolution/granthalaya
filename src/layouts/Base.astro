@@ -139,7 +139,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     <Valley line={line} />
     <footer class="foot">
       <div class="foot-in">
-        <p class="foot-credits">© {site.name}. Made with ❤️ by {site.maker}. Film data from <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDB</a>, streaming data from <a href="https://www.justwatch.com" target="_blank" rel="noopener noreferrer">JustWatch</a>, book descriptions from <a href="https://www.wikipedia.org" target="_blank" rel="noopener noreferrer">Wikipedia</a>. Book covers from <a href="https://akshardhara.com" target="_blank" rel="noopener noreferrer">Akshardhara</a> and <a href="https://www.bookganga.com" target="_blank" rel="noopener noreferrer">BookGanga</a>.</p>
+        <p class="foot-credits">© {site.name}. Made with ❤️ by {site.maker}. Film data from <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDB</a>, streaming data from <a href="https://www.justwatch.com" target="_blank" rel="noopener noreferrer">JustWatch</a>, book descriptions from <a href="https://www.wikipedia.org" target="_blank" rel="noopener noreferrer">Wikipedia</a>. Book covers from <a href="https://akshardhara.com" target="_blank" rel="noopener noreferrer">Akshardhara</a> and <a href="https://www.bookganga.com" target="_blank" rel="noopener noreferrer">BookGanga</a>. Marathi essays from <a href="https://hakara.in" target="_blank" rel="noopener noreferrer">Hakara</a>.</p>
         <nav aria-label="Footer"><a href="/about/">About</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>{site.sponsor.enabled && <a href="/sponsor/">Sponsor</a>}{me ? <a href="/add/">Add something</a> : <a href="/join/" data-astro-prefetch="false">Sign in</a>}</nav>
       </div>
     </footer>
@@ -813,6 +813,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       if (!r) { paint(group('On your shelf', local) + '<li class="search-empty">Search isn’t answering right now. Try again in a moment.</li>'); return; }
       const titles = (r.titles ?? []).map((t: any) => row(t.href, thumb(t.poster), t.title, [t.year, t.kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), '', q));
       const books = (r.books ?? []).map((b: any) => row(b.href, thumb(b.cover), b.title, [b.author, b.year].filter(Boolean).join(' | '), '', q));
+      const essayRows = (r.essays ?? []).map((t: any) => row(t.href, thumb(undefined), t.title, t.sub, 'Essay', q, true));
       const people = [
         ...(r.people ?? []).map((p: any) => row(p.href, thumb(p.photo, true), p.name, p.known ?? 'Films and TV', '', q)),
         ...(r.authors ?? []).map((a: any) => row(a.href, thumb(undefined, true), a.name, `Author${a.works ? ` | ${a.works} works` : ''}`, '', q)),
@@ -825,7 +826,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       const filmsGroup = r.failed && !titles.length ? '<li class="search-empty small">Films and TV couldn’t be reached just now. Try again in a moment.</li>' : group('Films and TV', titles);
       // a member whose username is exactly what was typed comes first
       const memGroup = group('On Granthalaya', members);
-      const html = group('On your shelf', local) + nearGroup + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('People', people) + (r.exactMember ? '' : memGroup);
+      const html = group('On your shelf', local) + nearGroup + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('Essays', essayRows) + group('People', people) + (r.exactMember ? '' : memGroup);
       normalHtml = html || (askHtml ? '' : `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`);
       show();
     }

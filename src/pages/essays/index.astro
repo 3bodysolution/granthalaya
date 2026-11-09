@@ -5,18 +5,26 @@ import Base from '../../layouts/Base.astro';
 import PosterRow from '../../components/title/PosterRow.astro';
 import EssayCard from '../../components/title/EssayCard.astro';
 import Filters from '../../components/title/Filters.astro';
-import { themes, allEssays, total, collection } from '../../lib/essays';
+import { themes, allEssays, total, collection, hakara, marathi } from '../../lib/essays';
 import { essayMarks } from '../../lib/catalog/onsite';
 export const prerender = false;
 const ROW = 10;
 const pick = Astro.url.searchParams.get('theme') ?? '';
 const picked = themes.find((t) => t.slug === pick);
-const showNY = Astro.url.searchParams.get('collection') === collection.slug;   // the See all page of Best of The New Yorker
+const which = Astro.url.searchParams.get('collection');
+const showNY = which === collection.slug;      // the See all page of Best of The New Yorker
+const showHK = which === hakara.slug;          // the See all page of From Hakara
+const inMarathi = Astro.url.searchParams.get('language') === 'mr';   // the Marathi filter: Marathi essays from every theme
+const grid = showNY ? collection.items : showHK ? hakara.items : inMarathi ? (picked ? picked.items.filter((e) => e.language === 'mr') : marathi) : picked ? picked.items : null;
 // which of these are already on your shelf: one lookup for the whole page
 const sb = Astro.locals.supabase;
-const marks = await essayMarks(sb, Astro.locals.me, (picked ? picked.items : showNY ? collection.items : allEssays).map((e) => e.link)).catch(() => new Map());
-const fields = [{ name: 'theme', label: 'Theme', value: picked?.slug ?? '', options: [['', 'All themes'], ...themes.map((t) => [t.slug, t.label])] as [string, string][] }];
-const heading = showNY ? collection.name : !picked ? 'Essays' : picked.name === 'Picks' ? 'Picks' : `Essays ${picked.label.replace('On ', 'on ')}`;
+const marks = await essayMarks(sb, Astro.locals.me, (grid ?? allEssays).map((e) => e.link)).catch(() => new Map());
+const fields = [
+  { name: 'theme', label: 'Theme', value: picked?.slug ?? '', options: [['', 'All themes'], ...themes.map((t) => [t.slug, t.label])] as [string, string][] },
+  { name: 'language', label: 'Language', value: inMarathi ? 'mr' : '', options: [['', 'All languages'], ['mr', 'Marathi']] as [string, string][] },
+];
+const subject = !picked ? '' : picked.name === 'Picks' ? 'Picks' : picked.label.replace('On ', 'on ');
+const heading = showNY ? collection.name : showHK ? hakara.name : inMarathi ? `Marathi essays${subject && subject !== 'Picks' ? ` ${subject}` : ''}` : !picked ? 'Essays' : picked.name === 'Picks' ? 'Picks' : `Essays ${subject}`;
 const NY_ROW = 10;
 ---
 <Base title={heading} active="essays" description="Essays worth reading, each linking to a free copy at the original.">
@@ -27,22 +35,22 @@ const NY_ROW = 10;
         <p class="muted lede">Curated by <a href={collection.curator.url} target="_blank" rel="noopener noreferrer">{collection.curator.name}</a></p>
         <p class="muted note">Many New Yorker articles need a subscription after a few free reads.</p>
       </>
+    ) : showHK ? (
+      <p class="muted lede">Marathi essays from <a href={hakara.credit.url} target="_blank" rel="noopener noreferrer">{hakara.credit.name}</a>, listed with their permission. Each opens at its original home.</p>
+    ) : inMarathi ? (
+      <p class="muted lede">{grid!.length} essays in Marathi. Each opens at its original home.</p>
     ) : (
       <p class="muted lede">{picked ? `${picked.items.length} essays` : `${total} essays`} worth an afternoon, chosen by us. Each opens at its original home.</p>
     )}
     <Filters fields={fields} />
   </section>
-  {showNY ? (
+  {grid ? (
     <section class="pad">
-      <div class="grid">
-        {collection.items.map((e) => <EssayCard e={e} mark={marks.get(e.link)} />)}
-      </div>
-    </section>
-  ) : picked ? (
-    <section class="pad">
-      <div class="grid">
-        {picked.items.map((e) => <EssayCard e={e} mark={marks.get(e.link)} />)}
-      </div>
+      {grid.length ? (
+        <div class="grid">
+          {grid.map((e) => <EssayCard e={e} mark={marks.get(e.link)} />)}
+        </div>
+      ) : <p class="muted">No essays here yet.</p>}
     </section>
   ) : (
     <section class="pad rows">
@@ -53,6 +61,9 @@ const NY_ROW = 10;
       ))}
       <PosterRow title={collection.name} tone="essay" href={`/essays/?collection=${collection.slug}`} col="min(290px, 80vw)">
         {collection.items.slice(0, NY_ROW).map((e) => <li><EssayCard e={e} mark={marks.get(e.link)} /></li>)}
+      </PosterRow>
+      <PosterRow title={hakara.name} tone="essay" href={`/essays/?collection=${hakara.slug}`} col="min(290px, 80vw)">
+        {hakara.items.slice(0, NY_ROW).map((e) => <li><EssayCard e={e} mark={marks.get(e.link)} /></li>)}
       </PosterRow>
     </section>
   )}
