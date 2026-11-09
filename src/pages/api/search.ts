@@ -9,10 +9,20 @@ import { searchBooks, type BookCard } from '../../lib/catalog/books';
 import { searchShopBooks } from '../../lib/catalog/shopbooks';
 import { norm, similarity } from '../../lib/fuzzy';
 import { nearest, visibleMembers } from '../../lib/catalog/localindex';
+import { answerRequest } from '../../lib/catalog/ask';
 export const prerender = false;
 type Member = { username: string; display_name: string | null; avatar_url: string | null };
 
-export const GET: APIRoute = async ({ locals, url }) => {
+export const GET: APIRoute = async ({ locals, url, clientAddress }) => {
+  // a request like "best sports movies": the AI turns the words into filters, we find the real results (only the typed words are used,
+  // nothing about the visitor). Asked for separately so the normal results never wait for it.
+  const ask = (url.searchParams.get('ask') ?? '').trim().slice(0, 100);
+  if (ask) {
+    let ip: string | undefined;
+    try { ip = clientAddress; } catch { ip = undefined; }
+    const { answer, how } = await answerRequest(ask, locals.supabase, ip);
+    return new Response(JSON.stringify({ answer, how }), { headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'private, max-age=300' } });
+  }
   const text = (url.searchParams.get('q') ?? '').trim().slice(0, 100);
   if (text) {
     if (text.length < 2) return json({ titles: [], people: [], books: [], authors: [], members: [] });

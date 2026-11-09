@@ -753,8 +753,8 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     }
     const thumb = (src: string | undefined, round = false, bg = 'var(--soft)') =>
       `<span class="sthumb${round ? ' round' : ''}" style="background:${bg}">${src ? `<img src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}</span>`;
-    const row = (href: string, th: string, title: string, sub: string, tag: string, q: string) =>
-      `<li><a href="${esc(href)}" role="option" aria-selected="false">${th}<span class="stext"><span class="serif st1">${hi(title, q)}</span><span class="st2">${esc(sub)}</span></span>${tag ? `<span class="eyebrow stag">${esc(tag)}</span>` : ''}</a></li>`;
+    const row = (href: string, th: string, title: string, sub: string, tag: string, q: string, ext = false) =>
+      `<li><a href="${esc(href)}"${ext ? ' target="_blank" rel="noopener noreferrer"' : ''} role="option" aria-selected="false">${th}<span class="stext"><span class="serif st1">${hi(title, q)}</span><span class="st2">${esc(sub)}</span></span>${tag ? `<span class="eyebrow stag">${esc(tag)}</span>` : ''}</a></li>`;
     const group = (label: string, items: string[]) => (items.length ? `<li class="sgroup eyebrow">${esc(label)}</li>${items.join('')}` : '');
     function paint(html: string) {
       const list = document.getElementById('search-list')!;
@@ -789,6 +789,22 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       paint(group('On your shelf', local) + (q.length >= 2 ? '<li class="search-empty small">Looking…</li>' : ''));
       if (q.length < 2) return;
       asked = q;
+      // a request ("best sports movies"): the filters come from a small AI model and the results from our own sources; asked on its own, so the
+      // normal results below never wait for it, and it appears above them if it answers (3 seconds at most on the server)
+      let askHtml = '', normalHtml: string | null = null;
+      const show = () => {
+        if (asked !== q || !dialog().open) return;
+        if (normalHtml !== null) paint(askHtml + normalHtml);
+        else if (askHtml) paint(askHtml + group('On your shelf', local) + '<li class="search-empty small">Looking…</li>');
+      };
+      if (q.includes(' ') && q.length >= 6) {
+        fetch(`/api/search?ask=${encodeURIComponent(q)}`).then((x) => x.json()).then((x) => {
+          const a = x?.answer;
+          if (!a?.items?.length) return;
+          askHtml = group(a.heading, a.items.map((t: any) => row(t.href, thumb(t.cover), t.title, t.sub, t.kind === 'essay' ? 'Essay' : '', '', t.external)));
+          show();
+        }).catch(() => {});
+      }
       const wait = document.querySelector<HTMLElement>('.search-wait');
       if (wait) wait.hidden = false;
       const r = await fetch(`/api/search?q=${encodeURIComponent(q)}`).then((x) => x.json()).catch(() => null);
@@ -810,7 +826,8 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       // a member whose username is exactly what was typed comes first
       const memGroup = group('On Granthalaya', members);
       const html = group('On your shelf', local) + nearGroup + (r.exactMember ? memGroup : '') + filmsGroup + group('Books', books) + group('People', people) + (r.exactMember ? '' : memGroup);
-      paint(html || `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`);
+      normalHtml = html || (askHtml ? '' : `<li class="search-empty">Nothing called “${esc(raw.trim())}”. ${dialog().dataset.src ? '<a href="/add/">Add it by hand →</a>' : ''}</li>`);
+      show();
     }
     function move(d: number) {
       const opts = [...document.querySelectorAll<HTMLElement>('#search-list [role=option]')];

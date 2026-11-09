@@ -25,6 +25,18 @@ export async function searchShopBooks(sb: SupabaseClient | null | undefined, lik
   }));
 }
 
+/** the shops' books in one language ('mr' or 'hi'), most-listed first with a cover first (for request search) */
+export async function shopListBooks(sb: SupabaseClient | null | undefined, lang: 'mr' | 'hi', n = 8): Promise<BookCard[]> {
+  if (!sb) return [];
+  const { data } = await sb.from('shop_books').select(COLS).eq('language', lang).limit(300);
+  const seen = new Set<string>();
+  return ((data ?? []) as unknown as Joined[]).filter((r) => r.title?.cover_url && !seen.has(r.title.slug) && seen.add(r.title.slug))
+    .sort((a, b) => b.lists.length - a.lists.length).slice(0, n).map((r): BookCard => ({
+      kind: 'book', key: r.title!.ol_key ?? r.title!.slug, title: r.title!.title, author: r.title!.creator ?? undefined, year: yearOf(r.title!),
+      cover: viaCover(r.title!.cover_url!, 200), href: hrefOf(r.title!),
+    }));
+}
+
 export const SHOP_LISTS = { 'shop-marathi': ['mr', 'Marathi books', 'mar'], 'shop-hindi': ['hi', 'Hindi books', 'hin'] } as const;
 /**
  * The Marathi and Hindi books the two shops list, as lists like the prize lists: most-listed first, with a cover first.

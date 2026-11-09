@@ -209,7 +209,7 @@ export async function trending(kind: 'film' | 'tv', page = 1): Promise<Card[]> {
 
 /** `language` may list several with "|" ("ml|ta|te"); `since` keeps titles released after a date;
     `streaming` keeps titles on any subscription service in India */
-export interface Filters { kind: 'film' | 'tv'; genre?: number; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean; minVotes?: number }
+export interface Filters { kind: 'film' | 'tv'; genre?: number; genres?: number[]; keywords?: number[]; year?: number; decade?: number; language?: string; service?: number; sort?: 'popular' | 'top' | 'new'; page?: number; since?: string; streaming?: boolean; minVotes?: number; retry?: boolean }
 export async function discover(f: Filters): Promise<{ items: Card[]; pages: number; total: number; failed?: boolean }> {
   if (!key()) return { items: [], pages: 0, total: 0 };
   const tv = f.kind === 'tv';
@@ -217,13 +217,14 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   const today = new Date().toISOString().slice(0, 10);
   const params: Record<string, string | number | undefined> = {
     include_adult: 'false', page: Math.min(Math.max(f.page ?? 1, 1), 500),
-    with_genres: f.genre, with_original_language: f.language,
+    with_genres: f.genres?.length ? f.genres.join(',') : f.genre, with_original_language: f.language,
+    with_keywords: f.keywords?.length ? f.keywords.join('|') : undefined,   // any of them (search for requests like "sports films")
     sort_by: f.sort === 'top' ? 'vote_average.desc' : f.sort === 'new' ? `${date}.desc` : 'popularity.desc',
     // "Highest rated" needs enough votes to mean something, or this week's releases with a few hundred
     // excited votes come first. Narrower lists (a language, a decade, a genre) get a lower bar.
     'vote_count.gte': f.minVotes ? f.minVotes : f.sort === 'top'
       ? f.language && f.language !== 'en' ? (tv ? 8 : 15) // Marathi films rarely pass 40 votes on TMDB
-        : f.year || f.decade || f.genre || f.service ? (tv ? 150 : 300) : (tv ? 800 : 2000)
+        : f.year || f.decade || f.genre || f.genres?.length || f.keywords?.length || f.service ? (tv ? 150 : 300) : (tv ? 800 : 2000)
       : undefined,
   };
   if (f.year) params[tv ? 'first_air_date_year' : 'primary_release_year'] = f.year;
@@ -232,9 +233,25 @@ export async function discover(f: Filters): Promise<{ items: Card[]; pages: numb
   if (f.since && !params[`${date}.gte`]) { params[`${date}.gte`] = f.since; params[`${date}.lte`] ??= today; }
   if (f.service) { params.watch_region = REGION; params.with_watch_providers = f.service; params.with_watch_monetization_types = 'flatrate|free|ads'; }
   else if (f.streaming) { params.watch_region = REGION; params.with_watch_monetization_types = 'flatrate'; }
-  const { data: j, state } = await getJSONResult(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600 });
+  const { data: j, state } = await getJSONResult(q(`/discover/${tv ? 'tv' : 'movie'}`, params), { ttl: 3600, retry: f.retry });   // retry: TMDB sometimes drops a first connection
   const items = (j?.results ?? []).map((m: any) => toCard(f.kind, m));
   return { items, pages: Math.min(j?.total_pages ?? 0, 500), total: j?.total_results ?? 0, failed: state === 'failed' };
+}
+
+/** TMDB's ids for a keyword: the exact name and its plural ("sport" and "sports" are two keywords), kept in memory because they never change */
+const keywordCache = new Map<string, number[]>();
+export async function keywordIds(term: string): Promise<number[]> {
+  const t = term.toLowerCase().trim();
+  if (keywordCache.has(t)) return keywordCache.get(t)!;
+  if (!key()) return [];
+  const ids: number[] = [];
+  for (const name of [...new Set([t, t.endsWith('s') ? t.slice(0, -1) : `${t}s`])]) {
+    const j = await getJSON(q('/search/keyword', { query: name }), { ttl: 86400 * 7 });
+    const hit = (j?.results ?? []).find((k: any) => String(k.name).toLowerCase() === name);
+    if (hit) ids.push(hit.id);
+  }
+  if (ids.length) keywordCache.set(t, ids);
+  return ids;
 }
 
 /** the browse grids show 40 to a page: two of TMDB's pages of 20 at once (TMDB stops at its page 500, so 250 of ours).
