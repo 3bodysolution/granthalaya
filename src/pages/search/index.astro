@@ -10,6 +10,7 @@ import EssayCard from '../../components/title/EssayCard.astro';
 import { searchEverything } from '../../lib/catalog/searchall';
 import { answerRequest, type Hit } from '../../lib/catalog/ask';
 import { findEssays, allEssays } from '../../lib/essays';
+import { similarity } from '../../lib/fuzzy';
 export const prerender = false;
 
 const q = (Astro.url.searchParams.get('q') ?? '').trim().slice(0, 100);
@@ -23,12 +24,18 @@ const [all, asked] = q.length >= 2
   ])
   : [null, { answer: null, how: '' }];
 const answer = asked.answer;
-const films = (all?.titles ?? []).filter((t: any) => t.kind === 'film');
-const shows = (all?.titles ?? []).filter((t: any) => t.kind === 'tv');
-const books = all?.books ?? [];
-const essays = q.length >= 2 ? findEssays(q, 24) : [];
-const people = [...(all?.people ?? []), ...(all?.authors ?? [])];
-const members = all?.members ?? [];
+// After a request answer, the normal word matches are only of the same kind as the request (a film request: films and TV; a book request: books;
+// an essay request: essays and stories), under "Also matching your words". People and members show only when their name matches closely.
+const reqKind = answer?.items[0]?.kind;
+const sameKind = (k: 'film' | 'tv' | 'book' | 'essay') => !reqKind || (k === 'book' ? reqKind === 'book' : k === 'essay' ? reqKind === 'essay' : reqKind === 'film' || reqKind === 'tv');
+const closeName = (name: string, extra = '') => !reqKind || similarity(q, name) >= 0.8 || (!!extra && similarity(q, extra) >= 0.8);
+const films = sameKind('film') ? (all?.titles ?? []).filter((t: any) => t.kind === 'film') : [];
+const shows = sameKind('tv') ? (all?.titles ?? []).filter((t: any) => t.kind === 'tv') : [];
+const books = sameKind('book') ? all?.books ?? [] : [];
+const essays = q.length >= 2 && sameKind('essay') ? findEssays(q, 24) : [];
+const people = [...(all?.people ?? []), ...(all?.authors ?? [])].filter((p: any) => closeName(p.name));
+const members = (all?.members ?? []).filter((m: any) => closeName(m.name, m.username));
+const others = films.length + shows.length + books.length + essays.length + people.length + members.length;
 const near = all?.near ?? [];
 const total = (answer?.items.length ?? 0) + films.length + shows.length + books.length + essays.length + people.length + members.length;
 
@@ -92,6 +99,7 @@ const groups = [
               {answer.items.length > SHOWN && <button type="button" class="btn more" data-more>Show more</button>}
             </section>
           )}
+          {answer && others > 0 && <h2 class="also eyebrow">Also matching your words</h2>}
           {films.length > 0 && (
             <section id="films" class="grp" aria-labelledby="h-films"><h2 class="serif gh" id="h-films">Films</h2>
               <div class="rgrid">{films.map((t: any) => <div class="cell"><PosterTile href={t.href} title={t.title} year={t.year} poster={t.poster} kind="film" /></div>)}</div></section>
@@ -144,6 +152,7 @@ const groups = [
   .sx-nav .num { color: var(--muted); font-weight: 500; font-variant-numeric: tabular-nums; }
   .results { display: flex; flex-direction: column; gap: 44px; min-width: 0; }
   .grp { scroll-margin-top: 90px; }
+  .also { margin: 8px 0 -22px; padding-top: 28px; border-top: 1px solid var(--line); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
   .gh { margin: 0 0 16px; font-size: 24px; font-weight: 500; }
   .rgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 22px 16px; }
   .rgrid .cell { min-width: 0; }
