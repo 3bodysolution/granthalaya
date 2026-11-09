@@ -5,7 +5,9 @@ import type { Intent } from './ask';
 
 const norm1 = (n: string) => n
   .replace(/\b(sci fi|scifi|science fiction)\b/g, 'scifi').replace(/\bshort stories\b/g, 'stories')
-  .replace(/\b(highest rated|top rated|best rated|top rating|must read|must watch)\b/g, 'top');
+  .replace(/\b(highest rated|top rated|best rated|top rating|must read|must watch)\b/g, 'top')
+  .replace(/\bstand ?up( comedy| specials?)?\b/g, 'standup').replace(/\bshort films?\b/g, 'shortfilm film')
+  .replace(/\bmusic videos?\b/g, 'musicvideo film').replace(/\bconcerts?( films?)?\b/g, 'concert film');
 
 const SORTS: [RegExp, 'top' | 'new' | 'popular'][] = [
   [/^(best|top|greatest|finest|good|great|famous|classic|classics|सर्वोत्तम|उत्तम|सर्वश्रेष्ठ|चांगले|चांगल्या|चांगली|अच्छी|अच्छे|अच्छा|बेहतरीन|सबसे)$/, 'top'],
@@ -34,6 +36,10 @@ const LANG_WORDS: [RegExp, string][] = [
 interface Topic { film?: string; tv?: string; kw?: string; subject?: string; theme?: string }
 const TOPICS: [RegExp, Topic][] = [
   [/^(sports?|खेळ\S*|क्रीडा|खेल)$/, { kw: 'sports', subject: 'sports' }],
+  [/^standup$/, { kw: 'stand-up comedy' }],
+  [/^shortfilm$/, { kw: 'short film' }],
+  [/^musicvideo$/, { kw: 'music video' }],
+  [/^concert$/, { kw: 'concert' }],
   [/^(war|wars|युद्ध\S*|लढाई|जंग)$/, { film: 'War', tv: 'War & Politics', subject: 'war' }],
   [/^(horror|हॉरर|भयपट|डरावनी)$/, { film: 'Horror', kw: 'horror', subject: 'horror' }],
   [/^(comedy|comedies|funny|कॉमेडी|विनोदी|हास्य\S*|हास्यपट)$/, { film: 'Comedy', tv: 'Comedy', subject: 'humor' }],

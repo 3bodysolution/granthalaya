@@ -21,7 +21,7 @@ export interface Answer { heading: string; items: Hit[] }
 const REQUEST = new Set(['best', 'top', 'good', 'great', 'greatest', 'finest', 'famous', 'popular', 'recommended', 'newest', 'latest', 'highest', 'rated', 'underrated', 'classic', 'classics', 'about', 'like', 'must', 'read', 'watch',
   'उत्तम', 'सर्वोत्तम', 'सर्वश्रेष्ठ', 'चांगले', 'चांगल्या', 'बद्दल', 'विषयी', 'वरील', 'अच्छी', 'अच्छे', 'बेहतरीन', 'सबसे', 'बारे']);
 const KIND_WORDS = /^(films?|movies?|cinema|shows?|series|tv|books?|novels?|essays?|articles?|stories|poems|poetry|memoirs?|biograph(y|ies)|plays|चित्रपट\S*|सिनेमा\S*|मालिका\S*|पुस्तक\S*|कादंब[रऱ]\S*|निबंध\S*|लेख\S*|कथा\S*|कविता\S*|किताब\S*|उपन्यास\S*|फिल्म\S*|फ़िल्म\S*|निबंध|कहानी\S*)$/i;
-const SUBJECT_WORDS = /^(fiction|history|philosophy|psychology|science|politics|religion|travel|humou?r|romance|thriller|horror|mystery|fantasy|comedy|crime|war|sports?|biography|poetry|nature|writing|work|freedom|india|village\S*|space|love|family|music|मराठी|हिंदी|हिन्दी|गाव\S*|प्रेम|युद्ध|इतिहास|तत्त्वज्ञान)$/i;
+const SUBJECT_WORDS = /^(documentarS*|animatS*|comedS*|fiction|history|philosophy|psychology|science|politics|religion|travel|humou?r|romance|thriller|horror|mystery|fantasy|comedy|crime|war|sports?|biography|poetry|nature|writing|work|freedom|india|village\S*|space|love|family|music|मराठी|हिंदी|हिन्दी|गाव\S*|प्रेम|युद्ध|इतिहास|तत्त्वज्ञान)$/i;
 const LANGS = new RegExp(`^(${BOOK_LANGUAGES.map(([, n]) => n.toLowerCase()).join('|')})$`, 'i');
 const DECADE = /^((19|20)\d0s?|\d0s)$/i;
 
@@ -144,6 +144,11 @@ export function headingFor(i: Intent, applied: { subjects?: string[]; keywords?:
 const ENOUGH = 4;
 let lastDebug = '';   // dev only: what the last request did, shown in the answer's `how`
 
+/** TMDB keywords that mark what is not a film or show in the usual sense (found once, kept in memory) */
+let unwanted: Promise<number[]> | null = null;
+const unwantedKeywordIds = () => (unwanted ??= Promise.all(['stand-up comedy', 'stand-up specials', 'stand-up comedian', 'music video', 'concert', 'concert film', 'live concert', 'music concert', 'short film']
+  .map((t) => keywordIds(t).catch(() => [] as number[]))).then((a) => [...new Set(a.flat())]));
+
 /* Films and TV: TMDB discover. "Highest rated" needs a real number of votes: about 300 for English, 20 for Indian and other languages
    (Marathi films rarely have more on TMDB). Adult titles are always left out (discover is asked with include_adult=false). */
 async function screen(i: Intent): Promise<{ items: Hit[]; applied: { genres: string[]; keywords: string[] } } | null> {
@@ -154,7 +159,15 @@ async function screen(i: Intent): Promise<{ items: Hit[]; applied: { genres: str
   const kws = i.keywords.filter((k) => !wordsOfGenres.has(k));
   const idOf = (g: string) => names.find(([, n]) => n === g)?.[0];
   const english = !i.language || i.language === 'en';
-  const minVotes = i.sort === 'top' ? (english ? 300 : 20) : i.sort === 'new' ? (english ? 8 : 2) : undefined;
+  // No sort word means highest rated, with the vote minimum (popularity alone puts obscure titles first). Newest needs 30 votes too.
+  const sort = i.sort ?? 'top';
+  // (about 300 votes for English; a request with only a broad genre, like animation, has so many titles that 2500 votes are asked of a film and 600 of a show)
+  const broad = !i.keywords.length && !i.decade && !i.language;
+  const minVotes = sort === 'top' ? (english ? (broad ? (kind === 'film' ? 2500 : 600) : 300) : 20) : sort === 'new' ? 30 : undefined;
+  // short films, music videos, stand-up specials and concert films are left out unless the request is for them
+  const wants = [...i.keywords, ...i.genres].join(' ').toLowerCase();
+  const allowShort = /stand|concert|music video|short|^music$|music/.test(wants);
+  const without = allowShort ? [] : await unwantedKeywordIds();
   // all the filters first, then looser (at most one keyword beside a genre, genres alone, then keywords alone): the heading says what was applied
   const attempts: { genres: string[]; keywords: string[] }[] = i.genres.length
     ? [{ genres: i.genres, keywords: kws.slice(0, 1) }, ...(kws.length ? [{ genres: i.genres, keywords: [] as string[] }] : []), ...(kws.length ? [{ genres: [] as string[], keywords: kws.slice(0, 2) }] : [])]
@@ -163,9 +176,17 @@ async function screen(i: Intent): Promise<{ items: Hit[]; applied: { genres: str
     const genres = at.genres.map(idOf).filter((x): x is number => !!x);
     const keywords = [...new Set((await Promise.all(at.keywords.map((k) => keywordIds(k).catch(() => [] as number[])))).flat())];
     if (at.keywords.length && !keywords.length && !genres.length) continue;
-    const { items, failed, total } = await discover({ kind, genres, keywords, language: i.language, decade: i.decade, sort: i.sort ?? 'popular', minVotes, retry: true, ms: 3500 });
+    // the high bar for a broad request first; a small genre (documentaries) that can't fill the list at that bar is asked again at 1000, then 300 votes
+    const floors = minVotes && minVotes > 300 ? [minVotes, ...(minVotes > 1000 ? [1000] : []), 300] : [minVotes];
+    let found = await discover({ kind, genres, keywords, language: i.language, decade: i.decade, sort, minVotes: floors[0], retry: true, ms: 3500, released: true, minRuntime: allowShort ? undefined : 40, without });
+    for (const v of floors.slice(1)) {
+      if (found.items.filter((c) => c.poster).length >= ENOUGH) break;
+      found = await discover({ kind, genres, keywords, language: i.language, decade: i.decade, sort, minVotes: v, retry: true, ms: 3500, released: true, minRuntime: allowShort ? undefined : 40, without });
+    }
+    const { items, failed, total } = found;
     if (import.meta.env.DEV) lastDebug += ` screen ${JSON.stringify({ genres, keywords, minVotes })} items ${items.length} total ${total} failed ${failed};`;
-    const hits = items.filter((c) => c.poster).slice(0, 8).map((c): Hit => ({ href: c.href, title: c.title, sub: [c.year, kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), cover: c.poster, kind }));
+    const thisYear = new Date().getFullYear();
+    const hits = items.filter((c) => c.poster && (!c.year || c.year <= thisYear)).slice(0, 8).map((c): Hit => ({ href: c.href, title: c.title, sub: [c.year, kind === 'tv' ? 'TV' : 'Film'].filter(Boolean).join(' | '), cover: c.poster, kind }));
     if (hits.length >= ENOUGH) return { items: hits, applied: at };
   }
   return null;
@@ -210,7 +231,7 @@ function essays(i: Intent): Hit[] {
 export async function resultsFor(i: Intent, sb: SupabaseClient | null | undefined): Promise<Answer | null> {
   if (i.kind === 'film' || i.kind === 'tv') {
     const r = await screen(i);
-    return r ? { heading: headingFor({ ...i, genres: r.applied.genres }, { keywords: r.applied.keywords }), items: r.items } : null;
+    return r ? { heading: headingFor({ ...i, genres: r.applied.genres, sort: i.sort ?? 'top' }, { keywords: r.applied.keywords }), items: r.items } : null;
   }
   if (i.kind === 'book') {
     const { hits, applied } = await shelves(i, sb);
