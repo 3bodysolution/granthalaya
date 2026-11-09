@@ -57,7 +57,6 @@ const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.pr
           )}
           <p class="muted foot2 num">
             {r.entry.data.private ? 'Only you can see this review' : <>{x?.likes ?? 0} {x?.likes === 1 ? 'like' : 'likes'} | {x?.comments.length ?? 0} {x?.comments.length === 1 ? 'comment' : 'comments'}</>}
-            {' | '}<a href={r.href} class="accent">Open</a>
           </p>
         </article>
       );

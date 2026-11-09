@@ -6,7 +6,8 @@
 //
 // Comments: the same member, the same review and the same text, created within a minute of each other. The first is kept.
 // Entries: the same member, the same title, the same status and the same day, created within a minute of each other. The one
-// with the most in it (rating, review, dates) is kept, the earliest if they are equal. Likes on a removed entry are moved
+// with the most in it (rating, review, dates) is kept, the earliest if they are equal; what the removed one has and the kept one
+// lacks (review, tagline, spoiler flag, rating) is copied across first. Likes on a removed entry are moved
 // to the kept one first. Needs SUPABASE_DB_URL in .env: read here, never printed.
 import fs from 'node:fs';
 import pg from 'pg';
@@ -46,7 +47,7 @@ function groups(rows, key) {
 
 const comments = (await db.query('select id, log_id, user_id, body, created_at from review_comments')).rows;
 const cGroups = groups(comments, (c) => `${c.user_id}|${c.log_id}|${c.body.trim()}`);
-const logs = (await db.query(`select l.id, l.user_id, l.title_id, l.status, l.rating, l.notes, l.tagline, l.logged_on, l.started_on, l.finished_on, l.created_at, t.title
+const logs = (await db.query(`select l.id, l.user_id, l.title_id, l.status, l.rating, l.notes, l.tagline, l.spoiler, l.logged_on, l.started_on, l.finished_on, l.created_at, t.title
   from logs l join titles t on t.id = l.title_id`)).rows;
 const day = (l) => (l.finished_on ?? l.started_on ?? l.logged_on)?.toISOString?.().slice(0, 10) ?? String(l.finished_on ?? l.started_on ?? l.logged_on);
 const lGroups = groups(logs, (l) => `${l.user_id}|${l.title_id}|${l.status}|${day(l)}`);
@@ -62,7 +63,7 @@ console.log(`\nDuplicate entries: ${lGroups.length} group(s)`);
 for (const g of lGroups) {
   const keep = [...g].sort((a, b) => weight(b) - weight(a) || a.created_at - b.created_at)[0];
   console.log(`  @${who.get(g[0].user_id)}: ${g[0].title} (${g[0].status}, ${day(g[0])})`);
-  for (const l of g) { const k = l === keep; console.log(`    ${k ? 'keep  ' : 'delete'} ${l.id.slice(0, 8)}  ${at(l.created_at)}  rating ${l.rating ?? '-'}${l.notes ? ', review' : ''}`); if (!k) dropLogs.push({ id: l.id, into: keep.id }); }
+  for (const l of g) { const k = l === keep; console.log(`    ${k ? 'keep  ' : 'delete'} ${l.id.slice(0, 8)}  ${at(l.created_at)}  rating ${l.rating ?? '-'}${l.notes ? ', review' : ''}`); if (!k) dropLogs.push({ id: l.id, into: keep.id, from: l, keep }); }
 }
 console.log(`\nWould delete ${dropComments.length} comment(s) and ${dropLogs.length} entr${dropLogs.length === 1 ? 'y' : 'ies'}.`);
 
@@ -70,6 +71,12 @@ if (!write) { console.log('Dry run: nothing was changed.'); await db.end(); proc
 await db.query('begin');
 try {
   for (const d of dropLogs) {
+    // what the removed entry has and the kept one lacks (review, tagline, spoiler flag, rating) is copied across first
+    const { from: f, keep: k } = d;
+    if (f.notes && !k.notes) { await db.query('update logs set notes = $2 where id = $1', [k.id, f.notes]); k.notes = f.notes; }
+    if (f.tagline && !k.tagline) { await db.query('update logs set tagline = $2, spoiler = $3 where id = $1', [k.id, f.tagline, f.spoiler]); k.tagline = f.tagline; }
+    else if (f.spoiler && f.notes && k.notes === f.notes) await db.query('update logs set spoiler = true where id = $1', [k.id]);
+    if (f.rating != null && k.rating == null) { await db.query('update logs set rating = $2 where id = $1', [k.id, f.rating]); k.rating = f.rating; }
     await db.query('update review_likes set log_id = $2 where log_id = $1 and user_id not in (select user_id from review_likes where log_id = $2)', [d.id, d.into]);
     await db.query('update review_comments set log_id = $2 where log_id = $1', [d.id, d.into]);
     await db.query('delete from logs where id = $1', [d.id]);
