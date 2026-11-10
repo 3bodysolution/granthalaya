@@ -23,8 +23,8 @@ const { books, owner, mine } = Astro.props;
             data-i={i} data-title={b.title} data-by={b.creator} data-kind={b.kind} data-kindlabel={b.kindLabel} data-year={b.year ?? ''} data-status={b.status} data-when={b.when}
             data-stars={b.stars} data-href={b.href} data-cover={b.cover ?? ''} data-review={b.review}
             style={`--w:${b.spine.w}px;--h:${b.spine.h}px;--d:${b.spine.d}px;--c:${b.spine.color};color:${b.spine.ink}`}>
-            <span class="face front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true">{b.title}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
-            <span class="face top" aria-hidden="true"></span>
+            <span class="bk front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true">{b.title}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
+            <span class="bk top" aria-hidden="true"></span>
           </button>
         </li>
       ))}
@@ -76,7 +76,7 @@ const { books, owner, mine } = Astro.props;
   .book:focus-visible .front { outline: 3px solid var(--lat); outline-offset: 3px; }
   .book.out { transform: translateY(-36px) translateZ(210px) rotateY(-78deg); }
   .book.out:hover { transform: translateY(-40px) translateZ(214px) rotateY(-78deg); }
-  .book :global(.face) { position: absolute; box-sizing: border-box; display: block; }
+  .book :global(.bk) { position: absolute; box-sizing: border-box; display: block; }
   .front { inset: 0; background: var(--c); border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 10px; box-shadow: inset 4px 0 0 rgba(255,255,255,.12), inset -5px 0 7px rgba(0,0,0,.3); overflow: hidden; }
   .band { position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .45; }
   .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; font-size: 15px; line-height: 1.05; max-height: 150px; overflow: hidden; font-weight: 500; position: relative; z-index: 1; }
@@ -156,7 +156,7 @@ const { books, owner, mine } = Astro.props;
     let out = -1, rove = 0, hoverTimer = 0;
     books.forEach((b, i) => { b.tabIndex = i === 0 ? 0 : -1; });
 
-    const span = (cls: string) => { const s = document.createElement('span'); s.className = `face ${cls}`; s.setAttribute('aria-hidden', 'true'); return s; };
+    const span = (cls: string) => { const s = document.createElement('span'); s.className = `bk ${cls}`; s.setAttribute('aria-hidden', 'true'); return s; };
     // the sides, made when first needed (not at all with reduced motion)
     function faces(b: HTMLElement) {
       if (b.dataset.faces || rm.matches) return;
