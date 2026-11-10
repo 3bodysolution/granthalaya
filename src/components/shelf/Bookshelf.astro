@@ -25,6 +25,8 @@ const { books, owner, mine } = Astro.props;
             style={`--w:${b.spine.w}px;--h:${b.spine.h}px;--d:${b.spine.d}px;--c:${b.spine.color};color:${b.spine.ink}`}>
             <span class="bk front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true">{b.title}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
             <span class="bk top" aria-hidden="true"></span>
+            <span class="bk left" aria-hidden="true"></span>
+            <span class="bk right" aria-hidden="true"></span>
           </button>
         </li>
       ))}
@@ -59,9 +61,11 @@ const { books, owner, mine } = Astro.props;
   .shelfwrap { --plank1: #8A5E3B; --plank2: #5A3B22; --rowh: 300px; --gapy: 18px; position: relative; }
   :global(html[data-theme="dark"]) .shelfwrap { --plank1: #4A3524; --plank2: #241912; }
   .stage { position: relative; }
-  .shelf { list-style: none; margin: 0; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 3px; row-gap: var(--gapy);
+  .shelf { justify-content: center; list-style: none; margin: 0; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 3px; row-gap: var(--gapy);
     background: repeating-linear-gradient(to bottom, transparent 0 var(--rowh), var(--plank1) var(--rowh) calc(var(--rowh) + 8px), var(--plank2) calc(var(--rowh) + 8px) calc(var(--rowh) + var(--gapy))); }
-  .shelf li { position: relative; flex: 0 0 auto; height: var(--rowh); display: flex; align-items: flex-end; perspective: 1500px; perspective-origin: 50% -25%; }
+  /* the camera sits above the shelf: each one's vanishing point is over the middle of its shelf (--ox, set in the script), so the flat top shows as a thin strip and the sides show toward the ends */
+  .shelf li { position: relative; flex: 0 0 auto; height: var(--rowh); display: flex; align-items: flex-end; perspective: 3000px; perspective-origin: var(--ox, 50%) -35%; }
+  .shelf.multi { justify-content: flex-start; }
   .shelf li:has(.out), .shelf li:hover, .shelf li:focus-within { z-index: 4; }
   .plank { position: relative; height: 34px; margin: 0 8px; border-radius: 3px; background: linear-gradient(var(--plank1), var(--plank2)); box-shadow: 0 18px 30px -12px var(--shadow); display: flex; justify-content: center; align-items: center; }
   .plate { padding: 4px 18px; border-radius: 2px; font-size: 12px; letter-spacing: .24em; font-weight: 700; color: #3B2A12; background: linear-gradient(180deg, #E8C77A, #B88A3A 55%, #D9B064); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 1px 2px rgba(0,0,0,.5); text-shadow: 0 1px 0 rgba(255,240,200,.5); max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -74,37 +78,38 @@ const { books, owner, mine } = Astro.props;
   .book:hover { transform: translateY(-14px) translateZ(18px); }
   .book:focus-visible { outline: none; }
   .book:focus-visible .front { outline: 3px solid var(--lat); outline-offset: 3px; }
-  .book.out { transform: translateY(-36px) translateZ(210px) rotateY(-78deg); }
-  .book.out:hover { transform: translateY(-40px) translateZ(214px) rotateY(-78deg); }
+  .book.out { transform: translateX(var(--sx, 0px)) translateY(-36px) translateZ(210px) rotateY(-78deg); }
+  .book.out:hover { transform: translateX(var(--sx, 0px)) translateY(-40px) translateZ(214px) rotateY(-78deg); }
   .book :global(.bk) { position: absolute; box-sizing: border-box; display: block; }
-  .front { inset: 0; background: var(--c); border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 10px; box-shadow: inset 4px 0 0 rgba(255,255,255,.12), inset -5px 0 7px rgba(0,0,0,.3); overflow: hidden; }
+  .front { inset: 0; background: var(--c); border-radius: 1px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 10px; box-shadow: inset 4px 0 0 rgba(255,255,255,.12), inset -5px 0 7px rgba(0,0,0,.3); overflow: hidden; }
   .band { position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .45; }
   .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; font-size: 15px; line-height: 1.05; max-height: 150px; overflow: hidden; font-weight: 500; position: relative; z-index: 1; }
   .sp-tag { font-family: 'Courier Prime', ui-monospace, monospace; font-size: 9px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid currentColor; position: relative; z-index: 1; }
-  .top { left: 0; top: calc(var(--d) * -1); width: var(--w); height: var(--d); transform-origin: bottom center; transform: rotateX(90deg); background: repeating-linear-gradient(to right, #EFE6D2 0 2px, #DCCFB4 2px 3px); border: 2px solid var(--c); filter: brightness(.9); }
-  .book :global(.left) { left: calc(var(--d) * -1); top: 0; width: var(--d); height: var(--h); transform-origin: right center; transform: rotateY(-90deg); background: var(--c); filter: brightness(.55); }
-  .book :global(.right) { left: var(--w); top: 0; width: var(--d); height: var(--h); transform-origin: left center; transform: rotateY(90deg); background: var(--c); overflow: hidden; }
-  .book:not(.out) :global(.right) { filter: brightness(.6); }
+  .top { left: 0; top: calc(var(--d) * -1); width: var(--w); height: var(--d); transform-origin: bottom center; transform: rotateX(90deg); background: repeating-linear-gradient(to right, #EFE6D2 0 2px, #DCCFB4 2px 3px); border: 2px solid var(--c); }
+  .left { left: calc(var(--d) * -1); top: 0; width: var(--d); height: var(--h); transform-origin: right center; transform: rotateY(-90deg); background: color-mix(in srgb, var(--c) 55%, #000); }
+  .right { left: var(--w); top: 0; width: var(--d); height: var(--h); transform-origin: left center; transform: rotateY(90deg); background: var(--c); overflow: hidden; }
+  .right::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,.4); pointer-events: none; transition: opacity .75s ease; }
+  .book.out .right::after { opacity: 0; }
   .book :global(.right img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
   .book :global(.rt) { position: absolute; inset: 0; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; text-align: left; color: inherit; font-family: Fraunces, Georgia, serif; font-size: 17px; line-height: 1.15; }
   .book :global(.rt small) { margin-top: auto; font-family: 'Courier Prime', ui-monospace, monospace; font-size: 11px; letter-spacing: .1em; opacity: .8; }
 
   /* DVD cases: one size, a dark plastic shell, gloss, a ribbed top */
-  .dvd .front { border-radius: 5px; padding: 22px 0 18px; box-shadow: inset 0 13px 0 #17181C, inset 0 -13px 0 #17181C, inset 3px 0 0 #17181C, inset -3px 0 0 #17181C, inset 5px 0 6px rgba(0,0,0,.35); }
-  .dvd .front::after { content: ""; position: absolute; inset: 0; border-radius: 5px; pointer-events: none; background: linear-gradient(90deg, rgba(255,255,255,0) 12%, rgba(255,255,255,.30) 26%, rgba(255,255,255,.06) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 86%, rgba(255,255,255,0) 94%); }
-  .dvd .band { top: 3px; height: 6px; border: 0; background: repeating-linear-gradient(90deg, #2A2C31 0 2px, #111215 2px 4px); opacity: 1; left: 4px; right: 4px; border-radius: 2px; }
+  .dvd .front { border-radius: 3px; padding: 16px 0 12px; box-shadow: inset 0 7px 0 #17181C, inset 0 -7px 0 #17181C, inset 3px 0 0 #17181C, inset -3px 0 0 #17181C, inset 5px 0 6px rgba(0,0,0,.35); }
+  .dvd .front::after { content: ""; position: absolute; inset: 0; border-radius: 3px; pointer-events: none; background: linear-gradient(90deg, rgba(255,255,255,0) 12%, rgba(255,255,255,.30) 26%, rgba(255,255,255,.06) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 86%, rgba(255,255,255,0) 94%); }
+  .dvd .band { top: 1px; height: 4px; border: 0; background: repeating-linear-gradient(90deg, #2A2C31 0 2px, #111215 2px 4px); opacity: 1; left: 4px; right: 4px; border-radius: 1px; }
   .dvd .sp-tag { border-radius: 3px; width: 28px; height: 14px; font-size: 8px; letter-spacing: .1em; }
-  .dvd .top { border: 0; border-radius: 4px; background: repeating-linear-gradient(to bottom, #26282D 0 3px, #1A1B1F 3px 6px); filter: none; }
-  .dvd :global(.left) { background: #17181C; filter: none; border-radius: 4px; }
-  .dvd :global(.right) { border-radius: 4px; box-shadow: inset 0 0 0 4px #17181C; }
-  .dvd :global(.right)::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.28) 0, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 100%); }
+  .dvd .top { border: 0; border-radius: 0; background: repeating-linear-gradient(to bottom, #26282D 0 3px, #1A1B1F 3px 6px); }
+  .dvd .left { background: #17181C; border-radius: 3px; }
+  .dvd .right { border-radius: 3px; box-shadow: inset 0 0 0 4px #17181C; }
+  .dvd .right::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.28) 0, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 100%); }
 
   .caption { text-align: center; margin: 14px 0 0; min-height: 22px; font-size: 15px; color: var(--muted); }
   .detail { margin-top: 18px; display: flex; gap: 28px; flex-wrap: wrap; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: 0 12px 24px -16px var(--shadow); animation: rise .45s var(--spring) both; }
   .detail[hidden] { display: none; }
   .d-cover { flex: 0 0 auto; }
-  .d-cover img { display: block; width: 132px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; background: var(--soft); }
-  .d-cover .ph { width: 132px; aspect-ratio: 2 / 3; border-radius: 6px; padding: 14px 12px; box-sizing: border-box; display: flex; background: var(--c, var(--soft)); color: var(--ink-c, var(--ink)); font-family: Fraunces, Georgia, serif; font-size: 17px; line-height: 1.15; }
+  .d-cover :global(img) { display: block; width: 132px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; background: var(--soft); }
+  .d-cover :global(.ph) { width: 132px; aspect-ratio: 2 / 3; border-radius: 6px; padding: 14px 12px; box-sizing: border-box; display: flex; background: var(--c, var(--soft)); color: var(--ink-c, var(--ink)); font-family: Fraunces, Georgia, serif; font-size: 17px; line-height: 1.15; }
   .d-body { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
   .d-body .eyebrow { margin: 0; }
   .d-title { margin: 0; font-size: clamp(28px, 4vw, 38px); font-weight: 400; line-height: 1.05; overflow-wrap: anywhere; }
@@ -122,7 +127,8 @@ const { books, owner, mine } = Astro.props;
     .stage { margin-inline: calc(var(--gut) * -1); }
     .shelf { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 40px var(--gut) 0; margin-top: -40px; height: calc(var(--rowh) + 40px); scroll-snap-type: x proximity; background: none; overscroll-behavior-x: contain; }
     .shelf::-webkit-scrollbar { display: none; }
-    .shelf li { scroll-snap-align: center; }
+    .shelf { perspective: 2600px; perspective-origin: 50% 0%; justify-content: flex-start; }
+    .shelf li { scroll-snap-align: center; perspective: none; transform-style: preserve-3d; }
     .plank { margin: 0 calc(var(--gut) - 8px); }
     .fade { display: block; position: absolute; top: 0; width: 48px; height: calc(var(--rowh)); pointer-events: none; z-index: 5; }
     .fade-l { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
@@ -133,6 +139,7 @@ const { books, owner, mine } = Astro.props;
   @media (prefers-reduced-motion: reduce) {
     /* the spines stay put: no turning, no sliding; the one chosen is only marked, and the cover shows in the card */
     .book, .book:hover, .book.out, .book.out:hover { transition: none; transform: none; }
+    .right::after { transition: none; }
     .book.out .front { outline: 3px solid var(--ink); outline-offset: 3px; }
     .book:hover .front { filter: brightness(1.08); }
     .detail { animation: none; }
@@ -150,24 +157,35 @@ const { books, owner, mine } = Astro.props;
     if (!books.length) return;
     const card = q('[data-shelf-card]'), caption = q('[data-shelf-caption]'), live = q('[data-shelf-live]');
     const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const stage = q('.stage');
     const touch = window.matchMedia('(hover: none)');
     const idle = () => { caption.textContent = (touch.matches ? caption.dataset.idleTouch : caption.dataset.idle) ?? ''; };
     idle();
     let out = -1, rove = 0, hoverTimer = 0;
     books.forEach((b, i) => { b.tabIndex = i === 0 ? 0 : -1; });
+    // each shelf's vanishing point is over its middle (a phone's one shelf uses the container's own); more than one row is left-aligned
+    const phone = window.matchMedia('(max-width: 780px)');
+    function layout() {
+      const lis = books.map((b) => b.parentElement as HTMLElement);
+      const r = list.getBoundingClientRect(), cx = r.left + r.width / 2;
+      const tops = new Set(lis.map((li) => Math.round(li.offsetTop / 10)));
+      list.classList.toggle('multi', tops.size > 1 && !phone.matches);
+      const lefts = lis.map((li) => li.getBoundingClientRect());
+      lis.forEach((li, i) => { if (phone.matches) li.style.removeProperty('--ox'); else li.style.setProperty('--ox', `${((cx - lefts[i].left) / lefts[i].width) * 100}%`); });
+    }
+    layout();
+    let rl = 0;
+    window.addEventListener('resize', () => { cancelAnimationFrame(rl); rl = requestAnimationFrame(layout); });
 
-    const span = (cls: string) => { const s = document.createElement('span'); s.className = `bk ${cls}`; s.setAttribute('aria-hidden', 'true'); return s; };
-    // the sides, made when first needed (not at all with reduced motion)
+    // the right side: the title as text, made when first needed (not at all with reduced motion)
     function faces(b: HTMLElement) {
       if (b.dataset.faces || rm.matches) return;
       b.dataset.faces = '1';
-      const right = span('right');
       const rt = document.createElement('span'); rt.className = 'rt';
       rt.append(b.dataset.title ?? '');
       const small = document.createElement('small'); small.textContent = [b.dataset.kindlabel, b.dataset.year].filter(Boolean).join(' · ');
       rt.append(small);
-      right.append(rt);
-      b.append(span('left'), right);
+      b.querySelector('.right')?.prepend(rt);
     }
     // the cover picture, only for a book that is pointed at for a moment, focused, pulled out, or next to the one pulled out
     function cover(b: HTMLElement) {
@@ -218,7 +236,9 @@ const { books, owner, mine } = Astro.props;
       if (out >= 0 && out !== i) { books[out].classList.remove('out'); books[out].setAttribute('aria-pressed', 'false'); }
       out = i;
       const b = books[i];
+      b.style.removeProperty('--sx');
       b.classList.add('out'); b.setAttribute('aria-pressed', 'true');
+      inside(b);
       faces(b); cover(b); warm(books[i - 1]); warm(books[i + 1]);
       fillCard(b);
       card.hidden = false;
@@ -226,6 +246,21 @@ const { books, owner, mine } = Astro.props;
       live.textContent = `${b.dataset.title} pulled out. Details below.`;
       b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: rm.matches ? 'auto' : 'smooth' });
       if (focus) b.focus({ preventScroll: true });
+    }
+    // a pulled-out book swings its cover out sideways: if that would go past the edge of the shelf, slide it back in
+    function inside(b: HTMLElement) {
+      if (rm.matches) return;
+      const was = b.style.transition;
+      b.style.transition = 'none';
+      void b.offsetWidth;
+      const box = stage.getBoundingClientRect();
+      const sides = [b.querySelector('.right'), b.querySelector('.front')].filter(Boolean).map((x) => x!.getBoundingClientRect());
+      const left = Math.min(...sides.map((x) => x.left)), right = Math.max(...sides.map((x) => x.right));
+      const pad = 8;
+      const dx = left < box.left + pad ? box.left + pad - left : right > box.right - pad ? box.right - pad - right : 0;
+      if (dx) b.style.setProperty('--sx', `${Math.round(dx)}px`);
+      void b.offsetWidth;
+      b.style.transition = was;
     }
     function putBack() {
       if (out < 0) return;
