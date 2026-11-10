@@ -2,6 +2,11 @@
 
 Read this at the start of a session; update it when a part is done.
 
+## Follow-ups
+
+- [ ] **A week after the new shelf is live on main:** make the shelf redirects permanent. In `src/middleware.ts`, `shelfMoved()` answers with a 307 for `/@x/library/`, `/@x/diary/`, `/@x/stats/`, `/library/` and `/stats/`; change that 307 in `handle` to 301.
+- [x] Shelf rebuild (shelf at `/@username`, two tabs, View profile panel, 3D shelf, 2026 so far, threads footer). Owner-only views still to check by hand: Edit profile, Share my year, "Nothing finished yet", the owner's own private shelf, Block/Unblock/Report as a signed-in visitor.
+
 ## Phase 2
 
 - [x] Step 1. Tidy-ups (Collections, pinned line, settings in tabs, export).
