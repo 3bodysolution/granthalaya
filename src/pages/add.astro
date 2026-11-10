@@ -58,6 +58,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
 
       <!-- 2. the details -->
       <form class="step" data-step="form" id="entry" novalidate>
+        <button type="button" class="linkbtn" id="startover">← Start over</button>
         <div class="kinds" id="mkinds" role="tablist" aria-label="What is it" hidden>
           {kinds.map(([k, label]) => <button type="button" role="tab" data-kind={k} aria-selected={k === start.kind ? 'true' : 'false'}>{label}</button>)}
         </div>
@@ -137,7 +138,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         <div class="stack" style="gap: 10px">
           <button class="btn primary big" type="submit" id="savebtn">Save to my shelf</button>
           <div class="between">
-            <button type="button" class="linkbtn" id="startover">← Start over</button>
             {start.mode === 'edit' && <button type="button" class="linkbtn danger" id="remove">Remove from my shelf</button>}
           </div>
         </div>
