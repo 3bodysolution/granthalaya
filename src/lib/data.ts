@@ -114,6 +114,15 @@ export async function loadProfile(sb: SupabaseClient, username: string, known?: 
 /** everything on a shelf that the visitor is allowed to see, newest first. A TV show's season logs are folded into one
  *  entry for the show (`byShow`, the default); Diary, Stats and RSS pass `{ byShow: false }` and keep each season's visits. */
 export async function loadShelf(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>, { byShow = true } = {}): Promise<Entry[]> {
+  const list = await loadFlat(sb, profile);
+  return byShow ? foldShows(sb, list) : list;
+}
+/** the shelf both ways from one read: `flat` keeps each season's visits (for the year numbers), `folded` has one entry per show */
+export async function loadShelfBoth(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<{ flat: Entry[]; folded: Entry[] }> {
+  const flat = await loadFlat(sb, profile);
+  return { flat, folded: await foldShows(sb, flat) };
+}
+async function loadFlat(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<Entry[]> {
   const { data, error } = await sb.from('logs').select(LOG_SELECT).eq('user_id', profile.id)
     .order('logged_on', { ascending: false }).order('created_at', { ascending: false }).range(0, 4999);
   if (error) throw new Error(error.message);
@@ -121,7 +130,7 @@ export async function loadShelf(sb: SupabaseClient, profile: Pick<Profile, 'id' 
   const visits = new Map<string, number>();
   for (const e of list) visits.set(e.titleId, (visits.get(e.titleId) ?? 0) + 1);
   for (const e of list) e.data.times = visits.get(e.titleId)!;
-  return byShow ? foldShows(sb, list) : list;
+  return list;
 }
 
 /** a show's own row: kind TV with no season */
@@ -230,6 +239,30 @@ export async function loadVisits(sb: SupabaseClient, profile: Pick<Profile, 'id'
   if (show) return list.length ? [foldShow(t, list)] : [];
   for (const e of list) e.data.times = list.length;
   return list;
+}
+
+/** what the "View profile" panel shows besides the details: up to four favourites and the newest written review.
+ *  Pass the loaded (folded) shelf when the page has it; otherwise two small reads, both through the visitor's own connection. */
+export interface LatestReview { title: string; season?: number; text: string; spoiler: boolean; href: string }
+export async function loadProfileCard(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>, details: Details | null, shelf?: Entry[]):
+  Promise<{ favs: Entry[]; latest: LatestReview | null }> {
+  if (shelf) {
+    const byTitle = new Map<string, Entry>();
+    for (const e of shelf) if (!byTitle.has(e.titleId)) byTitle.set(e.titleId, e);
+    const favs = (details?.favourites ?? []).map((id) => byTitle.get(id)).filter(Boolean).slice(0, 4) as Entry[];
+    const r = shelfReviews(shelf).find((x) => x.text.trim());
+    return { favs, latest: r ? { title: r.entry.data.title, season: r.season, text: r.text, spoiler: r.spoiler, href: r.href } : null };
+  }
+  const ids = (details?.favourites ?? []).slice(0, 4);
+  const [titles, logs] = await Promise.all([
+    ids.length ? sb.from('titles').select('*').in('id', ids) : Promise.resolve({ data: [] as Title[] }),
+    sb.from('logs').select(LOG_SELECT).eq('user_id', profile.id).neq('notes', '').order('logged_on', { ascending: false }).order('created_at', { ascending: false }).limit(1),
+  ]);
+  const byId = new Map(((titles.data ?? []) as Title[]).map((t) => [t.id, t]));
+  const favs = ids.map((id) => byId.get(id)).filter(Boolean).map((t) => titleAsEntry(t!, profile.username));
+  const row = ((logs.data ?? []) as unknown as LogRow[]).find((r) => r.title);
+  const e = row ? toEntry(row, profile.username) : null;
+  return { favs, latest: e ? { title: e.data.title, season: e.data.season, text: e.body, spoiler: e.data.spoiler, href: href(e) } : null };
 }
 
 export async function loadCollections(sb: SupabaseClient, profile: Pick<Profile, 'id' | 'username'>): Promise<Collection[]> {
