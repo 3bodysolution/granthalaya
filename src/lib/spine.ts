@@ -26,7 +26,34 @@ export function fit(bg: string): { bg: string; ink: string } {
   return { bg: c, ink: inkOn(c) };
 }
 
-export interface Spine { kind: 'book' | 'dvd'; w: number; h: number; d: number; color: string; ink: string; tag: string }
+export interface Spine { kind: 'book' | 'dvd'; w: number; h: number; d: number; color: string; ink: string; tag: string; text: string; size: number }
+
+/** the title as it is written on the spine: a step smaller on a thin spine, and if it still doesn't fit, whole lines ending in "…".
+ *  (A spine's title runs upwards, the lines stack across its width; the estimate is a little cautious.) The full title stays in the button's label and the caption. */
+export function fitTitle(title: string, w: number): { text: string; size: number } {
+  const HEIGHT = 140, across = w - 2;
+  const wrap = (cpl: number) => {
+    const lines: string[] = []; let cur = '';
+    for (const word of title.split(/\s+/).filter(Boolean)) {
+      let rest = word;
+      while (rest.length > cpl) { if (cur) { lines.push(cur); cur = ''; } lines.push(rest.slice(0, cpl)); rest = rest.slice(cpl); }
+      if (!cur) cur = rest; else if ((cur + ' ' + rest).length <= cpl) cur += ' ' + rest; else { lines.push(cur); cur = rest; }
+    }
+    if (cur) lines.push(cur);
+    return lines;
+  };
+  let last = { text: title, size: 12 };
+  for (const size of [15, 13, 12]) {
+    const cpl = Math.floor(HEIGHT / (size * 0.56)), room = Math.max(1, Math.floor(across / (size * 1.08)));
+    const lines = wrap(cpl);
+    if (lines.length <= room) return { text: title, size };
+    const kept = lines.slice(0, room);
+    const end = kept[kept.length - 1];
+    kept[kept.length - 1] = (end.length >= cpl ? end.slice(0, cpl - 1) : end).replace(/[\s,.:;-]+$/, '') + '…';
+    last = { text: kept.join(' '), size };
+  }
+  return last;
+}
 
 /** a DVD case is one fixed size; a book's width follows its page count and its height the title */
 export function spineOf(e: Entry): Spine {
@@ -34,11 +61,11 @@ export function spineOf(e: Entry): Spine {
   const base = d.coverColor && /^#[0-9a-f]{6}$/i.test(d.coverColor) ? d.coverColor : CLOTH[hash(d.title) % CLOTH.length];
   if (d.type === 'film' || d.type === 'tv') {
     const f = fit(base);
-    return { kind: 'dvd', w: 44, h: 248, d: 168, color: f.bg, ink: f.ink, tag: d.type === 'tv' ? 'TV' : 'FILM' };
+    return { kind: 'dvd', w: 44, h: 248, d: 168, color: f.bg, ink: f.ink, tag: d.type === 'tv' ? 'TV' : 'FILM', ...fitTitle(d.title, 44) };
   }
   const h = 196 + (hash(d.title) % 55);
-  if (d.type === 'essay') return { kind: 'book', w: 26, h: Math.min(h, 220), d: Math.round(Math.min(h, 220) * 0.66), color: PAPER, ink: DARK, tag: 'E' };
+  if (d.type === 'essay') return { kind: 'book', w: 26, h: Math.min(h, 220), d: Math.round(Math.min(h, 220) * 0.66), color: PAPER, ink: DARK, tag: 'E', ...fitTitle(d.title, 26) };
   const w = Math.max(26, Math.min(54, d.pages ? Math.round(24 + d.pages / 14) : 26 + (hash(d.title) >> 5) % 18));
   const f = fit(base);
-  return { kind: 'book', w, h, d: Math.round(h * 0.66), color: f.bg, ink: f.ink, tag: 'B' };
+  return { kind: 'book', w, h, d: Math.round(h * 0.66), color: f.bg, ink: f.ink, tag: 'B', ...fitTitle(d.title, w) };
 }

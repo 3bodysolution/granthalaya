@@ -23,7 +23,7 @@ const { books, owner, mine } = Astro.props;
             data-i={i} data-title={b.title} data-by={b.creator} data-kind={b.kind} data-kindlabel={b.kindLabel} data-year={b.year ?? ''} data-status={b.status} data-when={b.when}
             data-stars={b.stars} data-href={b.href} data-cover={b.cover ?? ''} data-review={b.review}
             style={`--w:${b.spine.w}px;--h:${b.spine.h}px;--d:${b.spine.d}px;--c:${b.spine.color};color:${b.spine.ink}`}>
-            <span class="bk front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true">{b.title}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
+            <span class="bk front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true" style={`font-size:${b.spine.size}px`}>{b.spine.text}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
             <span class="bk top" aria-hidden="true"></span>
             <span class="bk left" aria-hidden="true"></span>
             <span class="bk right" aria-hidden="true"></span>
@@ -83,7 +83,7 @@ const { books, owner, mine } = Astro.props;
   .book :global(.bk) { position: absolute; box-sizing: border-box; display: block; }
   .front { inset: 0; background: var(--c); border-radius: 1px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 10px; box-shadow: inset 4px 0 0 rgba(255,255,255,.12), inset -5px 0 7px rgba(0,0,0,.3); overflow: hidden; }
   .band { position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .45; }
-  .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; font-size: 15px; line-height: 1.05; max-height: 150px; overflow: hidden; font-weight: 500; position: relative; z-index: 1; }
+  .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; line-height: 1.05; max-height: 140px; overflow: hidden; overflow-wrap: anywhere; font-weight: 500; position: relative; z-index: 1; }
   .sp-tag { font-family: 'Courier Prime', ui-monospace, monospace; font-size: 9px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid currentColor; position: relative; z-index: 1; }
   .top { left: 0; top: calc(var(--d) * -1); width: var(--w); height: var(--d); transform-origin: bottom center; transform: rotateX(90deg); background: repeating-linear-gradient(to right, #EFE6D2 0 2px, #DCCFB4 2px 3px); border: 2px solid var(--c); }
   .left { left: calc(var(--d) * -1); top: 0; width: var(--d); height: var(--h); transform-origin: right center; transform: rotateY(-90deg); background: color-mix(in srgb, var(--c) 55%, #000); }
