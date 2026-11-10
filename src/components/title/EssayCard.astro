@@ -7,8 +7,9 @@ import { statusLabel } from '../../lib/kinds';
 import { authorLink, essayHit, themes, collection, hakara, hakaraStories, type Essay } from '../../lib/essays';
 import { savedId } from '../../lib/saved';
 import type { Mark as OnShelf } from '../../lib/catalog/onsite';
-interface Props { e: Essay; mark?: OnShelf }
-const { e, mark } = Astro.props;
+// shelf: on someone's shelf the title opens their entry, the save bookmark is left out, and the shelf's own status and date sit under the book
+interface Props { e: Essay; mark?: OnShelf; shelf?: { href: string; status: string; date: string } }
+const { e, mark, shelf } = Astro.props;
 const me = Astro.locals.me;
 const plain = savedId(mark);
 const label = mark ? statusLabel('essay', mark.status as any) : '';
@@ -37,16 +38,17 @@ const cloth = CLOTH[(ti + ii) % CLOTH.length];
       <div class="eb-back" aria-hidden="true"></div>
       <div class="eb-front">
         <p class="eb-topic"><span>{topic}</span></p>
-        <h3 class="serif eb-title" lang={lang}><a href={e.link} target="_blank" rel="noopener noreferrer">{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}<span class="out" aria-hidden="true"> ↗</span></span></a></h3>
-        <p class="eb-by">by <a href={authorLink(e)}>{e.author}</a></p>
+        <h3 class="serif eb-title" lang={lang}><a href={shelf ? shelf.href : e.link} target={shelf ? undefined : '_blank'} rel={shelf ? undefined : 'noopener noreferrer'}>{words.length ? words.join(' ') + ' ' : ''}<span class="nw">{last}{!shelf && <span class="out" aria-hidden="true"> ↗</span>}</span></a></h3>
+        <p class="eb-by">by {e.authorKey || e.authorSlug ? <a href={authorLink(e)}>{e.author}</a> : e.author}</p>
         {credit && <p class="eb-credit">{credit}</p>}
         <p class="eb-note">{note}</p>
-        {me && (mark && !plain
+        {me && !shelf && (mark && !plain
           ? <span class="es-save is-saved" role="img" title={label} aria-label={`${e.title}: ${label}`}><Mark size={16} /></span>
           : <button type="button" class:list={['es-save', plain && 'is-saved']} data-quick-add={JSON.stringify({ hit: essayHit(e), status: 'want' })} data-unsave={plain} aria-label={plain ? `Saved: ${e.title}. Tap to remove` : `Save ${e.title}`} title={plain ? 'Saved. Tap to remove' : 'Save to your shelf'}><Mark size={16} /></button>)}
       </div>
     </div>
   </div>
+  {shelf && <p class="eb-shelf"><span>{shelf.status}</span><span class="num">{shelf.date}</span></p>}
 </article>
 <style>
   .eb { --t: 16px; --cream: #F7EFDF; --turn: -24deg; position: relative; height: 100%; min-height: 270px; }
@@ -78,6 +80,7 @@ const cloth = CLOTH[(ti + ii) % CLOTH.length];
   .eb-pages { position: absolute; top: 3px; bottom: 3px; right: calc(var(--t) / -2 + 1px); width: calc(var(--t) - 2px); transform: rotateY(90deg); border-radius: 0 2px 2px 0;
     background: repeating-linear-gradient(90deg, #F1E8D2 0 1px, #D9CEB4 1px 2px), #EADFC6; box-shadow: inset 0 0 6px rgba(90, 70, 40, .35); }
 
+  .eb-shelf { margin: -6px 6px 0 6px; display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--muted); }
   .eb-topic { margin: 0; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid rgba(247, 239, 223, .55); }
   .eb-title { margin: 6px 0 0; font-size: 25px; line-height: 1.15; font-weight: 500; font-family: 'Fraunces Fix', Fraunces, Georgia, serif; overflow-wrap: break-word; }
   .eb-title a { color: var(--cream); }

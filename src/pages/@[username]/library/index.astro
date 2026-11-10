@@ -1,10 +1,12 @@
 ---
 import Base from '../../../layouts/Base.astro';
 import Tile from '../../../components/Tile.astro';
+import EssayCard from '../../../components/title/EssayCard.astro';
 import ShelfStrip from '../../../components/ShelfStrip.astro';
 import { openShelf } from '../../../lib/shelfpage';
-import { loadShelf } from '../../../lib/data';
-import { KINDS, kindPlural, type Status } from '../../../lib/kinds';
+import { loadShelf, href, short } from '../../../lib/data';
+import { allEssays, type Essay } from '../../../lib/essays';
+import { KINDS, kindPlural, statusLabel, type Status } from '../../../lib/kinds';
 export const prerender = false;
 
 const o = await openShelf(Astro, '/library/');
@@ -25,6 +27,10 @@ const STATUS_FILTERS: [string, string, (s: Status) => boolean][] = [
   ['dnf', 'Didn’t finish', (s) => s === 'dnf' || s === 'dropped'],
 ];
 const filters = STATUS_FILTERS.map(([k, label, f]) => ({ k, label, n: all.filter((e) => f(e.data.status)).length })).filter((f) => f.n > 0);
+// an essay on the shelf is drawn as the Essays page draws it: the catalogue's own record when we have one, else built from the entry
+const essayOf = (e: (typeof all)[number]): Essay => allEssays.find((x) => x.link === e.data.link) ?? {
+  title: e.data.title, author: e.data.creator, authorKey: null, authorSlug: null, publication: e.data.source ?? null, year: e.data.year ?? null, link: e.data.link ?? href(e), note: null,
+};
 const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s === 'dropped' ? 'dnf' : s);
 ---
 <Base title={isMe ? 'Your library' : `${name}’s library`} shelf={profile.username} feed={!profile.is_private} description={`Everything on ${name}’s shelf, by year.`}>
@@ -74,7 +80,11 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
                 <span class="more toggle" style="color: var(--lat)" aria-hidden="true"><span class="o">Show ↓</span><span class="c">Hide ↑</span></span>
               </summary>
               <div class="shelf grid">
-                {items.map((e) => <div class="cell" data-type={e.data.type} data-status={group(e.data.status)}><Tile entry={e} vt /></div>)}
+                {items.map((e) => <div class:list={['cell', e.data.type === 'essay' && 'cell-essay']} data-type={e.data.type} data-status={group(e.data.status)}>
+                  {e.data.type === 'essay'
+                    ? <EssayCard e={essayOf(e)} shelf={{ href: href(e), status: statusLabel('essay', e.data.status), date: short(e.data.date) }} />
+                    : <Tile entry={e} vt />}
+                </div>)}
               </div>
               <p class="none muted">Nothing like that in {y}.</p>
             </details>
@@ -108,6 +118,8 @@ const group = (s: Status) => (s === 'reading' || s === 'watching' ? 'now' : s ==
   .yr:not([open]) summary { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 24px; box-shadow: 0 12px 24px -16px var(--shadow); margin-bottom: 0; }
   .yr[open] > .grid, .yr[open] > .list { animation: rise .7s var(--spring) backwards; }
   .cell > :global(.tile) { height: 100%; }
+  /* an essay card is wider than a poster */
+  .cell-essay { grid-column: span 2; }
 
 
   .none { display: none; margin: 0; font-size: 15px; }
