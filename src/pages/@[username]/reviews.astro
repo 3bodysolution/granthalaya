@@ -3,10 +3,10 @@
 // Reached from the Reviews count on the profile. Lines used to live here (/lines/ redirects in middleware.ts).
 import Base from '../../layouts/Base.astro';
 import Cover from '../../components/Cover.astro';
-import ShelfStrip from '../../components/ShelfStrip.astro';
+import ShelfHead from '../../components/ShelfHead.astro';
 import Stars from '../../components/ui/Stars.astro';
 import { openShelf } from '../../lib/shelfpage';
-import { loadShelf, long, shelfReviews } from '../../lib/data';
+import { loadShelf, loadProfileCard, long, shelfReviews } from '../../lib/data';
 import { reviewExtras } from '../../lib/reviews';
 import { md } from '../../lib/md';
 import SpoilerGate from '../../components/SpoilerGate.astro';
@@ -17,7 +17,9 @@ if (o.out) return o.out;
 const { profile, isMe, visible } = o.shelf;
 if (!visible) return Astro.redirect(`/@${profile.username}/`);
 const sb = Astro.locals.supabase;
-const all = shelfReviews(await loadShelf(sb, profile));
+const shelf = await loadShelf(sb, profile);
+const all = shelfReviews(shelf);
+const card = await loadProfileCard(sb, profile, o.shelf.details, shelf);
 const name = profile.display_name || profile.username;
 const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.private).map((r) => [r.logId, profile.id])), Astro.locals.me);
 ---
@@ -29,7 +31,7 @@ const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.pr
     </div>
   </section>
 
-  <div class="pad rise d1" style="padding-top: 26px"><ShelfStrip shelf={o.shelf} /></div>
+  <div class="pad rise d1" style="padding-top: 26px"><ShelfHead shelf={o.shelf} favs={card.favs} latest={card.latest} /></div>
 
   <section class="pad list" style="padding-top: 36px">
     {all.length === 0 && <p class="serif" style="font-size: 22px; margin: 0">{isMe ? 'No reviews yet. Write one when you log a book or film.' : `${name} hasn’t written any reviews yet.`}</p>}

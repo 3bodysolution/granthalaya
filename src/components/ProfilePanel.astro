@@ -1,0 +1,86 @@
+---
+// The "View profile" panel: photo, name, username, links, bio, joined date, favourites, the newest review, and the actions
+// (Edit profile and Copy link; for a signed-in visitor, Report and Block; for a signed-out one, a sign-in link). It replaces the old three-dots menu.
+// Everything shown here came through the visitor's own database connection, so a private shelf shows little: the database hands back nothing more.
+import Face from './Face.astro';
+import Cover from './Cover.astro';
+import SocialLink from './ui/SocialLink.astro';
+import type { Shelf } from '../lib/shelfpage';
+import { href, fullTitle, excerpt, reviewsHref, type Entry, type LatestReview } from '../lib/data';
+import { socialLinks } from '../lib/kinds';
+interface Props { shelf: Shelf; favs: Entry[]; latest: LatestReview | null }
+const { shelf, favs, latest } = Astro.props;
+const { profile: p, details, isMe, blockedByMe } = shelf;
+const signedIn = !!Astro.locals.me;
+const name = p.display_name || p.username;
+const links = socialLinks(details?.links);
+const since = new Date(p.created_at).toLocaleString('en-GB', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+const link = new URL(`/@${p.username}/`, Astro.url).href;
+---
+<section id="profile" class="pp" aria-label="Profile">
+  <div class="pp-id">
+    <div class="pp-who">
+      <Face name={name} src={p.avatar_url} size={76} />
+      <div class="pp-names">
+        <p class="serif pp-name">{name}{p.is_private && <span class="pp-lock">Private</span>}</p>
+        <p class="pp-user">@{p.username}</p>
+        {links.length > 0 && <div class="pp-links">{links.map((l) => <SocialLink kind={l.key} label={l.label} href={l.href} bare />)}</div>}
+      </div>
+    </div>
+    {details?.bio && <p class="pp-bio">{details.bio}</p>}
+    <p class="pp-since">On Granthalaya since {since}</p>
+    <div class="pp-acts">
+      {isMe && <a class="btn" href="/settings/#profile">Edit profile</a>}
+      <button class="btn" type="button" data-copy={link}>Copy link</button>
+      {!isMe && signedIn && <button class="btn" type="button" data-report={JSON.stringify({ user: p.id, log: null, who: p.username })}>Report</button>}
+      {!isMe && signedIn && <button class="btn" type="button" data-block={JSON.stringify({ id: p.id, who: p.username, blocked: blockedByMe })}>{blockedByMe ? `Unblock @${p.username}` : `Block @${p.username}`}</button>}
+      {!isMe && !signedIn && <a class="btn" href={`/join/?next=/@${p.username}/`} data-astro-prefetch="false">Sign in to report or block</a>}
+    </div>
+  </div>
+  <div class="pp-col">
+    <p class="eyebrow">Favourites</p>
+    {favs.length > 0 ? (
+      <div class="pp-favs">
+        {favs.map((e) => <a href={href(e)} title={fullTitle(e)} aria-label={fullTitle(e)}><Cover entry={e} variant="mini" /></a>)}
+      </div>
+    ) : (
+      <p class="pp-none">{isMe ? <>Choose up to four favourites in <a href="/settings/#profile">Settings</a>.</> : 'None chosen yet.'}</p>
+    )}
+  </div>
+  <div class="pp-col">
+    <p class="eyebrow">Latest review</p>
+    {latest ? (
+      <>
+        {latest.spoiler && !isMe ? <p class="pp-none">This review gives away the story.</p> : <p class="serif pp-quote">{excerpt({ body: latest.text }, 150)}</p>}
+        <p class="pp-from"><a href={latest.href}>{latest.title}{latest.season ? `, season ${latest.season}` : ''}</a> · <a href={reviewsHref(p.username)}>All reviews</a></p>
+      </>
+    ) : <p class="pp-none">No reviews yet.</p>}
+  </div>
+</section>
+<style>
+  .pp { display: none; margin-top: 24px; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; box-shadow: 0 12px 24px -16px var(--shadow); }
+  .pp.is-open, .pp:target { display: grid; animation: ppin .35s var(--spring) both; }
+  @keyframes ppin { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .pp-id { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .pp-who { display: flex; gap: 16px; align-items: center; min-width: 0; }
+  .pp-names { min-width: 0; }
+  .pp-name { margin: 0; font-size: 28px; line-height: 1.1; overflow-wrap: anywhere; }
+  .pp-lock { margin-left: 10px; font-family: inherit; font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--soft); color: var(--muted); vertical-align: middle; }
+  .pp-user { margin: 4px 0 0; font-size: 15px; color: var(--muted); }
+  .pp-links { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 2px 14px; }
+  .pp-bio { margin: 0; font-size: 16px; line-height: 1.5; overflow-wrap: anywhere; }
+  .pp-since { margin: 0; font-size: 14px; color: var(--muted); }
+  .pp-acts { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
+  .pp-acts .btn { height: 40px; }
+  .pp-col { min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+  .pp-col .eyebrow { margin: 0; }
+  .pp-favs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+  .pp-favs :global(.mini) { width: 100%; height: auto; aspect-ratio: 2 / 3; border-radius: 6px; transition: box-shadow .25s ease; }
+  .pp-favs a:hover :global(.mini) { box-shadow: 0 0 0 2px var(--lat); }
+  .pp-quote { margin: 0; font-size: 22px; line-height: 1.35; overflow-wrap: anywhere; }
+  .pp-from { margin: 0; font-size: 14px; color: var(--muted); }
+  .pp-none { margin: 0; font-size: 14.5px; color: var(--muted); }
+  .pp-none a, .pp-from a { color: var(--lat); }
+  @media (max-width: 900px) { .pp { grid-template-columns: 1fr; padding: 22px; } }
+  @media (prefers-reduced-motion: reduce) { .pp.is-open, .pp:target { animation: none; } }
+</style>
