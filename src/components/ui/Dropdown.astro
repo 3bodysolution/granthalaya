@@ -1,0 +1,174 @@
+---
+// Our own dropdown, in place of the browser's <select>. Looks like the open menus of the filter bar (title/Filters.astro).
+// A real <select> stays underneath: forms and saving read it, and without scripts it is the one shown.
+// With scripts (html.dd-js) it is hidden and the button + list below take over. Picking sets the select and fires a bubbling `change` on it.
+// Extra attributes (data-..., name, id) go on the real <select>.
+interface Props { options: { value: string; label: string }[]; value?: string; label: string; [attr: string]: unknown }
+const { options, value, label, class: cls, ...rest } = Astro.props;
+const current = options.find((o) => o.value === value) ?? options[0];
+const uid = 'dd' + Math.random().toString(36).slice(2, 8);
+---
+<div class:list={['dd', cls]} data-dd>
+  <select class="dd-native" aria-label={label} {...rest}>
+    {options.map((o) => <option value={o.value} selected={o.value === current?.value}>{o.label}</option>)}
+  </select>
+  <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-label={`${label}: ${current?.label ?? ''}`} aria-controls={`${uid}-list`} data-dd-btn>
+    <span class="dd-cur" data-dd-cur>{current?.label}</span>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 10l5 5 5-5" /></svg>
+  </button>
+  <ul class="dd-list" id={`${uid}-list`} role="listbox" tabindex="-1" aria-label={label} data-dd-list>
+    {options.map((o, i) => <li class="dd-opt" role="option" id={`${uid}-${i}`} data-value={o.value} aria-selected={o.value === current?.value ? 'true' : 'false'}>{o.label}</li>)}
+  </ul>
+</div>
+<style>
+  .dd { position: relative; display: block; }
+  /* without scripts: the native select, styled as the season picker always was */
+  .dd-native { width: 100%; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background-color: var(--soft); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; }
+  .dd-btn, .dd-list { display: none; }
+  :global(html.dd-js) .dd-native { position: absolute; inset: 0 auto auto 0; width: 1px; height: 1px; opacity: 0; visibility: hidden; pointer-events: none; }
+  :global(html.dd-js) .dd-btn { display: flex; }
+  .dd-btn { align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--soft); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; transition: border-color .2s ease, background-color .2s ease, transform .2s var(--spring); }
+  .dd-btn:hover { border-color: color-mix(in srgb, var(--ink) 28%, var(--line)); }
+  .dd-btn:active { transform: scale(.985); }
+  .dd-btn[aria-expanded="true"] { border-color: color-mix(in srgb, var(--ink) 28%, var(--line)); }
+  .dd-cur { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dd-btn svg { width: 14px; height: 14px; flex: none; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s ease; }
+  .dd-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+  .dd-list { position: fixed; z-index: 60; margin: 0; padding: 6px; list-style: none; box-sizing: border-box; overflow-y: auto; max-height: min(60vh, 340px); border: 1px solid var(--line); border-radius: 6px; background: var(--card); box-shadow: 0 18px 34px -14px var(--shadow); outline: none; }
+  :global(html.dd-js) .dd-list { display: block; opacity: 0; visibility: hidden; transition: opacity .12s ease, visibility 0s linear .12s; }
+  :global(html.dd-js) .dd.is-open .dd-list { opacity: 1; visibility: visible; transition-delay: 0s; }
+  .dd-opt { padding: 9px 12px; border-radius: 4px; font-size: 13.5px; font-weight: 500; color: var(--ink); cursor: pointer; transition: background-color .15s ease; }
+  .dd-opt:hover, .dd-opt.active { background: var(--soft); }
+  .dd-opt[aria-selected="true"] { font-weight: 600; }
+  .dd-opt[aria-selected="true"]::after { content: "✓"; margin-left: 8px; color: var(--muted); }
+  .dd-list:focus-visible .dd-opt.active { outline: 2px solid var(--lat); outline-offset: -2px; border-radius: 4px; }
+  @media (max-width: 780px) { .dd-opt { padding: 13px 14px; } }
+  @media (prefers-reduced-motion: reduce) { .dd-list, .dd-btn, .dd-btn svg { transition: none; } }
+</style>
+<script>
+  const root = document.documentElement;
+  root.classList.add('dd-js');
+  document.addEventListener('astro:page-load', () => root.classList.add('dd-js'));
+
+  const fold = (s: string) => s.normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  let typed = '', typedAt = 0;
+  const parts = (dd: HTMLElement) => ({
+    sel: dd.querySelector<HTMLSelectElement>('select')!,
+    btn: dd.querySelector<HTMLButtonElement>('[data-dd-btn]')!,
+    list: dd.querySelector<HTMLElement>('[data-dd-list]')!,
+    cur: dd.querySelector<HTMLElement>('[data-dd-cur]')!,
+    opts: [...dd.querySelectorAll<HTMLElement>('.dd-opt')],
+  });
+  const isOpen = (dd: HTMLElement) => dd.classList.contains('is-open');
+
+  function place(dd: HTMLElement) {
+    const { btn, list } = parts(dd);
+    const r = btn.getBoundingClientRect();
+    const below = innerHeight - r.bottom - 12, above = r.top - 12;
+    const h = Math.min(list.scrollHeight, 340);
+    const up = below < h && above > below;
+    list.style.left = `${r.left}px`;
+    list.style.width = `${r.width}px`;
+    list.style.maxHeight = `${Math.max(120, Math.min(340, up ? above : below))}px`;
+    if (up) { list.style.top = 'auto'; list.style.bottom = `${innerHeight - r.top + 4}px`; }
+    else { list.style.bottom = 'auto'; list.style.top = `${r.bottom + 4}px`; }
+  }
+  function setActive(dd: HTMLElement, i: number, scroll = true) {
+    const { list, opts } = parts(dd);
+    opts.forEach((o, n) => o.classList.toggle('active', n === i));
+    if (opts[i]) { list.setAttribute('aria-activedescendant', opts[i].id); if (scroll) opts[i].scrollIntoView({ block: 'nearest' }); }
+  }
+  const activeIndex = (dd: HTMLElement) => parts(dd).opts.findIndex((o) => o.classList.contains('active'));
+  function open(dd: HTMLElement, at?: number) {
+    closeAll(dd);
+    const { sel, btn, list } = parts(dd);
+    dd.classList.add('is-open');
+    btn.setAttribute('aria-expanded', 'true');
+    place(dd);
+    setActive(dd, at ?? Math.max(0, sel.selectedIndex));
+    list.focus({ preventScroll: true });
+  }
+  function close(dd: HTMLElement, refocus = false) {
+    if (!isOpen(dd)) return;
+    const { btn } = parts(dd);
+    dd.classList.remove('is-open');
+    btn.setAttribute('aria-expanded', 'false');
+    if (refocus) btn.focus({ preventScroll: true });
+  }
+  function closeAll(except?: Element | null) {
+    document.querySelectorAll<HTMLElement>('[data-dd].is-open').forEach((d) => { if (d !== except) close(d); });
+  }
+  function sync(dd: HTMLElement) {
+    const { sel, btn, cur, opts } = parts(dd);
+    const text = sel.options[sel.selectedIndex]?.text ?? '';
+    cur.textContent = text;
+    btn.setAttribute('aria-label', `${sel.getAttribute('aria-label') ?? ''}: ${text}`);
+    opts.forEach((o) => o.setAttribute('aria-selected', String(o.dataset.value === sel.value)));
+  }
+  function pick(dd: HTMLElement, i: number) {
+    const { sel, opts } = parts(dd);
+    const o = opts[i];
+    if (!o) return;
+    const changed = sel.value !== o.dataset.value;
+    sel.value = o.dataset.value!;
+    sync(dd);
+    close(dd, true);
+    if (changed) sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  // typing a letter jumps to the next choice starting with what was typed
+  function jump(dd: HTMLElement, ch: string) {
+    const { opts } = parts(dd);
+    const now = Date.now();
+    typed = now - typedAt > 600 ? ch : typed + ch;
+    typedAt = now;
+    const from = Math.max(0, activeIndex(dd));
+    const order = [...opts.keys()].map((n) => (from + (typed.length > 1 ? 0 : 1) + n) % opts.length);
+    const hit = order.find((n) => fold(opts[n].textContent ?? '').startsWith(fold(typed)));
+    return hit;
+  }
+
+  document.addEventListener('click', (ev) => {
+    const t = ev.target as Element;
+    const btn = t.closest<HTMLElement>('[data-dd-btn]');
+    if (btn) { const dd = btn.closest<HTMLElement>('[data-dd]')!; isOpen(dd) ? close(dd) : open(dd); return; }
+    const opt = t.closest<HTMLElement>('.dd-opt');
+    if (opt) { const dd = opt.closest<HTMLElement>('[data-dd]')!; pick(dd, parts(dd).opts.indexOf(opt)); return; }
+    closeAll();
+  });
+  document.addEventListener('mouseover', (ev) => {
+    const opt = (ev.target as Element).closest?.<HTMLElement>('.dd-opt');
+    if (!opt) return;
+    const dd = opt.closest<HTMLElement>('[data-dd]')!;
+    setActive(dd, parts(dd).opts.indexOf(opt), false);
+  });
+  document.addEventListener('change', (ev) => {
+    const dd = (ev.target as Element).closest?.<HTMLElement>('[data-dd]');
+    if (dd && (ev.target as Element).tagName === 'SELECT') sync(dd);
+  });
+  document.addEventListener('keydown', (ev) => {
+    const t = ev.target as Element;
+    const dd = t.closest?.<HTMLElement>('[data-dd]');
+    if (!dd || (ev as KeyboardEvent).altKey || (ev as KeyboardEvent).ctrlKey || (ev as KeyboardEvent).metaKey) return;
+    const k = ev.key;
+    const { opts } = parts(dd);
+    if (t.closest('[data-dd-btn]')) {
+      if (k === 'Enter' || k === ' ' || k === 'ArrowDown' || k === 'ArrowUp') { ev.preventDefault(); open(dd); }
+      else if (k.length === 1) { ev.preventDefault(); const at = jump(dd, k); open(dd, at); }
+      return;
+    }
+    if (!t.closest('[data-dd-list]')) return;
+    const at = activeIndex(dd);
+    if (k === 'ArrowDown') { ev.preventDefault(); setActive(dd, Math.min(opts.length - 1, at + 1)); }
+    else if (k === 'ArrowUp') { ev.preventDefault(); setActive(dd, Math.max(0, at - 1)); }
+    else if (k === 'Home') { ev.preventDefault(); setActive(dd, 0); }
+    else if (k === 'End') { ev.preventDefault(); setActive(dd, opts.length - 1); }
+    else if (k === 'Enter' || k === ' ') { ev.preventDefault(); pick(dd, Math.max(0, at)); }
+    else if (k === 'Escape') { ev.preventDefault(); close(dd, true); }
+    else if (k === 'Tab') close(dd);
+    else if (k.length === 1) { ev.preventDefault(); const hit = jump(dd, k); if (hit !== undefined) setActive(dd, hit); }
+  });
+  const reposition = () => document.querySelectorAll<HTMLElement>('[data-dd].is-open').forEach(place);
+  addEventListener('resize', reposition);
+  addEventListener('scroll', reposition, { passive: true });
+  document.addEventListener('astro:before-swap', () => closeAll());
+</script>

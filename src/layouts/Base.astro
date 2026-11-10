@@ -333,6 +333,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         const pick = panel.querySelector<HTMLSelectElement>('[data-season-pick]');
         if (pick && season) {
           pick.value = season;
+          pick.dispatchEvent(new Event('change', { bubbles: true })); // the custom dropdown's label follows
           panel.querySelectorAll<HTMLElement>('[data-season-panel]').forEach((p) => (p.hidden = p.dataset.seasonPanel !== season));
         }
         panel.querySelectorAll<HTMLElement>('.stars-in').forEach((b) => paintStars(b, Number(b.dataset.rating || 0)));
