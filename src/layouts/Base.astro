@@ -25,6 +25,8 @@ interface Props {
   line?: { text: string; by?: string; source?: string };
   /** keep this page out of search engines */
   noindex?: boolean;
+  /** the footer painting: the valley (default) or, on a person's shelf pages, the Collections painting faded in from the page */
+  footArt?: 'threads';
 }
 const { title, description = site.description, active, image = '/img/og.jpg', line, noindex = false } = Astro.props;
 const og = Astro.props.og ?? DEFAULT_OG;
@@ -136,7 +138,9 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   </main>
 
   <div class="foot-wrap">
-    <Valley line={line} />
+    {Astro.props.footArt === 'threads'
+      ? <div class="art foot-art" style="--day: url(/art/threads-day.webp); --night: url(/art/threads-night.webp)" aria-hidden="true"></div>
+      : <Valley line={line} />}
     <footer class="foot">
       <div class="foot-in">
         <p class="foot-credits">© {site.name}. Made with ❤️ by {site.maker}. Film data from <a href="https://www.themoviedb.org" target="_blank" rel="noopener noreferrer">TMDB</a>, streaming data from <a href="https://www.justwatch.com" target="_blank" rel="noopener noreferrer">JustWatch</a>, book descriptions from <a href="https://www.wikipedia.org" target="_blank" rel="noopener noreferrer">Wikipedia</a>. Book covers from <a href="https://akshardhara.com" target="_blank" rel="noopener noreferrer">Akshardhara</a> and <a href="https://www.bookganga.com" target="_blank" rel="noopener noreferrer">BookGanga</a>. Marathi essays from <a href="https://hakara.in" target="_blank" rel="noopener noreferrer">Hakara</a>.</p>

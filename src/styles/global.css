@@ -140,6 +140,9 @@ html[data-theme="dark"] .theme-moon { display: none; }
 .foot a { color: #F6F0E4; }
 .foot a:hover { color: #8FDCD2; }
 
+/* a person's shelf pages: the threads painting, faded in from the page, with the footer links on top (painted as it is, no tint) */
+.foot-art { aspect-ratio: 2172 / 724; min-height: 360px; background-position: center 70%; -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.1) 8%, #000 34%); mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.1) 8%, #000 34%); }
+
 /* day and night versions of the footer painting */
 html[data-theme="dark"] .skyL, html[data-theme="light"] .skyD { display: none; }
 

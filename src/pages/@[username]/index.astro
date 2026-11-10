@@ -89,7 +89,7 @@ const og = visible && !profile.is_private
   ? (so && Number(q.get('year')) === so.year ? yearOg(name, so.year, so.nBooks, so.filmCount, Math.round(so.filmMin / 60), so.fav?.data.title) : profileOg(name, count('book'), count('film', 'tv'), count('essay')))
   : undefined;
 ---
-<Base title={isMe ? 'Your shelf' : `${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} feed={!profile.is_private} noindex={profile.is_private} og={og}
+<Base footArt="threads" title={isMe ? 'Your shelf' : `${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} feed={!profile.is_private} noindex={profile.is_private} og={og}
   image={profile.is_private ? undefined : `/og/u/${profile.username}.png`}>
   <div class="pad top rise">
     <ShelfHead shelf={o.shelf} current="shelf" heading={`${name}’s shelf`} favs={card.favs} latest={card.latest} tabs={visible && !blockedByMe} />

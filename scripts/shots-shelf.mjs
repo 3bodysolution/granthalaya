@@ -35,7 +35,7 @@ for (const theme of ['light', 'dark']) for (const [dev, vp] of [['desktop', { wi
   if (!rm) {
     const fp = page.locator('.fpart').first();
     if (dev === 'desktop') await fp.hover(); else await fp.locator('.fbtn').click();
-    await page.waitForTimeout(400); await page.screenshot({ path: `${OUT}/filter-${tag}.png` });
+    await page.waitForTimeout(400); await page.screenshot({ path: `${OUT}/filter-${tag}.png` }); await page.keyboard.press('Escape'); await page.mouse.click(5, 300);
   }
   await page.mouse.move(0, 0);
   await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(1800);

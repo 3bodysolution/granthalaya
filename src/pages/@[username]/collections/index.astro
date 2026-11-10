@@ -15,7 +15,7 @@ const [entries, collections] = await Promise.all([loadShelf(sb, profile), loadCo
 const card = await loadProfileCard(sb, profile, o.shelf.details, entries);
 const name = profile.display_name || profile.username;
 ---
-<Base title={isMe ? 'Your collections' : `${name}’s collections`} shelf={profile.username} feed={!profile.is_private} description={`Hand-picked paths through ${name}’s library.`}>
+<Base footArt="threads" title={isMe ? 'Your collections' : `${name}’s collections`} shelf={profile.username} feed={!profile.is_private} description={`Hand-picked paths through ${name}’s library.`}>
   <div class="pad rise" style="padding-top: 28px"><ShelfHead shelf={o.shelf} current="collections" favs={card.favs} latest={card.latest} /></div>
   <section class="pad head rise">
     <h1 class="title">Collections</h1>
