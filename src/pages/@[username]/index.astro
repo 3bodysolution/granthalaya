@@ -5,11 +5,13 @@ import Base from '../../layouts/Base.astro';
 import ShelfHead from '../../components/ShelfHead.astro';
 import Filters from '../../components/title/Filters.astro';
 import Bookshelf, { type ShelfBook } from '../../components/shelf/Bookshelf.astro';
+import SoFar from '../../components/shelf/SoFar.astro';
 import { openShelf } from '../../lib/shelfpage';
-import { loadShelf, loadProfileCard, href, short, excerpt, kind as kindOf, stars, coverSrc, type Entry } from '../../lib/data';
+import { loadShelfBoth, loadProfileCard, href, short, excerpt, kind as kindOf, stars, coverSrc, type Entry } from '../../lib/data';
 import { kindPlural, statusLabel, type Kind, type Status } from '../../lib/kinds';
 import { spineOf } from '../../lib/spine';
-import { profileOg } from '../../lib/share';
+import { profileOg, yearOg } from '../../lib/share';
+import { pickYear, yearNumbers } from '../../lib/yearstats';
 import { fillCoverColors } from '../../lib/catalog/covercolor';
 import { waitUntil } from '@vercel/functions';
 export const prerender = false;
@@ -21,7 +23,8 @@ const sb = Astro.locals.supabase;
 const name = profile.display_name || profile.username;
 
 // a private shelf (not yours) and a blocked one show nothing of the shelf itself; the database hands back nothing either way
-const all: Entry[] = visible && !blockedByMe ? await loadShelf(sb, profile) : [];
+const both = visible && !blockedByMe ? await loadShelfBoth(sb, profile) : { flat: [] as Entry[], folded: [] as Entry[] };
+const all: Entry[] = both.folded;
 const card = visible && !blockedByMe ? await loadProfileCard(sb, profile, details, all) : { favs: [], latest: null };
 
 // spine colours come from each cover's main colour, worked out once and kept on the title: for the ones still missing it, that happens
@@ -79,7 +82,12 @@ const books: ShelfBook[] = shown.map((e) => {
 });
 
 const count = (...t: string[]) => all.filter((e) => t.includes(e.data.type)).length;
-const og = visible && !profile.is_private ? profileOg(name, count('book'), count('film', 'tv'), count('essay')) : undefined;
+// "so far": this year, or (before anything is finished in a new year) the last year that has something; ?year= picks one
+const pick = pickYear(both.flat, Number(q.get('year')));
+const so = pick.year ? yearNumbers(both.flat, pick.year) : undefined;
+const og = visible && !profile.is_private
+  ? (so && Number(q.get('year')) === so.year ? yearOg(name, so.year, so.nBooks, so.filmCount, Math.round(so.filmMin / 60), so.fav?.data.title) : profileOg(name, count('book'), count('film', 'tv'), count('essay')))
+  : undefined;
 ---
 <Base title={isMe ? 'Your shelf' : `${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} feed={!profile.is_private} noindex={profile.is_private} og={og}
   image={profile.is_private ? undefined : `/og/u/${profile.username}.png`}>
@@ -128,6 +136,11 @@ const og = visible && !profile.is_private ? profileOg(name, count('book'), count
           ? <p class="serif none">Nothing on this shelf matches.</p>
           : <Bookshelf books={books} owner={name} mine={isMe} />}
       </div>
+      <div class="pad rise d3">
+        {so
+          ? <SoFar n={so} years={pick.years} thisYear={pick.thisYear} username={profile.username} name={name} isMe={isMe} />
+          : isMe && <section id="so-far" class="nothing"><h2 class="serif">{pick.thisYear} so far</h2><p class="muted">Nothing finished in {pick.thisYear} yet.</p></section>}
+      </div>
     </>
   )}
 </Base>
@@ -136,6 +149,9 @@ const og = visible && !profile.is_private ? profileOg(name, count('book'), count
   .top { padding-top: 28px; }
   .bar { margin-top: 28px; }
   .shelfarea { margin-top: 40px; }
+  .nothing { margin-top: 64px; }
+  .nothing h2 { margin: 0 0 6px; font-weight: 400; font-size: 34px; }
+  .nothing p { margin: 0; }
   .none { margin: 0; padding: 60px 0; text-align: center; font-size: 22px; font-style: italic; color: var(--muted); }
   .note { max-width: 560px; margin: 0 auto; padding: 40px 32px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
   .note svg { color: var(--muted); }

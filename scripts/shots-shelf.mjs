@@ -38,8 +38,9 @@ for (const theme of ['light', 'dark']) for (const [dev, vp] of [['desktop', { wi
     await page.waitForTimeout(400); await page.screenshot({ path: `${OUT}/filter-${tag}.png` });
   }
   await page.mouse.move(0, 0);
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(500);
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight)); await page.waitForTimeout(1800);
   await page.screenshot({ path: `${OUT}/bottom-${tag}.png` });
+  if (await page.locator('#so-far h2').count()) await page.locator('#so-far').screenshot({ path: `${OUT}/sofar-${tag}.png` });
   await ctx.close();
 }
 await browser.close();

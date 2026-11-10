@@ -1,0 +1,105 @@
+---
+// "2026 so far", under the shelf: one sentence, a bar for each month, and a few tiles. Real numbers from finished things only;
+// hours and pages count only titles that have a runtime or a page count, and say so. The Year share card links here (#so-far).
+import Cover from '../Cover.astro';
+import { coverSrc, fullTitle, href } from '../../lib/data';
+import type { YearNumbers } from '../../lib/yearstats';
+interface Props { n: YearNumbers; years: number[]; thisYear: number; username: string; name: string; isMe: boolean; keep?: string }
+const { n, years, thisYear, username, name, isMe, keep = '' } = Astro.props;
+const who = isMe ? 'you' : name.split(' ')[0];
+const plural = (k: number, one: string, many = one + 's') => `${k} ${k === 1 ? one : many}`;
+const read = [n.nBooks && ['book', n.nBooks], n.nEssays && ['essay', n.nEssays]].filter(Boolean) as [string, number][];
+const watched = [n.nFilms && ['film', n.nFilms], n.nShows && ['show', n.nShows]].filter(Boolean) as [string, number][];
+const BAR = 100;
+const fmt = (k: number) => k.toLocaleString('en-IN');
+const hours = Math.round(n.filmMin / 60);
+const yearUrl = (y: number) => `/@${username}/${y === thisYear ? '' : `?year=${y}`}#so-far`;
+const fav = n.fav;
+const favSrc = fav ? coverSrc(fav) : undefined;
+---
+<section id="so-far" class="sofar" aria-labelledby="so-far-h">
+  <div class="sf-head">
+    <h2 id="so-far-h" class="serif">{n.year === thisYear ? `${n.year} so far` : String(n.year)}</h2>
+    <div class="sf-tools">
+      {isMe && <button class="gchip" type="button" data-share={JSON.stringify({ title: `My ${n.year}`, ref: `year=${username}/${n.year}`, card: `/@${username}/year.png?year=${n.year}` })}>Share my year</button>}
+      {years.length > 1 && <span class="sf-years" role="group" aria-label="Year">{years.map((y) => <a class="gchip" href={yearUrl(y)} aria-current={y === n.year ? 'page' : undefined}>{y}</a>)}</span>}
+    </div>
+  </div>
+  <div class="sf-grid">
+    <div class="card sf-main">
+      <p class="serif sf-line num">
+        In {n.year} {who}
+        {read.length > 0 && <> read {read.map(([w, k], i) => <>{i > 0 && ' and '}<b class="nb">{k}</b> {k === 1 ? w : w + 's'}</>)}</>}{read.length > 0 && watched.length > 0 && ', and'}
+        {watched.length > 0 && <> watched {watched.map(([w, k], i) => <>{i > 0 && ' and '}<b class="nf">{k}</b> {k === 1 ? w : w + 's'}</>)}</>}.
+      </p>
+      <div class="bars num" role="img" aria-label={`Finished per month in ${n.year}: ` + n.months.filter((m) => !m.future).map((m) => `${m.name} ${m.sum}`).join(', ')}>
+        {n.months.map((m) => (
+          <div class="mcol" title={m.future ? undefined : `${m.name}: ${plural(m.book, 'book')}, ${plural(m.film, 'film or show', 'films and shows')}, ${plural(m.essay, 'essay')}`}>
+            {!m.future && m.sum > 0 && <span class="mt">{m.sum}</span>}
+            <div class="stackbar">
+              {m.essay > 0 && <i style={`height:${(m.essay / n.maxMonth) * BAR}px;background:var(--moss)`}></i>}
+              {m.film > 0 && <i style={`height:${(m.film / n.maxMonth) * BAR}px;background:var(--sky)`}></i>}
+              {m.book > 0 && <i style={`height:${(m.book / n.maxMonth) * BAR}px;background:var(--book)`}></i>}
+              {m.sum === 0 && <i class="zero"></i>}
+            </div>
+            <span class="mn">{m.name.slice(0, 1)}</span>
+          </div>
+        ))}
+      </div>
+      <div class="keys"><span class="key"><i style="background: var(--book)"></i>Books</span><span class="key"><i style="background: var(--sky)"></i>Films and TV</span><span class="key"><i style="background: var(--moss)"></i>Essays</span></div>
+    </div>
+    <div class="sf-tiles">
+      <div class="card tile"><span class="eyebrow">Hours of film</span>
+        {n.filmsKnown ? <><span class="serif big" style="color: var(--sky)">{hours < 1 ? '<1' : fmt(hours)}</span><span class="small">{n.filmCount > n.filmsKnown ? `About, from ${plural(n.filmsKnown, 'title')} with a runtime` : 'Counted from each runtime'}</span></>
+          : <span class="small">{n.filmCount ? 'No runtimes saved for these yet.' : 'No films or shows finished.'}</span>}
+      </div>
+      <div class="card tile"><span class="eyebrow">Pages</span>
+        {n.booksKnown ? <><span class="serif big" style="color: var(--book)">{fmt(n.pageSum)}</span><span class="small">{n.bookCount > n.booksKnown ? `About, from ${plural(n.booksKnown, 'book')} with a page count` : 'Counted from each book’s pages'}</span></>
+          : <span class="small">{n.bookCount ? 'No page counts saved for these yet.' : 'No books finished.'}</span>}
+      </div>
+      <div class="card tile wide">
+        <div>
+          <span class="eyebrow">Favourite of the year</span>
+          {fav ? <a class="serif favname" href={href(fav)}>{fullTitle(fav)}</a> : <span class="small">Rate something 3.5 or more to pick one.</span>}
+          {fav?.data.rating != null && <span class="small">{fav.data.rating} stars</span>}
+        </div>
+        {fav && favSrc && <a href={href(fav)} tabindex="-1" aria-hidden="true" class="favpic"><Cover entry={fav} variant="mini" /></a>}
+      </div>
+    </div>
+  </div>
+</section>
+<style>
+  .sofar { margin-top: 64px; scroll-margin-top: 24px; }
+  .sf-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px 20px; flex-wrap: wrap; margin-bottom: 20px; }
+  .sf-head h2 { margin: 0; font-size: 34px; font-weight: 400; }
+  .sf-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .sf-years { display: inline-flex; flex-wrap: wrap; gap: 6px; }
+  .sf-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 20px; }
+  .sf-main { padding: 26px; border-radius: 20px; display: flex; flex-direction: column; gap: 22px; }
+  .sf-line { margin: 0; font-size: 24px; line-height: 1.35; }
+  .nb { font-weight: 500; color: var(--book); }
+  .nf { font-weight: 500; color: var(--sky); }
+  .bars { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 8px; align-items: end; }
+  .mcol { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; min-width: 0; }
+  .mt { font-size: 12px; color: var(--muted); }
+  .stackbar { width: 100%; display: flex; flex-direction: column; justify-content: flex-end; min-height: 4px; border-radius: 4px 4px 2px 2px; overflow: hidden; transform-origin: bottom; animation: grow .7s var(--spring) backwards; }
+  .stackbar i { display: block; width: 100%; }
+  .stackbar i.zero { height: 4px; background: var(--line); }
+  .mn { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+  @keyframes grow { from { transform: scaleY(0); } to { transform: none; } }
+  .keys { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted); }
+  .key { display: inline-flex; align-items: center; gap: 6px; }
+  .key i { width: 10px; height: 10px; border-radius: 3px; }
+  .sf-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-content: start; }
+  .tile { padding: 22px; border-radius: 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .tile.wide { grid-column: span 2; flex-direction: row; justify-content: space-between; align-items: center; gap: 16px; }
+  .tile.wide > div { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .big { font-size: 40px; line-height: 1; }
+  .small { font-size: 13px; color: var(--muted); }
+  .favname { font-size: 24px; line-height: 1.2; overflow-wrap: anywhere; }
+  a.favname:hover { color: var(--lat); }
+  .favpic { flex: 0 0 auto; width: 54px; }
+  .favpic :global(.mini) { width: 100%; height: auto; aspect-ratio: 2 / 3; border-radius: 4px; }
+  @media (max-width: 900px) { .sf-grid { grid-template-columns: 1fr; } .sf-main { padding: 20px; } .sf-line { font-size: 21px; } .sf-head h2 { font-size: 28px; } }
+  @media (prefers-reduced-motion: reduce) { .stackbar { animation: none; } }
+</style>
