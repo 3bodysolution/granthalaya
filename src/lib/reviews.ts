@@ -58,7 +58,7 @@ export async function loadReviews(sb: SupabaseClient, rows: Row[], me: { id: str
     const x = extras.get(r.id)!;
     return {
       id: r.id, userId: r.user_id, titleId: r.title_id, season, status: r.status, rating: r.rating == null ? null : Number(r.rating),
-      loved: r.loved, notes: r.notes ?? '', tagline: r.tagline ?? '', spoiler: r.spoiler, date: r.logged_on, again: r.again,
+      loved: r.loved, notes: r.notes ?? '', tagline: '', spoiler: r.spoiler, date: r.logged_on, again: r.again,
       username: r.username, name: r.display_name || r.username, avatar: r.avatar_url, mine: r.user_id === me?.id,
       href: season != null && show ? `/@${r.username}/library/${show.slug}/#s${season}` : `/@${r.username}/library/${t?.slug ?? ''}/`,
       likes: x.likes, liked: x.liked, comments: x.comments,

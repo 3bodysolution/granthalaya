@@ -581,7 +581,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       ev.preventDefault();
       const btn = f.querySelector<HTMLButtonElement>('button[type="submit"]')!;
       busy(btn, true);
-      const r = await send('/api/log', 'PATCH', { id: f.dataset.seasonEdit, notes: (f.elements.namedItem('notes') as HTMLTextAreaElement).value, tagline: (f.elements.namedItem('tagline') as HTMLInputElement | null)?.value ?? '', finished: (f.elements.namedItem('day') as HTMLInputElement).value });
+      const r = await send('/api/log', 'PATCH', { id: f.dataset.seasonEdit, notes: (f.elements.namedItem('notes') as HTMLTextAreaElement).value, finished: (f.elements.namedItem('day') as HTMLInputElement).value });
       busy(btn, false);
       if (r) toast('Saved');
     }, true);

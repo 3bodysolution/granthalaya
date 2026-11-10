@@ -80,7 +80,7 @@ function toEntry(r: LogRow, owner: string): Entry {
       runtime: opt(t.runtime), pages: opt(t.pages), words: opt(t.words), link: opt(t.link), source: opt(t.source),
       where: opt(r.where_seen), again: r.again, times: 1, color: opt(t.color), coverColor: opt(t.cover_color), cover: opt(t.cover_url), private: r.only_me,
       trivia: Array.isArray(t.trivia) ? t.trivia : [], triviaSource: opt(t.trivia_source), tmdbId: opt(t.tmdb_id), olKey: opt(t.ol_key), language: opt(t.language),
-      tagline: opt(r.tagline), spoiler: r.spoiler === true, cardLine: opt(t.tagline),
+      spoiler: r.spoiler === true, cardLine: opt(t.tagline),
     },
   };
 }

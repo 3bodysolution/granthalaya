@@ -60,7 +60,6 @@ const stars = (r?: number) => (r == null ? '' : '★'.repeat(Math.floor(r)) + (r
         {mode === 'owner' && m && (
           <form class="sl-edit" data-season-edit={m.logId}>
             <label class="sl-day"><span>{m.status === 'done' ? 'Watched on' : m.status === 'want' ? 'Added on' : 'Started on'}</span><input type="date" name="day" value={m.day} required /></label>
-            <label class="sl-review"><span>Tagline</span><input name="tagline" maxlength="140" value={m.tagline ?? ''} placeholder="Optional. Your review in one line" /></label>
             <label class="sl-review"><span>Review</span><textarea name="notes" rows="3" maxlength="10000" placeholder={`What did season ${s.n} leave you with?`}>{m.notes}</textarea></label>
             <div class="sl-actions">
               <button type="submit" class="btn">Save</button>

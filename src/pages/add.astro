@@ -22,7 +22,7 @@ if (logId) {
   start = {
     mode: 'edit', id: l.id, kind: l.title.kind, title: l.title, status: l.status, rating: l.rating == null ? null : Number(l.rating), loved: l.loved,
     started: l.started_on, finished: l.finished_on, again: l.again, notes: l.notes, where: l.where_seen, onShelf: true,
-    tagline: l.tagline ?? '', spoiler: l.spoiler === true,
+    spoiler: l.spoiler === true,
   };
 } else if (titleId && /^[0-9a-f-]{36}$/i.test(titleId)) {
   const { data: t } = await sb.from('titles').select('*').eq('id', titleId).maybeSingle<any>();
@@ -109,10 +109,6 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
           </div>
         </div>
 
-        <label class="stack not-essay" style="gap: 8px">
-          <span class="lbl">Tagline</span>
-          <input name="tagline" class="field serif" maxlength="140" placeholder="Optional. Your review in one line" />
-        </label>
         <label class="stack" style="gap: 8px">
           <span class="lbl" id="noteslbl">Review</span>
           <textarea name="notes" class="field serif" rows="4" maxlength="10000" placeholder="Optional. What did you think?"></textarea>
@@ -449,7 +445,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         status, rating: rating || null, loved: $('loved').getAttribute('aria-pressed') === 'true',
         started: f('started').value || null, finished: f('finished').value || null,
         again: f('again').checked, notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value, where: f('where').value,
-        tagline: kind === 'essay' ? '' : f('tagline').value, spoiler: kind !== 'essay' && f('spoiler').checked,
+        spoiler: kind !== 'essay' && f('spoiler').checked,
       };
       if (start.mode === 'edit') { data.id = start.id; data.full = true; }
       else if (titleId) data.title = titleId;
@@ -488,7 +484,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         f('again').checked = !!start.again;
         (form.elements.namedItem('notes') as HTMLTextAreaElement).value = start.notes ?? '';
         f('where').value = start.where ?? '';
-        f('tagline').value = start.tagline ?? ''; f('spoiler').checked = !!start.spoiler;
+        f('spoiler').checked = !!start.spoiler;
         if (start.where) ($('morebox') as HTMLDetailsElement).open = true;
         ($('savebtn')).textContent = 'Save changes';
       } else if (start.again) {

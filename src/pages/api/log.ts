@@ -26,13 +26,10 @@ function fields(b: Record<string, any>, kind: Kind, status: Status) {
     finished_on: status === 'done' ? finished ?? today() : null,
     again: b.again === true,
     notes: str(b.notes, 10000) ?? '',
-    tagline: oneLine(b.tagline),
     spoiler: b.spoiler === true,
     where_seen: str(b.where, 80) ?? '',
   };
 }
-/** a review's tagline: one line, at most 140 characters */
-const oneLine = (v: unknown) => [...(str(v, 400) ?? '').replace(/\s+/g, ' ')].slice(0, 140).join('').trim();
 
 type TitleBits = { kind: Kind; slug: string; season: number | null; show_id: string | null; cover_url?: string | null };
 async function kindOf(ctx: APIContext, titleId: string): Promise<TitleBits | null> {
@@ -84,8 +81,7 @@ export const POST: APIRoute = async (ctx) => {
     if (recent?.length) {
       const fill: Record<string, unknown> = {};
       if (row.rating != null) fill.rating = row.rating;
-      if (row.notes) fill.notes = row.notes;
-      if (row.tagline) { fill.tagline = row.tagline; fill.spoiler = row.spoiler; }
+      if (row.notes) { fill.notes = row.notes; if (row.spoiler) fill.spoiler = true; }
       if (row.where_seen) fill.where_seen = row.where_seen;
       if (row.started_on) fill.started_on = row.started_on;
       if (Object.keys(fill).length) await sb.from('logs').update(fill).eq('id', recent[0].id).eq('user_id', me.id);
@@ -127,7 +123,6 @@ export const PATCH: APIRoute = async (ctx) => {
     // a season's review or date, edited in place on the show's entry page
     change = {};
     if ('notes' in b) change.notes = str(b.notes, 10000) ?? '';
-    if ('tagline' in b) change.tagline = oneLine(b.tagline);
     if ('spoiler' in b) change.spoiler = b.spoiler === true;
     if ('finished' in b) {
       const day = isoDate(b.finished);
