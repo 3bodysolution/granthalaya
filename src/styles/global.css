@@ -321,6 +321,8 @@ input[type="checkbox"], input[type="radio"] { color: var(--lat); }
 :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"], [type="hidden"]), textarea, select) {
   background-color: var(--card); color: var(--ink); border-color: var(--line); caret-color: var(--ink);
 }
+/* the open list of a plain dropdown: our colours, so no white list with unreadable text in dark mode */
+:where(select) option, :where(select) optgroup { background-color: var(--card); color: var(--ink); }
 :where(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"], [type="hidden"]), textarea, select):focus {
   border-color: var(--lat); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--lat) 30%, transparent);
 }
