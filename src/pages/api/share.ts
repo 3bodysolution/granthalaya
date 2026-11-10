@@ -58,7 +58,7 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     const list = (await loadShelf(sb, profile, { byShow: false })).filter((e) => e.data.status === 'done' && !e.data.private && e.data.date.getUTCFullYear() === year);
     const books = list.filter((e) => e.data.type === 'book').length;
     const films = list.filter((e) => e.data.type === 'film' || e.data.type === 'tv').length;
-    const link = abs(profile.is_private ? null : `/@${profile.username}/stats/?year=${year}`);
+    const link = abs(profile.is_private ? null : `/@${profile.username}/?year=${year}#so-far`);
     return json({ link, text: yearText(year, books, films, link) });
   }
 

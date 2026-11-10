@@ -12,10 +12,8 @@ const tooMany = (ctx: { url: URL; clientAddress: string }) => { try { return rat
 // Addresses from the days when this was one person's site keep working.
 function oldAddress(path: string): string | null {
   const f = `/@${site.founder}`;
-  if (/^\/library\/?$/.test(path)) return `${f}/library/`;
   let m = path.match(/^\/library\/([a-z0-9-]+)\/?$/);
   if (m) return `${f}/library/${m[1]}/`;
-  if (/^\/stats\/?$/.test(path)) return `${f}/stats/`;
   if (/^\/notes\/?$/.test(path)) return `${f}/reviews/`;
   if (/^\/threads\/?$/.test(path)) return `${f}/collections/`;
   m = path.match(/^\/threads\/([a-z0-9-]+)\/?$/);
@@ -28,6 +26,23 @@ function oldAddress(path: string): string | null {
   if (path === '/rss.xml') return `${f}/rss.xml`;
   // Support became Sponsor
   if (/^\/support\/?$/.test(path)) return '/sponsor/';
+  return null;
+}
+
+// The shelf is the page at /@username now. Library, Diary and Stats went into it; these are temporary redirects (307) for now,
+// to be made permanent once the new shelf has been live for a week (see docs/plan.md).
+function shelfMoved(url: URL): string | null {
+  const path = url.pathname;
+  const f = `/@${site.founder}/`;
+  if (/^\/library\/?$/.test(path)) return f;
+  if (/^\/stats\/?$/.test(path)) return `${f}#so-far`;
+  let m = path.match(/^\/@([^/]+)\/library\/?$/);
+  if (m) return `/@${m[1]}/${url.search}`;
+  if ((m = path.match(/^\/@([^/]+)\/diary\/?$/))) return `/@${m[1]}/`;
+  if ((m = path.match(/^\/@([^/]+)\/stats\/?$/))) {
+    const y = url.searchParams.get('year') ?? '';
+    return `/@${m[1]}/${/^\d{4}$/.test(y) ? `?year=${y}` : ''}#so-far`;
+  }
   return null;
 }
 
@@ -62,6 +77,8 @@ const handle: Parameters<typeof defineMiddleware>[0] = async (ctx, next) => {
   const path = ctx.url.pathname;
   // Sponsor is switched off in src/data/site.ts: its pages are not found
   if (!site.sponsor.enabled && /^\/(sponsor|support)\/?$/.test(path)) return ctx.rewrite('/404');
+  const moved = shelfMoved(ctx.url);
+  if (moved) return ctx.redirect(moved, 307);
   const old = oldAddress(path);
   if (old) return ctx.redirect(old, 301);
   if (ctx.isPrerendered) return next();

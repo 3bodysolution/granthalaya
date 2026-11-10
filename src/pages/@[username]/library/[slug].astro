@@ -84,7 +84,7 @@ const mins = minutes(entry);
 const done = d.status === 'done';
 // a plain save can be taken back with the same tap that made it; the page is gone afterwards, so the message keeps an Undo
 const bare = isMe && me ? await isBareEntry(sb, me.id, entry.logId!) : false;
-const off = (k: string) => ({ 'data-bare': bare ? '1' : '0', 'data-unsave-go': `/@${profile.username}/library/`, 'data-redo': JSON.stringify({ title: entry.titleId, status: k }) });
+const off = (k: string) => ({ 'data-bare': bare ? '1' : '0', 'data-unsave-go': `/@${profile.username}/`, 'data-redo': JSON.stringify({ title: entry.titleId, status: k }) });
 const nav = inCols[0];
 const prev = nav && nav.pos > 1 ? bySlug.get(nav.items[nav.pos - 2].slug) : undefined;
 const next = nav && nav.pos < nav.of ? bySlug.get(nav.items[nav.pos].slug) : undefined;
@@ -190,7 +190,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
         </div>
 
         <div class="main">
-          <a href={`/@${profile.username}/library/`} class="owner rise d2"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
+          <a href={`/@${profile.username}/`} class="owner rise d2"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
           <h1 class="title bigtitle rise d3">{fullTitle(entry)}</h1>
           <p class="rise d3 meta">
             {isFilm ? (
@@ -329,7 +329,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
     </>
   ) : (
     <article class="essay-page">
-      <a href={`/@${profile.username}/library/`} class="owner rise"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
+      <a href={`/@${profile.username}/`} class="owner rise"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
       <p class="sub rise d1" style="color: var(--moss)">Essay | {d.source ?? 'on the web'} | {d.creator}</p>
       <h1 class="serif rise d2 et" transition:name={tname}>{d.title}</h1>
       <p class="rise d2 num muted" style="margin: 0; font-size: 15px">
@@ -373,7 +373,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
 
   {rel.length > 0 && (
     <section class="pad block rise d6">
-      <div class="rule"><h2 class="eyebrow">Sits well next to</h2>{inCols[0] ? <a href={collectionHref(inCols[0])} class="more">Open the collection →</a> : <a href={`/@${profile.username}/library/`} class="more">The library →</a>}</div>
+      <div class="rule"><h2 class="eyebrow">Sits well next to</h2>{inCols[0] ? <a href={collectionHref(inCols[0])} class="more">Open the collection →</a> : <a href={`/@${profile.username}/`} class="more">The library →</a>}</div>
       <div class="rel">
         {rel.map((e) => (
           <a href={href(e)} class="lift stack" style="gap: 10px">

@@ -160,5 +160,5 @@ export const DELETE: APIRoute = async (ctx) => {
   const { error, count } = await ctx.locals.supabase.from('logs').delete({ count: 'exact' }).eq('id', b.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
   if (!count) return oops('Couldn’t find that entry.', 404);
-  return json({ ok: true, href: `/@${me.username}/library/` });
+  return json({ ok: true, href: `/@${me.username}/` });
 };

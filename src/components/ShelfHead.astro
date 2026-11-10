@@ -5,13 +5,13 @@ import ShelfTabs, { type ShelfTab } from './ShelfTabs.astro';
 import ProfilePanel from './ProfilePanel.astro';
 import type { Shelf } from '../lib/shelfpage';
 import type { Entry, LatestReview } from '../lib/data';
-interface Props { shelf: Shelf; current?: ShelfTab; heading?: string; favs?: Entry[]; latest?: LatestReview | null }
-const { shelf, current, heading, favs = [], latest = null } = Astro.props;
+interface Props { shelf: Shelf; current?: ShelfTab; heading?: string; favs?: Entry[]; latest?: LatestReview | null; tabs?: boolean }
+const { shelf, current, heading, favs = [], latest = null, tabs = true } = Astro.props;
 const p = shelf.profile;
 ---
 {heading && <h1 class="sr">{heading}</h1>}
 <div class="shead">
-  <ShelfTabs username={p.username} current={current} />
+  {tabs ? <ShelfTabs username={p.username} current={current} /> : <span></span>}
   <button type="button" class="btn vp" aria-expanded="false" aria-controls="profile" data-profile-btn>
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" /></svg>
     <span data-profile-label>View profile</span>

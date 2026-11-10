@@ -13,7 +13,7 @@ const me = Astro.locals.me;
     </div>
   </section>
   <div class="pad rise d4 row">
-    {me ? <a href={`/@${me.username}/library/`} class="btn primary">Go to your library</a> : <a href="/" class="btn primary">Go home</a>}
+    {me ? <a href={`/@${me.username}/`} class="btn primary">Go to your library</a> : <a href="/" class="btn primary">Go home</a>}
     {me && <button class="btn" data-search-open>Search</button>}
   </div>
 </Base>

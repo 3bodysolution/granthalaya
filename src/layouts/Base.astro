@@ -40,7 +40,7 @@ const nav: { key: string; label: string; href: string }[] = [
 ];
 const avatar = me?.avatar_url;
 // "My shelf" (signed in): your Library tab, shown as current on any of your own shelf pages (profile, library, diary, entries...)
-const shelfHref = me ? `/@${me.username}/library/` : '';
+const shelfHref = me ? `/@${me.username}/` : '';
 const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.username.toLowerCase()}/`);
 ---
 <!doctype html>
@@ -116,7 +116,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
               </summary>
               <div class="menu-list" role="menu">
                 <div class="menu-who"><b>{me.display_name || me.username}</b><span>@{me.username}</span></div>
-                <a role="menuitem" href={`/@${me.username}/`}>Profile</a>
+                <a role="menuitem" href={`/@${me.username}/#profile`}>Profile</a>
                 <a role="menuitem" href="/settings/">Settings</a>
                 {me.is_admin && <a role="menuitem" href="/admin/">Reports</a>}
                 <form method="post" action="/auth/signout" data-astro-reload><button role="menuitem" type="submit">Sign out</button></form>

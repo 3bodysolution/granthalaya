@@ -1,0 +1,295 @@
+---
+// The 3D shelf. Books and essays are books (spine, page-edge top, sides); films and TV are DVD cases. Spine colour is the cover's main colour.
+// Point at one to lift it; click, Enter or Space pulls it out and turns it to show the cover; Escape or another click puts it back.
+// Under the shelf: a caption (what you point at) and a details card for the pulled-out one (Open the entry, Previous, Next, Put it back).
+// Speed: the page carries only the spine and the page-edge top of each one. The sides and the cover picture are made when a book is pointed at,
+// focused or pulled out (and for its two neighbours), so a shelf of hundreds loads no cover pictures until you ask.
+// Desktop: shelves stack (the row wraps, the planks are a repeating background). Phone: one shelf that scrolls sideways.
+// Reduced motion: the spines stay and don't turn or move; the cover shows only in the details card.
+import type { Spine } from '../../lib/spine';
+export interface ShelfBook {
+  title: string; creator: string; kind: 'book' | 'film' | 'tv' | 'essay'; kindLabel: string; year?: number;
+  status: string; when: string; stars: string; href: string; cover?: string; review: string; spine: Spine; label: string;
+}
+interface Props { books: ShelfBook[]; owner: string; mine: boolean }
+const { books, owner, mine } = Astro.props;
+---
+<section class="shelfwrap" data-shelf aria-label={`${owner}’s shelf, ${books.length} ${books.length === 1 ? 'title' : 'titles'}`}>
+  <div class="stage">
+    <ul class="shelf" role="list" data-shelf-list>
+      {books.map((b, i) => (
+        <li>
+          <button type="button" class:list={['book', b.spine.kind === 'dvd' && 'dvd']} aria-pressed="false" aria-controls="shelf-card" aria-label={b.label}
+            data-i={i} data-title={b.title} data-by={b.creator} data-kind={b.kind} data-kindlabel={b.kindLabel} data-year={b.year ?? ''} data-status={b.status} data-when={b.when}
+            data-stars={b.stars} data-href={b.href} data-cover={b.cover ?? ''} data-review={b.review}
+            style={`--w:${b.spine.w}px;--h:${b.spine.h}px;--d:${b.spine.d}px;--c:${b.spine.color};color:${b.spine.ink}`}>
+            <span class="face front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true">{b.title}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
+            <span class="face top" aria-hidden="true"></span>
+          </button>
+        </li>
+      ))}
+    </ul>
+    <div class="plank" aria-hidden="true"><span class="plate">{owner.toUpperCase()}</span></div>
+    <div class="legs" aria-hidden="true"><span></span><span></span></div>
+    <div class="fade fade-l" aria-hidden="true"></div>
+    <div class="fade fade-r" aria-hidden="true"></div>
+  </div>
+  <p class="caption" data-shelf-caption aria-hidden="true" data-idle="Point at a spine. Click to pull it out." data-idle-touch="Tap a spine to pull it out.">Point at a spine. Click to pull it out.</p>
+  <p class="sr" role="status" aria-live="polite" data-shelf-live></p>
+
+  <section class="detail" id="shelf-card" data-shelf-card hidden aria-label="The one pulled out">
+    <div class="d-cover" data-d-cover hidden><img alt="" width="132" height="198" decoding="async" /></div>
+    <div class="d-body">
+      <p class="eyebrow" data-d-kind></p>
+      <h2 class="serif d-title" data-d-title></h2>
+      <p class="d-by" data-d-by></p>
+      <p class="d-meta"><span class="d-stars" data-d-stars></span><span data-d-status></span></p>
+      <p class="serif d-review" data-d-review></p>
+      <div class="d-acts">
+        <a class="btn act" href="#" data-d-open>Open the entry</a>
+        <button type="button" class="btn" data-d-prev>← Previous</button>
+        <button type="button" class="btn" data-d-next>Next →</button>
+        <button type="button" class="btn" data-d-back>Put it back</button>
+      </div>
+    </div>
+  </section>
+</section>
+
+<style>
+  .shelfwrap { --plank1: #8A5E3B; --plank2: #5A3B22; --rowh: 300px; --gapy: 18px; position: relative; }
+  :global(html[data-theme="dark"]) .shelfwrap { --plank1: #4A3524; --plank2: #241912; }
+  .stage { position: relative; }
+  .shelf { list-style: none; margin: 0; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 3px; row-gap: var(--gapy);
+    background: repeating-linear-gradient(to bottom, transparent 0 var(--rowh), var(--plank1) var(--rowh) calc(var(--rowh) + 8px), var(--plank2) calc(var(--rowh) + 8px) calc(var(--rowh) + var(--gapy))); }
+  .shelf li { position: relative; flex: 0 0 auto; height: var(--rowh); display: flex; align-items: flex-end; perspective: 1500px; perspective-origin: 50% -25%; }
+  .shelf li:has(.out), .shelf li:hover, .shelf li:focus-within { z-index: 4; }
+  .plank { position: relative; height: 34px; margin: 0 8px; border-radius: 3px; background: linear-gradient(var(--plank1), var(--plank2)); box-shadow: 0 18px 30px -12px var(--shadow); display: flex; justify-content: center; align-items: center; }
+  .plate { padding: 4px 18px; border-radius: 2px; font-size: 12px; letter-spacing: .24em; font-weight: 700; color: #3B2A12; background: linear-gradient(180deg, #E8C77A, #B88A3A 55%, #D9B064); box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 1px 2px rgba(0,0,0,.5); text-shadow: 0 1px 0 rgba(255,240,200,.5); max-width: 80%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .legs { display: flex; justify-content: space-between; margin: 0 40px; }
+  .legs span { width: 10px; height: 18px; background: var(--plank2); }
+  .fade { display: none; }
+
+  .book { position: relative; flex: 0 0 auto; width: var(--w); height: var(--h); border: 0; padding: 0; margin: 0; background: none; cursor: pointer; font: inherit; transform-style: preserve-3d;
+    transform-origin: 50% 50% calc(var(--d) * -.5); transition: transform .75s cubic-bezier(.22,.9,.25,1.05); }
+  .book:hover { transform: translateY(-14px) translateZ(18px); }
+  .book:focus-visible { outline: none; }
+  .book:focus-visible .front { outline: 3px solid var(--lat); outline-offset: 3px; }
+  .book.out { transform: translateY(-36px) translateZ(210px) rotateY(-78deg); }
+  .book.out:hover { transform: translateY(-40px) translateZ(214px) rotateY(-78deg); }
+  .book :global(.face) { position: absolute; box-sizing: border-box; display: block; }
+  .front { inset: 0; background: var(--c); border-radius: 2px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 10px; box-shadow: inset 4px 0 0 rgba(255,255,255,.12), inset -5px 0 7px rgba(0,0,0,.3); overflow: hidden; }
+  .band { position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .45; }
+  .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; font-size: 15px; line-height: 1.05; max-height: 150px; overflow: hidden; font-weight: 500; position: relative; z-index: 1; }
+  .sp-tag { font-family: 'Courier Prime', ui-monospace, monospace; font-size: 9px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid currentColor; position: relative; z-index: 1; }
+  .top { left: 0; top: calc(var(--d) * -1); width: var(--w); height: var(--d); transform-origin: bottom center; transform: rotateX(90deg); background: repeating-linear-gradient(to right, #EFE6D2 0 2px, #DCCFB4 2px 3px); border: 2px solid var(--c); filter: brightness(.9); }
+  .book :global(.left) { left: calc(var(--d) * -1); top: 0; width: var(--d); height: var(--h); transform-origin: right center; transform: rotateY(-90deg); background: var(--c); filter: brightness(.55); }
+  .book :global(.right) { left: var(--w); top: 0; width: var(--d); height: var(--h); transform-origin: left center; transform: rotateY(90deg); background: var(--c); overflow: hidden; }
+  .book:not(.out) :global(.right) { filter: brightness(.6); }
+  .book :global(.right img) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .book :global(.rt) { position: absolute; inset: 0; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; text-align: left; color: inherit; font-family: Fraunces, Georgia, serif; font-size: 17px; line-height: 1.15; }
+  .book :global(.rt small) { margin-top: auto; font-family: 'Courier Prime', ui-monospace, monospace; font-size: 11px; letter-spacing: .1em; opacity: .8; }
+
+  /* DVD cases: one size, a dark plastic shell, gloss, a ribbed top */
+  .dvd .front { border-radius: 5px; padding: 22px 0 18px; box-shadow: inset 0 13px 0 #17181C, inset 0 -13px 0 #17181C, inset 3px 0 0 #17181C, inset -3px 0 0 #17181C, inset 5px 0 6px rgba(0,0,0,.35); }
+  .dvd .front::after { content: ""; position: absolute; inset: 0; border-radius: 5px; pointer-events: none; background: linear-gradient(90deg, rgba(255,255,255,0) 12%, rgba(255,255,255,.30) 26%, rgba(255,255,255,.06) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 86%, rgba(255,255,255,0) 94%); }
+  .dvd .band { top: 3px; height: 6px; border: 0; background: repeating-linear-gradient(90deg, #2A2C31 0 2px, #111215 2px 4px); opacity: 1; left: 4px; right: 4px; border-radius: 2px; }
+  .dvd .sp-tag { border-radius: 3px; width: 28px; height: 14px; font-size: 8px; letter-spacing: .1em; }
+  .dvd .top { border: 0; border-radius: 4px; background: repeating-linear-gradient(to bottom, #26282D 0 3px, #1A1B1F 3px 6px); filter: none; }
+  .dvd :global(.left) { background: #17181C; filter: none; border-radius: 4px; }
+  .dvd :global(.right) { border-radius: 4px; box-shadow: inset 0 0 0 4px #17181C; }
+  .dvd :global(.right)::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, rgba(255,255,255,.28) 0, rgba(255,255,255,0) 35%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 100%); }
+
+  .caption { text-align: center; margin: 14px 0 0; min-height: 22px; font-size: 15px; color: var(--muted); }
+  .detail { margin-top: 18px; display: flex; gap: 28px; flex-wrap: wrap; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--card); box-shadow: 0 12px 24px -16px var(--shadow); animation: rise .45s var(--spring) both; }
+  .detail[hidden] { display: none; }
+  .d-cover { flex: 0 0 auto; }
+  .d-cover img { display: block; width: 132px; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 6px; background: var(--soft); }
+  .d-cover .ph { width: 132px; aspect-ratio: 2 / 3; border-radius: 6px; padding: 14px 12px; box-sizing: border-box; display: flex; background: var(--c, var(--soft)); color: var(--ink-c, var(--ink)); font-family: Fraunces, Georgia, serif; font-size: 17px; line-height: 1.15; }
+  .d-body { flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .d-body .eyebrow { margin: 0; }
+  .d-title { margin: 0; font-size: clamp(28px, 4vw, 38px); font-weight: 400; line-height: 1.05; overflow-wrap: anywhere; }
+  .d-by { margin: 0; color: var(--muted); font-size: 16px; }
+  .d-meta { margin: 0; font-size: 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .d-stars { color: var(--haldi); letter-spacing: 2px; }
+  .d-review { margin: 4px 0 0; font-size: 19px; line-height: 1.45; font-style: italic; overflow-wrap: anywhere; }
+  .d-review:empty { display: none; }
+  .d-acts { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .btn.act { background: var(--lat); border-color: var(--lat); color: var(--on-lat); }
+  .btn.act:hover { background: var(--lat); filter: brightness(1.08); color: var(--on-lat); }
+
+  @media (max-width: 780px) {
+    /* one shelf that scrolls sideways, with soft edges */
+    .stage { margin-inline: calc(var(--gut) * -1); }
+    .shelf { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; padding: 40px var(--gut) 0; margin-top: -40px; height: calc(var(--rowh) + 40px); scroll-snap-type: x proximity; background: none; overscroll-behavior-x: contain; }
+    .shelf::-webkit-scrollbar { display: none; }
+    .shelf li { scroll-snap-align: center; }
+    .plank { margin: 0 calc(var(--gut) - 8px); }
+    .fade { display: block; position: absolute; top: 0; width: 48px; height: calc(var(--rowh)); pointer-events: none; z-index: 5; }
+    .fade-l { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+    .fade-r { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+    .detail { padding: 22px; gap: 20px; }
+    .d-acts .btn { flex: 1 1 auto; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    /* the spines stay put: no turning, no sliding; the one chosen is only marked, and the cover shows in the card */
+    .book, .book:hover, .book.out, .book.out:hover { transition: none; transform: none; }
+    .book.out .front { outline: 3px solid var(--ink); outline-offset: 3px; }
+    .book:hover .front { filter: brightness(1.08); }
+    .detail { animation: none; }
+  }
+</style>
+
+<script>
+  function setup() {
+    const root = document.querySelector<HTMLElement>('[data-shelf]');
+    if (!root || root.dataset.ready) return;
+    root.dataset.ready = '1';
+    const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const list = q('[data-shelf-list]');
+    const books = [...list.querySelectorAll<HTMLButtonElement>('.book')];
+    if (!books.length) return;
+    const card = q('[data-shelf-card]'), caption = q('[data-shelf-caption]'), live = q('[data-shelf-live]');
+    const rm = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const touch = window.matchMedia('(hover: none)');
+    const idle = () => { caption.textContent = (touch.matches ? caption.dataset.idleTouch : caption.dataset.idle) ?? ''; };
+    idle();
+    let out = -1, rove = 0, hoverTimer = 0;
+    books.forEach((b, i) => { b.tabIndex = i === 0 ? 0 : -1; });
+
+    const span = (cls: string) => { const s = document.createElement('span'); s.className = `face ${cls}`; s.setAttribute('aria-hidden', 'true'); return s; };
+    // the sides, made when first needed (not at all with reduced motion)
+    function faces(b: HTMLElement) {
+      if (b.dataset.faces || rm.matches) return;
+      b.dataset.faces = '1';
+      const right = span('right');
+      const rt = document.createElement('span'); rt.className = 'rt';
+      rt.append(b.dataset.title ?? '');
+      const small = document.createElement('small'); small.textContent = [b.dataset.kindlabel, b.dataset.year].filter(Boolean).join(' · ');
+      rt.append(small);
+      right.append(rt);
+      b.append(span('left'), right);
+    }
+    // the cover picture, only for a book that is pointed at for a moment, focused, pulled out, or next to the one pulled out
+    function cover(b: HTMLElement) {
+      if (rm.matches) return;
+      faces(b);
+      const right = b.querySelector('.right');
+      if (!right || right.querySelector('img') || !b.dataset.cover) return;
+      const img = document.createElement('img');
+      img.alt = ''; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
+      img.onerror = () => img.remove();
+      img.src = b.dataset.cover;
+      right.append(img);
+    }
+    const warm = (b?: HTMLElement) => { if (!b) return; if (rm.matches) { if (b.dataset.cover) new Image().src = b.dataset.cover; } else cover(b); };
+
+    const text = (sel: string, v: string) => { q(sel).textContent = v; };
+    function fillCard(b: HTMLElement) {
+      const d = b.dataset;
+      text('[data-d-kind]', [d.kindlabel, d.year].filter(Boolean).join(' · ').toUpperCase());
+      text('[data-d-title]', d.title ?? '');
+      text('[data-d-by]', d.by ?? '');
+      text('[data-d-stars]', d.stars ?? '');
+      text('[data-d-status]', [d.stars ? '' : 'Not rated yet', d.status, d.when].filter(Boolean).join(' · '));
+      text('[data-d-review]', d.review ?? '');
+      q<HTMLAnchorElement>('[data-d-open]').href = d.href ?? '#';
+      const box = q('[data-d-cover]');
+      box.replaceChildren();
+      if (d.cover) {
+        const img = document.createElement('img');
+        img.alt = ''; img.width = 132; img.height = 198; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
+        img.onerror = () => { box.replaceChildren(placeholder(b)); };
+        img.src = d.cover;
+        box.append(img);
+      } else box.append(placeholder(b));
+      box.hidden = false;
+    }
+    function placeholder(b: HTMLElement) {
+      const p = document.createElement('span');
+      p.className = 'ph';
+      p.style.setProperty('--c', b.style.getPropertyValue('--c'));
+      p.style.setProperty('--ink-c', b.style.color);
+      p.textContent = b.dataset.title ?? '';
+      return p;
+    }
+
+    function setRove(i: number) { books[rove].tabIndex = -1; rove = i; books[i].tabIndex = 0; }
+    function pullOut(i: number, focus = false) {
+      if (out >= 0 && out !== i) { books[out].classList.remove('out'); books[out].setAttribute('aria-pressed', 'false'); }
+      out = i;
+      const b = books[i];
+      b.classList.add('out'); b.setAttribute('aria-pressed', 'true');
+      faces(b); cover(b); warm(books[i - 1]); warm(books[i + 1]);
+      fillCard(b);
+      card.hidden = false;
+      setRove(i);
+      live.textContent = `${b.dataset.title} pulled out. Details below.`;
+      b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: rm.matches ? 'auto' : 'smooth' });
+      if (focus) b.focus({ preventScroll: true });
+    }
+    function putBack() {
+      if (out < 0) return;
+      const b = books[out];
+      b.classList.remove('out'); b.setAttribute('aria-pressed', 'false');
+      out = -1; card.hidden = true;
+      live.textContent = `${b.dataset.title} put back.`;
+    }
+    const step = (d: number) => { if (out >= 0) pullOut((out + d + books.length) % books.length); };
+
+    list.addEventListener('click', (ev) => {
+      const b = (ev.target as Element).closest<HTMLButtonElement>('.book');
+      if (!b) return;
+      const i = books.indexOf(b);
+      i === out ? putBack() : pullOut(i);
+    });
+    const hint = (b: HTMLElement) => { caption.textContent = [b.dataset.title, b.dataset.by, b.dataset.year, b.dataset.status].filter(Boolean).join(' · '); };
+    list.addEventListener('pointerover', (ev) => {
+      const b = (ev.target as Element).closest<HTMLElement>('.book');
+      if (!b) return;
+      hint(b);
+      clearTimeout(hoverTimer);
+      hoverTimer = window.setTimeout(() => { faces(b); cover(b); }, 150);   // a moment's rest, not a sweep across the shelf
+    });
+    list.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); idle(); });
+    list.addEventListener('focusin', (ev) => {
+      const b = (ev.target as Element).closest<HTMLButtonElement>('.book');
+      if (!b) return;
+      setRove(books.indexOf(b)); hint(b); faces(b);
+    });
+    list.addEventListener('focusout', () => idle());
+
+    // one tab stop for the whole shelf; arrows move along it (up and down move between shelves)
+    const row = (b: HTMLElement) => b.parentElement!.getBoundingClientRect();
+    function vertical(i: number, dir: 1 | -1) {
+      const here = row(books[i]), cx = here.left + here.width / 2;
+      const cand = books.map((b, n) => ({ n, r: row(b) })).filter(({ r }) => (dir > 0 ? r.top > here.top + 20 : r.top < here.top - 20));
+      if (!cand.length) return i;
+      const nearestTop = dir > 0 ? Math.min(...cand.map((c) => c.r.top)) : Math.max(...cand.map((c) => c.r.top));
+      const sameRow = cand.filter((c) => Math.abs(c.r.top - nearestTop) < 10);
+      return sameRow.sort((a, z) => Math.abs(a.r.left + a.r.width / 2 - cx) - Math.abs(z.r.left + z.r.width / 2 - cx))[0].n;
+    }
+    list.addEventListener('keydown', (ev) => {
+      const b = (ev.target as Element).closest<HTMLButtonElement>('.book');
+      if (!b) return;
+      const i = books.indexOf(b), last = books.length - 1;
+      const to = ev.key === 'ArrowRight' ? Math.min(last, i + 1) : ev.key === 'ArrowLeft' ? Math.max(0, i - 1)
+        : ev.key === 'ArrowDown' ? vertical(i, 1) : ev.key === 'ArrowUp' ? vertical(i, -1)
+        : ev.key === 'Home' ? 0 : ev.key === 'End' ? last : -1;
+      if (to < 0) return;
+      ev.preventDefault();
+      setRove(to); books[to].focus();
+    });
+    root.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Escape' || out < 0) return;
+      ev.preventDefault();
+      const inCard = card.contains(document.activeElement);
+      const b = books[out];
+      putBack();
+      if (inCard) b.focus({ preventScroll: true });
+    });
+    q('[data-d-prev]').addEventListener('click', () => step(-1));
+    q('[data-d-next]').addEventListener('click', () => step(1));
+    q('[data-d-back]').addEventListener('click', () => { const b = books[out]; putBack(); b?.focus(); });
+  }
+  document.addEventListener('astro:page-load', setup);
+</script>

@@ -129,7 +129,7 @@ const features = [
 
         {recent.length > 0 && (
           <section class="pad block rise d5">
-            <div class="rule"><h2 class="eyebrow">Recently</h2><a href={`/@${me.username}/library/`} class="more">Your whole library →</a></div>
+            <div class="rule"><h2 class="eyebrow">Recently</h2><a href={`/@${me.username}/`} class="more">Your whole library →</a></div>
             <div class="shelf">
               {recent.map((e, n) => <Tile entry={e} vt cls="rise" delay={`${(0.6 + n * 0.08).toFixed(2)}s`} />)}
             </div>
