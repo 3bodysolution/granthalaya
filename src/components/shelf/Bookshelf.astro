@@ -1,7 +1,7 @@
 ---
 // The 3D shelf. Books and essays are books (spine, page-edge top, sides); films and TV are DVD cases. Spine colour is the cover's main colour.
 // Point at one to lift it; click, Enter or Space pulls it out and turns it to show the cover; Escape or another click puts it back.
-// Under the shelf: a caption (what you point at) and a details card for the pulled-out one (Open the entry, Previous, Next, Put it back).
+// Under the shelf: a caption (what you point at) and a details card for the pulled-out one (Open, Previous, Next, Put it back).
 // Speed: the page carries only the spine and the page-edge top of each one. The sides and the cover picture are made when a book is pointed at,
 // focused or pulled out (and for its two neighbours), so a shelf of hundreds loads no cover pictures until you ask.
 // Desktop: shelves stack (the row wraps, the planks are a repeating background). Phone: one shelf that scrolls sideways.
@@ -48,7 +48,7 @@ const { books, owner, mine } = Astro.props;
       <p class="d-meta"><span class="d-stars" data-d-stars></span><span data-d-status></span></p>
       <p class="serif d-review" data-d-review></p>
       <div class="d-acts">
-        <a class="btn act" href="#" data-d-open>Open the entry</a>
+        <a class="btn act" href="#" data-d-open>Open</a>
         <button type="button" class="btn" data-d-prev>← Previous</button>
         <button type="button" class="btn" data-d-next>Next →</button>
         <button type="button" class="btn" data-d-back>Put it back</button>

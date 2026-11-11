@@ -12,7 +12,7 @@ const link = new URL(`/@${username}/`, Astro.url).href;
     <button role="menuitem" type="button" data-copy={link}>Copy link to this shelf</button>
     {!isMe && signedIn && (
       <>
-        <button role="menuitem" type="button" data-report={JSON.stringify({ user: id, log: logId ?? null, who: username })}>{logId ? 'Report this entry' : 'Report'}</button>
+        <button role="menuitem" type="button" data-report={JSON.stringify({ user: id, log: logId ?? null, who: username })}>{logId ? 'Report this' : 'Report'}</button>
         <button role="menuitem" type="button" data-block={JSON.stringify({ id, who: username, blocked })}>{blocked ? `Unblock @${username}` : `Block @${username}`}</button>
       </>
     )}

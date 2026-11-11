@@ -103,7 +103,7 @@ export const PATCH: APIRoute = async (ctx) => {
   if (!b || typeof b.id !== 'string') return oops('Nothing to change.');
   const sb = ctx.locals.supabase;
   const { data: cur } = await sb.from('logs').select('id, user_id, status, started_on, finished_on, title:titles(kind, slug, season, show_id)').eq('id', b.id).eq('user_id', me.id).maybeSingle<any>();
-  if (!cur) return oops('Couldn’t find that entry.', 404);
+  if (!cur) return oops('Couldn’t find that.', 404);
   const kind = cur.title.kind as Kind;
   const whole = wholeShow(cur.title);
 
@@ -159,6 +159,6 @@ export const DELETE: APIRoute = async (ctx) => {
   if (b.onlyBare === true && !(await isBareEntry(ctx.locals.supabase, me.id, b.id))) return oops('That has more than a status on it, so it stays on your shelf.', 409);
   const { error, count } = await ctx.locals.supabase.from('logs').delete({ count: 'exact' }).eq('id', b.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
-  if (!count) return oops('Couldn’t find that entry.', 404);
+  if (!count) return oops('Couldn’t find that.', 404);
   return json({ ok: true, href: `/@${me.username}/` });
 };

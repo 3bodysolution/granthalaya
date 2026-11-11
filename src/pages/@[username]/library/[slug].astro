@@ -217,7 +217,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
               <div class="stat"><span class="sub">{isFilm ? 'Times seen' : 'Times read'}</span><b>{d.again && d.times === 1 ? (isFilm ? 'A rewatch' : 'A re-read') : timesWord(d.times, isFilm ? 'watch' : 'read')}</b></div>
             </div>
           )}
-          {d.private && <span class="priv"><Lock width="15" height="15" /> Only you can see this entry</span>}
+          {d.private && <span class="priv"><Lock width="15" height="15" /> Only you can see this</span>}
           {hasReview && (
             <div class="mynotes rise d5" id="review">
               <p class="eyebrow">{isMe ? 'My review' : `${name}’s review`}</p>
@@ -254,10 +254,10 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
           )}
         </div>
 
-        <aside class="logpanel rise d4" aria-label={isMe ? 'Your log' : 'Your shelf'}>
+        <aside class="logpanel rise d4" aria-label={'Your shelf'}>
           {isMe && isShow ? (
             <>
-              <p class="lp-head">Your log</p>
+              <p class="lp-head">Your shelf</p>
               {d.seasons!.length ? (
                 <p class="lp-note">{showLabel}. Each season has its own status, rating and review under Seasons.</p>
               ) : (
@@ -270,7 +270,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
             </>
           ) : isMe ? (
             <>
-              <p class="lp-head">Your log</p>
+              <p class="lp-head">Your shelf</p>
               <div class="toggles" role="group" aria-label="Status">
                 {STATUSES[d.type].map(([k, label]) => {
                   const I = ICON[k];
@@ -289,17 +289,17 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
               {mine.length ? (
                 <>
                   <p class="lp-note">It’s on your shelf: <b>{statusLabel(mine[0].data.type, mine[0].data.status)}</b>{mine[0].data.progress ? ` | ${mine[0].data.progress}` : ''}{stars(mine[0]) ? ` | ${stars(mine[0])}` : ''}.</p>
-                  <a class="lrow2" href={href(mine[0])}><Eye /><span>Open the entry</span></a>
+                  <a class="lrow2" href={href(mine[0])}><Eye /><span>Open it</span></a>
                   {mine[0].data.status === 'done' && !isShow && <a class="lrow2" href={`/add/?title=${entry.titleId}&again=1`}><Repeat /><span>{againWord}</span></a>}
                 </>
               ) : (
                 <>
                   <button class="lrow2 save" type="button" data-quick-add={JSON.stringify({ title: entry.titleId, status: 'want' })} data-saved-label="Saved to your shelf"><Mark /><span data-label>{statusLabel(d.type, 'want')}</span></button>
-                  {isShow ? (about && <a class="lrow2" href={about}><Plus /><span>Log a season</span></a>) : <a class="lrow2" href={`/add/?title=${entry.titleId}`}><Plus /><span>Log it on your shelf</span></a>}
+                  {isShow ? (about && <a class="lrow2" href={about}><Plus /><span>Add a season</span></a>) : <a class="lrow2" href={`/add/?title=${entry.titleId}`}><Plus /><span>Add it to your shelf</span></a>}
                 </>
               )}
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
-              <button class="lrow2 quiet" type="button" data-report={JSON.stringify({ user: profile.id, log: entry.logId, who: profile.username })}><span>Report this entry</span></button>
+              <button class="lrow2 quiet" type="button" data-report={JSON.stringify({ user: profile.id, log: entry.logId, who: profile.username })}><span>Report this</span></button>
               <button class="lrow2 quiet" type="button" data-block={JSON.stringify({ id: profile.id, who: profile.username, blocked: false })}><span>Block @{profile.username}</span></button>
             </>
           ) : (

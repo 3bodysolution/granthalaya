@@ -101,7 +101,8 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
   .clear { font-size: 13px; font-weight: 600; color: var(--muted); padding: 0 6px; }
   .clear:hover { color: var(--lat); }
   @media (max-width: 780px) {
-    /* on a phone the parts scroll sideways and a tapped one opens as a sheet above the bottom bar */
+    /* on a phone the parts scroll sideways, which would clip a list that hangs from its button, so a tapped one opens as a fixed
+       list that the script below puts right under its own button (--ft, --fl, --fw, --fh) and keeps inside the screen */
     .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gut, 20px) * -1); padding: 2px var(--gut, 20px); width: calc(100% + var(--gut, 20px) * 2); }
     .filters::-webkit-scrollbar { display: none; }
     /* the bar runs past the right edge: a fade there says there is more (it stays at the edge while the parts scroll) */
@@ -109,7 +110,7 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
     .fby, .clear, .fbar, .sort { flex: none; }
     .sort { margin-left: 0; }
     .sort .fbtn { padding: 0 14px; }
-    .fmenu, .fmenu[data-cols] { position: fixed; z-index: 40; left: 12px; right: 12px; top: auto; bottom: 88px; width: auto; column-count: 1; max-height: 55vh; box-shadow: 0 -10px 40px -10px var(--shadow); }
+    .fmenu, .fmenu[data-cols], .fmenu.has-search, .sort .fmenu, .fpart.right .fmenu { position: fixed; z-index: 40; left: var(--fl, 12px); right: auto; top: var(--ft, 120px); bottom: auto; width: var(--fw, 260px); min-width: 0; column-count: 1; max-height: var(--fh, 55vh); box-shadow: 0 18px 34px -14px var(--shadow); }
     .fmenu a { padding: 13px 14px; }
   }
   @media (prefers-reduced-motion: reduce) { .fmenu { transition: none; } }
@@ -121,6 +122,21 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
     p.querySelector('.fbtn')?.setAttribute('aria-expanded', 'false');
   });
   const canHover = () => window.matchMedia('(hover: hover)').matches;
+  const phone = () => window.matchMedia('(max-width: 780px)').matches;
+  // phone: put the open list right under its own button, inside the screen (12px from each side, above the bottom bar)
+  const place = (part: HTMLElement) => {
+    const menu = part.querySelector<HTMLElement>('.fmenu'), btn = part.querySelector<HTMLElement>('.fbtn');
+    if (!menu || !btn) return;
+    if (!phone()) { ['--ft', '--fl', '--fw', '--fh'].forEach((p) => menu.style.removeProperty(p)); return; }
+    const vw = document.documentElement.clientWidth, vh = window.innerHeight, r = btn.getBoundingClientRect();
+    const w = Math.min(menu.classList.contains('has-search') ? 280 : 260, vw - 24);
+    const left = Math.max(12, Math.min(r.left, vw - w - 12)), top = r.bottom + 6;
+    menu.style.setProperty('--fw', w + 'px'); menu.style.setProperty('--fl', left + 'px'); menu.style.setProperty('--ft', top + 'px');
+    menu.style.setProperty('--fh', Math.max(160, Math.min(vh * 0.6, vh - top - 90)) + 'px');
+  };
+  const replace = () => document.querySelectorAll<HTMLElement>('[data-fpart].open').forEach(place);
+  document.addEventListener('scroll', replace, { capture: true, passive: true }); // the bar scrolling sideways, or the page
+  window.addEventListener('resize', replace);
 
   document.addEventListener('click', (ev) => {
     const t = ev.target as Element;
@@ -133,6 +149,7 @@ const anyOn = fields.some((f) => f.value && f.name !== 'sort');
       const open = !part.classList.contains('open');
       closeAll(part);
       part.classList.toggle('open', open);
+      if (open) place(part);
       btn.setAttribute('aria-expanded', String(open));
       if (open && (ev as MouseEvent).detail === 0) part.querySelector<HTMLElement>('.fmenu a')?.focus();
       return;

@@ -44,7 +44,7 @@ const at = (p: Record<string, string | null>) => {
           <header class="who">
             <a href={`/@${r.username}/`} class="wl"><Face name={r.name} src={r.avatar} size={32} /><b>{r.name}</b></a>
             {r.loved ? <span class="vst">♥</span> : r.rating != null && <span class="vst"><Stars rating={r.rating} /></span>}
-            <a href={r.href} class="muted vs" aria-label="Open this review’s entry">{r.season != null && <>Season {r.season} | </>}{long(new Date(`${r.date}T00:00:00Z`))}{r.again && ' | again'}</a>
+            <a href={r.href} class="muted vs" aria-label="Open this review">{r.season != null && <>Season {r.season} | </>}{long(new Date(`${r.date}T00:00:00Z`))}{r.again && ' | again'}</a>
           </header>
           {r.spoiler ? (
             <SpoilerGate id={r.id}>

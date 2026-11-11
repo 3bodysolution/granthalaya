@@ -118,10 +118,12 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
               </summary>
               <div class="menu-list" role="menu">
                 <div class="menu-who"><b>{me.display_name || me.username}</b><span>@{me.username}</span></div>
-                <a role="menuitem" href={`/@${me.username}/#profile`}>Profile</a>
-                <a role="menuitem" href="/settings/">Settings</a>
+                <a role="menuitem" href="/settings/#profile">Profile</a>
+                <a role="menuitem" href="/settings/#privacy">Privacy</a>
+                <a role="menuitem" href="/settings/#data">Data</a>
+                <a role="menuitem" href="/settings/#account">Account</a>
                 {me.is_admin && <a role="menuitem" href="/admin/">Reports</a>}
-                <form method="post" action="/auth/signout" data-astro-reload><button role="menuitem" type="submit">Sign out</button></form>
+                <form method="post" action="/auth/signout" data-astro-reload><button role="menuitem" type="submit">Log out</button></form>
               </div>
             </details>
           </>

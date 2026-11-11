@@ -38,7 +38,7 @@ if (start.title) start.title.bg = paletteFor(start.title.title, start.title.colo
 const kinds = (['book', 'film', 'tv', 'essay'] as const).map((k) => [k, k === 'essay' ? 'Essay' : kindName[k]]);
 const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log it again' : 'Add to your shelf';
 ---
-<Base title={start.mode === 'edit' ? 'Edit entry' : 'Add'} active="add" noindex>
+<Base title={start.mode === 'edit' ? 'Edit' : 'Add'} active="add" noindex>
   <section class="pad wrap">
     <div id="add" class="box rise" data-start={JSON.stringify(start)} data-statuses={JSON.stringify(STATUSES)} data-me={me.username}>
       <h1 class="serif h">{heading}</h1>
@@ -118,7 +118,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
 
         <div class="opts">
           <label class="opt" id="againopt" hidden={!start.onShelf}>
-            <span class="stack" style="gap: 2px"><b>Again</b><span class="hint" id="againhint">A re-read or re-watch. Your first time stays as its own entry.</span></span>
+            <span class="stack" style="gap: 2px"><b>Again</b><span class="hint" id="againhint">A re-read or re-watch. Your first time stays on your shelf.</span></span>
             <input type="checkbox" class="onoff" name="again" />
           </label>
           <label class="opt not-essay">
@@ -149,7 +149,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         <h2 class="serif h">Saved</h2>
         <p class="muted" id="savedmsg">It’s on your shelf.</p>
         <div class="stack" style="gap: 10px; width: 100%">
-          <a class="btn primary big" id="viewlink" href="/">Open the entry</a>
+          <a class="btn primary big" id="viewlink" href="/">Open it</a>
           <button class="btn big" type="button" id="another">Add another</button>
         </div>
       </div>
@@ -288,7 +288,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
       root.querySelectorAll<HTMLElement>('[data-kind]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.kind === k)));
       f('creator').placeholder = k === 'book' ? 'Author' : k === 'film' ? 'Director' : k === 'tv' ? 'Created by' : 'Writer';
       $('noteslbl').textContent = k === 'essay' ? 'Review' : 'Review';
-      $('againhint').textContent = k === 'book' || k === 'essay' ? 'A re-read. Your first time stays as its own entry.' : 'A re-watch. Your first time stays as its own entry.';
+      $('againhint').textContent = k === 'book' || k === 'essay' ? 'A re-read. Your first time stays on your shelf.' : 'A re-watch. Your first time stays on your shelf.';
       drawStatuses();
     };
     const setStatus = (s: string) => {

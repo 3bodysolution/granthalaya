@@ -42,7 +42,7 @@ for (const e of shelf) if (!titles.has(e.titleId)) titles.set(e.titleId, e);
 const picks = [...titles.values()];
 const favs = (d.favourites ?? []).filter((id) => titles.has(id)).slice(0, 4);
 
-const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your data'], ['account', 'Account']] as const;
+const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], ['account', 'Account']] as const;
 ---
 <Base title="Settings" noindex>
   <section class="pad wrap">
@@ -154,7 +154,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Your dat
           </div>
         </div>
 
-        <!-- ——— Your data ——— -->
+        <!-- ——— Data ——— -->
         <div class="panel" role="tabpanel" id="data" aria-labelledby="tab-data" hidden>
           <div class="sec">
             <div class="head"><h2>Export</h2><p>Everything you’ve added, in files you keep.</p></div>

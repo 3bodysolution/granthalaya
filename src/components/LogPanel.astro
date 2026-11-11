@@ -36,16 +36,16 @@ const stories = me ? (show ? (show.slug && (show.entry || show.saved) ? { show: 
   : Object.fromEntries(parts.filter((p) => p.mine).map((p) => [p.key, { user: me.username, slug: p.mine!.slug }]))) : undefined;
 const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKind}:${pageSeg}` : undefined, card: preview, wide: false, stories });
 ---
-<aside class="logpanel" aria-label={me ? 'Your log' : 'Keep your own shelf'}>
+<aside class="logpanel" aria-label={me ? 'Your shelf' : 'Keep your own shelf'}>
   {!me ? (
     <>
-      <a class="lp-row lp-signin" href={next} data-astro-prefetch="false"><span>Sign in to log, rate or save</span></a>
+      <a class="lp-row lp-signin" href={next} data-astro-prefetch="false"><span>Sign in to save, rate or review</span></a>
       <button class="lp-row" type="button" data-share={shareData}><Share aria-hidden="true" /><span>Share</span></button>
     </>
   ) : show ? (
     <>
       {show.entry ? (
-        <a class="lp-row" href={`/@${me.username}/library/${show.slug}/`}><Eye aria-hidden="true" /><span>Your entry | {show.entry.label}</span></a>
+        <a class="lp-row" href={`/@${me.username}/library/${show.slug}/`}><Eye aria-hidden="true" /><span>On your shelf | {show.entry.label}</span></a>
       ) : (
         <div class="lp-save">
           <button class="tg" type="button" aria-pressed={show.saved ? 'true' : 'false'}
@@ -97,12 +97,12 @@ const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKin
             </div>
             {m ? (
               <>
-                <a class="lp-row" href={`/@${me.username}/library/${m.slug}/`}><Eye aria-hidden="true" /><span>Your entry | {statusLabel(kind, m.status as Status)}</span></a>
+                <a class="lp-row" href={`/@${me.username}/library/${m.slug}/`}><Eye aria-hidden="true" /><span>On your shelf | {statusLabel(kind, m.status as Status)}</span></a>
                 <a class="lp-row" href={`/add/?log=${m.id}`}><Notes aria-hidden="true" /><span>Review and dates</span></a>
                 {m.status === 'done' && <a class="lp-row" href={`/add/?title=${m.titleId}&again=1`}><Repeat aria-hidden="true" /><span>{film ? 'Watch it again' : 'Read it again'}</span></a>}
               </>
             ) : (
-              <button class="lp-row" type="button" data-write={JSON.stringify(src)}><Notes aria-hidden="true" /><span>Log with a review</span></button>
+              <button class="lp-row" type="button" data-write={JSON.stringify(src)}><Notes aria-hidden="true" /><span>Save with a review</span></button>
             )}
             <button class="lp-row" type="button" data-collect={JSON.stringify({ ...src, what })}><Stack aria-hidden="true" /><span>Add to a collection</span></button>
           </div>

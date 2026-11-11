@@ -70,7 +70,7 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
         ? <a class="btn primary" href={Astro.url.pathname}>Done</a>
         : <a class="btn" href={`${Astro.url.pathname}?edit=1`}>Edit</a>)}
     </div>
-    {isMe && path.length === 0 && !editing && <p class="muted empty-c">Nothing here yet. Use “Add to a collection” on any film, show, book, essay or entry.</p>}
+    {isMe && path.length === 0 && !editing && <p class="muted empty-c">Nothing here yet. Use “Add to a collection” on any film, show, book or essay.</p>}
   </section>
 
   <div class="path">
