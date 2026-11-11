@@ -60,6 +60,15 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - **Phone checks use a real device profile and the width check; screenshots alone don't count.** Test phones with Playwright's `devices['Pixel 7']` (it sets isMobile and hasTouch, so a page that is too wide zooms out like on a real phone; a plain narrow window just crops it and hides the bug). Every phone check must also measure the page: `scripts/lib/widthcheck.mjs` (`checkWidth`, `phonePages`) loads the main pages at 360px and fails, naming the element, if the page is wider than the screen. It runs inside `npm run check:site` (step 2b) and at the start of `scripts/shots-shelf.mjs`. Watch for `aspect-ratio` together with `min-height` (the browser works the width out from the height; give it `width: 100%`), and a `100vw` that includes the scrollbar.
 - Never add Claude as a co-author on commits.
 
+## Definition of done
+Nothing is done or pushed until all of these pass. Say in the report which ones you ran.
+1. Phone: check with real device profiles (Playwright devices['Pixel 7'] and devices['iPhone 13']) at 360 and 390 wide, with the page-width check passing (scrollWidth not bigger than the screen). Screenshots alone don't count.
+2. No side effects: take before and after screenshots of home, /films/, /books/, /essays/, one title page, one entry page and /@sarthak/, on phone and desktop. Compare them and report every difference you didn't intend.
+3. npm run build and npm run check:site pass (check:site includes the width check).
+4. Light and dark both checked.
+5. The report lists anything you could not check (for example signed-in views), so Sarthak can test it by hand.
+6. Never push main without Sarthak's yes after he has tested the preview.
+
 ## Commands
 
 - `npm run dev` starts a local copy at http://localhost:4321 (needs the Supabase values in `.env`).
