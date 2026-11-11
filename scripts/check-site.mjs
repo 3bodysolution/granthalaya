@@ -13,6 +13,7 @@
 // Exit code: 1 when there are real problems, 2 when only outside services failed, 0 when all is good.
 import fs from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
+import { checkWidth, phonePages, reportWidth } from './lib/widthcheck.mjs';
 
 try {
   for (const line of fs.readFileSync('.env', 'utf8').split(/\r?\n/)) {
@@ -107,6 +108,16 @@ for (const [slug, path] of listPages) {
 }
 
 // ───────── 3. privacy, with the anon key only ─────────
+// ───────── 2b. phone width ─────────
+// A page wider than the screen makes a real phone (Chrome on Android) zoom the whole page out. Uses the Pixel 7 profile
+// (isMobile, hasTouch) at 360px and measures; looking at a screenshot does not catch it.
+head('2b. Phone width (Pixel 7 profile, 360px)');
+{
+  const wp = await phonePages(BASE, opt('--user', 'sarthak'));
+  const res = await checkWidth(BASE, wp, { widths: [360] });
+  for (const r of reportWidth(res)) fail(r.error ? `could not load at 360px (${r.error})` : `wider than the screen: ${Math.max(r.scrollWidth, r.innerWidth)}px on a 360px phone. Sticking out: ${r.offenders.slice(0, 3).map((o) => o.el + ' ' + o.right + 'px').join('; ') || 'unknown'}`, { check: '2b. Phone width', page: r.path, outside: !!r.error });
+}
+
 head('3. Privacy (public key only)');
 const url = process.env.PUBLIC_SUPABASE_URL, key = process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 if (!url || !key) info('No public Supabase values in .env, so the privacy checks were skipped.');

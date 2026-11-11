@@ -152,6 +152,9 @@ Sponsor hidden at launch: UPI payments to the personal ID failed from QR in Phon
 
 2026-11-11: fixed Letters to a young poet year 1656 → 1929 (bad Open Library first_publish_year), backup before-rilke-year.
 
+
+Phone zoom-out fix (2026-11-11, not pushed; pictures in `.shots/overflow-fix/`). On a real phone the shelf page showed zoomed out: the footer painting (`.foot-art`, used on the shelf, collections and reviews pages) has `aspect-ratio: 2172/724` with `min-height: 360px`, and with no width set the browser worked its width out from the height (360 x 3 = 1080px), so the page was 1080px wide and Chrome shrank it to fit. A cropping test browser never shows this. Fix: `width: 100%` on `.foot-art`, and `overflow-x: clip` on `.foot-wrap`, the shelf (`.shelfwrap`) and `.sofar` (the 3D inside still works). The filter bar already scrolls sideways inside itself on phones. New `scripts/lib/widthcheck.mjs` (Pixel 7 profile, measures the page against the screen, names the element that sticks out) runs in `npm run check:site` (step 2b) and at the start of `scripts/shots-shelf.mjs` (whose phone pictures now use the Pixel 7 profile; `--out` picks the folder). Rule added to CLAUDE.md.
+
 ## Go-live checklist (from `private/final-review.md`, in order)
 
 Environment variables for Production in Vercel (names only): `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `TMDB_API_KEY`, `PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `GOOGLE_BOOKS_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`; optional `GEMINI_MODEL`, `GROQ_MODEL`. Not in Production: `TMDB_API_BASE`, `OPENLIBRARY_BASE`, `GOOGLE_BOOKS_BASE` (test servers), `SUPABASE_DB_URL` (this computer's scripts only). `CRON_SECRET` is no longer used by anything: delete it from Vercel.

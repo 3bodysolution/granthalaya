@@ -60,6 +60,7 @@ const { books, owner, mine } = Astro.props;
 <style>
   .shelfwrap { --plank1: #8A5E3B; --plank2: #5A3B22; --rowh: 300px; --gapy: 18px; position: relative; }
   :global(html[data-theme="dark"]) .shelfwrap { --plank1: #4A3524; --plank2: #241912; }
+  .shelfwrap { overflow-x: clip; }
   .stage { position: relative; }
   .shelf { justify-content: center; list-style: none; margin: 0; padding: 0 12px; display: flex; flex-wrap: wrap; align-items: flex-end; column-gap: 3px; row-gap: var(--gapy);
     background: repeating-linear-gradient(to bottom, transparent 0 var(--rowh), var(--plank1) var(--rowh) calc(var(--rowh) + 8px), var(--plank2) calc(var(--rowh) + 8px) calc(var(--rowh) + var(--gapy))); }

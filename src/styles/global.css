@@ -130,7 +130,7 @@ html[data-theme="dark"] .theme-sun { display: block; }
 html[data-theme="dark"] .theme-moon { display: none; }
 
 /* footer: the painting runs edge to edge, the links sit on its lower edge */
-.foot-wrap { position: relative; margin-top: 56px; }
+.foot-wrap { position: relative; margin-top: 56px; overflow-x: clip; }
 .foot { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 64px var(--gut) 26px; display: flex; justify-content: center; pointer-events: none;
         background: linear-gradient(to bottom, transparent, rgba(12, 16, 22, .42) 55%, rgba(12, 16, 22, .62)); }
 .foot-in { width: 100%; max-width: var(--max); display: flex; flex-direction: column; gap: 10px; font-size: 13px; color: #EFE8DA; text-shadow: 0 1px 6px rgba(0,0,0,.45); pointer-events: auto; }
@@ -141,7 +141,8 @@ html[data-theme="dark"] .theme-moon { display: none; }
 .foot a:hover { color: #8FDCD2; }
 
 /* a person's shelf pages: the threads painting, faded in from the page, with the footer links on top (painted as it is, no tint) */
-.foot-art { aspect-ratio: 2172 / 724; min-height: 360px; background-position: center 70%; -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.1) 8%, #000 34%); mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.1) 8%, #000 34%); }
+/* width: 100% matters: with a ratio and a min-height the browser works the width out from the height (360px x 3 = 1080px), and a phone zooms the whole page out to fit it */
+.foot-art { width: 100%; max-width: 100%; aspect-ratio: 2172 / 724; min-height: 360px; background-position: center 70%; -webkit-mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.1) 8%, #000 34%); mask-image: linear-gradient(to bottom, transparent 0, rgba(0,0,0,.1) 8%, #000 34%); }
 
 /* day and night versions of the footer painting */
 html[data-theme="dark"] .skyL, html[data-theme="light"] .skyD { display: none; }

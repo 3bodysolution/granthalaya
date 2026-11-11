@@ -57,6 +57,7 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 - Never ask for or handle passwords, keys or tokens in the chat. They go in Vercel and `.env` only.
 - Never create a sign-in session for any account, including Sarthak's, without asking first.
 - **Never run `npm run db:apply` (or any script that changes the live database's structure) unless Sarthak asks for it in that same message.** Always run it with `--dry` first, show the output, and wait for his yes before the real run. A yes to an earlier run doesn't carry over to the next.
+- **Phone checks use a real device profile and the width check; screenshots alone don't count.** Test phones with Playwright's `devices['Pixel 7']` (it sets isMobile and hasTouch, so a page that is too wide zooms out like on a real phone; a plain narrow window just crops it and hides the bug). Every phone check must also measure the page: `scripts/lib/widthcheck.mjs` (`checkWidth`, `phonePages`) loads the main pages at 360px and fails, naming the element, if the page is wider than the screen. It runs inside `npm run check:site` (step 2b) and at the start of `scripts/shots-shelf.mjs`. Watch for `aspect-ratio` together with `min-height` (the browser works the width out from the height; give it `width: 100%`), and a `100vw` that includes the scrollbar.
 - Never add Claude as a co-author on commits.
 
 ## Commands

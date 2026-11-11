@@ -1,13 +1,20 @@
 // Pictures of the shelf page: desktop and phone, light and dark; at rest, pointed at, pulled out, profile panel, filter open, reduced motion.
 // node scripts/shots-shelf.mjs [--base http://localhost:4321] [--user sarthak]
-import { chromium } from 'playwright';
+import { chromium, devices } from 'playwright';
 import { mkdirSync } from 'node:fs';
+import { checkWidth, phonePages, reportWidth } from './lib/widthcheck.mjs';
 const arg = (k, d) => process.argv.includes(k) ? process.argv[process.argv.indexOf(k) + 1] : d;
 const BASE = arg('--base', 'http://localhost:4321'), USER = arg('--user', 'sarthak');
-const OUT = '.shots/shelf'; mkdirSync(OUT, { recursive: true });
+const OUT = arg('--out', '.shots/shelf'); mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
+// Phone width check first: real device profile (Pixel 7), 360px. A page wider than the screen makes a phone zoom out,
+// and a screenshot can't show that. Fails loudly, naming the element.
+console.log('Phone width check (Pixel 7, 360px):');
+const widthBad = reportWidth(await checkWidth(BASE, await phonePages(BASE, USER), { widths: [360], browser }));
+if (widthBad.length) { console.error('\nPAGE TOO WIDE FOR A PHONE. Fix this before looking at pictures.'); await browser.close(); process.exit(1); }
 for (const theme of ['light', 'dark']) for (const [dev, vp] of [['desktop', { width: 1280, height: 900 }], ['phone', { width: 390, height: 844 }]]) for (const rm of [false, true]) {
-  const ctx = await browser.newContext({ viewport: vp, colorScheme: theme, isMobile: dev === 'phone', hasTouch: dev === 'phone', reducedMotion: rm ? 'reduce' : 'no-preference' });
+  // the phone is a real device profile (Pixel 7: isMobile, hasTouch, touch user agent), so it zooms out like a phone would
+  const ctx = await browser.newContext({ ...(dev === 'phone' ? devices['Pixel 7'] : {}), viewport: vp, colorScheme: theme, reducedMotion: rm ? 'reduce' : 'no-preference' });
   await ctx.addInitScript((t) => { try { localStorage.setItem('theme', t); } catch {} }, theme);
   const page = await ctx.newPage();
   const requests = [];
