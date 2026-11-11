@@ -26,7 +26,11 @@ Searched all on-page text (buttons, labels, headings, empty states, errors, the 
 | Settings tab, account menu | Your data | Data |
 | Account menu | Sign out | Log out |
 
-## For you to decide (file, current wording, plain replacement)
+## Applied on 2026-11-11 (second round, with Sarthak's decisions)
+
+Status → Progress everywhere people see it (shelf filter and "Any progress", the entry page label, the panel and season labels read aloud, the two messages in `api/log.ts`: "Say where you are with it." and "That doesn’t fit this one."), and in the data download's first row ("Status" → "Progress", "Kind" → "Type"; the Collections sheet's "Kind" → "Type" too, for the same reason). Admin page: "Hide this" and "…has it on their shelf or in a collection". Privacy and Terms: every plain version below, with "data fiduciary" kept and "(the person responsible for your information)" added after it; "Your data is kept in the database…" is now "Your data is kept for as long as you have an account." Kept as they are: "Sexual content" (report reason and Terms) and "Skip to content". Not done: the `supabase/schema.sql:251` message (later item in `docs/plan.md`).
+
+## The list as it was proposed (for the record)
 
 **status** (shown to people)
 - `@[username]/index.astro:56`, the shelf's filter: "Status" / "Any status" → "Progress" / "Any progress" (the choices are Want to, Reading, Read…).

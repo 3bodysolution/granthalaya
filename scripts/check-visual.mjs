@@ -5,8 +5,8 @@
 // Pages: home, /films/, /books/, /essays/, one title page, one entry page and /@sarthak/ (the title and entry are chosen once, in
 // --before, and kept in .shots/baseline/pages.json so both runs look at the same ones). Phone (Pixel 7 profile, 390 wide) and
 // desktop (1280), light and dark. npm run dev must be running.
-// Pages with changing content (the home wall, trending rows) always differ a little; the list says which are over the line
-// (--limit 0.5 means 0.5% of pixels) and you decide whether each difference was meant. Exit code 1 when a page is over the line
+// Pictures (img) are blanked, their boxes stay. Live rows (the poster rows, the home wall) are blanked to fixed blocks, so two runs of the same code compare as 0%. The list says
+// which pages are over the line (--limit 0.02 means 0.02% of pixels, small enough to show a changed label) and you decide whether each difference was meant. Exit code 1 when a page is over the line
 // or changed size, 0 otherwise.
 import { chromium, devices } from 'playwright';
 import { PNG } from 'pngjs';
@@ -17,7 +17,7 @@ const args = process.argv.slice(2);
 const opt = (f, d) => { const i = args.indexOf(f); return i < 0 ? d : args[i + 1]; };
 const BEFORE = args.includes('--before');
 const BASE = opt('--base', 'http://localhost:4321'), USER = opt('--user', 'sarthak');
-const LIMIT = parseFloat(opt('--limit', '0.5'));
+const LIMIT = parseFloat(opt('--limit', '0.02'));
 const BASELINE = '.shots/baseline', AFTER = '.shots/after', DIFF = '.shots/diff';
 const OUT = BEFORE ? BASELINE : AFTER;
 
@@ -36,6 +36,9 @@ if (BEFORE) {
   fs.rmSync(AFTER, { recursive: true, force: true }); fs.rmSync(DIFF, { recursive: true, force: true });
   fs.mkdirSync(AFTER, { recursive: true }); fs.mkdirSync(DIFF, { recursive: true });
 }
+// warm-up: the first visit to a page can be slow (the server fetches its facts), and a picture taken while it is still
+// filling in is shorter than the next. Ask for every page once, and wait for the answers, before taking any pictures.
+for (const p of pages) await fetch(BASE + p, { signal: AbortSignal.timeout(60000) }).then((r) => r.text()).catch(() => {});
 const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/[^a-z0-9]+/gi, '-').slice(0, 50));
 
 const browser = await chromium.launch();
@@ -52,7 +55,15 @@ for (const theme of ['light', 'dark']) for (const [dev, ctxOpts] of [
     try {
       await page.goto(BASE + p, { waitUntil: 'load', timeout: 45000 });
       await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-      await page.addStyleTag({ content: '*,*::before,*::after{caret-color:transparent!important;animation:none!important;transition:none!important}' });
+      await page.addStyleTag({ content: '*,*::before,*::after{caret-color:transparent!important;animation:none!important;transition:none!important}img,video{visibility:hidden!important}' }); // pictures blanked (their boxes stay): only layout, text and colour are compared, and a cover's resampled edge can't count as a change
+      // live rows (TMDB and Open Library posters, the home wall) change from minute to minute, so each poster row becomes a fixed
+      // blank block of the same height and the wall is hidden: the picture then shows the page around them, and only real changes
+      await page.evaluate(() => {
+        // however many rows loaded (a slow catalogue gives fewer), they become ONE fixed block, so the height never depends on them
+        const rows = [...document.querySelectorAll('.prow')];
+        rows.forEach((r, i) => { if (i === 0) { const b = document.createElement('div'); b.setAttribute('data-frozen', 'poster rows'); b.style.cssText = 'height:600px;margin:24px 0;border-radius:8px;background:repeating-linear-gradient(45deg,#8883,#8883 10px,#8881 10px,#8881 20px)'; r.replaceWith(b); } else r.remove(); });
+        document.querySelectorAll('.wall').forEach((w) => { w.style.visibility = 'hidden'; });
+      });
       // lazy pictures load as the page is scrolled: go down and back, then wait for them
       await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 60)); } scrollTo(0, 0); });
       await page.waitForLoadState('networkidle', { timeout: 6000 }).catch(() => {});
@@ -112,5 +123,5 @@ for (const r of rows) {
   if (r.note) { console.log(`  CHANGED ${r.file}: ${r.note}`); continue; }
   console.log(`  ${r.over ? 'CHANGED' : 'same   '} ${r.dev.padEnd(7)} ${r.theme.padEnd(5)} ${r.p.padEnd(44)} ${r.pct.toFixed(2)}%${r.resized ? `  size ${r.size}` : ''}${r.over ? `  -> ${DIFF}/${r.file}` : ''}`);
 }
-console.log(bad ? `\n${bad} picture(s) changed or missing. Look at each difference image and report every one you did not intend. (Pages with a rotating wall or trending rows differ a little on their own.)` : `\nNo page changed beyond ${LIMIT}%. ${same} compared.`);
+console.log(bad ? `\n${bad} picture(s) changed or missing. Look at each difference image and report every one you did not intend.` : `\nNo page changed beyond ${LIMIT}%. ${same} compared.`);
 process.exit(bad ? 1 : 0);

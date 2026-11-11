@@ -72,7 +72,7 @@ const shareData = JSON.stringify({ title: what, ref: pageKind ? `title=${pageKin
         const rating = m?.rating ?? 0;
         return (
           <div class="lp-body" data-season-panel={p.key} hidden={p.key !== pick}>
-            <div class="lp-status" role="group" aria-label="Status">
+            <div class="lp-status" role="group" aria-label="Progress">
               {STATUSES[kind].map(([k, label]) => {
                 const I = ICON[k];
                 const on = m?.status === k;

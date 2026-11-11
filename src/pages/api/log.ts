@@ -68,7 +68,7 @@ export const POST: APIRoute = async (ctx) => {
   ensureFactsLater(titleId);   // its card line and painting are written in the background, so they are ready before anyone shares
   warmCover(ctx.url.origin, t.cover_url);   // and its cover is fetched into the CDN, so the first card doesn't wait on Open Library
   const status = String(b.status ?? 'done');
-  if (!statusFits(t.kind, status)) return oops('Pick a status.');
+  if (!statusFits(t.kind, status)) return oops('Say where you are with it.');
   if (wholeShow(t) && status !== 'want') return oops('Pick a season first.');
 
   const sb = ctx.locals.supabase;
@@ -111,7 +111,7 @@ export const PATCH: APIRoute = async (ctx) => {
   if (b.full === true) {
     // the whole entry, from the edit screen
     const status = String(b.status ?? cur.status);
-    if (!statusFits(kind, status) || (whole && status !== 'want')) return oops('Pick a status.');
+    if (!statusFits(kind, status) || (whole && status !== 'want')) return oops('Say where you are with it.');
     change = fields(b, kind, status);
   } else if ('rating' in b) {
     // a quick rating from a title page: rating something means you've finished it
@@ -132,7 +132,7 @@ export const PATCH: APIRoute = async (ctx) => {
   } else {
     // a quick status change from the entry page
     const status = String(b.status ?? '');
-    if (!statusFits(kind, status) || (whole && status !== 'want')) return oops('That status doesn’t fit here.');
+    if (!statusFits(kind, status) || (whole && status !== 'want')) return oops('That doesn’t fit this one.');
     change = { status };
     if (status === 'done') change.finished_on = cur.finished_on ?? today();
     else change.finished_on = null;

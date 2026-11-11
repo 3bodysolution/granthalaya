@@ -16,7 +16,7 @@ const SHOP: Record<string, string> = { akshardhara: 'Akshardhara', bookganga: 'B
 let shopQ = db.from('shop_books').select('id, shop, url, title, original_title, author, hidden, cover_hidden, cover_src').order('hidden', { ascending: false }).order('title').limit(60);
 shopQ = find ? shopQ.or(`title.ilike.%${find}%,original_title.ilike.%${find}%,author.ilike.%${find}%`) : shopQ.eq('hidden', true);
 const { data: shopBooks } = await shopQ;
-// catalogue titles: find one to remove (only possible when no member has it logged or in a collection)
+// catalogue titles: find one to remove (only possible when no member has it on their shelf or in a collection)
 const findTitle = (Astro.url.searchParams.get('title') ?? '').trim().slice(0, 60).replace(/[%_\,()]/g, ' ').trim();
 let catalogue: { id: string; title: string; kind: string; year: number | null; creator: string | null; season: number | null; slug: string; source: string | null; logs: number; items: number }[] = [];
 if (findTitle) {
@@ -53,7 +53,7 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
           <div class="flex gap-2 flex-wrap">
             {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'dismiss' })}>Dismiss</button>}
             {r.comment && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'delete_comment' })}>Delete the comment</button>}
-            {r.log && !r.log.admin_hidden && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'hide_entry' })}>Hide the entry</button>}
+            {r.log && !r.log.admin_hidden && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'hide_entry' })}>Hide this</button>}
             {r.target?.avatar_url && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'remove_photo' })}>Remove their photo</button>}
             {r.target?.featured && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'unfeature' })}>Stop featuring them</button>}
             {r.status === 'open' && <button class="btn sm" data-admin={JSON.stringify({ id: r.id, action: 'done' })}>Mark as dealt with</button>}
@@ -81,7 +81,7 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
   </section>
   <section class="pad wrap picks">
     <h2 class="title">Catalogue titles</h2>
-    <p class="muted small">Take a title out of the shared catalogue (for a made-up or wrong one). It is refused if any member has it logged or in a collection, and says how many. A TV show goes with its seasons.</p>
+    <p class="muted small">Take a title out of the shared catalogue (for a made-up or wrong one). It is refused if any member has it on their shelf or in a collection, and says how many. A TV show goes with its seasons.</p>
     <form method="get" class="flex gap-2"><input class="input" type="search" name="title" value={findTitle} placeholder="Title or author" aria-label="Find a catalogue title" /><button class="btn sm" type="submit">Find</button></form>
     {findTitle && catalogue.length === 0 && <p class="muted small">No title matches.</p>}
     <ul class="plist">

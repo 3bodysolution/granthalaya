@@ -53,7 +53,7 @@ const SORTS: [string, string][] = [['', 'Recently added'], ['title', 'Title'], [
 const sort = SORTS.find(([k]) => k && k === q.get('sort'))?.[0] ?? '';
 const fields = [
   { name: 'type', label: 'Type', value: type, options: [['', 'Any type'], ...types.map((t) => [t, kindPlural[t]])] as [string, string][] },
-  { name: 'status', label: 'Status', value: status, options: [['', 'Any status'], ...statuses.map(([k, l]) => [k, l])] as [string, string][] },
+  { name: 'status', label: 'Progress', value: status, options: [['', 'Any progress'], ...statuses.map(([k, l]) => [k, l])] as [string, string][] },
   { name: 'sort', label: 'Sort', value: sort, options: SORTS },
 ];
 const inStatus = STATUS_FILTERS.find(([k]) => k === status)?.[2];

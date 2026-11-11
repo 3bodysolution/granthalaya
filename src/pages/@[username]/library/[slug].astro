@@ -203,14 +203,14 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
           </p>
           {isShow ? (
             <div class="stats rise d4 num">
-              <div class="stat"><span class="sub">Status</span><b>{sLabel}</b></div>
+              <div class="stat"><span class="sub">Progress</span><b>{sLabel}</b></div>
               {d.progress && <div class="stat"><span class="sub">Seasons</span><b>{d.progress.replace(/^Seasons? /, '')}</b></div>}
               <div class="stat"><span class="sub">Average</span>{s ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="notrated">Not rated</span>}</div>
               {d.seasons!.length > 0 && <div class="stat"><span class="sub">Runtime</span><b>{duration(mins)}</b></div>}
             </div>
           ) : (
             <div class="stats rise d4 num">
-              <div class="stat"><span class="sub">{done ? 'Rating' : 'Status'}</span>
+              <div class="stat"><span class="sub">{done ? 'Rating' : 'Progress'}</span>
                 {done ? (s ? <span class="bigstars" role="img" aria-label={starsLabel(entry)}>{s}</span> : <span class="notrated">Not rated</span>) : <b>{sLabel}</b>}
               </div>
               <div class="stat"><span class="sub">{isFilm ? 'Runtime' : 'Reading time'}</span><b>{isFilm ? duration(mins) : `≈ ${duration(mins)}`}</b></div>
