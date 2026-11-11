@@ -2,10 +2,32 @@
 // zoom the whole page out. A cropping test browser never shows that, so this uses a real device profile
 // (isMobile + hasTouch) and measures instead of looking.
 //   import { checkWidth, phoneContext } from './lib/widthcheck.mjs'
-import { chromium, devices } from 'playwright';
+import { chromium, webkit, devices } from 'playwright';
 
 export const PHONE_WIDTHS = [360, 390];
-// Pixel 7's profile (isMobile, hasTouch, touch user agent) with the width swapped
+export const PHONE_DEVICES = ['Pixel 7', 'iPhone 13'];
+
+// Opens a browser per device: Pixel 7 in chromium, iPhone 13 in webkit (Safari's engine). If webkit can't run here
+// (npx playwright install webkit), the iPhone 13 falls back to chromium with its user agent and says so.
+// Returns [{ name, browser, note, make(width, extra) }]; close every browser when done (closeAll).
+export async function launchDevices(names = PHONE_DEVICES) {
+  const out = [];
+  for (const name of names) {
+    const d = devices[name]; let browser, note = '';
+    if (d.defaultBrowserType === 'webkit') {
+      try { browser = await webkit.launch(); } catch (e) {
+        browser = await chromium.launch(); note = `webkit can't run here (${String(e.message).slice(0, 160)}), so ${name} is checked in chromium with its user agent. Run: npx playwright install webkit`;
+      }
+    } else browser = await chromium.launch();
+    // the device's own profile (isMobile, hasTouch, user agent) with the width swapped
+    const make = (width, extra = {}) => browser.newContext({ ...d, ...(note ? { defaultBrowserType: undefined } : {}), viewport: { width, height: 800 }, screen: { width, height: 800 }, ...extra });
+    out.push({ name, browser, note, make });
+  }
+  return out;
+}
+export const closeAll = (devs) => Promise.all(devs.map((d) => d.browser.close().catch(() => {})));
+
+// kept for the picture scripts: Pixel 7's profile with the width swapped
 export const phoneContext = (browser, width = 360, extra = {}) => {
   const d = devices['Pixel 7'];
   return browser.newContext({ ...d, viewport: { width, height: 800 }, screen: { width, height: 800 }, ...extra });
@@ -42,22 +64,23 @@ export async function measure(page, width) {
 }
 
 // Loads each path at each width with the Pixel 7 profile. Returns [{ path, width, ...measure }]
-export async function checkWidth(base, paths, { widths = [360], browser } = {}) {
-  const own = !browser; browser ??= await chromium.launch();
-  const out = [];
-  for (const width of widths) {
-    const ctx = await phoneContext(browser, width); const page = await ctx.newPage();
-    for (const path of paths) {
-      try {
-        await page.goto(base + path, { waitUntil: 'load', timeout: 45000 });
-        await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
-        await page.waitForTimeout(400);
-        out.push({ path, width, ...(await measure(page, width)) });
-      } catch (e) { out.push({ path, width, error: String(e.message).split('\n')[0] }); }
+export async function checkWidth(base, paths, { widths = PHONE_WIDTHS, devices: names = PHONE_DEVICES } = {}) {
+  const devs = await launchDevices(names), out = [];
+  for (const dev of devs) {
+    for (const width of widths) {
+      const ctx = await dev.make(width); const page = await ctx.newPage();
+      for (const path of paths) {
+        try {
+          await page.goto(base + path, { waitUntil: 'load', timeout: 45000 });
+          await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {});
+          await page.waitForTimeout(400);
+          out.push({ device: dev.name, note: dev.note, path, width, ...(await measure(page, width)) });
+        } catch (e) { out.push({ device: dev.name, note: dev.note, path, width, error: String(e.message).slice(0, 160) }); }
+      }
+      await ctx.close();
     }
-    await ctx.close();
   }
-  if (own) await browser.close();
+  await closeAll(devs);
   return out;
 }
 
@@ -71,14 +94,16 @@ export async function phonePages(base, user = 'sarthak') {
 
 // Prints one line per page and, for a page that is too wide, the elements that stick out. Returns the failures.
 export function reportWidth(results, log = console.log) {
-  const bad = [];
+  const bad = [], notes = new Set(results.map((r) => r.note).filter(Boolean));
+  for (const n of notes) log(`  NOTE    ${n}`);
   for (const r of results) {
-    if (r.error) { log(`  FAIL    ${r.path} at ${r.width}px: could not load (${r.error})`); bad.push(r); continue; }
+    const at = `${r.device} ${r.width}px`;
+    if (r.error) { log(`  FAIL    ${r.path} on ${at}: could not load (${r.error})`); bad.push(r); continue; }
     if (r.over) {
       const names = r.offenders.slice(0, 4).map((o) => `${o.el} (right edge ${o.right}px, ${o.width}px wide)`).join('; ') || 'no single element found (check overflow on html/body)';
-      log(`  FAIL    ${r.path} at ${r.width}px: page is ${Math.max(r.scrollWidth, r.innerWidth)}px wide, screen is ${r.width}px. A phone would zoom out. Sticking out: ${names}`);
+      log(`  FAIL    ${r.path} on ${at}: page is ${Math.max(r.scrollWidth, r.innerWidth)}px wide, screen is ${r.width}px. A phone would zoom out. Sticking out: ${names}`);
       bad.push(r);
-    } else log(`  ok      ${r.path} at ${r.width}px: ${r.scrollWidth}px wide`);
+    } else log(`  ok      ${r.path} on ${at}: ${r.scrollWidth}px wide`);
   }
   return bad;
 }

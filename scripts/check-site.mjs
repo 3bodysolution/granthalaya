@@ -110,12 +110,12 @@ for (const [slug, path] of listPages) {
 // ───────── 3. privacy, with the anon key only ─────────
 // ───────── 2b. phone width ─────────
 // A page wider than the screen makes a real phone (Chrome on Android) zoom the whole page out. Uses the Pixel 7 profile
-// (isMobile, hasTouch) at 360px and measures; looking at a screenshot does not catch it.
-head('2b. Phone width (Pixel 7 profile, 360px)');
+// and iPhone 13 profiles (isMobile, hasTouch) at 360 and 390px and measures; looking at a screenshot does not catch it.
+head('2b. Phone width (Pixel 7 and iPhone 13 profiles, 360 and 390px)');
 {
   const wp = await phonePages(BASE, opt('--user', 'sarthak'));
-  const res = await checkWidth(BASE, wp, { widths: [360] });
-  for (const r of reportWidth(res)) fail(r.error ? `could not load at 360px (${r.error})` : `wider than the screen: ${Math.max(r.scrollWidth, r.innerWidth)}px on a 360px phone. Sticking out: ${r.offenders.slice(0, 3).map((o) => o.el + ' ' + o.right + 'px').join('; ') || 'unknown'}`, { check: '2b. Phone width', page: r.path, outside: !!r.error });
+  const res = await checkWidth(BASE, wp, { widths: [360, 390] });
+  for (const r of reportWidth(res)) fail(r.error ? `could not load on ${r.device} ${r.width}px (${r.error})` : `wider than the screen: ${Math.max(r.scrollWidth, r.innerWidth)}px on ${r.device} at ${r.width}px. Sticking out: ${r.offenders.slice(0, 3).map((o) => o.el + ' ' + o.right + 'px').join('; ') || 'unknown'}`, { check: '2b. Phone width', page: r.path, outside: !!r.error });
 }
 
 head('3. Privacy (public key only)');

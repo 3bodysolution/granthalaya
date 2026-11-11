@@ -9,8 +9,8 @@ const OUT = arg('--out', '.shots/shelf'); mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch();
 // Phone width check first: real device profile (Pixel 7), 360px. A page wider than the screen makes a phone zoom out,
 // and a screenshot can't show that. Fails loudly, naming the element.
-console.log('Phone width check (Pixel 7, 360px):');
-const widthBad = reportWidth(await checkWidth(BASE, await phonePages(BASE, USER), { widths: [360], browser }));
+console.log('Phone width check (Pixel 7 and iPhone 13, 360 and 390px):');
+const widthBad = reportWidth(await checkWidth(BASE, await phonePages(BASE, USER), { widths: [360, 390] }));
 if (widthBad.length) { console.error('\nPAGE TOO WIDE FOR A PHONE. Fix this before looking at pictures.'); await browser.close(); process.exit(1); }
 for (const theme of ['light', 'dark']) for (const [dev, vp] of [['desktop', { width: 1280, height: 900 }], ['phone', { width: 390, height: 844 }]]) for (const rm of [false, true]) {
   // the phone is a real device profile (Pixel 7: isMobile, hasTouch, touch user agent), so it zooms out like a phone would

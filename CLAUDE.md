@@ -62,8 +62,8 @@ A shelf for everything you read and watch (books, films, TV seasons, essays), in
 
 ## Definition of done
 Nothing is done or pushed until all of these pass. Say in the report which ones you ran.
-1. Phone: check with real device profiles (Playwright devices['Pixel 7'] and devices['iPhone 13']) at 360 and 390 wide, with the page-width check passing (scrollWidth not bigger than the screen). Screenshots alone don't count.
-2. No side effects: take before and after screenshots of home, /films/, /books/, /essays/, one title page, one entry page and /@sarthak/, on phone and desktop. Compare them and report every difference you didn't intend.
+1. Phone: check with real device profiles (Playwright devices['Pixel 7'] in chromium and devices['iPhone 13'] in webkit, which falls back to chromium with a note if webkit can't run; `npx playwright install webkit` once) at 360 and 390 wide, with the page-width check passing (scrollWidth not bigger than the screen). `npm run check:site` runs it (step 2b, `scripts/lib/widthcheck.mjs`). Screenshots alone don't count.
+2. No side effects: run `npm run check:visual -- --before` before you start, and `npm run check:visual` after. It takes pictures of home, /films/, /books/, /essays/, one title page, one entry page and /@sarthak/, on phone (Pixel 7) and desktop, light and dark, compares them with the baseline in `.shots/baseline/`, and lists every page that changed with its percentage and a difference image in `.shots/diff/`. Look at each one and report every difference you didn't intend (the home wall and trending rows change on their own).
 3. npm run build and npm run check:site pass (check:site includes the width check).
 4. Light and dark both checked.
 5. The report lists anything you could not check (for example signed-in views), so Sarthak can test it by hand.

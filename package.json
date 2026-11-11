@@ -15,6 +15,7 @@
     "db:apply": "node scripts/db-apply.mjs",
     "shots": "node scripts/shots.mjs",
     "check:site": "node scripts/check-site.mjs",
+    "check:visual": "node scripts/check-visual.mjs",
     "time": "node scripts/time-pages.mjs"
   },
   "dependencies": {
