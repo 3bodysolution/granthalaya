@@ -150,6 +150,8 @@ Double-save fixes (2026-11-09, phase-1 only until tested on the preview). Commen
 
 Sponsor hidden at launch: UPI payments to the personal ID failed from QR in PhonePe; switch to a merchant UPI (PhonePe Business or Paytm for Business), then set sponsor.enabled = true.
 
+2026-11-11: fixed Letters to a young poet year 1656 → 1929 (bad Open Library first_publish_year), backup before-rilke-year.
+
 ## Go-live checklist (from `private/final-review.md`, in order)
 
 Environment variables for Production in Vercel (names only): `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`, `TMDB_API_KEY`, `PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `GOOGLE_BOOKS_API_KEY`, `GEMINI_API_KEY`, `GROQ_API_KEY`; optional `GEMINI_MODEL`, `GROQ_MODEL`. Not in Production: `TMDB_API_BASE`, `OPENLIBRARY_BASE`, `GOOGLE_BOOKS_BASE` (test servers), `SUPABASE_DB_URL` (this computer's scripts only). `CRON_SECRET` is no longer used by anything: delete it from Vercel.
