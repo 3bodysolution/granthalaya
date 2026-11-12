@@ -121,7 +121,7 @@ const fields = [
   { name: 'sort', label: 'Order', value: picked ? '' : sort === 'popular' ? '' : sort, options: [['', 'Popular'], ['top', 'Highest rated'], ['new', 'Newest']] as [string, string][], clears: picked ? ['list'] : undefined },
 ];
 ---
-<Base title={title} active="books" description={`${title} on Granthalaya: browse, save and review.`} og={{ title: `${title} | Granthalaya`, description: picked ? picked.intro : `${title} on Granthalaya: browse, save and review.` }}>
+<Base title={title} active="books" description={`${title}: find your next book, and keep it on your shelf.`} og={{ title: `${title} | Granthalaya`, description: picked ? picked.intro : `${title}: find your next book, and keep it on your shelf.` }}>
   <section class="pad head">
     {!front && <p class="eyebrow" style="color: var(--book)">Books</p>}
     <h1 class="title">{title}</h1>
@@ -147,7 +147,7 @@ const fields = [
     </section>
   ) : onShops ? (
     <section class="pad">
-      <p class="muted lede">Popular {langName} books first, then more {langName} books we have.</p>
+      <p class="muted lede">{langName} books, most popular first.</p>
       <ListGrid list={shown!} />
       <Pager page={page} pages={pages} />
     </section>
@@ -158,14 +158,14 @@ const fields = [
     </section>
   ) : (
   <section class="pad">
-    {shopList && <p class="muted lede">Popular {langName} books first, then more {langName} books we have.</p>}
+    {shopList && <p class="muted lede">{langName} books, most popular first.</p>}
     {olItems.length === 0 && list.failed ? (
       <div class="empty">
         <p class="muted">The book catalogue couldn’t be reached just now. Please try again shortly.</p>
       </div>
     ) : olItems.length === 0 ? (
       <div class="empty">
-        <p class="muted">Nothing matches all of that{language ? ', and Open Library has few books in some Indian languages' : ''}. Try fewer filters.</p>
+        <p class="muted">Nothing matches all of that. Try fewer filters.</p>
         <a href="/add/?type=book" class="btn">Add a book by hand</a>
       </div>
     ) : (

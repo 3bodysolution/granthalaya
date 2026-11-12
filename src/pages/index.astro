@@ -11,12 +11,16 @@ import { statusLabel } from '../lib/kinds';
 import { supabaseReady } from '../lib/supabase';
 import FrontRows from '../components/title/FrontRows.astro';
 import { homeRows, markRows } from '../lib/catalog/rows';
+import PosterRow from '../components/title/PosterRow.astro';
+import EssayCard from '../components/title/EssayCard.astro';
+import { themes } from '../lib/essays';
+import { essayMarks } from '../lib/catalog/onsite';
 export const prerender = false;
 
 const me = Astro.locals.me;
 const sb = Astro.locals.supabase;
 // what's popular this week, for everyone (the rows load alongside the visitor's own shelf)
-const rowsP = homeRows().then((r) => markRows(sb, me, r)).catch(() => []);
+const rowsP = homeRows(sb).then((r) => markRows(sb, me, r)).catch(() => []);
 // the shelves to visit, the visitor's own shelf and their details are independent, so they load together
 const featuredP = sb ? loadFeatured(sb, 6).catch((e) => { console.error('Home: featured shelves could not be loaded', e); return []; }) : Promise.resolve([]);
 // the home wall's pick is started here and awaited by the wall itself, so the words never wait for it
@@ -34,17 +38,21 @@ const first = me ? (me.display_name.split(' ')[0] || me.username) : '';
 const latest = shelfReviews(shelf)[0];   // your newest review
 const otd = shelf.filter((e) => e.data.status === 'done').map((e) => ({ t: e.data.title, d: e.data.date.toISOString().slice(0, 10), h: href(e), v: e.data.type === 'film' || e.data.type === 'tv' ? 'watched' : 'finished' }));
 const others = featured.filter((f) => f.profile.username !== me?.username);
+// a few essays and stories for the row (two from each theme, from static data, so it costs the page nothing)
+const homeEssays = themes.flatMap((t) => t.items.slice(0, 2)).slice(0, 10);
+const essayOn = me && sb ? await essayMarks(sb, me, homeEssays.map((e) => e.link)).catch(() => new Map()) : new Map();
 const features = [
-  ['Everything in one place', 'Books, films, TV seasons and essays on one shelf.'],
-  ['Say what you thought', 'A rating and a review. People can like it and comment.'],
-  ['Behind the film', 'Three short facts about how each one was made.'],
-  ['A shelf to share', 'A public profile, or a private one. Your choice.'],
+  ['Say what you thought', 'Rate it, write a review, and share it with your friends.'],
+  ['Where to watch it', 'Every film and show tells you where it’s streaming in India.'],
+  ['Find your next one', 'Prize winners, classics and Indian favourites, in English, Marathi and Hindi.'],
+  ['Your year, as a picture', 'Share your shelf or your year. Or keep it all private.'],
 ];
 ---
 {!me ? (
   <Base>
     <HomeWall wall={wall}>
       <h1 class="title hl rise d1">A shelf for everything you <span class="nw"><span class="rw">read and watch<svg class="pencil" viewBox="0 0 460 130" preserveAspectRatio="none" aria-hidden="true" focusable="false"><defs><filter id="graphite" x="-5%" y="-10%" width="110%" height="120%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4" result="wob"/><feDisplacementMap in="SourceGraphic" in2="wob" scale="4" xChannelSelector="R" yChannelSelector="G" result="bent"/><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="9" result="grain"/><feColorMatrix in="grain" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -3.4 2.5" result="holes"/><feComposite in="bent" in2="holes" operator="in"/></filter></defs><g filter="url(#graphite)"><path pathLength="1" d="M392 18C312 4 170 2 92 16 30 28 8 52 18 80c10 28 80 42 196 44 128 2 222-14 238-52 12-30-30-56-110-66-52-9-104-9-150-3"/><path class="second" pathLength="1" d="M60 110c70 12 160 16 250 8"/></g></svg></span>.</span></h1>
+      <p class="sub rise d2">Keep track of the books you’ve read and the films you’ve watched. Save what’s next. Say what you thought.</p>
       {supabaseReady() && (
         <div class="cta rise d3">
           <a class="startbtn" href="/join/" data-astro-prefetch="false">Start your shelf<svg class="arr" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -55,6 +63,9 @@ const features = [
 
     <section class="pad rows rise d4">
       <FrontRows rows={rowsP} />
+      <PosterRow title="Essays and stories" tone="essay" href="/essays/" col="min(290px, 80vw)">
+        {homeEssays.map((e) => <li><EssayCard e={e} mark={essayOn.get(e.link)} /></li>)}
+      </PosterRow>
     </section>
 
     <section class="pad feats rise d4">
@@ -72,10 +83,6 @@ const features = [
               {f.bio && <p class="small muted" style="margin: 0">{f.bio}</p>}
             </a>
           ))}
-          <div class="shelfcard dashed">
-            <span class="serif" style="font-size: 20px">Your shelf here</span>
-            <p class="small muted" style="margin: 0">Turn on “Feature my shelf” in Settings and new visitors can find you from this page.</p>
-          </div>
         </div>
       </section>
     )}
@@ -89,8 +96,8 @@ const features = [
 
     {shelf.length === 0 ? (
       <section class="pad start rise d3">
-        <a href="/add/" class="btn primary big">Add a book or film</a>
-        <a href={profileHref(me.username)} class="small muted">View your profile →</a>
+        <a href="/add/" class="btn primary big">Add something</a>
+        <a href={profileHref(me.username)} class="small muted">View profile →</a>
       </section>
     ) : (
       <>
@@ -129,7 +136,7 @@ const features = [
 
         {recent.length > 0 && (
           <section class="pad block rise d5">
-            <div class="rule"><h2 class="eyebrow">Recently</h2><a href={`/@${me.username}/`} class="more">Your whole library →</a></div>
+            <div class="rule"><h2 class="eyebrow">Recently</h2><a href={`/@${me.username}/`} class="more">Your whole shelf →</a></div>
             <div class="shelf">
               {recent.map((e, n) => <Tile entry={e} vt cls="rise" delay={`${(0.6 + n * 0.08).toFixed(2)}s`} />)}
             </div>
@@ -140,9 +147,12 @@ const features = [
 
     <section class="pad rows block rise d6">
       <FrontRows rows={rowsP} />
+      <PosterRow title="Essays and stories" tone="essay" href="/essays/" col="min(290px, 80vw)">
+        {homeEssays.map((e) => <li><EssayCard e={e} mark={essayOn.get(e.link)} /></li>)}
+      </PosterRow>
     </section>
 
-    {others.length > 0 && (
+    {(others.length > 0 || !me.featured) && (
       <section class="pad block rise d6">
         <div class="rule"><h2 class="eyebrow">Shelves to visit</h2></div>
         <div class="shelves">
@@ -152,6 +162,12 @@ const features = [
               <div class="covers">{f.covers.map((e) => <Cover entry={e} variant="swatch" w={56} h={84} />)}</div>
             </a>
           ))}
+          {!me.featured && (
+            <div class="shelfcard dashed">
+              <span class="serif" style="font-size: 20px">Your shelf here</span>
+              <p class="small muted" style="margin: 0">Turn on “Feature my shelf” in Settings and new visitors can find you from this page.</p>
+            </div>
+          )}
         </div>
       </section>
     )}

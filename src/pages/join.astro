@@ -28,7 +28,7 @@ const points = [
           ))}
         </ul>
         <p class="privacy">We get your name, email and photo from Google, nothing else.</p>
-        {error && <p class="notice bad">{error === 'setup' || !supabaseReady() ? 'Sign-in isn’t set up on this copy of the site yet.' : 'Signing in didn’t finish. Please try again.'}</p>}
+        {error && <p class="notice bad">{error === 'setup' || !supabaseReady() ? 'Sign-in isn’t working right now. Please try again later.' : 'Signing in didn’t finish. Please try again.'}</p>}
         <div class="go">
           <GoogleButton next={next} />
           <p class="fine">Already have a shelf? The same button signs you in.</p>

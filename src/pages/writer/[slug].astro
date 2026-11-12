@@ -22,7 +22,7 @@ const marks = await essayMarks(Astro.locals.supabase, Astro.locals.me, essays.ma
     </div>
   </section>
   <section class="pad work">
-    <div class="rule"><h2 class="eyebrow">Essays <span class="num">{essays.length}</span></h2></div>
+    <div class="rule"><h2 class="eyebrow">Essays</h2></div>
     <div class="grid">
       {essays.map((e) => <EssayCard e={e} mark={marks.get(e.link)} />)}
     </div>

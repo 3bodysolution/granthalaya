@@ -32,8 +32,8 @@ export const collection = {
 };
 
 /** one word each; the address is /essays/?theme=<slug> */
-/** shown as "On writing", "On India" and so on; Picks is not a subject, so it keeps its name */
-const label = (n: string) => (n === 'Picks' ? n : `On ${n === 'India' ? n : n.toLowerCase()}`);
+/** shown as "On writing", "On India" and so on; Picks is not a subject, so it is "Our picks" */
+const label = (n: string) => (n === 'Picks' ? 'Our picks' : `On ${n === 'India' ? n : n.toLowerCase()}`);
 // a New Yorker article joins a theme only where its title makes the theme obvious (new-yorker.json says which)
 /** From Hakara: Marathi essays from hakara.in, listed with their permission (src/data/hakara.json); newest first */
 export const hakara = { slug: 'hakara', name: hk.name, credit: hk.credit, items: freeFirst(hk.items as Essay[]) };
@@ -59,7 +59,6 @@ export function findEssays(text: string, n = 4): Essay[] {
   return allEssays.filter((e) => { const h = fold(`${e.title} ${e.roman ?? ''} ${e.author}`); return words.every((w) => h.includes(w)); }).slice(0, n);
 }
 /** the count the Essays page quotes: the ones we chose ourselves */
-export const total = data.themes.reduce((n, t) => n + t.items.length, 0);
 
 /** an author's page: Open Library's own /author/ page when they're there, else a simple page of ours */
 export const authorLink = (e: Pick<Essay, 'author' | 'authorKey' | 'authorSlug'>) => (e.authorKey ? authorHref(e.authorKey, e.author) : `/writer/${e.authorSlug}/`);

@@ -49,7 +49,7 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
     </div>
   </section>
   <section class="pad work">
-    <div class="rule"><h2 class="eyebrow">Books <span class="num">{a.books.length}</span></h2></div>
+    <div class="rule"><h2 class="eyebrow">Books</h2></div>
     {a.books.length === 0 ? <p class="muted">No books listed yet.</p> : (
       <div class="grid">
         {a.books.map((b) => <PosterTile href={b.href} title={b.title} year={b.year} poster={b.cover} kind="book" status={marks.get(`book:${b.key}`)?.status} logId={savedId(marks.get(`book:${b.key}`))} save={{ kind: 'book', olKey: b.key, title: b.title, creator: a.name, year: b.year, cover: b.cover }} />)}
@@ -58,7 +58,7 @@ const bioParas = a.bio.split(/\n{2,}/).filter(Boolean);
   </section>
   {essays.length > 0 && (
     <section class="pad work">
-      <div class="rule"><h2 class="eyebrow">Essays <span class="num">{essays.length}</span></h2></div>
+      <div class="rule"><h2 class="eyebrow">Essays</h2></div>
       <div class="egrid">
         {essays.map((e) => <EssayCard e={e} mark={essayOn.get(e.link)} />)}
       </div>

@@ -5,7 +5,7 @@ import { trending, discover, type Card } from './tmdb';
 import { trendingBooks, browseBooks, type BookCard } from './books';
 import { myMarks, type Mark } from './onsite';
 import { savedId } from '../saved';
-import { SHOP_LISTS } from './shopbooks';
+import { SHOP_LISTS, shopListBooks } from './shopbooks';
 import { getList, listTile, listBrowseHref, fillCovers, type CatalogList } from '../lists';
 
 /** one poster in a row; `save` is what the bookmark sends, `status` is set when it's already on your shelf */
@@ -67,7 +67,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     ]);
     return onceEach([
       { title: 'Popular this week', href: '/films/?kind=tv&sort=popular', tone: 'film', big: true, items: films(week) },
-      { title: 'New series streaming in India', tone: 'film', items: films(fresh) },
+      { title: 'New on streaming in India', tone: 'film', items: films(fresh) },
       { title: 'Indian series people love', href: '/films/?kind=tv&language=hi&sort=top', tone: 'film', items: films(indian) },
       { title: 'Korean dramas', href: '/films/?kind=tv&language=ko&genre=drama', tone: 'film', items: films(korean) },
       { title: 'Highest rated', href: '/films/?kind=tv&sort=top', tone: 'film', items: films(top) },
@@ -86,7 +86,7 @@ export async function filmRows(kind: 'film' | 'tv'): Promise<Row[]> {
     { title: 'New on streaming in India', tone: 'film', items: films(fresh) },
     { title: 'New Hindi films', href: '/films/?language=hi', tone: 'film', items: films(hindi) },
     { title: 'Marathi films people love', href: '/films/?language=mr&sort=top', tone: 'film', items: films(marathi) },
-    { title: 'New from the south', tone: 'film', items: films(south) },
+    { title: 'New Tamil, Telugu, Malayalam and Kannada films', tone: 'film', items: films(south) },
     { title: 'Highest rated', href: '/films/?sort=top', tone: 'film', items: films(top) },
     listRow('oscar-best-picture', 'Best Picture winners', 'film'),
     listRow('national-best-marathi', 'National Award winners, Marathi', 'film'),
@@ -117,18 +117,20 @@ export async function bookRows(shopIn: CatalogList[] | Promise<CatalogList[]> = 
 }
 
 /** the home page: a little of everything */
-export async function homeRows(): Promise<Row[]> {
-  const [films_, books_, indian, series] = await Promise.all([
+export async function homeRows(sb?: SupabaseClient | null): Promise<Row[]> {
+  const [films_, books_, indian, series, marathi] = await Promise.all([
     safe(trending('film'), []),
     safe(trendingBooks('weekly'), []),
     list(discover({ kind: 'film', language: 'hi|mr|ml|ta|te|kn|bn', since: daysAgo(540) })),
     safe(trending('tv'), []),
+    safe(shopListBooks(sb, 'mr', 20), [] as BookCard[]),
   ]);
   return onceEach([
     { title: 'Popular films this week', href: '/films/', tone: 'film', items: films(films_) },
     { title: 'Popular books this week', href: '/books/', tone: 'book', items: books(books_) },
-    { title: 'New Indian films', href: '/films/', tone: 'film', items: films(indian) },
+    { title: 'New Indian films, every language', href: '/films/', tone: 'film', items: films(indian) },
     { title: 'Popular series this week', href: '/films/?kind=tv', tone: 'film', items: films(series) },
+    { title: 'Marathi books people are buying', href: '/books/?language=mar', tone: 'book', items: books(marathi) },
   ]);
 }
 
