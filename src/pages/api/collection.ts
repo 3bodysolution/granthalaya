@@ -51,7 +51,7 @@ export const POST: APIRoute = async (ctx) => {
   async function addTo(threadId: string, titleId: string) {
     const { data: last } = await sb.from('thread_items').select('position').eq('thread_id', threadId).order('position', { ascending: false }).limit(1).maybeSingle();
     const { count } = await sb.from('thread_items').select('title_id', { count: 'exact', head: true }).eq('thread_id', threadId);
-    if ((count ?? 0) >= 200) return 'A collection can hold 200 things.';
+    if ((count ?? 0) >= 200) return 'A collection can hold 200 titles.';
     const { error } = await sb.from('thread_items').upsert({ thread_id: threadId, title_id: titleId, user_id: me.id, position: (last?.position ?? -1) + 1 }, { onConflict: 'thread_id,title_id', ignoreDuplicates: true });
     return error ? dbMessage(error) : null;
   }

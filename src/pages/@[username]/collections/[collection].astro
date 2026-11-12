@@ -33,7 +33,7 @@ const n = (t: string) => path.filter((x) => x.e.data.type === t).length;
 const tvShows = path.filter((x) => x.e.data.type === 'tv' && !x.e.data.season).length, tvSeasons = path.filter((x) => x.e.data.type === 'tv' && x.e.data.season).length;
 const plural = (k: number, w: string) => `${k} ${w}${k > 1 ? 's' : ''}`;
 const total = path.reduce((s, x) => s + minutes(x.e), 0);
-const meta = [plural(path.length, 'thing'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), tvShows && plural(tvShows, 'show'), tvSeasons && plural(tvSeasons, 'TV season'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' | ');
+const meta = [plural(path.length, 'title'), n('film') && plural(n('film'), 'film'), n('book') && plural(n('book'), 'book'), tvShows && plural(tvShows, 'show'), tvSeasons && plural(tvSeasons, 'TV season'), n('essay') && plural(n('essay'), 'essay'), aboutHours(total)].filter(Boolean).join(' | ');
 const fan = path.slice(0, 3).map((x) => palette(x.e));
 const og = collectionOg(col.data.title, name, col.body, path.length);
 const shareData = JSON.stringify({ title: col.data.title, ref: `col=${col.uuid}`, card: `/story/c/${profile.username}/${slug}.png`, wide: false });
@@ -112,7 +112,7 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
   {editing && (
     <section class="pad danger-zone">
       <button type="button" class="btn del" data-col-delete={col.uuid}>Delete this collection</button>
-      <span class="muted">The films and books stay on your shelf.</span>
+      <span class="muted">The titles themselves aren’t deleted.</span>
     </section>
   )}
 
@@ -194,7 +194,7 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
       const fd = new FormData(head);
       const r = await post({ action: 'update', name: fd.get('name'), intro: fd.get('intro') });
       const s = head.querySelector<HTMLElement>('.saved')!;
-      s.textContent = r.ok ? 'Saved' : r.error || 'Didn’t save'; s.hidden = false; setTimeout(() => (s.hidden = true), 2500);
+      s.textContent = r.ok ? 'Saved' : r.error || 'That didn’t save. Please try again.'; s.hidden = false; setTimeout(() => (s.hidden = true), 2500);
     });
     document.querySelectorAll<HTMLInputElement>('[data-why]').forEach((input) => input.addEventListener('change', async () => {
       const item = input.closest<HTMLElement>('[data-item]')!.dataset.item;
@@ -214,7 +214,7 @@ const others = collections.filter((t) => t.id !== col.id).slice(0, 3);
       const b = ev.currentTarget as HTMLButtonElement;
       const d = document.getElementById('confirm-box') as HTMLDialogElement;
       d.querySelector('#confirm-h')!.textContent = 'Delete this collection?';
-      d.querySelector('#confirm-p')!.textContent = 'The collection goes, with its intro and what you wrote about each title. Everything stays on your shelf.';
+      d.querySelector('#confirm-p')!.textContent = 'The collection goes, with its intro and what you wrote about each title. The titles themselves aren’t deleted.';
       d.querySelector('#confirm-ok')!.textContent = 'Delete';
       d.returnValue = '';
       d.showModal();

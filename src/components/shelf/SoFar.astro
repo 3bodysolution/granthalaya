@@ -51,11 +51,11 @@ const favSrc = fav ? coverSrc(fav) : undefined;
     <div class="sf-tiles">
       <div class="card tile"><span class="eyebrow">Hours of film</span>
         {n.filmsKnown ? <><span class="serif big" style="color: var(--sky)">{hours < 1 ? '<1' : fmt(hours)}</span><span class="small">{n.filmCount > n.filmsKnown ? `About, from ${plural(n.filmsKnown, 'title')} with a runtime` : 'Counted from each runtime'}</span></>
-          : <span class="small">{n.filmCount ? 'No runtimes saved for these yet.' : 'No films or shows finished.'}</span>}
+          : <span class="small">{n.filmCount ? 'We don’t know how long these run yet.' : 'No films or shows finished.'}</span>}
       </div>
       <div class="card tile"><span class="eyebrow">Pages</span>
         {n.booksKnown ? <><span class="serif big" style="color: var(--book)">{fmt(n.pageSum)}</span><span class="small">{n.bookCount > n.booksKnown ? `About, from ${plural(n.booksKnown, 'book')} with a page count` : 'Counted from each book’s pages'}</span></>
-          : <span class="small">{n.bookCount ? 'No page counts saved for these yet.' : 'No books finished.'}</span>}
+          : <span class="small">{n.bookCount ? 'We don’t know these books’ page counts yet.' : 'No books finished.'}</span>}
       </div>
       <div class="card tile wide">
         <div>

@@ -101,7 +101,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         </nav>
       ) : null}
       <div class="actions">
-        <button class="iconbtn" data-search-open aria-label="Search films, books and people (⌘K)" title="Search  ⌘K">
+        <button class="iconbtn" data-search-open aria-label="Search films, books, essays and people (⌘K)" title="Search  ⌘K" data-kbd-hint>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
         </button>
         <button class="iconbtn" data-theme-toggle aria-label="Switch between light and dark">
@@ -154,12 +154,12 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
   <dialog class="search" id="search" aria-label="Search" data-src={me ? `/api/search?u=${me.username}` : ''}>
     <div class="search-top">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
-      <input type="search" placeholder="Search films, books, people" aria-label="Search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="search-list" enterkeyhint="search" />
+      <input type="search" placeholder="Search films, books, essays and people" aria-label="Search" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="search-list" enterkeyhint="search" />
       <span class="search-wait" hidden><span class="ink" aria-hidden="true"></span></span>
       <kbd>esc</kbd>
     </div>
     <ul class="search-list" id="search-list" role="listbox" aria-label="Results"></ul>
-    <div class="search-foot"><span>↑ ↓ to pick</span><span>↵ to see all results</span>{me ? <a href="/add/" class="search-add">Add something by hand →</a> : <span style="margin-left:auto">⌘K anywhere</span>}</div>
+    <div class="search-foot"><span>↑ ↓ to pick</span><span>↵ to see all results</span>{me ? <a href="/add/" class="search-add">Add something by hand →</a> : <span style="margin-left:auto"><span data-kbd>⌘K</span> anywhere</span>}</div>
   </dialog>
 
   <dialog class="box coll" id="coll-box" aria-labelledby="coll-h">
@@ -268,7 +268,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       try {
         const r = await fetch(path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
         const j = await r.json().catch(() => ({}));
-        if (!r.ok) { toast(j.error || 'That didn’t work. Please try again.'); return null; }
+        if (!r.ok) { toast(j.error || 'That didn’t save. Please try again.'); return null; }
         return j;
       } catch { toast('Couldn’t reach the site. Check your connection.'); return null; }
     }
@@ -557,7 +557,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       try {
         const res = await fetch('/api/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'comment', id: f.dataset.comment, body: text }) });
         const j = await res.json().catch(() => ({}));
-        if (res.ok) r = j; else fail(j.error || 'That didn’t work. Please try again.');
+        if (res.ok) r = j; else fail(j.error || 'That didn’t save. Please try again.');
       } catch { fail('Couldn’t reach the site. Check your connection.'); }
       busy(btn, false); btn.textContent = was; field.readOnly = false;
       delete f.dataset.sending;
@@ -619,7 +619,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
         if (panel?.dataset.working) return;
         box.dataset.rating = String(v); paintStars(box, v);
         const save = async () => (src.id ? await send('/api/log', 'PATCH', { id: src.id, rating: v || null }) : await send('/api/log', 'POST', { ...src, status: 'done', rating: v }));
-        if (panel) await inPanel(panel, async () => { const j = await save(); if (src.id && j?.statusChanged === 'done') toast('Rated, so it’s marked as finished.'); return null; });
+        if (panel) await inPanel(panel, async () => { const j = await save(); if (src.id && j?.statusChanged === 'done') toast(`Rated, so it’s marked as ${j.kind === 'film' || j.kind === 'tv' ? 'watched' : 'read'}.`); return null; });
         else if (await save()) reload();
         return;
       }
@@ -737,7 +737,17 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       setTimeout(() => { b.replaceChildren(...old); b.classList.remove('copied'); if (label) b.setAttribute('aria-label', label); }, 1500);
     });
 
-    // ——— search (⌘K): your shelf, then films, TV, books, people and members ———
+    // ——— search (⌘K on a Mac, Ctrl K elsewhere): your shelf, then films, TV, books, essays, people and members ———
+    const MAC = /Mac|iPhone|iPad|iPod/.test(navigator.platform || navigator.userAgent);
+    function showKey() {
+      if (MAC) return;
+      document.querySelectorAll<HTMLElement>('[data-kbd]').forEach((el) => { el.textContent = 'Ctrl K'; });
+      document.querySelectorAll<HTMLElement>('[data-kbd-hint]').forEach((el) => {
+        el.setAttribute('aria-label', (el.getAttribute('aria-label') || '').replace('⌘K', 'Ctrl K'));
+        el.setAttribute('title', (el.getAttribute('title') || '').replace('⌘K', 'Ctrl K'));
+      });
+    }
+    document.addEventListener('astro:page-load', showKey);
     type Mine = { title: string; creator: string; kind: string; href: string; bg: string; r: string; year: string; cover?: string };
     let mine: Mine[] | null = null;
     let mineFrom = '';
@@ -796,9 +806,10 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     function renderEmpty() {
       const add = dialog().dataset.mode === 'add';
       const recent = shelfRows('', 6);
+      const lead = add ? '<li class="search-empty">Start typing to add something new.</li>' : '';
       paint(recent.length
-        ? group(add ? 'Add something new: start typing. Recently on your shelf' : 'Recently on your shelf', recent)
-        : `<li class="search-empty">${add ? 'Find the book, film or show you want to add.' : 'Search films, TV, books and people.'}</li>`);
+        ? lead + group('Recently on your shelf', recent)
+        : `<li class="search-empty">${add ? 'Find the book, film or show you want to add.' : 'Search films, TV, books, essays and people.'}</li>`);
     }
     async function search(raw: string) {
       const q = raw.trim().toLowerCase();
@@ -864,7 +875,7 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
       before = document.activeElement;
       const input = d.querySelector('input')!;
       input.value = '';
-      input.placeholder = 'Search films, books, people';
+      input.placeholder = 'Search films, books, essays and people';
       d.showModal();
       input.focus();
       await loadMine();

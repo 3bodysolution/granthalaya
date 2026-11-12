@@ -28,7 +28,7 @@ const all = p.groups.flatMap((g) => g.items);
 const marks = sb ? await myMarks(sb, Astro.locals.me, all.map((c) => ({ kind: c.kind, tmdb: c.id }))).catch((e) => { console.error('person marks', e); return new Map(); }) : new Map();
 const day = (d?: string) => (d ? new Date(`${d}T00:00:00Z`).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '');
 const bioParas = p.bio.split(/\n{2,}/).filter(Boolean);
-const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted in', Writer: 'Wrote', Cinematography: 'Shot', Music: 'Music for', Editor: 'Edited', Producer: 'Produced' } as Record<string, string>)[l] ?? l;
+const label = (l: string, n: number) => ({ Director: 'Directed', Actor: 'Acted in', Writer: 'Wrote', Cinematography: 'Cinematography', Music: 'Music', Editor: 'Edited', Producer: 'Produced' } as Record<string, string>)[l] ?? l;
 ---
 <Base title={p.name} description={p.bio ? p.bio.slice(0, 180) : `${p.name}: films and TV on Granthalaya.`} image={p.photo}>
   <section class="pad head">

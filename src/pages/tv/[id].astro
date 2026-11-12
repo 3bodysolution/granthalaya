@@ -31,6 +31,8 @@ try { [t, rows] = await Promise.all([show(id), sb ? rowsForShow(sb, id) : Promis
 catch (e) { if (e instanceof SourceUnavailable) return Astro.rewrite('/unavailable'); throw e; } // TMDB failing is not "not found"
 if (!t) { Astro.response.status = 404; return Astro.rewrite('/404'); }
 if (param !== `${id}-${slug(t.title)}` && slug(t.title)) return Astro.redirect(showHref(id, t.title) + Astro.url.search, 301);
+// TMDB's own words for how a show is going, in ours (an unknown word is left out rather than shown raw)
+const runWord = (w?: string | null) => ({ 'Returning Series': 'More seasons coming', 'Ended': 'Ended', 'Canceled': 'Cancelled', 'In Production': 'Being made', 'Planned': 'Planned', 'Pilot': 'Being made' } as Record<string, string>)[w ?? ''] ?? '';
 const site = sb ? await onSite(sb, rows, me) : { done: 0, saved: 0, average: null, ratings: 0, collections: [], mine: [] };
 const rowFor = (n: number) => rows.find((r) => r.season === n);
 const mineFor = (n: number) => site.mine.find((m) => m.season === n);   // your newest visit to that season
@@ -92,7 +94,7 @@ const facts = rows.find((r) => (r.trivia ?? []).length);
             {t.language && <><dt>Language</dt><dd><a href={`/films/?kind=tv&language=${t.language.code}`} class="ul">{t.language.name}</a></dd></>}
             {t.countries.length > 0 && <><dt>{t.countries.length > 1 ? 'Countries' : 'Country'}</dt><dd>{t.countries.map((c) => c.name).join(', ')}</dd></>}
             {t.networks.length > 0 && <><dt>Shown on</dt><dd>{t.networks.join(', ')}</dd></>}
-            {t.status && <><dt>Status</dt><dd>{t.status === 'Returning Series' ? 'More seasons coming' : t.status}</dd></>}
+            {runWord(t.status) && <><dt>Run</dt><dd>{runWord(t.status)}</dd></>}
             {t.original && t.original !== t.title && <><dt>Original title</dt><dd>{t.original}</dd></>}
           </dl>
         </div>

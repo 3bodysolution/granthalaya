@@ -11,6 +11,7 @@ import { pageBits } from '../../lib/cards/titlepage';
 import { within } from '../../lib/cards/output';
 import { creditFor } from '../../lib/cards/credits';
 import { cardFacts } from '../../lib/cards/tagline';
+import { yearNumbers } from '../../lib/yearstats';
 import { shortPath, pageText, entryText, yearText, collectionText } from '../../lib/share';
 import { titlePageHref } from '../../lib/catalog/onsite';
 export const prerender = false;
@@ -56,10 +57,9 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     if (profile.is_private && locals.me?.id !== profile.id) return gone();
     const year = Number(y);
     const list = (await loadShelf(sb, profile, { byShow: false })).filter((e) => e.data.status === 'done' && !e.data.private && e.data.date.getUTCFullYear() === year);
-    const books = list.filter((e) => e.data.type === 'book').length;
-    const films = list.filter((e) => e.data.type === 'film' || e.data.type === 'tv').length;
+    const n = yearNumbers(list, year);
     const link = abs(profile.is_private ? null : `/@${profile.username}/?year=${year}#so-far`);
-    return json({ link, text: yearText(year, books, films, link) });
+    return json({ link, text: yearText(year, { books: n.nBooks, films: n.nFilms, shows: n.nShows, essays: n.nEssays }, Math.round(n.filmMin / 60), link) });
   }
 
   if (q('col')) {
@@ -71,9 +71,8 @@ export const GET: APIRoute = async ({ url, locals, site }) => {
     if (found.profile.is_private && locals.me?.id !== found.profile.id) return gone();
     const col = (await loadCollections(sb, found.profile)).find((c) => c.uuid === q('col'));
     if (!col) return gone();
-    const books = col.data.items.filter((i) => i.title.kind === 'book').length;
     const link = abs(`/c/${col.uuid}`);
-    return json({ link, text: collectionText(col.data.title, books, col.data.items.length - books, link) });
+    return json({ link, text: collectionText(col.data.title, col.data.items.length, link) });
   }
   return gone();
 };

@@ -34,7 +34,7 @@ const extras = await reviewExtras(sb, new Map(all.filter((r) => !r.entry.data.pr
   <div class="pad rise d1" style="padding-top: 26px"><ShelfHead shelf={o.shelf} favs={card.favs} latest={card.latest} /></div>
 
   <section class="pad list" style="padding-top: 36px">
-    {all.length === 0 && <p class="serif" style="font-size: 22px; margin: 0">{isMe ? 'No reviews yet. Write one when you log a book or film.' : `${name} hasn’t written any reviews yet.`}</p>}
+    {all.length === 0 && <p class="serif" style="font-size: 22px; margin: 0">{isMe ? 'No reviews yet. Write one when you add something to your shelf.' : `${name} hasn’t written any reviews yet.`}</p>}
     {all.map((r) => {
       const x = extras.get(r.logId);
       return (

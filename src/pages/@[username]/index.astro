@@ -35,10 +35,16 @@ if (all.length) {
 }
 
 // ——— filters, from the address ———
+// the Progress words follow the Type filter: reading words for books and essays, watching words for films and TV, both when mixed
+const WORDS = {
+  read: { want: 'Want to read', now: 'Reading', done: 'Read' },
+  watch: { want: 'Want to watch', now: 'Watching', done: 'Watched' },
+  mixed: { want: 'Want to read or watch', now: 'Reading or watching', done: 'Finished' },
+};
 const STATUS_FILTERS: [string, string, (s: Status) => boolean][] = [
-  ['want', 'Want to', (s) => s === 'want'],
-  ['now', 'In progress', (s) => s === 'reading' || s === 'watching'],
-  ['done', 'Finished', (s) => s === 'done'],
+  ['want', 'want', (s) => s === 'want'],
+  ['now', 'now', (s) => s === 'reading' || s === 'watching'],
+  ['done', 'done', (s) => s === 'done'],
   ['paused', 'Paused', (s) => s === 'paused'],
   ['dnf', 'Didn’t finish', (s) => s === 'dnf' || s === 'dropped'],
 ];
@@ -49,11 +55,12 @@ const q = Astro.url.searchParams;
 // an unknown value (a mistyped address) shows everything
 const type = types.find((t) => t === q.get('type')) ?? '';
 const status = statuses.find(([k]) => k === q.get('status'))?.[0] ?? '';
-const SORTS: [string, string][] = [['', 'Recently added'], ['title', 'Title'], ['rating', 'Your rating']];
+const SORTS: [string, string][] = [['', 'Recently added'], ['title', 'Title'], ['rating', 'Rating']];
 const sort = SORTS.find(([k]) => k && k === q.get('sort'))?.[0] ?? '';
+const words = !type ? 'mixed' : type === 'film' || type === 'tv' ? 'watch' : 'read';
 const fields = [
   { name: 'type', label: 'Type', value: type, options: [['', 'Any type'], ...types.map((t) => [t, kindPlural[t]])] as [string, string][] },
-  { name: 'status', label: 'Progress', value: status, options: [['', 'Any progress'], ...statuses.map(([k, l]) => [k, l])] as [string, string][] },
+  { name: 'status', label: 'Progress', value: status, options: [['', 'Any progress'], ...statuses.map(([k, l]) => [k, (WORDS[words] as Record<string, string>)[l] ?? l])] as [string, string][] },
   { name: 'sort', label: 'Sort', value: sort, options: SORTS },
 ];
 const inStatus = STATUS_FILTERS.find(([k]) => k === status)?.[2];
@@ -86,7 +93,7 @@ const count = (...t: string[]) => all.filter((e) => t.includes(e.data.type)).len
 const pick = pickYear(both.flat, Number(q.get('year')));
 const so = pick.year ? yearNumbers(both.flat, pick.year) : undefined;
 const og = visible && !profile.is_private
-  ? (so && Number(q.get('year')) === so.year ? yearOg(name, so.year, so.nBooks, so.filmCount, Math.round(so.filmMin / 60), so.fav?.data.title) : profileOg(name, count('book'), count('film', 'tv'), count('essay')))
+  ? (so && Number(q.get('year')) === so.year ? yearOg(name, so.year, { books: so.nBooks, films: so.nFilms, shows: so.nShows, essays: so.nEssays }, Math.round(so.filmMin / 60), so.fav?.data.title) : profileOg(name, { books: count('book'), films: count('film'), shows: count('tv'), essays: count('essay') }))
   : undefined;
 ---
 <Base footArt="threads" title={isMe ? 'Your shelf' : `${name} (@${profile.username})`} description={details?.bio || `${name}’s shelf on Granthalaya.`} shelf={profile.username} feed={!profile.is_private} noindex={profile.is_private} og={og}
@@ -116,8 +123,8 @@ const og = visible && !profile.is_private
       <div class="card note">
         {isMe ? (
           <>
-            <h2 class="serif">Your shelf is empty, for now</h2>
-            <p class="muted">Start with whatever you’re reading or watching this week.</p>
+            <h2 class="serif">Your shelf is empty</h2>
+            <p class="muted">Add whatever you’re reading or watching now.</p>
             <a href="/add/" class="btn primary big">Add your first book, film, show or essay</a>
           </>
         ) : (

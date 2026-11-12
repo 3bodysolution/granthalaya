@@ -15,11 +15,11 @@ const [entries, collections] = await Promise.all([loadShelf(sb, profile), loadCo
 const card = await loadProfileCard(sb, profile, o.shelf.details, entries);
 const name = profile.display_name || profile.username;
 ---
-<Base footArt="threads" title={isMe ? 'Your collections' : `${name}’s collections`} shelf={profile.username} feed={!profile.is_private} description={`Hand-picked paths through ${name}’s library.`}>
+<Base footArt="threads" title={isMe ? 'Your collections' : `${name}’s collections`} shelf={profile.username} feed={!profile.is_private} description={`Collections by ${name}: titles that go together, in order.`}>
   <div class="pad rise" style="padding-top: 28px"><ShelfHead shelf={o.shelf} current="collections" favs={card.favs} latest={card.latest} /></div>
   <section class="pad head rise">
     <h1 class="title">Collections</h1>
-    <p class="lede">Books and films that go well together, in the order {isMe ? 'I’d' : 'they’d'} take them.</p>
+    <p class="lede">{isMe ? 'Titles that go together, in the order you’d take them.' : `Titles that go together, in the order ${name} would take them.`}</p>
     {isMe && (
       <form class="newc" data-new-col>
         <input class="field" name="name" maxlength="120" placeholder="Name a new collection" aria-label="Name a new collection" required />

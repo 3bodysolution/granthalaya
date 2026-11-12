@@ -2,7 +2,7 @@
 // Parts we don't have are left out. No em dashes anywhere.
 import type { Kind, Status } from './kinds';
 
-export const SITE_DESCRIPTION = 'Keep a shelf of the books, films, shows and essays you love, in a hand-painted library.';
+export const SITE_DESCRIPTION = 'Keep a shelf of the books, films, shows and essays you love, and see where to watch them in India.';
 
 /** short addresses that redirect to the full page: /f/<tmdb id>, /t/<tmdb id>, /b/<key>, /c/<id> */
 export function shortPath(t: { kind: Kind; tmdb_id?: number | null; ol_key?: string | null; slug?: string; link?: string | null }): string | null {
@@ -44,16 +44,21 @@ export function entryText(t: TitleBits, status: Status, rating: number | undefin
   return pageText(t, line, link);
 }
 
-export function yearText(year: number, books: number, films: number, link: string) {
-  const parts = [books ? `${books} ${books === 1 ? 'book' : 'books'}` : '', films ? `${films} ${films === 1 ? 'film' : 'films'}` : ''].filter(Boolean);
-  const what = [books ? 'books' : '', films ? 'films' : ''].filter(Boolean).join(' and ') || 'books and films';
-  return join(`My ${year} in ${what}${parts.length ? `: ${parts.join(' and ')}` : ''}.`, link);
+export interface Counts { books: number; films: number; shows: number; essays: number }
+/** "3 books, 2 films and 1 essay": only the kinds that aren't 0 */
+export function tally(c: Counts) {
+  const parts = ([[c.books, 'book'], [c.films, 'film'], [c.shows, 'show'], [c.essays, 'essay']] as [number, string][]).filter(([n]) => n > 0).map(([n, w]) => `${n} ${w}${n === 1 ? '' : 's'}`);
+  return parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts[parts.length - 1]}` : parts[0] ?? '';
+}
+const hoursOf = (hours: number) => (hours ? `about ${hours} ${hours === 1 ? 'hour' : 'hours'} of film` : '');
+const withHours = (t: string, hours: number) => (t && hours ? `${t}, and ${hoursOf(hours)}` : t || (hours ? `${hoursOf(hours)[0].toUpperCase()}${hoursOf(hours).slice(1)}` : ''));
+export function yearText(year: number, c: Counts, hours: number, link: string) {
+  const t = withHours(tally(c), hours);
+  return join(`My ${year} on Granthalaya${t ? `: ${t}` : ''}.`, link);
 }
 
-export function collectionText(name: string, books: number, films: number, link: string) {
-  const n = books + films;
-  const what = books && films ? 'books and films' : books ? (books === 1 ? 'book' : 'books') : (films === 1 ? 'film' : 'films');
-  return join(`${name}, ${n} ${what} I've put together.`, link);
+export function collectionText(name: string, titles: number, link: string) {
+  return join(`${name}: a collection of ${titles} ${titles === 1 ? 'title' : 'titles'}.`, link);
 }
 
 /* ——— link previews (og:title and og:description) ——— */
@@ -69,7 +74,7 @@ export function filmOg(kind: 'film' | 'tv', t: { title: string; year?: number },
 export function bookOg(t: { title: string; year?: number }, author: string, line: string | undefined): Og {
   return {
     title: join(t.title, author && `by ${author}`),
-    description: join(calm(line) && `${calm(line).replace(/\.$/, '')}.`, t.year && `First published ${t.year}.`, `Read what it's about, and keep it on your shelf.`),
+    description: join(calm(line) && `${calm(line).replace(/\.$/, '')}.`, t.year && `First published ${t.year}.`, `See what it's about, and keep it on your shelf.`),
   };
 }
 /** the first words of a note, without the formatting marks */
@@ -80,20 +85,20 @@ export function noteStart(note: string, max = 160) {
 export function entryOg(name: string, t: TitleBits, status: Status, rating: number | undefined, note: string, line: string | undefined): Og {
   const w = watchy(t.kind);
   const verb = status === 'done' ? (w ? 'watched' : 'read') : status === 'want' ? (w ? 'wants to watch' : 'wants to read')
-    : status === 'watching' ? 'is watching' : status === 'reading' ? 'is reading' : 'logged';
+    : status === 'watching' ? 'is watching' : status === 'reading' ? 'is reading' : '';
   const n = noteStart(note);
   return {
-    title: join(`${name} ${verb} ${t.title}`, stars(rating)),
+    title: join(verb ? `${name} ${verb} ${t.title}` : `${name} has ${t.title} on their shelf`, stars(rating)),
     description: n || join(calm(line) && `${calm(line).replace(/\.$/, '')}.`, `See ${name}'s shelf on Granthalaya.`),
   };
 }
-export const profileOg = (name: string, books: number, films: number, essays: number): Og => ({
+export const profileOg = (name: string, c: Counts): Og => ({
   title: `${name}'s shelf on Granthalaya`,
-  description: `${books} ${books === 1 ? 'book' : 'books'}, ${films} ${films === 1 ? 'film' : 'films'} and ${essays} ${essays === 1 ? 'essay' : 'essays'}, kept in a hand-painted library.`,
+  description: tally(c) ? `${tally(c)} on ${name}'s shelf.` : `${name}'s shelf on Granthalaya.`,
 });
-export const yearOg = (name: string, year: number, books: number, films: number, hours: number, favourite?: string): Og => ({
-  title: `${name}'s ${year} in books and films`,
-  description: join(`${books} ${books === 1 ? 'book' : 'books'}, ${films} ${films === 1 ? 'film' : 'films'}${hours ? ` and about ${hours} ${hours === 1 ? 'hour' : 'hours'} of film` : ''}.`, favourite && `Favourite: ${favourite}.`),
+export const yearOg = (name: string, year: number, c: Counts, hours: number, favourite?: string): Og => ({
+  title: `${name}'s ${year} on Granthalaya`,
+  description: join(withHours(tally(c), hours) && `${withHours(tally(c), hours)}.`, favourite && `Favourite: ${favourite}.`),
 });
 export function collectionOg(name: string, by: string, intro: string, titles: number): Og {
   const first = calm(intro.replace(/[*_`>#]|\[([^\]]*)\]\([^)]*\)/g, '$1')).match(/^.*?[.!?](?=\s|$)/)?.[0] ?? calm(intro);

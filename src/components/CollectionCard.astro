@@ -8,7 +8,7 @@ const c = [0, 1, 2].map((i) => (list[i] ? palette(list[i]).bg : '#46525E'));
 const n = (t: string) => list.filter((e) => e.data.type === t).length;
 const shows = list.filter((e) => e.data.type === 'tv' && !e.data.season).length, seasons = list.filter((e) => e.data.type === 'tv' && e.data.season).length;
 const many = (k: number, one: string, more = one + 's') => `${k} ${k === 1 ? one : more}`;
-const meta = [many(list.length, 'thing'), n('film') && many(n('film'), 'film'), n('book') && many(n('book'), 'book'), shows && many(shows, 'show'), seasons && `${many(seasons, 'season')} of TV`, n('essay') && many(n('essay'), 'essay')].filter(Boolean).join(' | ');
+const meta = [many(list.length, 'title'), n('film') && many(n('film'), 'film'), n('book') && many(n('book'), 'book'), shows && many(shows, 'show'), seasons && `${many(seasons, 'season')} of TV`, n('essay') && many(n('essay'), 'essay')].filter(Boolean).join(' | ');
 ---
 <a href={collectionHref(collection)} class="card ccard">
   <div class="fanwrap" aria-hidden="true">

@@ -104,8 +104,8 @@ const q = encodeURIComponent(`${b.title} ${b.authors[0]?.name ?? ''}`.trim());
 const find = [
   ...shops.map((s) => ({ label: `Buy at ${SHOP_NAME[s.shop]}`, url: s.url })),
   b.readOnline && { label: 'Borrow or read on Open Library', url: b.readOnline },
-  b.source === 'Open Library' && b.sourceLink && !b.readOnline && { label: 'Open Library', url: b.sourceLink },
-  b.source === 'Google Books' && { label: 'Google Books', url: b.sourceLink },
+  b.source === 'Open Library' && b.sourceLink && !b.readOnline && { label: 'See it on Open Library', url: b.sourceLink },
+  b.source === 'Google Books' && { label: 'Preview on Google Books', url: b.sourceLink },
   { label: 'Amazon India', url: `https://www.amazon.in/s?k=${q}&i=stripbooks` },
   { label: 'Find it in a library', url: `https://search.worldcat.org/search?q=${q}` },
 ].filter(Boolean) as { label: string; url: string }[];
@@ -140,7 +140,7 @@ const reading = pagesShown ? aboutHours(Math.round(pagesShown * siteConfig.minut
             {year && <><dt>First published</dt><dd><a href={`/books/?year=${year}`} class="ul">{year}</a></dd></>}
             {language && <><dt>Language</dt><dd>{language}</dd></>}
             {pagesShown && <><dt>Length</dt><dd>{pagesShown} pages{reading ? `, ${reading} to read` : ''}</dd></>}
-            {b.languages.length > 0 && <><dt>Editions in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}
+            {b.languages.length > 0 && <><dt>Published in</dt><dd>{b.languages.map((l, i) => <>{i > 0 && ', '}<a href={`/books/?language=${l.code}`} class="ul">{l.name}</a></>)}</dd></>}
             {publishers.length > 0 && <><dt>{publishers.length > 1 ? 'Publishers' : 'Publisher'}</dt><dd>{publishers.join(', ')}</dd></>}
             {manyEditions && <><dt>Editions</dt><dd>{b.editions}</dd></>}
             {isbnShown && <><dt>ISBN</dt><dd class="num">{isbnShown}</dd></>}

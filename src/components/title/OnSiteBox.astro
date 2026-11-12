@@ -9,7 +9,7 @@ const { site, film } = Astro.props;
   <div class="osb">
     <p class="osb-h">On Granthalaya</p>
     <div class="osb-row num">
-      {site.average != null && <span><b class="avg"><Star class="avg-i" aria-hidden="true" /> {site.average.toFixed(1)}</b>{` from ${site.ratings} ratings`}</span>}
+      {site.average != null && <span><b class="avg"><Star class="avg-i" aria-hidden="true" /> {site.average.toFixed(1)}</b>{` from ${site.ratings} ${site.ratings === 1 ? 'rating' : 'ratings'}`}</span>}
       <span><b>{site.done}</b>{film ? ' watched' : ' read'}</span>
       <span><b>{site.saved}</b>{' saved'}</span>
     </div>

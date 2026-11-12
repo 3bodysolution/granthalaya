@@ -147,7 +147,6 @@ const whenLine = d.status === 'done' ? `${isFilm ? 'Watched' : 'Read'} on ${long
   : d.status === 'reading' || d.status === 'watching' ? `Started on ${longDay(d.started ?? d.date)}`
   : `${statusLabel(d.type, d.status)} on ${longDay(d.date)}`;
 const againWord = isFilm ? 'Watch it again' : 'Read it again';
-const verb = isFilm ? 'watch' : 'read';
 const link = new URL(href(entry), Astro.url).href;
 // sharing goes to the film or book's public page (by its short address), never to your entry or shelf.
 // Your own entry shares your story card; someone else's entry shares the title's page.
@@ -190,7 +189,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
         </div>
 
         <div class="main">
-          <a href={`/@${profile.username}/`} class="owner rise d2"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
+          <a href={`/@${profile.username}/`} class="owner rise d2"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your shelf' : `${name}’s shelf`}</a>
           <h1 class="title bigtitle rise d3">{fullTitle(entry)}</h1>
           <p class="rise d3 meta">
             {isFilm ? (
@@ -259,7 +258,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
             <>
               <p class="lp-head">Your shelf</p>
               {d.seasons!.length ? (
-                <p class="lp-note">{showLabel}. Each season has its own status, rating and review under Seasons.</p>
+                <p class="lp-note">{showLabel}. Each season has its own progress, rating and review under Seasons.</p>
               ) : (
                 <div class="toggles one" role="group" aria-label="Status">
                   <button class="tg" type="button" aria-pressed="true" data-set-status={JSON.stringify({ id: entry.logId, status: 'want' })} {...off('want')}><Mark size={24} /><span>Want to watch</span></button>
@@ -305,7 +304,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
           ) : (
             <>
               <p class="lp-head">Keep your own shelf</p>
-              <p class="lp-note">Log what you {verb} and say what you thought of it.</p>
+              <p class="lp-note">Keep track of what you read and watch, and say what you thought.</p>
               <a class="lrow2" href={`/join/?next=${encodeURIComponent(Astro.url.pathname + Astro.url.search)}`} data-astro-prefetch="false"><Plus /><span>Sign in to save it</span></a>
               <button class="lrow2" type="button" data-copy={link}><Share /><span>Copy link</span></button>
             </>
@@ -329,7 +328,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
     </>
   ) : (
     <article class="essay-page">
-      <a href={`/@${profile.username}/`} class="owner rise"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your library' : `${name}’s library`}</a>
+      <a href={`/@${profile.username}/`} class="owner rise"><Face name={name} src={profile.avatar_url} size={24} />{isMe ? 'Your shelf' : `${name}’s shelf`}</a>
       <p class="sub rise d1" style="color: var(--moss)">Essay | {d.source ?? 'on the web'} | {d.creator}</p>
       <h1 class="serif rise d2 et" transition:name={tname}>{d.title}</h1>
       <p class="rise d2 num muted" style="margin: 0; font-size: 15px">
@@ -373,7 +372,7 @@ const line = d.cardLine ? { text: d.cardLine, source: d.title } : undefined;
 
   {rel.length > 0 && (
     <section class="pad block rise d6">
-      <div class="rule"><h2 class="eyebrow">Sits well next to</h2>{inCols[0] ? <a href={collectionHref(inCols[0])} class="more">Open the collection →</a> : <a href={`/@${profile.username}/`} class="more">The library →</a>}</div>
+      <div class="rule"><h2 class="eyebrow">Sits well next to</h2>{inCols[0] ? <a href={collectionHref(inCols[0])} class="more">Open the collection →</a> : <a href={`/@${profile.username}/`} class="more">The whole shelf →</a>}</div>
       <div class="rel">
         {rel.map((e) => (
           <a href={href(e)} class="lift stack" style="gap: 10px">

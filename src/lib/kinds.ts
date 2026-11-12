@@ -13,7 +13,7 @@ export const kindColor: Record<Kind, string> = { book: 'var(--book)', film: 'var
 export const STATUSES: Record<Kind, [Status, string][]> = {
   book: [['want', 'Want to read'], ['reading', 'Reading'], ['done', 'Read'], ['paused', 'Paused'], ['dnf', 'Didn’t finish']],
   film: [['want', 'Want to watch'], ['done', 'Watched'], ['dnf', 'Didn’t finish']],
-  tv: [['want', 'Want to watch'], ['watching', 'Watching'], ['done', 'Watched'], ['paused', 'Paused'], ['dropped', 'Dropped']],
+  tv: [['want', 'Want to watch'], ['watching', 'Watching'], ['done', 'Watched'], ['paused', 'Paused'], ['dropped', 'Didn’t finish']],
   essay: [['want', 'Saved for later'], ['done', 'Read']],
 };
 

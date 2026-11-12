@@ -144,7 +144,7 @@ export const PATCH: APIRoute = async (ctx) => {
   if (error) return oops(dbMessage(error));
   // rating something that wasn't finished marks it finished: the page says so
   const statusChanged = change.status && change.status !== cur.status ? change.status : undefined;
-  return json({ ok: true, id: cur.id, href: await entryHref(ctx, me.username, cur.title), statusChanged });
+  return json({ ok: true, id: cur.id, href: await entryHref(ctx, me.username, cur.title), statusChanged, kind });
 };
 
 export const DELETE: APIRoute = async (ctx) => {
@@ -156,7 +156,7 @@ export const DELETE: APIRoute = async (ctx) => {
   // a bookmark tap takes back a plain save only; anything with more on it stays
   if (b.onlySaved === true && !(await isPlainSave(ctx.locals.supabase, me.id, b.id))) return oops('That has more than a save on it, so it stays on your shelf.', 409);
   // a status tapped off again: no confirmation was asked, so the server makes sure there was nothing else on it
-  if (b.onlyBare === true && !(await isBareEntry(ctx.locals.supabase, me.id, b.id))) return oops('That has more than a status on it, so it stays on your shelf.', 409);
+  if (b.onlyBare === true && !(await isBareEntry(ctx.locals.supabase, me.id, b.id))) return oops('That has more than a save on it, so it stays on your shelf.', 409);
   const { error, count } = await ctx.locals.supabase.from('logs').delete({ count: 'exact' }).eq('id', b.id).eq('user_id', me.id);
   if (error) return oops(dbMessage(error));
   if (!count) return oops('Couldn’t find that.', 404);
