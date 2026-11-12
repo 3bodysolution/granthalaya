@@ -4,6 +4,8 @@ Read this at the start of a session; update it when a part is done.
 
 ## Follow-ups
 
+- [x] Copy rewrite applied (2026-11-12, `private/copy-rewrite.md`, D1 to D4, no catalogue counts anywhere). Left for Sarthak: the Privacy and Terms "updated" date is November 12, 2026 (change it to the day the work goes live); Sponsor sections are now hidden by `site.sponsor.enabled` and come back by themselves. Signed-in views (Progress words, Settings Data tab, toast wording, home dashed card) need a hand check.
+
 - [ ] **A week after the new shelf is live on main:** make the shelf redirects permanent. In `src/middleware.ts`, `shelfMoved()` answers with a 307 for `/@x/library/`, `/@x/diary/`, `/@x/stats/`, `/library/` and `/stats/`; change that 307 in `handle` to 301.
 - [x] Shelf rebuild (shelf at `/@username`, two tabs, View profile panel, 3D shelf, 2026 so far, threads footer). Owner-only views still to check by hand: Edit profile, Share my year, "Nothing finished yet", the owner's own private shelf, Block/Unblock/Report as a signed-in visitor.
 
