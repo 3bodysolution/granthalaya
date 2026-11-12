@@ -58,7 +58,7 @@ const groups = [
 <Base title={q ? `Search: ${q}` : 'Search'} noindex description="Search results">
   <section class="pad head">
     <form class="sx-form" action="/search/" method="get" role="search">
-      <input type="search" name="q" value={q} placeholder="Search films, books, people, or ask for something" aria-label="Search" enterkeyhint="search" autocomplete="off" spellcheck="false" />
+      <input type="search" name="q" value={q} placeholder="Search films, books, essays, people, or ask for something" aria-label="Search" enterkeyhint="search" autocomplete="off" spellcheck="false" />
       <button type="submit" class="btn primary">Search</button>
     </form>
     {q && total > 0 && <p class="muted count" aria-live="polite">Results for “{q}”</p>}

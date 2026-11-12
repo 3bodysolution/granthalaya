@@ -4,7 +4,7 @@ import Face from '../components/Face.astro';
 import Cover from '../components/Cover.astro';
 import { LINKS } from '../lib/kinds';
 import { adminClient } from '../lib/supabase';
-import { avatarsReady, ownAvatarPath } from '../lib/avatar';
+import { ownAvatarPath } from '../lib/avatar';
 import { loadShelf, fullTitle, type Details, type Entry } from '../lib/data';
 export const prerender = false;
 
@@ -27,9 +27,6 @@ try {
   }
 } catch (e) { console.error('Settings: the blocked list could not be loaded', e); }
 const googlePhoto = Astro.locals.user?.avatar ?? null;
-// uploading needs the avatars bucket (015); until it exists the button says coming soon
-let canUpload = false;
-try { canUpload = await avatarsReady(adminClient()); } catch { /* not ready */ }
 const photoHint = !me.avatar_url ? 'No photo: your first letter shows instead.'
   : googlePhoto && googlePhoto === me.avatar_url ? 'From your Google account.'
   : ownAvatarPath(me.avatar_url, me.id) ? 'A photo you uploaded.' : 'Your photo.';
@@ -60,16 +57,14 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
         <div class="panel" role="tabpanel" id="profile" aria-labelledby="tab-profile">
           <form class="sec" data-save="profile">
             <div class="head"><h2>Profile</h2><p>How you appear to others.</p></div>
-            <div class="photo" id="photo-zone" data-can-upload={canUpload ? '1' : '0'}>
+            <div class="photo" id="photo-zone">
               <button type="button" class="pbtn" id="photo-btn" aria-haspopup="menu" aria-expanded="false" aria-controls="photo-menu" aria-label="Change photo">
                 <Face name={me.display_name || me.username} src={me.avatar_url} size={96} />
                 <span class="cam" aria-hidden="true"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
               </button>
               <div class="pmenu-back" id="photo-back" hidden></div>
               <div class="pmenu" id="photo-menu" role="menu" aria-label="Photo" hidden>
-                {canUpload
-                  ? <button type="button" role="menuitem" id="photo-pick">Upload a photo</button>
-                  : <button type="button" role="menuitem" disabled title="Coming soon">Upload a photo (coming soon)</button>}
+                <button type="button" role="menuitem" id="photo-pick">Upload a photo</button>
                 {googlePhoto && googlePhoto !== me.avatar_url && <button type="button" role="menuitem" data-photo="google">Use my Google photo</button>}
                 {me.avatar_url && <button type="button" role="menuitem" class="danger" data-photo="none">Remove photo</button>}
               </div>
@@ -94,10 +89,10 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
               <label class="fld">
                 <span class="lbl">Username</span>
                 <span class="uwrap"><span class="at">@</span><input class="field u" name="username" value={me.username} maxlength="20" autocapitalize="none" spellcheck="false" disabled={!canRename} /><span class="ustate" aria-live="polite"></span></span>
-                <span class="hint">{canRename ? 'Change it once every 30 days. Your old address will keep working.' : `You can change it again on ${nextChange!.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}.`}</span>
+                <span class="hint">{canRename ? 'You can change it once every 30 days. Your old address will keep working.' : `You can change it again on ${nextChange!.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}.`}</span>
               </label>
             </div>
-            <label class="fld"><span class="lbl">One line about you</span><input class="field" name="bio" value={d.bio ?? ''} maxlength="160" placeholder="Books, films and everything I’ve spent time with." /><span class="hint"><span data-count="bio">{(d.bio ?? '').length}</span> of 160</span></label>
+            <label class="fld"><span class="lbl">One line about you</span><input class="field" name="bio" value={d.bio ?? ''} maxlength="160" placeholder="For example: Marathi novels, slow films, long essays." /><span class="hint"><span data-count="bio">{(d.bio ?? '').length}</span> of 160</span></label>
             <div class="sfoot"><span class="saved" hidden>Saved</span><button class="btn primary" type="submit">Save changes</button></div>
           </form>
 
@@ -157,9 +152,8 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
         <!-- ——— Data ——— -->
         <div class="panel" role="tabpanel" id="data" aria-labelledby="tab-data" hidden>
           <div class="sec">
-            <div class="head"><h2>Export</h2><p>Everything you’ve added, in files you keep.</p></div>
-            <div class="row">
-              <span><b>Download your data</b><span>A zip of spreadsheets: your shelf and reviews, the comments and likes you gave, your collections and your profile. They open in Excel, Numbers or Google Sheets.</span></span>
+            <div class="head"><h2>Download your data</h2><p>A zip of spreadsheets: your shelf and reviews, the comments and likes you gave, your collections and your profile. They open in Excel, Numbers or Google Sheets.</p></div>
+            <div class="row" style="justify-content: flex-start">
               <a class="btn sm" href="/api/export" download data-astro-reload>Download</a>
             </div>
           </div>
@@ -366,7 +360,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
       const r = await post({ section: form.dataset.save, ...fd });
       busy(btn, false);
       if (r.ok) { flash(form, 'Saved'); if (r.reload) navigate(location.pathname + location.hash, { history: 'replace' }); }
-      else flash(form, r.error || 'Didn’t save.', true);
+      else flash(form, r.error || 'That didn’t save. Please try again.', true);
     }));
 
     // username check
@@ -444,11 +438,9 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
       const input = ev.target as HTMLInputElement;
       void choose(input.files?.[0]); input.value = '';
     });
-    if (zone.dataset.canUpload === '1') {
-      zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('over'); });
-      zone.addEventListener('dragleave', () => zone.classList.remove('over'));
-      zone.addEventListener('drop', (ev) => { ev.preventDefault(); zone.classList.remove('over'); void choose(ev.dataTransfer?.files?.[0]); });
-    }
+    zone.addEventListener('dragover', (ev) => { ev.preventDefault(); zone.classList.add('over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('over'));
+    zone.addEventListener('drop', (ev) => { ev.preventDefault(); zone.classList.remove('over'); void choose(ev.dataTransfer?.files?.[0]); });
     // move: drag with a mouse or a finger; two fingers pinch to zoom
     const down = new Map<number, { x: number; y: number }>();
     let pinch = 0;
@@ -504,7 +496,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
     document.querySelectorAll<HTMLInputElement>('[data-flag]').forEach((c) => c.addEventListener('change', async () => {
       flagErr.hidden = true;
       const r = await post({ section: 'flag', flag: c.dataset.flag, on: c.checked });
-      if (!r.ok) { c.checked = !c.checked; flagErr.textContent = r.error || 'That didn’t save.'; flagErr.hidden = false; return; }
+      if (!r.ok) { c.checked = !c.checked; flagErr.textContent = r.error || 'That didn’t save. Please try again.'; flagErr.hidden = false; return; }
       if (c.dataset.flag === 'is_private') {
         // the server switched Feature off when the account went private; show that without a reload
         const feat = document.querySelector<HTMLInputElement>('[data-flag=featured]');
@@ -554,7 +546,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
         const ids = [...favs];
         saving = saving.then(async () => {
           const r = await post({ section: 'favourites', ids });
-          flash(favBox, r.ok ? 'Saved' : r.error || 'Didn’t save.', !r.ok);
+          flash(favBox, r.ok ? 'Saved' : r.error || 'That didn’t save. Please try again.', !r.ok);
         });
       };
       const toggle = (id: string) => {
@@ -586,7 +578,7 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
       busy(del, true);
       const r = await fetch('/api/account', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: confirm.value.trim().toLowerCase().replace(/^@/, '') }) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
       if (r.ok) { location.href = '/?deleted=1'; return; }
-      delErr.textContent = r.error || 'That didn’t work.'; delErr.hidden = false; busy(del, false);
+      delErr.textContent = r.error || 'That didn’t save. Please try again.'; delErr.hidden = false; busy(del, false);
     });
   }
   document.addEventListener('astro:page-load', setup);

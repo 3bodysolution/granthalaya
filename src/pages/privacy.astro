@@ -3,7 +3,7 @@ import Policy from '../components/Policy.astro';
 import { site } from '../data/site';
 export const prerender = false;
 ---
-<Policy title="Privacy" updated="November 3, 2026" description="What Granthalaya keeps about you, who can see it, who helps run the site, and how to take your data or delete it.">
+<Policy title="Privacy" updated="November 12, 2026" description="What Granthalaya keeps about you, who can see it, who helps run the site, and how to take your data or delete it.">
   <p class="lead">Granthalaya keeps only what it needs to give you a shelf. It has no ads and no tracking, and it does not sell or rent anything about you. This page says what we keep, why, who can see it and what you can do about it. It is written to follow India’s Digital Personal Data Protection Act, 2023 (the DPDP Act).</p>
 
   <h2>Who we are</h2>
@@ -29,7 +29,7 @@ export const prerender = false;
     <li>With a private account, only you can see your shelf, reviews, collections and stats.</li>
     <li><b>Comments and likes are the exception.</b> A comment or like you leave on someone else’s public review is public, even if your account is private. It shows with your name and photo and stays visible to whoever can see that review.</li>
     <li>If you block someone, neither of you can see the other’s profile.</li>
-    <li>Your shelf appears on the welcome page for new visitors only if you turn on <b>Feature my shelf</b>.</li>
+    <li>Your shelf appears on the home page for new visitors only if you turn on <b>Feature my shelf</b>.</li>
     <li>The person who runs the site can see reports and can hide or remove posts or accounts that break the terms. They can also remove a profile photo.</li>
   </ul>
   <p>Anything you make public can be seen, copied or quoted by others, and search engines may keep a copy. Think before you post what you would not want read.</p>
@@ -44,11 +44,16 @@ export const prerender = false;
     <li><b>TMDB</b> gives us film and TV details and posters. <b>JustWatch</b> gives us where a title can be watched in India. <b>Open Library</b> and <b>Google Books</b> give us book details and covers. <b>Wikipedia</b> gives us book descriptions and the pages the short facts are taken from.</li>
     <li><b>Google Gemini and Groq</b> (AI services) write the one-line text on share cards and tidy book descriptions and short facts from the sources above. They are sent a title and text about that title, never anything about you or what you wrote.</li>
     <li><b>Akshardhara and BookGanga</b> are Indian bookshops that let us show some of their books and covers. Our server reads their public book lists. Nothing about you is sent to them, unless you follow a “Buy at” link to their site.</li>
+    <li>Essays link out to their own sites, such as Hakara and The New Yorker. We don’t send them anything about you.</li>
   </ul>
   <p>Our server sends these services only what is being looked up (a title, or what you typed in search). Posters, covers and streaming logos from TMDB, Open Library and Google Books load straight from those services, so they can see your browser asking for the picture, as with any picture on the web. Covers from the two bookshops do not: our server fetches them and passes them on, so the shops never see your browser. Some of these services are outside India, so your data can leave the country this way. We only send what is listed here.</p>
 
-  <h2>Sponsor payments</h2>
-  <p>When you pay through UPI, your UPI app shares your name and UPI ID with the receiver, as with any UPI payment. Granthalaya itself stores nothing about payments.</p>
+  {site.sponsor.enabled && (
+    <>
+      <h2>Sponsor payments</h2>
+      <p>When you pay through UPI, your UPI app shares your name and UPI ID with the receiver, as with any UPI payment. Granthalaya itself stores nothing about payments.</p>
+    </>
+  )}
 
   <h2>Where it is kept, and for how long</h2>
   <ul>

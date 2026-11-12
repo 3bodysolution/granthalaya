@@ -87,7 +87,7 @@ const when = (s: string) => new Date(s).toLocaleString('en-GB', { day: 'numeric'
     <ul class="plist">
       {catalogue.map((t) => (
         <li class="pick">
-          <span class="pt">{t.title}<span class="muted"> | {t.kind}{t.season ? ` season ${t.season}` : ''}{t.year ? ` | ${t.year}` : ''}{t.creator ? ` | ${t.creator}` : ''} | {t.logs} log{t.logs === 1 ? '' : 's'}{t.items ? `, ${t.items} in collections` : ''}</span></span>
+          <span class="pt">{t.title}<span class="muted"> | {t.kind}{t.season ? ` season ${t.season}` : ''}{t.year ? ` | ${t.year}` : ''}{t.creator ? ` | ${t.creator}` : ''} | {t.logs} on a shelf{t.items ? `, ${t.items} in collections` : ''}</span></span>
           <button class="btn sm" disabled={t.logs > 0 || t.items > 0} data-confirm={`Remove “${t.title}” from the catalogue for good?`} data-admin={JSON.stringify({ id: t.id, action: 'remove_title' })}>Remove</button>
         </li>
       ))}

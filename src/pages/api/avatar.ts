@@ -14,7 +14,7 @@ export const POST: APIRoute = async (ctx) => {
   const { me, res } = needMe(ctx);
   if (res) return res;
   const db = adminClient();
-  if (!(await avatarsReady(db))) return oops('Uploading a photo is coming soon. You can still use your Google photo.', 503);
+  if (!(await avatarsReady(db))) return oops('Photo upload isn’t working right now. Please try again later.', 503);
 
   // size first, from the header, so a huge file is never read
   const announced = Number(ctx.request.headers.get('content-length') ?? 0);

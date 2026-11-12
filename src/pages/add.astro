@@ -36,7 +36,7 @@ if (logId) {
 }
 if (start.title) start.title.bg = paletteFor(start.title.title, start.title.color).bg;
 const kinds = (['book', 'film', 'tv', 'essay'] as const).map((k) => [k, k === 'essay' ? 'Essay' : kindName[k]]);
-const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log it again' : 'Add to your shelf';
+const heading = start.mode === 'edit' ? 'Edit' : start.again ? 'Add it again' : 'Add to your shelf';
 ---
 <Base title={start.mode === 'edit' ? 'Edit' : 'Add'} active="add" noindex>
   <section class="pad wrap">
@@ -76,7 +76,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
               <div class="row3">
                 <label>Year<input name="year" class="field sm" inputmode="numeric" maxlength="4" /></label>
                 <label class="only-book">Pages<input name="pages" class="field sm" inputmode="numeric" /></label>
-                <label class="only-film">Minutes<input name="runtime" class="field sm" inputmode="numeric" /></label>
+                <label class="only-film">Length (minutes)<input name="runtime" class="field sm" inputmode="numeric" /></label>
                 <label class="only-tv">Season<input name="season" class="field sm" inputmode="numeric" /></label>
                 <label class="only-essay">Link<input name="link" class="field sm" type="url" placeholder="https://" /></label>
               </div>
@@ -86,7 +86,7 @@ const heading = start.mode === 'edit' ? 'Edit your entry' : start.again ? 'Log i
         </div>
 
         <div class="stack" style="gap: 10px">
-          <span class="lbl">Status</span>
+          <span class="lbl">Progress</span>
           <div class="statuses" id="statuses" role="radiogroup" aria-label="Status"></div>
         </div>
 

@@ -58,7 +58,7 @@ export function sniffImage(b: Buffer): 'jpeg' | 'png' | 'webp' | 'heic' | 'anima
 }
 
 let ready: { at: number; ok: boolean } | null = null;
-/** is the avatars bucket there yet (014 applied)? Asked at most once a minute; until then uploading says "coming soon" */
+/** is the avatars bucket there yet (015 applied)? Asked at most once a minute; if it isn't there, uploading says it isn't working right now */
 export async function avatarsReady(db: SupabaseClient): Promise<boolean> {
   if (ready && Date.now() - ready.at < 60_000) return ready.ok;
   const { data, error } = await db.storage.getBucket(AVATAR_BUCKET);
