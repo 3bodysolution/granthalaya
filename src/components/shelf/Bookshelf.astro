@@ -22,8 +22,8 @@ const { books, owner, mine } = Astro.props;
           <button type="button" class:list={['book', b.spine.kind === 'dvd' && 'dvd']} aria-pressed="false" aria-controls="shelf-card" aria-label={b.label}
             data-i={i} data-title={b.title} data-by={b.creator} data-kind={b.kind} data-kindlabel={b.kindLabel} data-year={b.year ?? ''} data-status={b.status} data-when={b.when}
             data-stars={b.stars} data-href={b.href} data-cover={b.cover ?? ''} data-review={b.review}
-            style={`--w:${b.spine.w}px;--h:${b.spine.h}px;--d:${b.spine.d}px;--c:${b.spine.color};color:${b.spine.ink}`}>
-            <span class="bk front"><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true" style={`font-size:${b.spine.size}px`}>{b.spine.text}</span><span class="sp-tag" aria-hidden="true">{b.spine.tag}</span></span>
+            style={`--w:${b.spine.w}px;--h:${b.spine.h}px;--d:${b.spine.d}px;--c:${b.spine.color};--c2:${b.spine.color2};--wh:${b.spine.wash}%;color:${b.spine.ink}`}>
+            <span class="bk front"><span class="sp-wash" aria-hidden="true"></span><span class="band" aria-hidden="true"></span><span class="sp-title" aria-hidden="true" style={`font-size:${b.spine.size}px`}>{b.spine.text}</span><span class="sp-tag" aria-hidden="true"><span>{b.spine.tag}</span></span></span>
             <span class="bk top" aria-hidden="true"></span>
             <span class="bk left" aria-hidden="true"></span>
             <span class="bk right" aria-hidden="true"></span>
@@ -83,9 +83,16 @@ const { books, owner, mine } = Astro.props;
   .book.out:hover { transform: translateX(var(--sx, 0px)) translateY(-40px) translateZ(214px) rotateY(-78deg); }
   .book :global(.bk) { position: absolute; box-sizing: border-box; display: block; }
   .front { inset: 0; background: var(--c); border-radius: 1px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 16px 0 10px; box-shadow: inset 4px 0 0 rgba(255,255,255,.12), inset -5px 0 7px rgba(0,0,0,.3); overflow: hidden; }
+  .book .front { display: flex; }   /* (beats the plain block of .bk, so the title stays at the top and the label at the foot) */
   .band { position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .45; }
   .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; line-height: 1.05; max-height: 140px; overflow: hidden; overflow-wrap: anywhere; font-weight: 500; position: relative; z-index: 1; }
-  .sp-tag { font-family: 'Courier Prime', ui-monospace, monospace; font-size: 9px; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid currentColor; position: relative; z-index: 1; }
+  /* the one label: a thin rule, then the kind in the title's serif, italic, in the title's colour, at the foot of every spine and centred the same way */
+  .sp-tag { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 4px; position: relative; z-index: 1; font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 12px; letter-spacing: .04em; line-height: 1; }
+  .sp-tag::before { content: ''; width: 14px; height: 1px; background: currentColor; }
+  .sp-tag span { writing-mode: vertical-rl; transform: rotate(180deg); }
+  /* the second colour melts in from about the middle: soft blooms over a gradient that is solid only near the foot (no hard edge, and no filter, so nothing extra to paint while scrolling) */
+  .sp-wash { position: absolute; left: -20%; right: -20%; bottom: 0; height: calc(var(--wh, 38%) + 22%); pointer-events: none;
+    background: radial-gradient(ellipse 70% 38% at 28% 62%, color-mix(in srgb, var(--c2) 85%, transparent) 0, transparent 70%), radial-gradient(ellipse 60% 30% at 76% 48%, color-mix(in srgb, var(--c2) 70%, transparent) 0, transparent 72%), linear-gradient(to bottom, transparent 0, color-mix(in srgb, var(--c2) 35%, transparent) 30%, color-mix(in srgb, var(--c2) 85%, transparent) 55%, var(--c2) 78%); }
   .top { left: 0; top: calc(var(--d) * -1); width: var(--w); height: var(--d); transform-origin: bottom center; transform: rotateX(90deg); background: repeating-linear-gradient(to right, #EFE6D2 0 2px, #DCCFB4 2px 3px); border: 2px solid var(--c); }
   .left { left: calc(var(--d) * -1); top: 0; width: var(--d); height: var(--h); transform-origin: right center; transform: rotateY(-90deg); background: color-mix(in srgb, var(--c) 55%, #000); }
   .right { left: var(--w); top: 0; width: var(--d); height: var(--h); transform-origin: left center; transform: rotateY(90deg); background: var(--c); overflow: hidden; }
@@ -99,7 +106,7 @@ const { books, owner, mine } = Astro.props;
   .dvd .front { border-radius: 3px; padding: 16px 0 12px; box-shadow: inset 0 7px 0 #17181C, inset 0 -7px 0 #17181C, inset 3px 0 0 #17181C, inset -3px 0 0 #17181C, inset 5px 0 6px rgba(0,0,0,.35); }
   .dvd .front::after { content: ""; position: absolute; inset: 0; border-radius: 3px; pointer-events: none; background: linear-gradient(90deg, rgba(255,255,255,0) 12%, rgba(255,255,255,.30) 26%, rgba(255,255,255,.06) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,.12) 86%, rgba(255,255,255,0) 94%); }
   .dvd .band { top: 1px; height: 4px; border: 0; background: repeating-linear-gradient(90deg, #2A2C31 0 2px, #111215 2px 4px); opacity: 1; left: 4px; right: 4px; border-radius: 1px; }
-  .dvd .sp-tag { border-radius: 3px; width: 28px; height: 14px; font-size: 8px; letter-spacing: .1em; }
+  .dvd .sp-wash { left: 3px; right: 3px; bottom: 7px; height: calc(var(--wh, 38%) + 15%); }   /* inside the plastic shell, under the gloss */
   .dvd .top { border: 0; border-radius: 0; background: repeating-linear-gradient(to bottom, #26282D 0 3px, #1A1B1F 3px 6px); }
   .dvd .left { background: #17181C; border-radius: 3px; }
   .dvd .right { border-radius: 3px; box-shadow: inset 0 0 0 4px #17181C; }

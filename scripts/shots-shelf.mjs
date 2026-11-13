@@ -49,7 +49,7 @@ for (const theme of ['light', 'dark']) for (const [dev, vp] of [['desktop', { wi
     const bad = await page.evaluate(() => {
       const ul = document.querySelector('[data-shelf-list]'); const li = [...ul.children]; for (let i = 0; i < 400; i++) ul.append(li[i % li.length].cloneNode(true));
       const lum = (c) => { const v = c.match(/\d+/g).slice(0, 3).map((x) => x / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]; };
-      const out = []; document.querySelectorAll('.book').forEach((b) => { const bg = getComputedStyle(b.querySelector('.front')).backgroundColor, fg = getComputedStyle(b).color; const a = lum(bg), z = lum(fg); const r = (Math.max(a, z) + 0.05) / (Math.min(a, z) + 0.05); if (r < 4.5) out.push(b.dataset.title + ' ' + r.toFixed(2)); }); return [...new Set(out)];
+      const out = []; document.querySelectorAll('.book').forEach((b) => { const bg = getComputedStyle(b.querySelector('.front')).backgroundColor, fg = getComputedStyle(b).color; const a = lum(bg), z = lum(fg); const r = (Math.max(a, z) + 0.05) / (Math.min(a, z) + 0.05); if (r < 4.5) out.push(b.dataset.title + ' ' + r.toFixed(2)); const h = b.style.getPropertyValue('--c2').trim(); if (/^#[0-9a-f]{6}$/i.test(h)) { const a2 = lum('rgb(' + [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)).join(',') + ')'); const r2 = (Math.max(a2, z) + 0.05) / (Math.min(a2, z) + 0.05); if (r2 < 4.5) out.push(b.dataset.title + ' (wash) ' + r2.toFixed(2)); } }); return [...new Set(out)];
     });
     console.log(tag, 'spines below 4.5:1:', bad.length ? bad : 'none');
     await page.waitForTimeout(500); await page.screenshot({ path: `${OUT}/many-${tag}.png` });

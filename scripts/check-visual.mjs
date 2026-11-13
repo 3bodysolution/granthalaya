@@ -39,6 +39,20 @@ if (BEFORE) {
 // warm-up: the first visit to a page can be slow (the server fetches its facts), and a picture taken while it is still
 // filling in is shorter than the next. Ask for every page once, and wait for the answers, before taking any pictures.
 for (const p of pages) await fetch(BASE + p, { signal: AbortSignal.timeout(60000) }).then((r) => r.text()).catch(() => {});
+// A shelf stores each cover's colour the first time it is visited (the spine colours follow it), so the first visits change the spines.
+// Ask for the shelf until its spine colours are the same twice in a row (at most 8 tries), so the baseline and the later run agree.
+{
+  const shelf = pages.find((p) => p === `/@${USER}/`);
+  const colours = (html) => (html.match(/class="book[^"]*"[^>]*style="[^"]*"/g) || []).join('|').match(/--c:#[0-9a-f]{6}/gi)?.join(',') ?? '';
+  let last = null;
+  for (let n = 0; shelf && n < 8; n++) {
+    const html = await fetch(BASE + shelf, { signal: AbortSignal.timeout(60000) }).then((r) => r.text()).catch(() => '');
+    const now = colours(html);
+    if (now && now === last) break;
+    last = now;
+    await new Promise((r) => setTimeout(r, 3000));   // the colours are saved after the page goes out
+  }
+}
 const slug = (p) => (p === '/' ? 'home' : p.replace(/^\/|\/$/g, '').replace(/[^a-z0-9]+/gi, '-').slice(0, 50));
 
 const browser = await chromium.launch();

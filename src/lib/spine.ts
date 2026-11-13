@@ -1,4 +1,6 @@
-// How a shelf entry stands on the 3D shelf: its size and the colour of its spine. Same on every visit (sizes come from a hash of the title).
+// How a shelf entry stands on the 3D shelf: its size and the colours of its spine. Same on every visit (sizes come from a hash of the title).
+// Colour: the cover's stored colour is matched to the nearest of a vivid painted palette (the main colour), and a second palette colour that
+// contrasts with it melts in from about the middle of the spine like a watercolour wash. No teal (that is for actions).
 import type { Entry } from './data';
 
 export const hash = (s: string) => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
@@ -7,26 +9,50 @@ const lum = (hex: string) => {
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
 };
 const ratio = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
-const DARK = '#1B1612', LIGHT = '#F6EEDF';
+export const DARK = '#1B1612', LIGHT = '#F6EEDF';
 /** dark or light ink, whichever reads better on this colour */
 export const inkOn = (bg: string) => (ratio(lum(bg), lum(DARK)) >= ratio(lum(bg), lum(LIGHT)) ? DARK : LIGHT);
-export const PAPER = '#E9E1CE';
-/** painted cloth colours for a spine whose cover colour isn't stored yet: the same title always gets the same one (no teal: that is for actions) */
-export const CLOTH = ['#2B3A67', '#8E2F3A', '#4F6B4A', '#A15628', '#5B3A5E', '#8A6A2A', '#33343A', '#5C3F2E', '#3B3F7A', '#46607A', '#5E6034', '#7A4A4A'];
+export const PAPER = '#F3E9D2';
 
-const mix = (hex: string, to: string, f: number) => '#' + [1, 3, 5].map((i) => Math.round(parseInt(hex.slice(i, i + 2), 16) * (1 - f) + parseInt(to.slice(i, i + 2), 16) * f).toString(16).padStart(2, '0')).join('');
-/** a spine colour and a text colour that read at 4.5:1 or better: light text on a dark spine, dark on a light one; a middling colour is nudged until it does */
-export function fit(bg: string): { bg: string; ink: string } {
-  let c = bg;
-  for (let i = 0; i < 12; i++) {
-    const ink = inkOn(c);
-    if (ratio(lum(c), lum(ink)) >= 4.5) return { bg: c, ink };
-    c = mix(c, ink === DARK ? '#FFFFFF' : '#000000', 0.12);
-  }
-  return { bg: c, ink: inkOn(c) };
+/** the painted palette: vermilion, cobalt, marigold, violet, emerald, magenta, coral, indigo, orange, leaf, plum, sky, brick, near-black.
+ *  Every one has an ink (dark or light) that reads on it at 4.5:1 or better. */
+export const VIVID = ['#E4572E', '#2457C5', '#F2A900', '#7B3FBF', '#17724A', '#C2185B', '#F07167', '#3F3D99', '#FF9F1C', '#5BA33B', '#8E3B8E', '#3A9AD9', '#B5332E', '#1B1B1F'];
+
+// sRGB to Lab, to find the palette colour nearest to a cover's colour the way an eye would
+const lab = (hex: string): [number, number, number] => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  const f = (t: number) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const x = f((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047), y = f(0.2126 * r + 0.7152 * g + 0.0722 * b), z = f((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883);
+  return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+};
+const PLAB = VIVID.map(lab);
+/** the palette colour nearest to this colour */
+export function nearestVivid(hex: string): string {
+  const [l, a, b] = lab(hex);
+  let best = 0, d = Infinity;
+  PLAB.forEach((p, i) => { const e = (p[0] - l) ** 2 + (p[1] - a) ** 2 + (p[2] - b) ** 2; if (e < d) { d = e; best = i; } });
+  return VIVID[best];
+}
+const hueOf = (hex: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  if (!d) return 0;
+  const h = mx === r ? ((g - b) / d + 6) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return h * 60;
+};
+const hueGap = (a: string, b: string) => { const d = Math.abs(hueOf(a) - hueOf(b)); return Math.min(d, 360 - d); };
+const reads = (c: string, ink: string) => ratio(lum(c), lum(ink)) >= 4.5;
+
+/** the second colour: from the same palette, unlike the first (another hue, or clearly another lightness), and one the same ink reads on at 4.5:1,
+ *  so the title is readable wherever it crosses the wash. The title picks among the fits, so it is the same every visit. */
+export function secondOf(main: string, ink: string, seed: number, pool: string[] = VIVID): string {
+  const ok = pool.filter((c) => c !== main && reads(c, ink));
+  const apart = ok.filter((c) => hueGap(c, main) >= 50 || ratio(lum(c), lum(main)) >= 2);
+  const list = apart.length ? apart : ok;
+  return list.length ? list[seed % list.length] : main;
 }
 
-export interface Spine { kind: 'book' | 'dvd'; w: number; h: number; d: number; color: string; ink: string; tag: string; text: string; size: number }
+export interface Spine { kind: 'book' | 'dvd'; w: number; h: number; d: number; color: string; color2: string; wash: number; ink: string; tag: string; text: string; size: number }
 
 /** the title as it is written on the spine: a step smaller on a thin spine, and if it still doesn't fit, whole lines ending in "…".
  *  (A spine's title runs upwards, the lines stack across its width; the estimate is a little cautious.) The full title stays in the button's label and the caption. */
@@ -58,14 +84,19 @@ export function fitTitle(title: string, w: number): { text: string; size: number
 /** a DVD case is one fixed size; a book's width follows its page count and its height the title */
 export function spineOf(e: Entry): Spine {
   const d = e.data;
-  const base = d.coverColor && /^#[0-9a-f]{6}$/i.test(d.coverColor) ? d.coverColor : CLOTH[hash(d.title) % CLOTH.length];
+  const seed = hash(d.title);
+  const wash = 30 + ((seed >>> 3) % 18);   // how far up the second colour reaches, as a percent of the spine
+  const stored = d.coverColor && /^#[0-9a-f]{6}$/i.test(d.coverColor) ? d.coverColor : null;
+  const main = stored ? nearestVivid(stored) : VIVID[seed % VIVID.length];   // no stored colour yet: the title's own painted one
+  const ink = inkOn(main);
   if (d.type === 'film' || d.type === 'tv') {
-    const f = fit(base);
-    return { kind: 'dvd', w: 44, h: 248, d: 168, color: f.bg, ink: f.ink, tag: d.type === 'tv' ? 'TV' : 'FILM', ...fitTitle(d.title, 44) };
+    return { kind: 'dvd', w: 44, h: 248, d: 168, color: main, color2: secondOf(main, ink, seed >>> 7), wash, ink, tag: d.type === 'tv' ? 'TV' : 'Film', ...fitTitle(d.title, 44) };
   }
-  const h = 196 + (hash(d.title) % 55);
-  if (d.type === 'essay') return { kind: 'book', w: 26, h: Math.min(h, 220), d: Math.round(Math.min(h, 220) * 0.66), color: PAPER, ink: DARK, tag: 'E', ...fitTitle(d.title, 26) };
-  const w = Math.max(26, Math.min(54, d.pages ? Math.round(24 + d.pages / 14) : 26 + (hash(d.title) >> 5) % 18));
-  const f = fit(base);
-  return { kind: 'book', w, h, d: Math.round(h * 0.66), color: f.bg, ink: f.ink, tag: 'B', ...fitTitle(d.title, w) };
+  const h = 196 + (seed % 55);
+  if (d.type === 'essay') {
+    const second = secondOf(PAPER, DARK, seed >>> 7, VIVID.filter((c) => reads(c, DARK)));
+    return { kind: 'book', w: 26, h: Math.min(h, 220), d: Math.round(Math.min(h, 220) * 0.66), color: PAPER, color2: second, wash, ink: DARK, tag: 'Essay', ...fitTitle(d.title, 26) };
+  }
+  const w = Math.max(26, Math.min(54, d.pages ? Math.round(24 + d.pages / 14) : 26 + ((seed >>> 5) % 18)));
+  return { kind: 'book', w, h, d: Math.round(h * 0.66), color: main, color2: secondOf(main, ink, seed >>> 7), wash, ink, tag: 'Book', ...fitTitle(d.title, w) };
 }
