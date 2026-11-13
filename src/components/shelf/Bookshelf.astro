@@ -130,6 +130,14 @@ const { books, owner, mine } = Astro.props;
   .btn.act { background: var(--lat); border-color: var(--lat); color: var(--on-lat); }
   .btn.act:hover { background: var(--lat); filter: brightness(1.08); color: var(--on-lat); }
 
+  /* Speed: spines are flat by default (the front only). The top, left and right faces, and the 3D, are added by the script (.d3) only to the book
+     pointed at, touched or focused, and the one pulled out, and the faces fade in (.on). So a shelf of hundreds has no 3D to prepare. */
+  @media (prefers-reduced-motion: no-preference) {
+    .book:not(.d3) { transform-style: flat; }
+    .book:not(.d3) :global(.bk.top), .book:not(.d3) :global(.bk.left), .book:not(.d3) :global(.bk.right) { display: none; }
+    .book :global(.bk.top), .book :global(.bk.left), .book :global(.bk.right) { opacity: 0; transition: opacity .26s ease; }
+    .book.on :global(.bk.top), .book.on :global(.bk.left), .book.on :global(.bk.right) { opacity: 1; }
+  }
   @media (max-width: 780px) {
     /* one shelf that scrolls sideways, with soft edges */
     .stage { margin-inline: calc(var(--gut) * -1); }
@@ -143,6 +151,9 @@ const { books, owner, mine } = Astro.props;
     .fade-r { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
     .detail { padding: 22px; gap: 20px; }
     .d-acts .btn { flex: 1 1 auto; }
+  }
+  @media (max-width: 780px) and (prefers-reduced-motion: no-preference) {
+    .shelf li:not(.d3) { transform-style: flat; }
   }
   @media (prefers-reduced-motion: reduce) {
     /* the spines stay put: no turning, no sliding; the one chosen is only marked, and the cover shows in the card */
@@ -209,6 +220,30 @@ const { books, owner, mine } = Astro.props;
     }
     const warm = (b?: HTMLElement) => { if (!b) return; if (rm.matches) { if (b.dataset.cover) new Image().src = b.dataset.cover; } else cover(b); };
 
+    // 3D only where it is needed: a book gets its top and side faces (.d3, then .on to fade them in) while it is pointed at, touched, focused
+    // or pulled out, and loses them a moment after (the faces fade out first). At most a handful at once. Not with reduced motion (nothing turns).
+    const deep = new Set<HTMLElement>(), timers = new Map<HTMLElement, number>();
+    const li = (b: HTMLElement) => b.parentElement as HTMLElement;
+    const keep = (b: HTMLElement) => b.classList.contains('out') || b.matches(':hover') || b.matches(':focus-visible');
+    function drop(b: HTMLElement) {
+      deep.delete(b); b.classList.remove('on');
+      timers.set(b, window.setTimeout(() => { if (deep.has(b)) return; b.classList.remove('d3'); li(b).classList.remove('d3'); }, 320));
+    }
+    function raise(b: HTMLElement) {
+      if (rm.matches) return;
+      clearTimeout(timers.get(b));
+      if (!deep.has(b)) {
+        for (const o of deep) if (deep.size >= 6 && o !== b && !o.classList.contains('out')) { clearTimeout(timers.get(o)); drop(o); }
+        deep.add(b); b.classList.add('d3'); li(b).classList.add('d3');
+      }
+      requestAnimationFrame(() => requestAnimationFrame(() => { if (deep.has(b)) b.classList.add('on'); }));   // after the faces exist, so they fade in
+    }
+    function settle(b: HTMLElement, wait = 140) {
+      if (rm.matches || !deep.has(b)) return;
+      clearTimeout(timers.get(b));
+      timers.set(b, window.setTimeout(() => { if (keep(b)) return; drop(b); }, wait));
+    }
+
     const text = (sel: string, v: string) => { q(sel).textContent = v; };
     function fillCard(b: HTMLElement) {
       const d = b.dataset;
@@ -241,11 +276,12 @@ const { books, owner, mine } = Astro.props;
 
     function setRove(i: number) { books[rove].tabIndex = -1; rove = i; books[i].tabIndex = 0; }
     function pullOut(i: number, focus = false) {
-      if (out >= 0 && out !== i) { books[out].classList.remove('out'); books[out].setAttribute('aria-pressed', 'false'); }
+      if (out >= 0 && out !== i) { const o = books[out]; o.classList.remove('out'); o.setAttribute('aria-pressed', 'false'); settle(o, 800); }
       out = i;
       const b = books[i];
       b.style.removeProperty('--sx');
       b.classList.add('out'); b.setAttribute('aria-pressed', 'true');
+      raise(b);   // its faces must exist before inside() measures them
       inside(b);
       faces(b); cover(b); warm(books[i - 1]); warm(books[i + 1]);
       fillCard(b);
@@ -274,6 +310,7 @@ const { books, owner, mine } = Astro.props;
       if (out < 0) return;
       const b = books[out];
       b.classList.remove('out'); b.setAttribute('aria-pressed', 'false');
+      settle(b, 800);   // after it has turned back
       out = -1; card.hidden = true;
       live.textContent = `${b.dataset.title} put back.`;
     }
@@ -289,17 +326,35 @@ const { books, owner, mine } = Astro.props;
     list.addEventListener('pointerover', (ev) => {
       const b = (ev.target as Element).closest<HTMLElement>('.book');
       if (!b) return;
-      hint(b);
+      hint(b); if ((ev as PointerEvent).pointerType !== 'touch') raise(b);
       clearTimeout(hoverTimer);
       hoverTimer = window.setTimeout(() => { faces(b); cover(b); }, 150);   // a moment's rest, not a sweep across the shelf
     });
     list.addEventListener('pointerleave', () => { clearTimeout(hoverTimer); idle(); });
+    list.addEventListener('pointerout', (ev) => {
+      const b = (ev.target as Element).closest<HTMLElement>('.book');
+      if (b && !b.contains(ev.relatedTarget as Node | null)) settle(b);
+    });
+    // a finger: the 3D waits until it has rested on the book for a moment, so a swipe along the shelf never starts it (a tap is handled by pullOut)
+    let touchWait = 0, moved = false, start = 0;
+    list.addEventListener('pointermove', (ev) => { if (ev.pointerType === 'touch' && Math.abs(ev.clientX - start) > 6) { moved = true; clearTimeout(touchWait); } });
+    list.addEventListener('scroll', () => { moved = true; clearTimeout(touchWait); }, { passive: true });
+    list.addEventListener('pointerdown', (ev) => {
+      const b = (ev.target as Element).closest<HTMLElement>('.book');
+      if (!b || ev.pointerType !== 'touch') return;
+      const from = list.scrollLeft, x0 = ev.clientX;
+      clearTimeout(touchWait);
+      touchWait = window.setTimeout(() => { if (list.scrollLeft === from && !moved) raise(b); }, 150);
+      moved = false; start = x0;
+    });
+    const lift = (ev: Event) => { clearTimeout(touchWait); const b = (ev.target as Element).closest<HTMLElement>('.book'); if (b) settle(b, 400); };
+    list.addEventListener('pointerup', lift); list.addEventListener('pointercancel', lift);
     list.addEventListener('focusin', (ev) => {
       const b = (ev.target as Element).closest<HTMLButtonElement>('.book');
       if (!b) return;
-      setRove(books.indexOf(b)); hint(b); faces(b);
+      setRove(books.indexOf(b)); hint(b); faces(b); raise(b);
     });
-    list.addEventListener('focusout', () => idle());
+    list.addEventListener('focusout', (ev) => { idle(); const b = (ev.target as Element).closest<HTMLElement>('.book'); if (b) settle(b); });
 
     // one tab stop for the whole shelf; arrows move along it (up and down move between shelves)
     const row = (b: HTMLElement) => b.parentElement!.getBoundingClientRect();
