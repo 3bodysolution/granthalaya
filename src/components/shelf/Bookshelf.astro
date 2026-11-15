@@ -78,7 +78,8 @@ const { books, owner, mine } = Astro.props;
     transform-origin: 50% 50% calc(var(--d) * -.5); transition: transform .75s cubic-bezier(.22,.9,.25,1.05); }
   .book:hover { transform: translateY(-14px) translateZ(18px); }
   .book:focus-visible { outline: none; }
-  .book:focus-visible .front { outline: 3px solid var(--lat); outline-offset: 3px; }
+  /* the frame is for the keyboard only: the script sets data-kbd on the shelf while the last thing used was a key, and clears it on any pointer movement or press */
+  [data-kbd] .book:focus-visible .front { outline: 3px solid var(--lat); outline-offset: 3px; }
   .book.out { transform: translateX(var(--sx, 0px)) translateY(-36px) translateZ(210px) rotateY(-78deg); }
   .book.out:hover { transform: translateX(var(--sx, 0px)) translateY(-40px) translateZ(214px) rotateY(-78deg); }
   .book :global(.bk) { position: absolute; box-sizing: border-box; display: block; }
@@ -87,8 +88,8 @@ const { books, owner, mine } = Astro.props;
   .band { position: absolute; left: 0; right: 0; top: 8px; height: 3px; border-top: 1px solid currentColor; border-bottom: 1px solid currentColor; opacity: .45; }
   .sp-title { writing-mode: vertical-rl; transform: rotate(180deg); font-family: Fraunces, Georgia, serif; line-height: 1.05; max-height: 140px; overflow: hidden; overflow-wrap: anywhere; font-weight: 500; position: relative; z-index: 1; }
   /* the one label: a thin rule, then the kind in the title's serif, italic, in the title's colour, at the foot of every spine and centred the same way */
-  .sp-tag { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 4px; position: relative; z-index: 1; font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 12px; letter-spacing: .04em; line-height: 1; }
-  .sp-tag::before { content: ''; width: 14px; height: 1px; background: currentColor; }
+  .sp-tag { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 4px; width: 100%; position: relative; z-index: 1; font-family: Fraunces, Georgia, serif; font-style: italic; font-size: 12px; letter-spacing: .04em; line-height: 1; }
+  .sp-tag::before { content: ''; display: block; flex: none; width: 20px; height: 1.5px; background: currentColor; }
   .sp-tag span { writing-mode: vertical-rl; transform: rotate(180deg); }
   /* the second colour melts in from about the middle: soft blooms over a gradient that is solid only near the foot (no hard edge, and no filter, so nothing extra to paint while scrolling) */
   .sp-wash { position: absolute; left: -20%; right: -20%; bottom: 0; height: calc(var(--wh, 38%) + 22%); pointer-events: none;
@@ -366,6 +367,9 @@ const { books, owner, mine } = Astro.props;
       const sameRow = cand.filter((c) => Math.abs(c.r.top - nearestTop) < 10);
       return sameRow.sort((a, z) => Math.abs(a.r.left + a.r.width / 2 - cx) - Math.abs(z.r.left + z.r.width / 2 - cx))[0].n;
     }
+    root.addEventListener('keydown', () => { root.setAttribute('data-kbd', ''); }, true);
+    root.addEventListener('pointerdown', () => { root.removeAttribute('data-kbd'); }, true);
+    root.addEventListener('pointermove', (ev) => { if (ev.pointerType !== 'touch') root.removeAttribute('data-kbd'); });
     list.addEventListener('keydown', (ev) => {
       const b = (ev.target as Element).closest<HTMLButtonElement>('.book');
       if (!b) return;

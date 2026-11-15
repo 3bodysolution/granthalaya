@@ -16,7 +16,10 @@ export const PAPER = '#F3E9D2';
 
 /** the painted palette: vermilion, cobalt, marigold, violet, emerald, magenta, coral, indigo, orange, leaf, plum, sky, brick, near-black.
  *  Every one has an ink (dark or light) that reads on it at 4.5:1 or better. */
-export const VIVID = ['#E4572E', '#2457C5', '#F2A900', '#7B3FBF', '#17724A', '#C2185B', '#F07167', '#3F3D99', '#FF9F1C', '#5BA33B', '#8E3B8E', '#3A9AD9', '#B5332E', '#1B1B1F'];
+export const VIVID = ['#E4572E', '#2457C5', '#F2A900', '#7B3FBF', '#17724A', '#C2185B', '#F07167', '#3F3D99', '#FF9F1C', '#5BA33B', '#8E3B8E', '#3A9AD9', '#B5332E', '#1F4FA8', '#2A2A7A', '#5C2A6B', '#1E5B3A', '#8A2D2A', '#1B1B1F'];
+/** deep vivid colours for dark covers (indigo, plum, cobalt, forest, brick); near-black is kept for covers that are truly black and white */
+const DEEP = ['#2A2A7A', '#5C2A6B', '#1F4FA8', '#1E5B3A', '#8A2D2A'];
+const NEAR_BLACK = '#1B1B1F';
 
 // sRGB to Lab, to find the palette colour nearest to a cover's colour the way an eye would
 const lab = (hex: string): [number, number, number] => {
@@ -25,13 +28,16 @@ const lab = (hex: string): [number, number, number] => {
   const x = f((0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047), y = f(0.2126 * r + 0.7152 * g + 0.0722 * b), z = f((0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883);
   return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
 };
-const PLAB = VIVID.map(lab);
-/** the palette colour nearest to this colour */
-export function nearestVivid(hex: string): string {
+const COLOURFUL = VIVID.filter((c) => c !== NEAR_BLACK);
+const PLAB = COLOURFUL.map(lab);
+/** the palette colour nearest to this colour. Near-black is never the nearest: a dark cover gets a deep vivid colour, and only a truly black
+ *  (colourless, very dark) cover may get near-black, and then only for about 1 title in 10 (decided by the title's seed). */
+export function nearestVivid(hex: string, seed = 0): string {
   const [l, a, b] = lab(hex);
+  if (l < 22 && Math.hypot(a, b) < 10) return seed % 10 === 0 ? NEAR_BLACK : DEEP[seed % DEEP.length];
   let best = 0, d = Infinity;
   PLAB.forEach((p, i) => { const e = (p[0] - l) ** 2 + (p[1] - a) ** 2 + (p[2] - b) ** 2; if (e < d) { d = e; best = i; } });
-  return VIVID[best];
+  return COLOURFUL[best];
 }
 const hueOf = (hex: string) => {
   const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
@@ -45,7 +51,7 @@ const reads = (c: string, ink: string) => ratio(lum(c), lum(ink)) >= 4.5;
 
 /** the second colour: from the same palette, unlike the first (another hue, or clearly another lightness), and one the same ink reads on at 4.5:1,
  *  so the title is readable wherever it crosses the wash. The title picks among the fits, so it is the same every visit. */
-export function secondOf(main: string, ink: string, seed: number, pool: string[] = VIVID): string {
+export function secondOf(main: string, ink: string, seed: number, pool: string[] = COLOURFUL): string {
   const ok = pool.filter((c) => c !== main && reads(c, ink));
   const apart = ok.filter((c) => hueGap(c, main) >= 50 || ratio(lum(c), lum(main)) >= 2);
   const list = apart.length ? apart : ok;
@@ -87,14 +93,14 @@ export function spineOf(e: Entry): Spine {
   const seed = hash(d.title);
   const wash = 30 + ((seed >>> 3) % 18);   // how far up the second colour reaches, as a percent of the spine
   const stored = d.coverColor && /^#[0-9a-f]{6}$/i.test(d.coverColor) ? d.coverColor : null;
-  const main = stored ? nearestVivid(stored) : VIVID[seed % VIVID.length];   // no stored colour yet: the title's own painted one
+  const main = stored ? nearestVivid(stored, seed >>> 2) : COLOURFUL[seed % COLOURFUL.length];   // no stored colour yet: the title's own painted one
   const ink = inkOn(main);
   if (d.type === 'film' || d.type === 'tv') {
     return { kind: 'dvd', w: 44, h: 248, d: 168, color: main, color2: secondOf(main, ink, seed >>> 7), wash, ink, tag: d.type === 'tv' ? 'TV' : 'Film', ...fitTitle(d.title, 44) };
   }
   const h = 196 + (seed % 55);
   if (d.type === 'essay') {
-    const second = secondOf(PAPER, DARK, seed >>> 7, VIVID.filter((c) => reads(c, DARK)));
+    const second = secondOf(PAPER, DARK, seed >>> 7, COLOURFUL.filter((c) => reads(c, DARK)));
     return { kind: 'book', w: 26, h: Math.min(h, 220), d: Math.round(Math.min(h, 220) * 0.66), color: PAPER, color2: second, wash, ink: DARK, tag: 'Essay', ...fitTitle(d.title, 26) };
   }
   const w = Math.max(26, Math.min(54, d.pages ? Math.round(24 + d.pages / 14) : 26 + ((seed >>> 5) % 18)));
