@@ -38,6 +38,19 @@ const p = shelf.profile;
     btn.addEventListener('click', () => set(!panel.classList.contains('is-open')));
     panel.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && panel.classList.contains('is-open')) { ev.stopPropagation(); set(false, true); } });
     if (location.hash === '#profile') set(true);
+    // Follow the address after the first load: a #profile link opens the panel, Back from it closes it.
+    const w = window as any;
+    w.__profileHash?.abort();
+    const ac = (w.__profileHash = new AbortController());
+    let was = location.hash === '#profile';
+    const follow = () => {
+      const now = location.hash === '#profile';
+      if (now && !panel.classList.contains('is-open')) { set(true); panel.scrollIntoView({ block: 'start' }); }
+      else if (!now && was && panel.classList.contains('is-open')) set(false);
+      was = now;
+    };
+    window.addEventListener('hashchange', follow, { signal: ac.signal });
+    window.addEventListener('popstate', follow, { signal: ac.signal });
   }
   document.addEventListener('astro:page-load', setup);
 </script>

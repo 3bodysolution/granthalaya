@@ -318,25 +318,52 @@ const tabs = [['profile', 'Profile'], ['privacy', 'Privacy'], ['data', 'Data'], 
 
     // ——— tabs, kept in the address (#privacy) so links and the back button work ———
     const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-tab]')];
-    const show = (k: string, push = true) => {
+    const nameOf = (raw: string) => {
+      let k = raw.replace(/^#/, '');
       if (k === 'links' || k === 'favourites') k = 'profile';
-      if (!tabs.some((t) => t.dataset.tab === k)) k = 'profile';
+      return tabs.some((t) => t.dataset.tab === k) ? k : 'profile';
+    };
+    // Shows the tab. `how`: 'push' adds a history entry (when the address differs), 'replace' fixes the address, 'none' only follows it.
+    const show = (raw: string, how: 'push' | 'replace' | 'none' = 'none', move = true) => {
+      const k = nameOf(raw);
       tabs.forEach((t) => { const on = t.dataset.tab === k; t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; });
       document.querySelectorAll<HTMLElement>('[role=tabpanel]').forEach((p) => (p.hidden = p.id !== k));
-      if (push) history.replaceState(history.state, '', `#${k}`);
+      document.querySelectorAll<HTMLDetailsElement>('details.menu[open]').forEach((d) => (d.open = false));
+      if (how !== 'none' && location.hash !== `#${k}`) history[how === 'push' ? 'pushState' : 'replaceState'](history.state, '', `${location.pathname}${location.search}#${k}`);
+      if (move) {
+        window.scrollTo(0, 0);
+        const h = document.querySelector<HTMLElement>(`#${k} h2`);
+        if (h) { h.tabIndex = -1; h.focus({ preventScroll: true }); }
+      }
     };
     tabs.forEach((t, i) => {
-      t.addEventListener('click', () => show(t.dataset.tab!));
+      t.addEventListener('click', () => show(t.dataset.tab!, 'push'));
       t.addEventListener('keydown', (ev) => {
         const d = ev.key === 'ArrowDown' || ev.key === 'ArrowRight' ? 1 : ev.key === 'ArrowUp' || ev.key === 'ArrowLeft' ? -1 : 0;
         if (!d) return;
         ev.preventDefault();
         const n = tabs[(i + d + tabs.length) % tabs.length];
-        n.focus(); show(n.dataset.tab!);
+        show(n.dataset.tab!, 'push', false); n.focus();
       });
     });
-    show(location.hash.slice(1) || 'profile', false);
-    window.addEventListener('hashchange', () => show(location.hash.slice(1) || 'profile', false));
+    show(location.hash, location.hash && location.hash !== `#${nameOf(location.hash)}` ? 'replace' : 'none', false);
+    // Follow the address however it changes: links, Back and Forward. One set of listeners, replaced on each visit.
+    const w = window as any;
+    w.__settingsTabs?.abort();
+    const ac = (w.__settingsTabs = new AbortController());
+    const follow = () => { if (location.pathname.replace(/\/$/, '') === '/settings') show(location.hash, location.hash && location.hash !== `#${nameOf(location.hash)}` ? 'replace' : 'none'); };
+    window.addEventListener('hashchange', follow, { signal: ac.signal });
+    window.addEventListener('popstate', follow, { signal: ac.signal });
+    // The account menu's links (and any other /settings/#x link) while already on Settings: handle here, as the router may not fire hashchange.
+    document.addEventListener('click', (ev) => {
+      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) return;
+      const a = (ev.target as Element).closest?.('a[href]') as HTMLAnchorElement | null;
+      if (!a) return;
+      const u = new URL(a.href, location.href);
+      if (u.origin !== location.origin || u.pathname.replace(/\/$/, '') !== '/settings' || !u.hash) return;
+      ev.preventDefault(); ev.stopImmediatePropagation();
+      show(u.hash, 'push');
+    }, { capture: true, signal: ac.signal });
 
     const post = async (data: unknown) =>
       fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }).then((x) => x.json()).catch(() => ({ error: 'Couldn’t reach the site.' }));
