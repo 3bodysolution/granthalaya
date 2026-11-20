@@ -80,6 +80,9 @@ const { books, owner, mine } = Astro.props;
   /* the lift: under a mouse (hover) only, or for a touch-hold (.held, set by the script for the 150 ms hold). Touch screens keep :hover after a tap, so it must not decide anything there. */
   @media (hover: hover) and (pointer: fine) { .book:hover { transform: translateY(-14px) translateZ(18px); } }
   .book.held { transform: translateY(-14px) translateZ(18px); }
+  /* just after a book is put back the pointer is often still over it (or the page moved under it): it stays flat until the pointer really moves */
+  .shelfwrap[data-calm] .book:hover:not(.out):not(.held) { transform: none; }
+  @media (hover: hover) and (pointer: fine) { .shelfwrap[data-calm] .shelf li:hover:not(:has(.out)):not(:focus-within) { z-index: auto; } }
   .book:focus-visible { outline: none; }
   /* the frame is for the keyboard only: the script sets data-kbd on the shelf while the last thing used was a key, and clears it on any pointer movement or press */
   [data-kbd] .book:focus-visible .front { outline: 3px solid var(--lat); outline-offset: 3px; }
@@ -229,7 +232,8 @@ const { books, owner, mine } = Astro.props;
     const deep = new Set<HTMLElement>(), timers = new Map<HTMLElement, number>();
     const li = (b: HTMLElement) => b.parentElement as HTMLElement;
     const mouse = matchMedia('(hover: hover) and (pointer: fine)');
-    const keep = (b: HTMLElement) => b.classList.contains('out') || b.classList.contains('held') || (mouse.matches && b.matches(':hover')) || b.matches(':focus-visible');
+    const calm = () => root.hasAttribute('data-calm');
+    const keep = (b: HTMLElement) => b.classList.contains('out') || b.classList.contains('held') || (mouse.matches && !calm() && b.matches(':hover')) || b.matches(':focus-visible');
     function drop(b: HTMLElement) {
       deep.delete(b); b.classList.remove('on');
       timers.set(b, window.setTimeout(() => { if (deep.has(b)) return; b.classList.remove('d3'); li(b).classList.remove('d3'); }, 320));
@@ -311,16 +315,31 @@ const { books, owner, mine } = Astro.props;
       void b.offsetWidth;
       b.style.transition = was;
     }
+    // where the pointer last was, so a put-back book is not lifted again by a pointer that has not moved
+    let pos: { x: number; y: number } | null = null, calmAt = { x: 0, y: 0 };
+    document.addEventListener('pointermove', (ev) => {
+      if (ev.pointerType === 'touch') return;
+      pos = { x: ev.clientX, y: ev.clientY };
+      if (calm() && Math.hypot(pos.x - calmAt.x, pos.y - calmAt.y) > 4) {
+        root.removeAttribute('data-calm');
+        const h = list.querySelector<HTMLElement>('.book:hover');
+        if (h) raise(h);
+      }
+    }, { passive: true });
     function putBack() {
       if (out < 0) return;
       const b = books[out];
-      b.classList.remove('out', 'held'); b.setAttribute('aria-pressed', 'false');
+      b.classList.remove('out', 'held'); b.setAttribute('aria-pressed', 'false'); b.style.removeProperty('--sx');
       if (!mouse.matches) {   // touch: nothing stays lifted, 3D or focused after it is put back
         if (document.activeElement === b) b.blur();
         b.style.transition = 'transform .2s ease'; window.setTimeout(() => { b.style.transition = ''; }, 260);   // back on the shelf at once
         clearTimeout(timers.get(b)); idle();
         if (deep.has(b)) drop(b); else { b.classList.remove('d3', 'on'); li(b).classList.remove('d3'); }
-      } else settle(b, 800);   // after it has turned back
+      } else {
+        // a mouse: it turns back first, then its faces fade out and are taken away. It stays flat (no hover lift) until the pointer really moves.
+        if (pos) { calmAt = { ...pos }; root.setAttribute('data-calm', ''); }
+        settle(b, 800);
+      }
       out = -1; card.hidden = true;
       live.textContent = `${b.dataset.title} put back.`;
     }
@@ -336,7 +355,7 @@ const { books, owner, mine } = Astro.props;
     list.addEventListener('pointerover', (ev) => {
       const b = (ev.target as Element).closest<HTMLElement>('.book');
       if (!b) return;
-      hint(b); if ((ev as PointerEvent).pointerType !== 'touch') raise(b);
+      hint(b); if ((ev as PointerEvent).pointerType !== 'touch' && !calm()) raise(b);
       clearTimeout(hoverTimer);
       hoverTimer = window.setTimeout(() => { faces(b); cover(b); }, 150);   // a moment's rest, not a sweep across the shelf
     });
@@ -400,7 +419,7 @@ const { books, owner, mine } = Astro.props;
     });
     q('[data-d-prev]').addEventListener('click', () => step(-1));
     q('[data-d-next]').addEventListener('click', () => step(1));
-    q('[data-d-back]').addEventListener('click', () => { const b = books[out]; putBack(); if (mouse.matches) b?.focus(); });
+    q('[data-d-back]').addEventListener('click', (ev) => { const b = books[out]; putBack(); if (mouse.matches && (ev as MouseEvent).detail === 0) b?.focus(); });   // the keyboard keeps its place; a mouse click leaves nothing focused
   }
   document.addEventListener('astro:page-load', setup);
 </script>

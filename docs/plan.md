@@ -4,6 +4,7 @@ Read this at the start of a session; update it when a part is done.
 
 ## Follow-ups
 
+- [x] Poster rows show whole posters only (`PosterRow.astro` works out how many fit and sizes posters and gaps to fill the row; arrows move one full set; `node scripts/check-rows-fit.mjs`). Shelf put-back: a book put back with the pointer still on it stays flat until the pointer really moves (`node scripts/check-shelf-putback.mjs`).
 - [x] Copy rewrite applied (2026-11-12, `private/copy-rewrite.md`, D1 to D4, no catalogue counts anywhere). Left for Sarthak: the Privacy and Terms "updated" date is November 12, 2026 (change it to the day the work goes live); Sponsor sections are now hidden by `site.sponsor.enabled` and come back by themselves. Signed-in views (Progress words, Settings Data tab, toast wording, home dashed card) need a hand check.
 
 - [ ] **A week after the new shelf is live on main:** make the shelf redirects permanent. In `src/middleware.ts`, `shelfMoved()` answers with a 307 for `/@x/library/`, `/@x/diary/`, `/@x/stats/`, `/library/` and `/stats/`; change that 307 in `handle` to 301.

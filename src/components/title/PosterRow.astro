@@ -9,7 +9,7 @@ const { title, items = [], href, all = 'See all', tone, id = 'row-' + title.toLo
 const filled = items.length > 0 || Astro.slots.has('default');
 ---
 {filled && (
-  <section class:list={['prow', big && 'big']} aria-labelledby={id} style={col ? `--prow-col:${col}` : undefined}>
+  <section class:list={['prow', big && 'big']} aria-labelledby={id} style={col ? `--prow-col:${col}` : undefined} data-prow data-kind={big ? 'big' : col ? 'text' : 'poster'}>
     <div class="prow-head">
       <h2 class="prow-t" id={id} data-tone={tone}>{title}</h2>
       {href && <a class="prow-all" href={href}>{all} <span aria-hidden="true">→</span></a>}
@@ -50,28 +50,58 @@ const filled = items.length > 0 || Astro.slots.has('default');
   .prow-btn:active:not(:disabled) { transform: scale(.94); }
   .prow-btn:disabled { opacity: 0; cursor: default; pointer-events: none; }
   .prow-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  /* room above and below so a poster can lift on hover without being cut off */
-  .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px var(--gut, 20px) 14px 2px; display: grid; grid-auto-flow: column; grid-auto-columns: var(--prow-col, 152px); gap: 20px;
-    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px var(--gut, 20px); scrollbar-width: none; }
+  /* room above and below so a poster can lift on hover without being cut off.
+     The list shows whole posters only: the script below works out how many fit and sets --col and --gap so they fill the row exactly
+     (the fallback sizes are only for the moment before it runs). The 2px at each side is smaller than any gap, so no neighbour peeks in. */
+  .prow-list { list-style: none; margin: -8px 0 -14px; padding: 8px 2px 14px; display: grid; grid-auto-flow: column; grid-auto-columns: var(--col, var(--prow-col, 152px)); gap: var(--gap, 20px);
+    overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 2px; scrollbar-width: none; }
   .prow-list::-webkit-scrollbar { display: none; }
   .prow-list > li { scroll-snap-align: start; min-width: 0; }
-  /* room after the last poster, as wide as the page gutter, is padding on the row itself (a margin on the last card would make it narrower than the rest) */
-  /* the large row: four across, three on a tablet, two on a phone */
-  .big { --prow-col: calc((100% - 60px) / 4); }
+  /* the large row: four across, three on a tablet, two on a phone (before the script runs) */
+  .big { --prow-col: calc((100% - 64px) / 4); }
   .big .prow-t { font-size: 13px; }
-  @media (max-width: 1000px) { .big { --prow-col: calc((100% - 40px) / 3); } }
+  @media (max-width: 1000px) { .big { --prow-col: calc((100% - 44px) / 3); } }
   @media (max-width: 1100px) { .prow-btn.prev { left: -34px; } .prow-btn.next { right: -34px; } .prow-btn { width: 30px; height: 30px; } }
   @media (hover: none), (max-width: 780px) { .prow-btn { display: none; } }
   @media (max-width: 780px) {
-    /* on a phone the row runs to the screen edge, so it's clear there's more to swipe */
-    .big { --prow-col: calc((100% - 12px) / 2.25); }
-    .prow-list { grid-auto-columns: var(--prow-col, clamp(108px, 34%, 156px)); gap: 12px; margin-inline: calc(var(--gut, 20px) * -1); padding-inline: var(--gut, 20px); scroll-padding-inline: var(--gut, 20px); }
+    .big { --prow-col: calc((100% - 16px) / 2); }
+    .prow-list { grid-auto-columns: var(--col, var(--prow-col, 108px)); gap: var(--gap, 12px); }
   }
 </style>
 
 <script>
-  // arrows scroll one screen of posters; each arrow switches off at its end of the row
+  // Whole posters only. For each row: how many fit across (n), then --col and --gap so those n fill the row exactly.
+  // Every poster then starts at a multiple of one step (poster + gap), so snapping, the arrows and the last set all land on whole posters.
   const reduce = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const PAD = 4; // 2px of padding at each side of the list
+  type Fit = { n: number; step: number };
+  const fits = new WeakMap<Element, Fit>();
+  function layout(list: HTMLElement) {
+    const row = list.closest<HTMLElement>('[data-prow]');
+    if (!row) return;
+    const W = list.clientWidth - PAD;
+    if (W <= 0) return;
+    const phone = window.matchMedia('(max-width: 780px)').matches;
+    const kind = row.dataset.kind;
+    const count = list.children.length;
+    let n: number, gap: number, col: number;
+    if (kind === 'big') {
+      n = window.innerWidth <= 780 ? 2 : window.innerWidth <= 1000 ? 3 : 4;
+      gap = phone ? 12 : 20;
+    } else {
+      const min = kind === 'text' ? 290 : phone ? (W < 480 ? 104 : 132) : 152;
+      const gmin = phone ? 12 : 20, gmax = phone ? 18 : 32;
+      n = Math.max(1, Math.floor((W + gmin) / (min + gmin)));
+      gap = n > 1 ? Math.min(gmax, Math.max(gmin, (W - n * min) / (n - 1))) : gmin;
+    }
+    n = Math.max(1, Math.min(n, count || 1));
+    col = Math.floor(((W - (n - 1) * gap) / n) * 100) / 100;
+    gap = n > 1 ? Math.floor(((W - n * col) / (n - 1)) * 100) / 100 : gap;
+    list.style.setProperty('--col', col + 'px');
+    list.style.setProperty('--gap', gap + 'px');
+    fits.set(list, { n, step: col + gap });
+    sync(list);
+  }
   function sync(list: Element) {
     const row = list.closest('.prow');
     if (!row) return;
@@ -80,15 +110,37 @@ const filled = items.length > 0 || Astro.slots.has('default');
     if (back) back.disabled = el.scrollLeft <= 4;
     if (fwd) fwd.disabled = el.scrollLeft + el.clientWidth >= el.scrollWidth - 4;
   }
+  const maxScroll = (el: HTMLElement) => el.scrollWidth - el.clientWidth;
+  // scroll to a whole-poster position (a multiple of the step, or the very end)
+  function goTo(list: HTMLElement, left: number) {
+    list.scrollTo({ left: Math.max(0, Math.min(left, maxScroll(list))), behavior: reduce() ? 'auto' : 'smooth' });
+  }
   document.addEventListener('click', (ev) => {
     const btn = (ev.target as Element).closest<HTMLButtonElement>('[data-row]');
     if (!btn) return;
     const list = btn.closest('.prow')?.querySelector<HTMLElement>('[data-row-list]');
-    if (!list) return;
-    list.scrollBy({ left: Number(btn.dataset.row) * list.clientWidth * 0.9, behavior: reduce() ? 'auto' : 'smooth' });
+    const f = list && fits.get(list);
+    if (!list || !f) return;
+    const at = Math.round(list.scrollLeft / f.step) * f.step;
+    goTo(list, at + Number(btn.dataset.row) * f.n * f.step);
+  });
+  // tabbing to a poster that is off to the side brings its whole set into view
+  document.addEventListener('focusin', (ev) => {
+    const li = (ev.target as Element).closest?.('[data-row-list] > li');
+    const list = li?.parentElement as HTMLElement | null;
+    const f = list && fits.get(list);
+    if (!li || !list || !f) return;
+    const i = [...list.children].indexOf(li);
+    const first = Math.round(list.scrollLeft / f.step);
+    if (i < first || i >= first + f.n) goTo(list, Math.floor(i / f.n) * f.n * f.step);
   });
   document.addEventListener('scroll', (ev) => { const t = ev.target as Element; if (t instanceof Element && t.matches('[data-row-list]')) sync(t); }, true);
-  const all = () => document.querySelectorAll('[data-row-list]').forEach(sync);
-  document.addEventListener('astro:page-load', all);
+  const all = () => document.querySelectorAll<HTMLElement>('[data-row-list]').forEach(layout);
+  document.addEventListener('astro:page-load', () => {
+    all();
+    // rows can appear later (they stream in), and a row can change width without the window resizing
+    const ro = ((window as any).__prowRO ??= new ResizeObserver((es) => es.forEach((e) => layout(e.target as HTMLElement))));
+    document.querySelectorAll('[data-row-list]').forEach((l) => ro.observe(l));
+  });
   window.addEventListener('resize', all);
 </script>
