@@ -225,6 +225,17 @@ const onMyShelf = !!me && Astro.url.pathname.toLowerCase().startsWith(`/@${me.us
     });
     document.addEventListener('astro:after-swap', () => document.querySelectorAll<HTMLDetailsElement>('details.menu[open]').forEach((d) => (d.open = false)));
 
+    // ——— Back to a page you left from an address with a # ———
+    // The router only handles history entries that carry its own state, and ignores the ones the browser makes by itself for a hash link
+    // (or an address typed with a #). Back to such an entry changed the address but left the other page showing. So any entry the browser
+    // makes for a hash change is given the router's state at once (the index and scroll of the entry before it).
+    let routerState: Record<string, unknown> | null = history.state;
+    document.addEventListener('astro:page-load', () => { if (history.state) routerState = history.state; });
+    window.addEventListener('hashchange', () => {
+      if (history.state) { routerState = history.state; return; }
+      if (routerState) history.replaceState({ ...routerState, scrollX, scrollY }, '');
+    });
+
 
     // ——— small actions on shelves: status, favourites, quick add, report, block ———
     const MARK = document.querySelector('#pageload .dr-fill')?.getAttribute('d') ?? '';
